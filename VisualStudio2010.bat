@@ -4,9 +4,8 @@ set REPODIR=%~dp0
 set SLN=%REPODIR%/FabricSplice3dsmax.sln
 set SGREPODIR=%REPODIR%\..\..\..
 set STAGEDIR=%REPODIR%\..\..\..\stage\Windows\x86_64\Release
-
-rem We only need the Horde ext in addition to the Splice Exts. 
 set FABRIC_SPLICE_API_DIR=%STAGEDIR%\Splice\API\FabricSpliceAPI
+set BOOST_DIR=%SGREPODIR%\ThirdParty\PreBuilt\Windows\x86_64\Release\boost\1.55.0\lib
 
 
 call %SGREPODIR%\Environment.bat

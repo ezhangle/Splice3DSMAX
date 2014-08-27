@@ -58,6 +58,7 @@
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<StringPooling>true</StringPooling>
+      		<PrecompiledHeader>Use</PrecompiledHeader>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
      		<PreprocessorDefinitions>FEC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ClCompile>
@@ -74,7 +75,7 @@
 			<SDLCheck>true</SDLCheck>
 			<Optimization>Disabled</Optimization>
 			<PreprocessorDefinitions>_DEBUG;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+			<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
 		</ClCompile>
 		
 		<!-- Release specific compiler settings -->
@@ -85,7 +86,7 @@
 			<PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<FunctionLevelLinking>true</FunctionLevelLinking>
 			<WholeProgramOptimization>true</WholeProgramOptimization>
-			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
 		</ClCompile>
 		
 		<!-- Linker Common Settings -->
@@ -93,7 +94,7 @@
 			<LinkIncremental>true</LinkIncremental>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<SubSystem>Windows</SubSystem>
-			<AdditionalDependencies>FabricCore-1.13.lib;FabricSplice-1.13.0.lib;assetmanagement.lib;atscore.lib;biped.lib;bmm.lib;core.lib;crowd.lib;custdlg.lib;databridge.lib;edmodel.lib;expr.lib;flt.lib;geom.lib;gfx.lib;GraphicsDriver.lib;gup.lib;igame.lib;imageviewers.lib;manipsys.lib;maxnet.lib;maxscrpt.lib;maxutil.lib;menuman.lib;menus.lib;mesh.lib;mnmath.lib;paramblk2.lib;particle.lib;particleflow.lib;physique.lib;poly.lib;polypaint.lib;renderutil.lib;rtmax.lib;tessint.lib;viewfile.lib;zlibdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>FabricCore-1.13.lib;FabricSplice-1.13.0_s.lib;assetmanagement.lib;atscore.lib;biped.lib;bmm.lib;core.lib;crowd.lib;custdlg.lib;databridge.lib;edmodel.lib;expr.lib;flt.lib;geom.lib;gfx.lib;GraphicsDriver.lib;gup.lib;igame.lib;imageviewers.lib;manipsys.lib;maxnet.lib;maxscrpt.lib;maxutil.lib;menuman.lib;menus.lib;mesh.lib;mnmath.lib;paramblk2.lib;particle.lib;particleflow.lib;physique.lib;poly.lib;polypaint.lib;renderutil.lib;rtmax.lib;tessint.lib;viewfile.lib;zlibdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies Condition="'$(MaxVersion)'!='2012'">GraphicsUtility.lib;%(AdditionalDependencies)</AdditionalDependencies>
 		</Link>
 

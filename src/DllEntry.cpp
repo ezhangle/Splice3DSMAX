@@ -28,7 +28,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID /*lpvReserved*/)
 		// Hang on to this DLL's instance handle.
 		DisableThreadLibraryCalls(hinstDLL);
 	}
-
 	return(TRUE);
 }
 

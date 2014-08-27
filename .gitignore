@@ -3,6 +3,7 @@
 #
 
 /build/
+/ipch/
 
 # Build files
 *.sdf

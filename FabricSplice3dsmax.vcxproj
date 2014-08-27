@@ -24,63 +24,7 @@
     <RootNamespace>CP3dsmaxIntegration</RootNamespace>
   </PropertyGroup>
   <Import Project="ProjectProperties.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2013|x64'">
-    <TargetExt>.dlu</TargetExt>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2014|x64'">
-    <TargetExt>.dlu</TargetExt>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2013|x64'">
-    <TargetExt>.dlu</TargetExt>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">
-    <TargetExt>.dlu</TargetExt>
-  </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2013|x64'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-    </ClCompile>
-    <Link>
-      <AdditionalDependencies>particleflow.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(BOOST_DIR);$(FABRIC_CAPI_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2014|x64'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-    </ClCompile>
-    <Link>
-      <AdditionalDependencies>particleflow.lib;mnmath.lib;poly.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(BOOST_DIR);$(FABRIC_CAPI_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release 2013|x64'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-    </ClCompile>
-    <Link>
-      <AdditionalDependencies>particleflow.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(BOOST_DIR);$(FABRIC_CAPI_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-    </ClCompile>
-    <Link>
-      <AdditionalDependencies>particleflow.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
-    <CustomBuildStep>
-      <Command>xcopy $(SCINTILLA) $(STAGEDIR)\Splice\Applications\FabricSplice3dsmax$(MaxVersion) /s /e /h</Command>
-    </CustomBuildStep>
-  </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SpliceModifier.cpp" />
     <ClCompile Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.cpp" />
     <ClCompile Include="src\DynamicParamBlocks\DynPBUndo.cpp" />
     <ClCompile Include="src\MaxConversionFns.cpp" />
@@ -94,6 +38,7 @@
     <ClCompile Include="src\SpliceLogging.cpp" />
     <ClCompile Include="src\SpliceMesh.cpp" />
     <ClCompile Include="src/DllEntry.cpp" />
+    <ClCompile Include="src\SpliceModifier.cpp" />
     <ClCompile Include="src\SpliceStaticFPInterface.cpp" />
     <ClCompile Include="src\SpliceTranslationFPInterface.cpp" />
     <ClCompile Include="src\SpliceTranslationLayer.cpp" />
@@ -125,11 +70,5 @@
     <ClInclude Include="src\DynamicParamBlocks\DynPBUndo.h" />
     <ClInclude Include="src\FabricSplice3dsmax.h" />
     <ClInclude Include="src\SpliceTranslationLayer.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ScintillaNET\SciLexer.dll" />
-    <None Include="ScintillaNET\SciLexer64.dll" />
-    <None Include="ScintillaNET\ScintillaNET.dll" />
-    <None Include="scripts\editor.ms" />
   </ItemGroup>
 </Project>

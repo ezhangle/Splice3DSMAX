@@ -1,11 +1,15 @@
-dotNet.loadAssembly @"ScintillaNET.dll"
+sysEnv = dotNetClass "System.Environment"
+ScintillaNETFolder = sysEnv.GetEnvironmentVariable "SCINTILLANETDIR"
+ScintillaNETAssembly = ScintillaNETFolder + "ScintillaNET.dll"
+dotNet.loadAssembly ScintillaNETAssembly
+
 -- Scintilla throws the first time we try and load it
 -- TODO: Fix this horrible hack.
 try (
 	local tmp = dotNetObject "ScintillaNET.Scintilla"
 ) catch ( 
 	-- but not the 2nd time.
-	sc= dotNet.loadAssembly @"ScintillaNET.dll"
+	sc= dotNet.loadAssembly ScintillaNETAssembly
 )
 
 -- Event Helpers
@@ -150,7 +154,7 @@ struct spliceEditorStruct
 		
 		mKlEditor = dotNetObject "ScintillaNET.Scintilla"
 		
-		mKlEditor.ConfigurationManager.CustomLocation = "D:\Program Files\Autodesk\3ds Max 2014\SyntaxHighlighting"
+		mKlEditor.ConfigurationManager.CustomLocation = ScintillaNETFolder+"\SyntaxHighlighting"
 		--mKlEditor.Lexing.LexerLanguageMap.add "kl" "kl";
 		mKlEditor.ConfigurationManager.Language = "cpp";
 		mKlEditor.ConfigurationManager.Configure();

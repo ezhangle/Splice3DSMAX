@@ -75,6 +75,9 @@
       <AdditionalDependencies>particleflow.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <CustomBuildStep>
+      <Command>xcopy $(SCINTILLA) $(STAGEDIR)\Splice\Applications\FabricSplice3dsmax$(MaxVersion) /s /e /h</Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="SpliceModifier.cpp" />

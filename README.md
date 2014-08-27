@@ -12,7 +12,7 @@ This repository will be maintained and kept up to date by Fabric Software to mat
 Supported platforms
 ===================
 
-To date all three major platforms (windows, linux, osx) are supported, if you build the thirdparty dependencies for the corresponding platform.
+To date only the Windows platform is supported, since 3DSMAX only supports that.
 
 Building
 ========

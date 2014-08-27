@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug 2013|x64">
+      <Configuration>Debug 2013</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug 2014|x64">
+      <Configuration>Debug 2014</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release 2013|x64">
+      <Configuration>Release 2013</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release 2014|x64">
+      <Configuration>Release 2014</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{771FD8D0-EE9B-442E-9D32-B2C60B807FEF}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>CP3dsmaxIntegration</RootNamespace>
+  </PropertyGroup>
+  <Import Project="ProjectProperties.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2013|x64'">
+    <TargetExt>.dlu</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2014|x64'">
+    <TargetExt>.dlu</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2013|x64'">
+    <TargetExt>.dlu</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">
+    <TargetExt>.dlu</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2013|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>particleflow.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(BOOST_DIR);$(FABRIC_CAPI_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2014|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>particleflow.lib;mnmath.lib;poly.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(BOOST_DIR);$(FABRIC_CAPI_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release 2013|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>particleflow.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(BOOST_DIR);$(FABRIC_CAPI_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>particleflow.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="SpliceModifier.cpp" />
+    <ClCompile Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.cpp" />
+    <ClCompile Include="src\DynamicParamBlocks\DynPBUndo.cpp" />
+    <ClCompile Include="src\MaxConversionFns.cpp" />
+    <ClCompile Include="src\MouseCallbacks\SpliceCommandMode.cpp" />
+    <ClCompile Include="src\MouseCallbacks\SpliceMouseCallback.cpp" />
+    <ClCompile Include="src\SpliceControlFloat.cpp" />
+    <ClCompile Include="src\SpliceControlMatrix.cpp" />
+    <ClCompile Include="src\SpliceControlPosition.cpp" />
+    <ClCompile Include="src\SpliceControlRotation.cpp" />
+    <ClCompile Include="src\SpliceEvents.cpp" />
+    <ClCompile Include="src\SpliceLogging.cpp" />
+    <ClCompile Include="src\SpliceMesh.cpp" />
+    <ClCompile Include="src/DllEntry.cpp" />
+    <ClCompile Include="src\SpliceStaticFPInterface.cpp" />
+    <ClCompile Include="src\SpliceTranslationFPInterface.cpp" />
+    <ClCompile Include="src\SpliceTranslationLayer.cpp" />
+    <ClCompile Include="src\StdAfx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug 2013|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug 2014|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release 2013|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\resource.h" />
+    <ClInclude Include="src\MaxConversionFns.h" />
+    <ClInclude Include="src\MouseCallbacks\SpliceCommandMode.h" />
+    <ClInclude Include="src\MouseCallbacks\SpliceMouseCallback.h" />
+    <ClInclude Include="src\SpliceEvents.h" />
+    <ClInclude Include="src\SpliceLogging.h" />
+    <ClInclude Include="src\SpliceStaticFPInterface.h" />
+    <ClInclude Include="src\SpliceTranslationFPInterface.h" />
+    <ClInclude Include="src\SpliceTranslationLayer.hpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="src\StdAfx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\DynamicParamBlocks\DynamicDialog\DynPBCustAttr.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\DynamicDialogTemplate.h" />
+    <ClInclude Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.h" />
+    <ClInclude Include="src\DynamicParamBlocks\DynPBUndo.h" />
+    <ClInclude Include="src\FabricSplice3dsmax.h" />
+    <ClInclude Include="src\SpliceTranslationLayer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ScintillaNET\SciLexer.dll" />
+    <None Include="ScintillaNET\SciLexer64.dll" />
+    <None Include="ScintillaNET\ScintillaNET.dll" />
+    <None Include="scripts\editor.ms" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup Label="UserMacros">
+		<!-- selector for debug/release version -->
+		<IsDebug>$([System.Convert]::ToString( $([System.Text.RegularExpressions.Regex]::IsMatch($(Configuration), '[Dd]ebug'))))</IsDebug>
+		<IsRelease>$([System.Convert]::ToString( $([System.Text.RegularExpressions.Regex]::IsMatch($(Configuration), '[Rr]elease'))))</IsRelease>
+
+		<!-- variable contains max version -->
+		<MaxVersion>2012</MaxVersion>
+		<MaxVersion Condition="'$(Configuration.Contains(2012))'">2012</MaxVersion>
+		<MaxVersion Condition="'$(Configuration.Contains(2013))'">2013</MaxVersion>
+		<MaxVersion Condition="'$(Configuration.Contains(2014))'">2014</MaxVersion>
+
+		<!-- version specific path selectors -->
+		<MaxPath Condition="'$(MaxVersion)'=='2012' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2012)</MaxPath>
+		<MaxPath Condition="'$(MaxVersion)'=='2013' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2013)</MaxPath>
+		<MaxPath Condition="'$(MaxVersion)'=='2014' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2014)</MaxPath>
+
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2012'">$(ADSK_3DSMAX_SDK_2012)</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2013'">$(ADSK_3DSMAX_SDK_2013)</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2014'">$(ADSK_3DSMAX_SDK_2014)</MaxSDKPath>
+
+		<!-- Autodesc changed the folder structure for 2014 SDK -->
+		<MaxSDKLibPath Condition="'$(MaxVersion)'=='2012'">$(MaxSDKPath)\x64\lib\</MaxSDKLibPath>
+		<MaxSDKLibPath Condition="'$(MaxVersion)'=='2013'">$(MaxSDKPath)\x64\lib\</MaxSDKLibPath>
+		<MaxSDKLibPath Condition="'$(MaxVersion)'=='2014'">$(MaxSDKPath)\lib\x64\Release</MaxSDKLibPath>
+
+
+		<!-- switcher for unicode build 
+		<IsUnicode Condition="'$(MaxVersion)'=='2012'">false</IsUnicode>
+		<IsUnicode Condition="'$(MaxVersion)'!='2012'">true</IsUnicode>
+		-->
+	</PropertyGroup>
+	
+	<!-- General properties for everyone -->
+	<PropertyGroup Label="Configuration">
+		<UseOfMfc>false</UseOfMfc>
+		<UseOfAtl>false</UseOfAtl>
+		<PlatformToolset>v100</PlatformToolset>
+		<IsUnicode>true</IsUnicode>
+		<CharacterSet>Unicode</CharacterSet>
+
+		<IntDir>..\build\FabricSplice3dsmax\obj\$(Configuration)\</IntDir>
+		<OutDir>..\dist\FabricSplice3dsmax\plugin $(MaxVersion)\</OutDir>
+		<TargetExt>.dlu</TargetExt>
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<UseDebugLibraries>false</UseDebugLibraries>
+    <PreprocessorDefinitions>FEC_STATIC;FECS_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+	</PropertyGroup>
+	<PropertyGroup Condition="!'$(IsUnicode)'" Label="Configuration">
+		<CharacterSet>MultiByte</CharacterSet>
+	</PropertyGroup>
+
+	<ItemDefinitionGroup>
+		<!-- default values for compiler -->
+		<ClCompile>
+			<AdditionalIncludeDirectories>$(FABRIC_SPLICE_API_DIR);$(FABRIC_CAPI_DIR)\include;$(MaxSDKPath)maxsdk\include</AdditionalIncludeDirectories>
+			<WarningLevel>Level4</WarningLevel>
+			<RuntimeTypeInfo>true</RuntimeTypeInfo>
+			<StringPooling>true</StringPooling>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+     		<PreprocessorDefinitions>FEC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+
+		<!-- 2014 very helpfully changed the installed path -->
+		<ClCompile Condition="'$(MaxVersion)' &gt; '2013'">
+			<AdditionalIncludeDirectories>$(FABRIC_SPLICE_API_DIR);$(MaxSDKPath)include;$(FABRIC_CAPI_DIR)\include;</AdditionalIncludeDirectories>
+		</ClCompile>
+		
+		<!-- Turn on E&C for Debug Win32 builds -->
+		<ClCompile Condition="'$(IsDebug)'">
+			<DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+			<WholeProgramOptimization>false</WholeProgramOptimization>
+			<SDLCheck>true</SDLCheck>
+			<Optimization>Disabled</Optimization>
+			<PreprocessorDefinitions>_DEBUG;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+		</ClCompile>
+		
+		<!-- Release specific compiler settings -->
+		<ClCompile Condition="'$(IsRelease)'">
+			<Optimization>MaxSpeed</Optimization>
+			<IntrinsicFunctions>true</IntrinsicFunctions>
+			<FavorSizeOrSpeed>speed</FavorSizeOrSpeed>
+			<PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<WholeProgramOptimization>true</WholeProgramOptimization>
+			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+		</ClCompile>
+		
+		<!-- Linker Common Settings -->
+		<Link>
+			<LinkIncremental>true</LinkIncremental>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<SubSystem>Windows</SubSystem>
+			<AdditionalDependencies>FabricCore-2.0.lib;FabricSplice-2.0.0.lib;assetmanagement.lib;atscore.lib;biped.lib;bmm.lib;core.lib;crowd.lib;custdlg.lib;databridge.lib;edmodel.lib;expr.lib;flt.lib;geom.lib;gfx.lib;GraphicsDriver.lib;gup.lib;igame.lib;imageviewers.lib;manipsys.lib;maxnet.lib;maxscrpt.lib;maxutil.lib;menuman.lib;menus.lib;mesh.lib;mnmath.lib;paramblk2.lib;particle.lib;particleflow.lib;physique.lib;poly.lib;polypaint.lib;renderutil.lib;rtmax.lib;tessint.lib;viewfile.lib;zlibdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies Condition="'$(MaxVersion)'!='2012'">GraphicsUtility.lib;%(AdditionalDependencies)</AdditionalDependencies>
+		</Link>
+
+		<Link Condition="'$(Platform)'=='x64'">
+			<AdditionalLibraryDirectories>$(FABRIC_SPLICE_API_DIR);$(FABRIC_CAPI_DIR)\lib;$(BOOST_DIR);$(MaxSDKPath)maxsdk\x64\lib\</AdditionalLibraryDirectories>
+			<AdditionalLibraryDirectories Condition="'$(MaxVersion)' &gt; '2013'">$(FABRIC_SPLICE_API_DIR);$(FABRIC_CAPI_DIR)\lib;$(BOOST_DIR);$(MaxSDKPath)\lib\x64\Release\</AdditionalLibraryDirectories>
+		</Link>	
+
+	</ItemDefinitionGroup>
+	<ImportGroup Label="PropertySheets">
+		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	</ImportGroup>
+
+  <!-- Override the MS props file settings -->
+  <PropertyGroup>
+    <TargetExt>.dlo</TargetExt>
+  </PropertyGroup>
+</Project>

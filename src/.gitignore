@@ -1,0 +1,10 @@
+build
+ipch
+x64
+*.aps
+*.user
+*.suo
+*.opensdf
+*.sdf
+*.lastbuildstate
+*.pdb

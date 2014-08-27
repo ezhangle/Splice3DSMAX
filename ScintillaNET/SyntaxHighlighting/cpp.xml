@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ScintillaNET>
+  <Language Name="cpp">
+    <AutoComplete AutoHide="True" FillUpCharacters=".([" SingleLineAccept="True" IsCaseSensitive="False">
+      <List>
+        FILE LINE alias break case const continue default do else false for function if in inline interface io object operator require return struct switch throw true use var while Ref ValueProducer
+      </List>
+    </AutoComplete>
+
+    <Indentation TabWidth="2" IndentWidth="2" UseSpaces="True" SmartIndentType="cpp" />
+
+
+    <Lexer LineCommentPrefix="//" StreamCommentPrefix="/* " StreamCommentSuffix=" */" >
+      <Keywords List="0" Inherit="False">
+        Boobies
+      </Keywords>
+
+      <Keywords List="1" Inherit="False">
+                FILE LINE alias break case const continue default do else false for function if in inline interface io object operator require return struct switch throw true use var while Ref ValueProducer
+      </Keywords>
+      <Keywords List="2" Inherit="False">
+        String Boolean Scalar Float32 Float64 Integer Integer64 Size Index
+      </Keywords>
+      <Keywords List="3" Inherit="False">
+        null false off on true NULL
+      </Keywords>
+      <Keywords List="4" Inherit="False">
+        Vec2 Vec3 Vec4 Mat44 Quat Color Boolean PolygonMesh
+      </Keywords>
+    </Lexer>
+
+    <Snippets>
+      <Snippet Shortcut="class" IsSurroundsWith="true">
+        public class $name$
+        {
+        $end$$selected$
+        }
+
+        inline $name$.
+      </Snippet>
+
+      <Snippet Shortcut="f" IsSurroundsWith="True">
+        for (Integer $i$ = $0$; $i$ &lt; $max$; $i$++)
+        {
+        $selected$$end$
+        }$DropMarker$
+      </Snippet>
+
+
+      <Snippet Shortcut="do" IsSurroundsWith="true">
+        do
+        {
+        $end$$selected$
+        } while ($expression$);
+        $DropMarker$
+      </Snippet>
+
+      <Snippet Shortcut="switch" IsSurroundsWith="false">
+        switch ($expression$)
+        {
+        $cases$
+        }$end$
+      </Snippet>
+
+      <Snippet Shortcut="w" IsSurroundsWith="true">
+        while ($expression$)
+        {
+        $end$$selected$
+        }
+      </Snippet>
+
+      <Snippet Shortcut="l" IsSurroundsWith="true">
+        else
+        $anchor$$selected$$caret$
+      </Snippet>
+
+      <Snippet Shortcut="lb" IsSurroundsWith="true">
+        else
+        {
+        $anchor$$selected$$caret$
+        }
+      </Snippet>
+
+      <Snippet Shortcut="if" IsSurroundsWith="true">
+        if ($end$)
+        $DropMarker$$selected$
+      </Snippet>
+
+      <Snippet Shortcut="ifb" IsSurroundsWith="true">
+        if ($end$)
+        {
+        $DropMarker$$selected$
+        }
+      </Snippet>
+
+      <Snippet Shortcut="b" IsSurroundsWith="true">
+        {
+        $end$$selected$
+        }
+      </Snippet>
+    </Snippets>
+  </Language>
+</ScintillaNET>

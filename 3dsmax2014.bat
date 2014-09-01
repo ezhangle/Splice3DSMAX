@@ -12,6 +12,6 @@ rem Save the Scintilla folder to an environment variable that will be accessed i
 set SCINTILLANETDIR=%CURRDIR%ScintillaNET\
 
 rem Launch Max
-call "D:\Program Files\Autodesk\3ds Max 2014\3dsmax.exe"
+call "%ADSK_3DSMAX_x64_2014%\3dsmax.exe"
 
 echo on

@@ -36,6 +36,16 @@ void DoShowKLEditor(ReferenceTarget* pTarget)
 	if (!script_initialized) {
 		init_MAXScript();
 		script_initialized = TRUE;
+
+		// On first run, evaluate the script that defines our function
+		char* mxsEditor = nullptr;
+		size_t buffSize = 0;
+		if (_dupenv_s(&mxsEditor, &buffSize, "SCINTILLANETDIR") == 0) {
+			MSTR mxsEditorPath = MSTR::FromACP(mxsEditor, buffSize);
+			mxsEditorPath = mxsEditorPath + _T("SpliceScintillaEditor.ms");
+			filein_script(mxsEditorPath.data());
+			free(mxsEditor);
+		}
 	}
 	init_thread_locals();
 	push_alloc_frame();

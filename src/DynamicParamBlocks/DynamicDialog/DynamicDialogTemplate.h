@@ -181,9 +181,9 @@ public:
 					// font size
 					*pWordPtr++ = (WORD)fontSize;
 					// font weight (read from memory for another DLGTEMPLATEEX)
-					*pWordPtr++ = 0 ;//0x0190;
+					*pWordPtr++ = 0x0190;
 					// font italics (read from memory for another DLGTEMPLATEEX)
-					*pWordPtr++ = 0; //0x0100;
+					*pWordPtr++ = 0x0100;
 
 					if(fontName)
 					{

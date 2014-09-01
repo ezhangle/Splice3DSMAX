@@ -25,27 +25,6 @@ class IntNameAccessor : public PBAccessor
 static IntNameAccessor theDefAccessor;
 #pragma endregion
 
-HGLOBAL LoadResourceImpl(wchar_t *resource, wchar_t *type)
-{
-	HRSRC handle = FindResource(hInstance, resource,type);
-	if (handle)
-	{
-		HGLOBAL hResource = LoadResource(hInstance, handle);
-		if (hResource)
-			return LockResource(hResource);  
-	}
-	return 0;
-}
-DLGTEMPLATE * LoadDialog(wchar_t *resource)
-{
-	return (DLGTEMPLATE *) LoadResourceImpl(resource,RT_DIALOG);
-}
-
-DLGTEMPLATEEX * LoadDialog(int resource)
-{
-	return (DLGTEMPLATEEX *) LoadResourceImpl(MAKEINTRESOURCE(resource),RT_DIALOG);
-}
-
 //////////////////////////////////////////////////////////////////////////
 //--- Utility Functions -------------------------------------------------------
 
@@ -358,7 +337,7 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 	if (!dialogTemplate)
 		return false; // we should probably actually throw here.
 
-	dialogTemplate->Create( DLG_X, dlgSize + DLG_PAD, DS_SETFONT | WS_CHILD | WS_VISIBLE, 0, NULL);
+	dialogTemplate->Create( DLG_X, dlgSize + DLG_PAD, DS_FIXEDSYS | DS_SETFONT | WS_CHILD, 0, NULL, _T("MS Shell Dlg"));
 
 	SHORT ypos = DLG_PAD / 2;
 	WORD ctrlId = 0;
@@ -370,7 +349,7 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 		// Post the name (in unicode)
 		const MCHAR* pName = pbDef.int_name;
 
-		dialogTemplate->AddStaticControl(0, 0, DLG_PAD / 2, ypos, LBL_WIDTH, CTRL_HEIGHT, ctrlId++, pName);
+		dialogTemplate->AddStaticControl(WS_VISIBLE | WS_CHILD | WS_GROUP, 0, DLG_PAD / 2, ypos, LBL_WIDTH, CTRL_HEIGHT, -1, pName);
 		//m_dialogTemplate->AddStaticControl(WS_VISIBLE, 0, 50, 50, 100, 50, ctrlId++, buf);
 
 		switch ((int)pbDef.type)

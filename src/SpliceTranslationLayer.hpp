@@ -203,10 +203,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::GeneratePBlockUI()
 //---------------------------------------------------------------------------------------------------------------
 // Inherited methods - UI related
 //---------------------------------------------------------------------------------------------------------------
-DLGTEMPLATEEX * LoadDialog(int resource);
-DLGTEMPLATE * LoadDialog(wchar_t *resource);
 
-#pragma region //inherited UI methods
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::BeginEditParams(IObjParam *ip, ULONG UNUSED(flags), Animatable *UNUSED(prev))
 {
@@ -221,8 +218,6 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::BeginEditParams(IObjParam 
 	// Generate our Dialog, and assign an mParamMap
 	if (GeneratePBlockUI())
 	{
-//		DLGTEMPLATEEX* dlg = LoadDialog(IDD_PARAM_GENERATION_UI);
-//		DLGTEMPLATEEX* dyndlg = m_dialogTemplate->GetDLGTEMPLATE();
 		m_paramMap = CreateCPParamMap2(m_pblock, ip, hInstance, (DLGTEMPLATE*)m_dialogTemplate->GetDLGTEMPLATE(), _M("The Dynamic Params"), 0);
 	}
 }

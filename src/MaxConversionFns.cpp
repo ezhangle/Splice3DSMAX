@@ -69,12 +69,12 @@ void Convert( INode* pNode, TimeValue t, Interval& ivValid, Mesh& out )
 #pragma region GetVariants
 FabricCore::Variant GetVariant(int param)
 {
-	return FabricCore::Variant::CreateSInt64(param);
+	return FabricCore::Variant::CreateSInt32(param);
 }
 
 FabricCore::Variant GetVariant(float param)
 {
-	return FabricCore::Variant::CreateFloat64(param);
+	return FabricCore::Variant::CreateFloat32(param);
 }
 
 FabricCore::Variant GetVariant(bool param)

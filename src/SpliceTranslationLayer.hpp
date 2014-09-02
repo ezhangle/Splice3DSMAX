@@ -5,6 +5,7 @@
 #include "DynamicParamBlocks/DynamicDialog/DynamicDialogTemplate.h"
 #include "DynamicParamBlocks/DynPBUndo.h"
 #include "SpliceLogging.h"
+#include "MaxConversionFns.h"
 
 //////////////////////////////////////////////////////////////////////////
 //--- SpliceTranslationLayer -------------------------------------------------------
@@ -122,11 +123,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::DeleteMaxParameter(ParamID
 	pNewDesc->DeleteParam(pid);
 
 	// Ensure that our max->splice connection is broken for this parameter
-	for (auto itr = m_dParamData.begin(); itr != m_dParamData.end(); itr++)
-	{
-		if (itr->first == pid)
-			itr->first = -1;
-	}
+	DbgAssert(false && "Check This");
 
 	// Replace old pblock with new one (will copy values).
 	CreateParamBlock(pNewDesc);
@@ -430,9 +427,7 @@ void WriteString(ISave *isave, const char* s, USHORT chunkID)
 // Save our local parameters
 template<typename TBaseClass, typename TResultType>
 IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
-{
-	ULONG dummy;
-	
+{	
 	// Save out all the data needed to recreate parameters
 	isave->BeginChunk(PARAM_SPLICE_DATA);
 	std::string data = m_graph.getPersistenceDataJSON();
@@ -440,27 +435,27 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
 	isave->EndChunk();
 
 	// Save out the information on which parameters are hooked up to what in the Max UI
-	int nInParams = GetNumPorts();
-	for( size_t i=0; i < nInParams; ++i )
-	{
-		isave->BeginChunk(PARAM_DATA_CHUNK);
-		ConnData& connection = m_dParamData[i];
+	//int nInParams = GetNumPorts();
+	//for( size_t i=0; i < nInParams; ++i )
+	//{
+	//	isave->BeginChunk(PARAM_DATA_CHUNK);
+	//	//ConnData& connection = m_dParamData[i];
 
-		isave->BeginChunk(PARAM_NAME_CHUNK);
-		isave->WriteCString(GetPortName(i));
-		isave->EndChunk();
+	//	isave->BeginChunk(PARAM_NAME_CHUNK);
+	//	isave->WriteCString(GetPortName(i));
+	//	isave->EndChunk();
 
-		//isave->BeginChunk(PARAM_SPLICE_TYPE_CHUNK);
-		//isave->WriteCString(connection.second.getDataType());
-		//isave->EndChunk();
+	//	//isave->BeginChunk(PARAM_SPLICE_TYPE_CHUNK);
+	//	//isave->WriteCString(connection.second.getDataType());
+	//	//isave->EndChunk();
 
-		ParamID pid = connection.first;
-		isave->BeginChunk(PARAM_MAX_DATA_CHUNK);
-		isave->Write(&pid, sizeof(pid), &dummy);
-		isave->EndChunk();
+	//	ParamID pid = connection.first;
+	//	isave->BeginChunk(PARAM_MAX_DATA_CHUNK);
+	//	isave->Write(&pid, sizeof(pid), &dummy);
+	//	isave->EndChunk();
 
-		isave->EndChunk();
-	}
+	//	isave->EndChunk();
+	//}
 	
 	// Save the value port.
 	isave->BeginChunk(PARAM_VALUE_NAME);
@@ -492,23 +487,22 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
 	return IO_OK;
 }
 
-// PLCB hooks up the names from Splice->Max
-class SpliceLayerNamePLCB : public PostLoadCallback
-{
-private:
-	std::vector<ConnData>& m_dConnData;
-	ReferenceMaker* m_pOwner;
-
-public:
-	SpliceLayerNamePLCB(std::vector<ConnData>& data, ReferenceTarget* owner);
-	virtual void proc( ILoad *iload );
-};
+//// PLCB hooks up the names from Splice->Max
+//class SpliceLayerNamePLCB : public PostLoadCallback
+//{
+//private:
+////	std::vector<ConnData>& m_dConnData;
+//	ReferenceMaker* m_pOwner;
+//
+//public:
+//	SpliceLayerNamePLCB(ReferenceTarget* owner);
+//	virtual void proc( ILoad *iload );
+//};
 // Load our local parameters
 template<typename TBaseClass, typename TResultType>
 IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 {
 	IOResult result = IO_OK;
-	char* temp = nullptr;
 	std::string outName;
 	while( IO_OK == (result = iload->OpenChunk()) )
 	{
@@ -530,44 +524,44 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 				outName = buff;
 				break;
 			}
-		case PARAM_DATA_CHUNK:
-			{
-				// Load our splice parameters.  Don't worry about
-				// Max parameters, they are handled by our ClassDesc2
-				std::string paramName;
-				std::string paramType;
-				std::string extension;
-				ParamID pid = -1;
-				while( IO_OK == (result = iload->OpenChunk()) )
-				{
-					switch (iload->CurChunkID())
-					{
-					case PARAM_NAME_CHUNK:
-						iload->ReadCStringChunk(&temp);
-						paramName = temp;
-						break;
-					//case PARAM_SPLICE_TYPE_CHUNK:
-					//	iload->ReadCStringChunk(&temp);
-					//	paramType = temp;
-					//	break;
-					case PARAM_MAX_DATA_CHUNK:
-						{
-							ULONG pidSize = sizeof(pid);
-							iload->Read(&pid, pidSize, &pidSize);
-						}
-						break;
-					}
-					iload->CloseChunk();
-				}
+		//case PARAM_DATA_CHUNK:
+		//	{
+		//		// Load our splice parameters.  Don't worry about
+		//		// Max parameters, they are handled by our ClassDesc2
+		//		std::string paramName;
+		//		std::string paramType;
+		//		std::string extension;
+		//		ParamID pid = -1;
+		//		while( IO_OK == (result = iload->OpenChunk()) )
+		//		{
+		//			switch (iload->CurChunkID())
+		//			{
+		//			case PARAM_NAME_CHUNK:
+		//				iload->ReadCStringChunk(&temp);
+		//				paramName = temp;
+		//				break;
+		//			//case PARAM_SPLICE_TYPE_CHUNK:
+		//			//	iload->ReadCStringChunk(&temp);
+		//			//	paramType = temp;
+		//			//	break;
+		//			case PARAM_MAX_DATA_CHUNK:
+		//				{
+		//					ULONG pidSize = sizeof(pid);
+		//					iload->Read(&pid, pidSize, &pidSize);
+		//				}
+		//				break;
+		//			}
+		//			iload->CloseChunk();
+		//		}
 
-				if (!paramName.empty())
-				{
-					
-					FabricSplice::DGPort aNode = m_graph.getDGPort(paramName.data()); // AddSpliceParameter(m_graph, paramType.data(), paramName.data(), FabricSplice::Port_Mode_IN);
-					m_dParamData.push_back(ConnData(pid, aNode));
-				}
-			}
-			break;
+		//		if (!paramName.empty())
+		//		{
+		//			
+		//			FabricSplice::DGPort aNode = m_graph.getDGPort(paramName.data()); // AddSpliceParameter(m_graph, paramType.data(), paramName.data(), FabricSplice::Port_Mode_IN);
+		//			m_dParamData.push_back(ConnData(pid, aNode));
+		//		}
+		//	}
+		//	break;
 		/*case KL_CODE_CHUNK:
 			{
 				std::string opName;
@@ -608,7 +602,7 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 		m_valuePort = m_graph.getDGPort(outName.data());
 
 	// PLCB hooks up our parameter block to the max ports
-	iload->RegisterPostLoadCallback(new SpliceLayerNamePLCB(m_dParamData, this));
+	//iload->RegisterPostLoadCallback(new SpliceLayerNamePLCB(this));
 	return IO_OK;
 }
 #pragma endregion
@@ -743,7 +737,6 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLFile( const ch
 			// Clear existing ports?
 			// On successful load, we want to hook up our ports
 			UINT nPorts = m_graph.getDGPortCount();
-			m_dParamData.clear();
 
 			// Create the default new descriptor
 			ParamBlockDesc2* pNewDesc = NULL;
@@ -767,9 +760,8 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLFile( const ch
 					// Add a new parameter to our pblock
 					ParamID pid = AddMaxParameter(pNewDesc, type, aPort.getName());
 					
-					// Store this port
-					ConnData newConnection(pid, aPort);
-					m_dParamData.push_back(newConnection);
+					// Store the max connection
+					aPort.setOption(MAX_PID_OPT, GetVariant(pid));
 				}
 			}
 			// reset our parameters to whats currently being used.
@@ -814,8 +806,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::CreatePort(const char* name
 	}
 
 	// Store connection between port->paramblock
-	ConnData newConnection(pid, aPort);
-	m_dParamData.push_back(newConnection);
+	aPort.setOption(MAX_PID_OPT, GetVariant(pid));
 
 	return pid;
 }
@@ -823,16 +814,16 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::CreatePort(const char* name
 template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::DeletePort(int i)
 {
-	if (m_dParamData.size() < i || i < 0)
+	if (i < 0 || i < GetNumPorts())
 		return false;
 
 	// Ensure the max data is released
-	ParamID pid = m_dParamData[i].first;
+	int pid = GetPortParamID(i);
 	if (pid >= 0)
-		DeleteMaxParameter(pid);
-	
-	// Resize param array
-	m_dParamData.erase(m_dParamData.begin() + i);
+		DeleteMaxParameter((ParamID)pid);
+
+	// Release Splice data.
+	m_graph.removeDGPort(GetPortName(i));
 	return true;
 }
 
@@ -897,20 +888,44 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortArrayIdx(int ind
 }
 
 template<typename TBaseClass, typename TResultType>
+int SpliceTranslationLayer<TBaseClass, TResultType>::GetPortParamID(int i) 
+{
+	if (i >= 0 && i < GetNumPorts())
+	{
+		FabricSplice::DGPort aPort = m_graph.getDGPort(i);
+		FabricCore::Variant option = aPort.getOption(MAX_PID_OPT);
+		if(option.isSInt32())
+			return (int)option.getSInt32();
+		//return aPort.getIntegerOption(MAX_PID_OPT);
+	}
+	return -1;
+}
+
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::SetPortParamID(int i, ParamID id) 
+{
+	if (i >= 0 && i < GetNumPorts())
+	{
+		FabricSplice::DGPort aPort = m_graph.getDGPort(i);
+		aPort.setOption(MAX_PID_OPT, GetVariant((int)id));
+	}
+}
+
+template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::GetMaxConnectedType( int i )
 {
-	if (i < 0 || i > GetNumPorts())
-		return -1;
-	if (m_dParamData[i].first == -1)
-		return -1;
-
-	return (int)m_pblock->GetParameterType(m_dParamData[i].first);
+	int pid = GetPortParamID(i);
+	if (pid >= 0)
+	{
+		return m_pblock->GetParameterType((ParamID)pid);
+	}
+	return -1;
 }
 
 template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(int i, int type)
 {
-	if (m_dParamData.size() < i || i < 0)
+	if (GetNumPorts() < i || i < 0)
 		return -1;
 
 	int baseType = base_type(type);
@@ -919,7 +934,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(int i, 
 		return 0;
 
 	// Do we have an existing Max parameter?
-	ParamID pid = m_dParamData[i].first;
+	ParamID pid = (ParamID)GetPortParamID(i);
 	if (pid != -1)
 	{
 		// Check that its not the correct type already
@@ -934,7 +949,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(int i, 
 	ParamBlockDesc2* pNewDesc = CopyPBDescriptor();
 	ParamID newId = AddMaxParameter(pNewDesc, type, GetPortName(i));
 	CreateParamBlock(pNewDesc);
-	m_dParamData[i].first = newId;
+	SetPortParamID(i, newId);
 	return true;
 }
 
@@ -995,7 +1010,7 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 			// Reset our internal validity times;
 			m_valid.SetInfinite();
 			// Set  all Max values on their splice equivalents
-			SetAllMaxValuesToSplice(t, m_pblock, m_dParamData, m_valid);
+			SetAllMaxValuesToSplice(t, m_pblock, m_graph, m_valid);
 
 			// Trigger graph evaluation
 			m_graph.evaluate();

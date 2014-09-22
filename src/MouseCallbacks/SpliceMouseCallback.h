@@ -6,7 +6,7 @@ class SpliceMouseCallback :
 {
 private:
 	//bool m_dragging;
-	FabricCore::RTVal mManipulationHandle;
+	FabricCore::RTVal mEventDispatcher;
 
 	// Cache previous mouse state, 
 	bool m_LMouseDown;

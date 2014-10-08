@@ -250,7 +250,7 @@ BOOL SpliceMouseCallback::TolerateOrthoMode()
 	return TRUE;
 }
 
-void AddViewport(FabricCore::RTVal& klevent, ViewExp* pView)
+FabricCore::RTVal SetupViewport(ViewExp* pView)
 {
 	GraphicsWindow* gw = pView->getGW();
 
@@ -325,7 +325,7 @@ void AddViewport(FabricCore::RTVal& klevent, ViewExp* pView)
 		}
 		inlineViewport.setMember("camera", inlineCamera);
 	}
-	klevent.setMember("viewport", inlineViewport);
+	return inlineViewport;
 }
 
 
@@ -387,8 +387,6 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 		m_MMouseDown = false;
 	}
 
-	klevent.setMember("eventType", FabricSplice::constructUInt32RTVal(eventType));
-
 	//Interface* pCore = GetCOREInterface();
 	//ViewExp* pView = GetViewport(pCore, hwnd);
 	//LONG cursorX, cursorY;
@@ -442,14 +440,22 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	// Trigger the event on Splice
 
 	ViewExp& pView = GetCOREInterface()->GetViewExp(hwnd);
-	AddViewport(klevent, &pView);
+	FabricCore::RTVal inlineViewport = SetupViewport(&pView);
 
 	//////////////////////////
 	// Setup the Host
 	// We cannot set an interface value via RTVals.
 	FabricCore::RTVal host = FabricSplice::constructObjectRTVal("Host");
 	host.setMember("hostName", FabricSplice::constructStringRTVal("3dsMax"));
-	klevent.setMember("host", host);
+
+	//////////////////////////
+	// Configure the event...
+	std::vector<FabricCore::RTVal> args(4);
+	args[0] = host;
+	args[1] = inlineViewport;
+	args[2] = FabricSplice::constructUInt32RTVal(eventType);
+	args[3] = FabricSplice::constructUInt32RTVal(modifiers);
+	klevent.callMethod("", "init", 4, &args[0]);
 
 	try{
 		mEventDispatcher.callMethod("Boolean", "onEvent", 1, &klevent);

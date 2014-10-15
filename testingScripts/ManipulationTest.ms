@@ -1,4 +1,4 @@
-
+resetMaxFile #noPrompt
 m = SpliceMesh()
 
 entryPt = "eventLogger";
@@ -9,7 +9,7 @@ object EventLogger : Manipulator {
 };
 
 function EventLogger.onEvent!(io Event event){
-    report(\"EventLogger.onEvent:\" + event.eventType());
+    report(\"EventLogger.onEvent:\" + event);
 }
 
 function EventLogger.onEnable!(){

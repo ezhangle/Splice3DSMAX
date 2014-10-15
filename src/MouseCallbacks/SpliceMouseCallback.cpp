@@ -9,16 +9,16 @@
 #include "FabricSplice.h"
 #include "..\SpliceEvents.h"
 
-class PaintRestoreObject : public RestoreObj
+class CustomKLUndoRedoCommandObject : public RestoreObj
 {
 	FabricCore::RTVal m_rtval_commands;
 
 public:
-	PaintRestoreObject(FabricCore::RTVal& commands) 
+	CustomKLUndoRedoCommandObject(FabricCore::RTVal& commands) 
 	{
 		m_rtval_commands = commands;
 	}
-	~PaintRestoreObject() 
+	~CustomKLUndoRedoCommandObject() 
 	{
 		m_rtval_commands.invalidate();
 	};
@@ -489,10 +489,9 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	}
 
 	if(host.callMethod("Boolean", "undoRedoCommandsAdded", 0, 0).getBoolean()){
-		if (theHold.Holding())
-		{
+		if (theHold.Holding()){
 			FabricCore::RTVal fabricUndoVal = host.callMethod("UndoRedoCommand[]", "getUndoRedoCommands", 0, 0);
-			PaintRestoreObject* pNewUndo = new PaintRestoreObject(fabricUndoVal);
+			CustomKLUndoRedoCommandObject* pNewUndo = new CustomKLUndoRedoCommandObject(fabricUndoVal);
 			theHold.Put(pNewUndo);
 		}
 	}

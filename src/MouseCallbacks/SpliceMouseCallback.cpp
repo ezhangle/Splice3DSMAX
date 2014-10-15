@@ -2,9 +2,10 @@
 // We need to access private variables on the SelectionCallback
 #include "StdAfx.h"
 #include <list>
+#include <maxapi.h>
+#include <maxscript/maxscript.h>
 #include "SpliceMouseCallback.h"
-#include "maxapi.h"
-#include "objmode.h"
+#include <objmode.h>
 #include "FabricCore.h"
 #include "FabricSplice.h"
 #include "..\SpliceEvents.h"
@@ -289,7 +290,7 @@ FabricCore::RTVal SetupViewport(ViewExp* pView)
 			float fovX = pView->GetFOV();
 			//convert to vertical fov as the RTR camera is always using this mode:
 			double aspect = double(width) / double(height);
-			float fovY = (2.0 * atan(1.0 / aspect * tan(fovX / 2.0)));
+			double fovY = (2.0 * atan(1.0 / aspect * tan(fovX / 2.0)));
 			inlineCamera.setMember("fovY", FabricSplice::constructFloat64RTVal(fovY));
 		}
 
@@ -470,14 +471,56 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	}
 
 	bool result = klevent.callMethod("Boolean", "isAccepted", 0, 0).getBoolean();
+	
+    // The manipulation system has requested that a custom command be invoked. 
+    // Invoke the custom command passing the speficied args. 
+	std::string customCommand(host.maybeGetMember("customCommand").getStringCString());
+	if(customCommand != std::string("")){
+		BOOL result;
+		BOOL quietErrors = FALSE;
+		FabricCore::RTVal customCommandArgs = host.maybeGetMember("customCommandArgs");
+		bool found = customCommand.find(std::string("=")) !=std::string::npos;
+		if (found){
+			// Setting a value in Max.
+			// e.g. 
+			// $Sphere01.radius = 3.0
+			std::string args;
+			for(int i=0; i<customCommandArgs.getArraySize(); i++){
+				args += std::string(customCommandArgs.getArrayElement(i).getStringCString());
+			}
+			result = ExecuteMAXScriptScript(TSTR::FromCStr((customCommand + args).data()), quietErrors);
+		}
+		else{
+			// Calling a functions in MaxScript.
+			if(customCommandArgs.getArraySize() == 0){
+				// No args
+				// e.g. 
+				// theHold.Begin()
+				bool found = customCommand.find(std::string("(")) !=std::wstring::npos;
+				if(found)
+					result = ExecuteMAXScriptScript(TSTR::FromCStr(customCommand.data()), quietErrors);
+				else
+					result = ExecuteMAXScriptScript(TSTR::FromCStr((customCommand + std::string("()")).data()), quietErrors);
+			}
+			else{
+				// With args
+				// e.g. 
+				// theHold.Accept "MyChanges"
+				std::string args;
+				for(int i=0; i<customCommandArgs.getArraySize(); i++){
+					args += std::string(" ");
+					args += std::string(customCommandArgs.getArrayElement(i).getStringCString());
+				}
+				result = ExecuteMAXScriptScript(TSTR::FromCStr((customCommand + args).data()), quietErrors);
+			}
+		}
+	}
 
-	if(host.maybeGetMember("redrawRequested").getBoolean())
-	{
+	if(host.maybeGetMember("redrawRequested").getBoolean())	{
 		Interface7* pCore = GetCOREInterface7();
 		ViewExp& vp = pCore->GetViewExp(hwnd);
 		ViewExp10* vp10 = NULL;
-		if (vp.IsAlive())
-		{
+		if (vp.IsAlive()){
 			vp10 = reinterpret_cast<ViewExp10*>(vp.Execute(ViewExp::kEXECUTE_GET_VIEWEXP_10));
 			vp10->Invalidate(true);
 			//pCore->RedrawViews(pCore->GetTime());

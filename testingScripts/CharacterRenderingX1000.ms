@@ -4,90 +4,102 @@ witcherFbx =  (getFilenamePath thisfile) + "testfiles/Witcher_Creep.fbx"
 
 
 m = SpliceMesh()
-m.CreatePort "fbxFile" "String" -2
+m.CreatePort "filePath" "String" -2
 m.CreatePort "numCharacters" "Integer" -2
 m.CreatePort "spacing" "Scalar" -2
 m.CreatePort "fbxCharacter" "FbxCharacter" -1 Extension:"FbxHelpers"
 m.CreatePort "characters" "Character" -1 isArray:true Extension:"Characters"
+m.CreatePort "handles" "DrawingHandle" -1 isArray:true Extension:"Characters"
 m.CreatePort "poseTextures" "InlineMatrixArrayTexture" -1 isArray:true Extension:"InlineDrawing"
 
 entryPt = "characterDrawing"
 klCode = "
+
 require InlineDrawing;
 require FbxHelpers;
-
-function Color randomColor(io Size offset)
-{
-  const Size seed = 16841;
-  return Color(
-    mathRandomFloat32(seed, offset++),
-    mathRandomFloat32(seed, offset++),
-    mathRandomFloat32(seed, offset++)
-    );
-}
 
 operator evalCharacter<<<index>>>(
   Scalar time,
   io Character characters[], 
   io InlineMatrixArrayTexture poseTextures[]
   ){
-    const Size seed = 9819815;
-    ClipPose pose = characters[index].getPose();
-    pose.evaluate(time + (mathRandomFloat32(seed, index) * 5.0));
-    poseTextures[index].update(characters[index].getSkinningMatrices());
+  const Size seed = 9819815;
+  ClipPose pose = characters[index].getPose();
+  pose.evaluate(time + (mathRandomFloat32(seed, index) * 5.0));
+  poseTextures[index].update(characters[index].getSkinningMatrices());
 }
 
 operator characterDrawing(
   io Scalar time, 
 
-  String fbxFile, 
+  String filePath, 
   Integer numCharacters, 
   Scalar spacing, 
 
   io FbxCharacter fbxCharacter, 
   io Character characters[], 
+  io DrawingHandle handles[], 
   io InlineMatrixArrayTexture poseTextures[]
 ) {
 
-  InlineDrawing drawing = OGLInlineDrawing_GetInstance();
+  if(numCharacters != characters.size()){
 
-  if(fbxCharacter.getFilePath() != fbxFile && fbxFile != \"\"){
-    fbxCharacter.load(fbxFile);
     characters.resize(0);
     poseTextures.resize(0);
+    handles.resize(0);
 
+    // Check for an absolute file path, then a relative path.
+    FilePath filePathObj(filePath);
+    if(!filePathObj.exists()){
+      report('File not found:' + filePath);
+      return;
+    }
+
+    report('Importing:' + filePathObj.string());
+    fbxCharacter.load(filePathObj.string());
+
+    // Now setup the rendering
+    InlineDrawing drawing = OGLInlineDrawing_GetInstance();
     if(!drawing.hasShader('skinnedSurfaceShader')){
       InlineShader skinnedSurfaceShader = OGLSkinnedSurfaceShader('skinnedSurfaceShader');
       drawing.registerShader(skinnedSurfaceShader);
     }
-  }
-  if(fbxCharacter.initialized() && numCharacters != characters.size()){
+
     InlineShader skinnedSurfaceShader = drawing.getShader('skinnedSurfaceShader');
+
+
+    // Create an InlineMeshShape for each of the geometries in the FbxCharacter.
+    // All the instances will share these InlineMeshShapes
+    InlineMeshShape skinShapes[];
+    skinShapes.resize(fbxCharacter.getNumGeometries());
+    for(Integer geom=0; geom<fbxCharacter.getNumGeometries(); geom++)
+      skinShapes[geom] = InlineMeshShape(fbxCharacter.getName() + '_' + geom, fbxCharacter.getGeometry(geom));
 
     Size offset = 0;
     characters.resize(numCharacters);
     poseTextures.resize(numCharacters);
+    handles.resize(numCharacters);
 
     Integer gridDim = sqrt(Scalar(numCharacters))+1;
     Integer inst=0;
+    const Size seed = 16841;
     for(Integer i=0; i<gridDim; i++){
       for(Integer j=0; j<gridDim; j++){
         if(inst >= numCharacters)
           break;
 
         if(characters[inst] == null){
-          characters[inst] = Character(fbxCharacter, \"_\" + inst);
-          InlineTransform characterTransform = StaticInlineTransform('characterTransform', Xfo());
-          drawing.getRoot().addChild(characterTransform);
-          poseTextures[inst] = InlineMatrixArrayTexture(fbxCharacter.getName() + \"_Transforms\"+inst, fbxCharacter.getSkinningMatrices());
+          // Construct a handle for this character instance. The handle will clean up the InlineDrawing when it is destroyed. 
+          handles[inst] = DrawingHandle(fbxCharacter.getName() + '_' + inst);
+          characters[inst] = Character(fbxCharacter, fbxCharacter.getName() + '_' + inst);
+          poseTextures[inst] = InlineMatrixArrayTexture(fbxCharacter.getName() + '_Transforms'+inst, fbxCharacter.getSkinningMatrices());
 
-          InlineMaterial characterMaterial = skinnedSurfaceShader.getOrCreateMaterial(\"character\"+inst);
-          characterMaterial.setUniform(InlineUniform('u_diffuseColor', randomColor(offset)));
+          InlineMaterial characterMaterial = skinnedSurfaceShader.getOrCreateMaterial('character'+inst);
+          characterMaterial.setUniform(InlineUniform('u_diffuseColor', randomColor(seed, ++offset)));
+
           for(Integer geom=0; geom<fbxCharacter.getNumGeometries(); geom++){
-            InlineMeshShape skinShape = InlineMeshShape(fbxCharacter.getName() + \"_\" + geom, fbxCharacter.getGeometry(geom));
-
-            InlineInstance skinInstance = SimpleInlineInstance(fbxCharacter.getName() + \"_\" + geom, characterTransform, skinShape, characterMaterial);
-            skinInstance.setInstanceUniform(InlineUniform('skinningMatrices', InlineTexture(poseTextures[inst])));
+            InlineInstance skinInstance = SimpleInlineInstance(fbxCharacter.getName() + '_' + geom, handles[inst].rootTransform, skinShapes[geom], characterMaterial);
+            skinInstance.setInstanceUniform(InlineUniform('skinningMatrices', poseTextures[inst]));
             skinInstance.setInstanceUniform(InlineUniform('bindShapeTransform', fbxCharacter.getBindShapeTransform(geom)));
           }
         }
@@ -104,13 +116,13 @@ operator characterDrawing(
   /////////////////
   // Now update the pose of the character, and push the skinningMatrices to the poseTexture.
   if(fbxCharacter.initialized()){
-		evalCharacter<<<numCharacters>>>(time, characters, poseTextures);
-	}
+    evalCharacter<<<numCharacters>>>(time, characters, poseTextures);
+  }
 }"
 
 m.SetKLCode entryPt klCode
 
-m.fbxFile = witcherFbx
+m.filePath = witcherFbx
 m.spacing = 200
 m.numCharacters =600
 

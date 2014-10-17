@@ -250,7 +250,7 @@ BOOL SpliceMouseCallback::TolerateOrthoMode()
 	return TRUE;
 }
 
-void AddViewport(FabricCore::RTVal& klevent, ViewExp* pView)
+FabricCore::RTVal SetupViewport(ViewExp* pView)
 {
 	GraphicsWindow* gw = pView->getGW();
 
@@ -325,13 +325,13 @@ void AddViewport(FabricCore::RTVal& klevent, ViewExp* pView)
 		}
 		inlineViewport.setMember("camera", inlineCamera);
 	}
-	klevent.setMember("viewport", inlineViewport);
+	return inlineViewport;
 }
 
 
 int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2 m )
 {
-	if (!mManipulationHandle.isValid())
+	if (!mEventDispatcher.isValid())
 		return FALSE;  // Return FALSE to exit this command mode
 
 	if (msg == MOUSE_IDLE)
@@ -387,8 +387,6 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 		m_MMouseDown = false;
 	}
 
-	klevent.setMember("eventType", FabricSplice::constructUInt32RTVal(eventType));
-
 	//Interface* pCore = GetCOREInterface();
 	//ViewExp* pView = GetViewport(pCore, hwnd);
 	//LONG cursorX, cursorY;
@@ -442,17 +440,25 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	// Trigger the event on Splice
 
 	ViewExp& pView = GetCOREInterface()->GetViewExp(hwnd);
-	AddViewport(klevent, &pView);
+	FabricCore::RTVal inlineViewport = SetupViewport(&pView);
 
 	//////////////////////////
 	// Setup the Host
 	// We cannot set an interface value via RTVals.
 	FabricCore::RTVal host = FabricSplice::constructObjectRTVal("Host");
 	host.setMember("hostName", FabricSplice::constructStringRTVal("3dsMax"));
-	klevent.setMember("host", host);
+
+	//////////////////////////
+	// Configure the event...
+	std::vector<FabricCore::RTVal> args(4);
+	args[0] = host;
+	args[1] = inlineViewport;
+	args[2] = FabricSplice::constructUInt32RTVal(eventType);
+	args[3] = FabricSplice::constructUInt32RTVal(modifiers);
+	klevent.callMethod("", "init", 4, &args[0]);
 
 	try{
-		mManipulationHandle.callMethod("Boolean", "onEvent", 1, &klevent);
+		mEventDispatcher.callMethod("Boolean", "onEvent", 1, &klevent);
 	}
 	catch(FabricCore::Exception e)    {
 		logMessage(e.getDesc_cstr());
@@ -510,12 +516,13 @@ void SpliceMouseCallback::EnterMode()
 	}
 
 	// We should not re-enter this mode while already active
-	//DbgAssert(!mManipulationHandle.isValid());
+	//DbgAssert(!mEventDispatcher.isValid());
 
-	mManipulationHandle = FabricSplice::constructObjectRTVal("ManipulationHandle");
-	if (mManipulationHandle.isValid())
+    FabricCore::RTVal eventDispatcherHandle = FabricSplice::constructObjectRTVal("EventDispatcherHandle");
+    mEventDispatcher = eventDispatcherHandle.callMethod("EventDispatcher", "getEventDispatcher", 0, 0);
+	if (mEventDispatcher.isValid())
 	{
-		mManipulationHandle.callMethod("", "activateManipulation", 0, 0);
+		mEventDispatcher.callMethod("", "activateManipulation", 0, 0);
 		//in_ctxt.Redraw(true);
 	}
 }
@@ -526,11 +533,11 @@ void SpliceMouseCallback::ExitMode()
 	if (theHold.Holding())
 		theHold.Accept(_T("ERROR - Splice Actions"));
 
-	if (mManipulationHandle.isValid())
+	if (mEventDispatcher.isValid())
 	{
 		// By deactivating the manipulation, we enable the manipulators to perform
 		// cleanup, such as hiding paint brushes/gizmos. 
-		mManipulationHandle.callMethod("", "deactivateManipulation", 0, 0);
-		mManipulationHandle.invalidate();
+		mEventDispatcher.callMethod("", "deactivateManipulation", 0, 0);
+		mEventDispatcher.invalidate();
 	}
 }

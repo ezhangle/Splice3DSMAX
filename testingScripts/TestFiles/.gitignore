@@ -1,0 +1,15 @@
+#
+# Copyright 2010-2014 Fabric Software Inc. All rights reserved.
+#
+
+/build/
+/ipch/
+
+# Build files
+*.sdf
+*.opensdf
+*.sdf
+*.suo
+*.user
+*.filters
+*.fbm

@@ -54,7 +54,7 @@
 	<ItemDefinitionGroup>
 		<!-- default values for compiler -->
 		<ClCompile>
-			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;$(MaxSDKPath)maxsdk\include</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<StringPooling>true</StringPooling>
@@ -65,8 +65,12 @@
 		
 		<!-- 2014 very helpfully changed the installed path -->
 		<ClCompile Condition="'$(MaxVersion)' &gt; '2013'">
-			<AdditionalIncludeDirectories>$(MaxSDKPath)include;</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(MaxSDKPath)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ClCompile>
+        <ClCompile Condition="'$(MaxVersion)' &lt; '2014'">
+            <AdditionalIncludeDirectories>$(MaxSDKPath)maxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+        </ClCompile>
+        
 
 		<!-- Turn on E&C for Debug Win32 builds -->
 		<ClCompile Condition="'$(IsDebug)'">
@@ -101,7 +105,7 @@
 
 		<!-- 2014 very helpfully changed the installed path -->
 		<Link Condition="'$(MaxVersion)' &gt; '2013'">
-			<AdditionalLibraryDirectories>$(MaxSDKPath)\lib\x64\Release\</AdditionalLibraryDirectories>
+			<AdditionalLibraryDirectories>$(MaxSDKPath)\lib\x64\Release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 		</Link>
 		
 

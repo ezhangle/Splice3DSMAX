@@ -107,8 +107,6 @@
 		<Link Condition="'$(MaxVersion)' &gt; '2013'">
 			<AdditionalLibraryDirectories>$(MaxSDKPath)\lib\x64\Release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 		</Link>
-		
-
 	</ItemDefinitionGroup>
 	<ImportGroup Label="PropertySheets">
 		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -119,5 +117,18 @@
   <!-- Override the MS props file settings -->
   <PropertyGroup>
     <TargetExt>.dlo</TargetExt>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)3dsMax2014.bat" "$(FABRIC_DIR)SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/" /Y
+xcopy "$(ProjectDir)ScintillaNET" "$(FABRIC_DIR)SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/ScintillaNET" /E /I /Y
+call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <PropertyGroup>
+    <LocalDebuggerCommandArguments>-vo -p "$(ProjectDir)/build/Generated.Plugin.Splice.ini"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommand>$(MaxPath)3dsmax.exe</LocalDebuggerCommand>
   </PropertyGroup>
 </Project>

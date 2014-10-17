@@ -35,63 +35,75 @@ static IntNameAccessor theDefAccessor;
 
 bool CopyValue(int type, ParamID newId, IParamBlock2* pNewBlock, ParamID oldId, IParamBlock2* pCopyBlock)
 {
-	// Is this value animated?  Keep the reference if so
-	Control* anim = pCopyBlock->GetControllerByID(oldId);
-	if (anim != NULL) 
+	int numValues = 1;
+	if (is_tab(type)) 
 	{
-		pNewBlock->SetControllerByID(oldId, 0, anim);
+		numValues = pCopyBlock->Count(oldId);
+		pNewBlock->SetCount(newId, numValues);
 	}
-	else
+
+	// Copy all values from copy block to newblock
+	for (int i = 0; i < numValues; i++)
 	{
-		// Constant value, copy it over.
-		switch (type)
+		// Is this value animated?  Keep the reference if so
+		Control* anim = pCopyBlock->GetControllerByID(oldId);
+		if (anim != NULL) 
 		{
-		case TYPE_FLOAT:
-		case TYPE_ANGLE:
-		case TYPE_PCNT_FRAC:
-		case TYPE_WORLD:
-			pNewBlock->SetValue(newId, 0, pCopyBlock->GetFloat(oldId));
-			break;
-		case TYPE_BOOL:
-		case TYPE_INT:
-			pNewBlock->SetValue(newId, 0, pCopyBlock->GetInt(oldId));
-			break;
-		case TYPE_POINT3:
+			pNewBlock->SetControllerByID(oldId, i, anim);
+		}
+		else
+		{
+			// Constant value, copy it over.
+			switch (type)
 			{
-				Point3 v = pCopyBlock->GetPoint3(oldId);
-				pNewBlock->SetValue(newId, 0, v);
-			}
-			break;
-		case TYPE_POINT4:
-			{
-				Point4 v = pCopyBlock->GetPoint4(oldId);
-				pNewBlock->SetValue(newId, 0, v);
-			}
-			break;
-		case TYPE_MTL:
-			pNewBlock->SetValue(newId, 0, pCopyBlock->GetMtl(oldId));
-			break;
-		case TYPE_TEXMAP:
-			pNewBlock->SetValue(newId, 0, pCopyBlock->GetTexmap(oldId));
-			break;
-		case TYPE_INODE:
-			pNewBlock->SetValue(newId, 0, pCopyBlock->GetINode(oldId));
-			break;
-		case TYPE_STRING:
-			{
-				CONST_2010 MCHAR* theString = pCopyBlock->GetStr(oldId);
-				if (theString != NULL) pNewBlock->SetValue(newId, 0, theString);
-			}
-			break;
-		case TYPE_RGBA:
-			{
-				Color c = pCopyBlock->GetColor(oldId);
-				pNewBlock->SetValue(newId, 0, c);
+			case TYPE_FLOAT:
+			case TYPE_ANGLE:
+			case TYPE_PCNT_FRAC:
+			case TYPE_WORLD:
+				pNewBlock->SetValue(newId, i, pCopyBlock->GetFloat(oldId));
 				break;
+			case TYPE_BOOL:
+			case TYPE_INT:
+				pNewBlock->SetValue(newId, i, pCopyBlock->GetInt(oldId));
+				break;
+			case TYPE_POINT3:
+				{
+					Point3 v = pCopyBlock->GetPoint3(oldId);
+					pNewBlock->SetValue(newId, i, v);
+				}
+				break;
+			case TYPE_POINT4:
+				{
+					Point4 v = pCopyBlock->GetPoint4(oldId);
+					pNewBlock->SetValue(newId, i, v);
+				}
+				break;
+			case TYPE_MTL:
+				pNewBlock->SetValue(newId, i, pCopyBlock->GetMtl(oldId));
+				break;
+			case TYPE_TEXMAP:
+				pNewBlock->SetValue(newId, i, pCopyBlock->GetTexmap(oldId));
+				break;
+			case TYPE_INODE:
+				pNewBlock->SetValue(newId, i, pCopyBlock->GetINode(oldId));
+				break;
+			case TYPE_STRING:
+				{
+					CONST_2010 MCHAR* theString = pCopyBlock->GetStr(oldId);
+					if (theString != NULL) 
+						pNewBlock->SetValue(newId, i, theString);
+				}
+				break;
+			case TYPE_RGBA:
+				{
+					Color c = pCopyBlock->GetColor(oldId);
+					pNewBlock->SetValue(newId, i, c);
+					break;
+				}
+			default:
+				DbgAssert(FALSE); // Implement Me
+				return false;
 			}
-		default:
-			DbgAssert(FALSE); // Implement Me
-			return false;
 		}
 	}
 	return true;

@@ -99,29 +99,35 @@ entryPt = "unitTestSharedGraph"
 klCode = "
 require Math;
 
-operator unitTestSharedGraph(io Mat44 outValArray[]) {
+operator unitTestSharedGraph(io Mat44 outValArray[], Scalar xMult, Scalar yMult, Scalar zMult) {
   for (Integer i = 0; i < outValArray.size(); i++) {
     outValArray[i].setIdentity();
-    outValArray[i].setTranslation(Vec3(i, i*2, 0));
+    outValArray[i].setTranslation(Vec3(i * xMult, i * yMult, i * zMult));
   }
 }"
 
 p4 = Point()
-p4.controller = SpliceMatrixController()
-p4.controller.OutPort = "outValArray"
-p4.controller.OutPortIndex = 0
-p4.controller.SetKLCode entryPt klCode
+spliceCtrl = SpliceMatrixController()
+p4.controller = spliceCtrl
+spliceCtrl.OutPort = "outValArray"
+spliceCtrl.OutPortIndex = 0
+
+spliceCtrl.CreatePort "xMult" "Scalar" -2
+spliceCtrl.CreatePort "yMult" "Scalar" -2
+spliceCtrl.CreatePort "zMult" "Scalar" -2
+
+spliceCtrl.SetKLCode entryPt klCode
 
 p5 = Point()
 p5.controller = SpliceMatrixController()
 p5.controller.SetSpliceGraph p4.controller
-p5.controller.OutPort = "myValOut"
+p5.controller.OutPort = "outValArray"
 p5.controller.OutPortIndex = 1
 
 p6 = Point()
 p6.controller = SpliceMatrixController()
 p6.controller.SetSpliceGraph p4.controller
-p6.controller.OutPort = "myValOut"
+p6.controller.OutPort = "outValArray"
 p6.controller.OutPortIndex = 2
 
 print "All Passed!"

@@ -27,7 +27,7 @@ public:
 	{
 		if(m_rtval_commands.isValid())
 		{
-			for(int i=0; i< m_rtval_commands.getArraySize(); i++)
+			for(size_t i=0; i< m_rtval_commands.getArraySize(); i++)
 			{
 				m_rtval_commands.getArrayElement(i).callMethod("", "undoAction", 0, 0);
 			}
@@ -38,7 +38,7 @@ public:
 	{
 		if(m_rtval_commands.isValid())
 		{
-			for(int i = 0; i < m_rtval_commands.getArraySize(); i++)
+			for(size_t i = 0; i < m_rtval_commands.getArraySize(); i++)
 			{
 				m_rtval_commands.getArrayElement(i).callMethod("", "doAction", 0, 0);
 			}
@@ -289,7 +289,7 @@ FabricCore::RTVal SetupViewport(ViewExp* pView)
 			float fovX = pView->GetFOV();
 			//convert to vertical fov as the RTR camera is always using this mode:
 			double aspect = double(width) / double(height);
-			float fovY = (2.0 * atan(1.0 / aspect * tan(fovX / 2.0)));
+			double fovY = (2.0 * atan(1.0 / aspect * tan(fovX / 2.0)));
 			inlineCamera.setMember("fovY", FabricSplice::constructFloat64RTVal(fovY));
 		}
 
@@ -469,7 +469,7 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 		res = 0;
 	}
 
-	bool result = klevent.callMethod("Boolean", "isAccepted", 0, 0).getBoolean();
+	//bool result = klevent.callMethod("Boolean", "isAccepted", 0, 0).getBoolean();
 
 	if(host.maybeGetMember("redrawRequested").getBoolean())
 	{

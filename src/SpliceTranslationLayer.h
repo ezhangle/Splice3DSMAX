@@ -32,8 +32,8 @@ class IParamBlock2;
 class DynPBCustAttrClassDesc;
 
 // Stores a connection between Max data (ParamID) and Splice data (DGPort)
-typedef std::pair<ParamID, FabricSplice::DGPort> ConnData;
-
+//typedef std::pair<ParamID, FabricSplice::DGPort> ConnData;
+#define MAX_PID_OPT "MaxPID"
 //////////////////////////////////////////////////////////////////////////
 #pragma region Utility functions
 /** Add a new parameter definition to the given pblock descriptor
@@ -78,7 +78,7 @@ const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, int
 /** Given a Max value, send it to the dgPort in the appropriate fashion */
 
 /** For each valid in the parameter block, send it to the appropriate Splice port in paramData */
-void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, std::vector<ConnData>& dSpliceParams, Interval& ivValid);
+void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DGGraph& rGraph, Interval& ivValid);
 
 // DlgCallback for our static UI
 INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -104,7 +104,7 @@ protected:
 	//! Stores the parameter connection data between Max and Splice.
 	//! The ParamID identifies the parameter in the Max parameter block,
 	//! and the DGPort connects to the port in Splice
-	std::vector<ConnData>						m_dParamData;
+	//std::vector<ConnData>						m_dParamData;
 
 	//! a handle to our static UI.  This UI panel contains the controls to modify the parameter block
 	HWND										m_hPanel;
@@ -291,7 +291,7 @@ public:
 	// Port creation/management
 
 	// Get the number of ports on this graph
-	virtual int GetNumPorts() { return m_dParamData.size(); }
+	virtual int GetNumPorts() { return m_graph.getDGPortCount(); }
 	//virtual Tab<TSTR*> GetPortNames();
 
 	// Splice port management
@@ -302,10 +302,10 @@ public:
 	bool DeletePort(int i);
 
 	// Get name of port
-	const char* GetPortName(int i) { return (i < GetNumPorts()) ? m_dParamData[i].second.getName() : NULL; }
+	const char* GetPortName(int i) { return (i < GetNumPorts()) ? m_graph.getDGPort(i).getName() : NULL; }
 	void SetPortName(int i, const char* name) { DbgAssert(false); } //{ m_dParamData[i] = AddSpliceParameter(m_graph, m_valuePort.getDataType(), name, FabricSplice::Port_Mode_IN); }
-	const char* GetPortType(int i) { return (i < GetNumPorts()) ? m_dParamData[i].second.getDataType() : NULL; }
-	bool IsPortArray(int i) { return (i < GetNumPorts()) ? m_dParamData[i].second.isArray() : NULL; }
+	const char* GetPortType(int i) { return (i < GetNumPorts()) ? m_graph.getDGPort(i).getDataType() : NULL; }
+	bool IsPortArray(int i) { return (i < GetNumPorts()) ? m_graph.getDGPort(i).isArray() : NULL; }
 
 	// Get the name of the port we our value from
 	const char* GetOutPortName() { return m_valuePort.getName(); }
@@ -313,6 +313,10 @@ public:
 
 	int GetOutPortArrayIdx();
 	void SetOutPortArrayIdx(int index);
+
+	// Return the ID of port in our paramblock, or -1 if not connected
+	int GetPortParamID(int index);
+	void SetPortParamID(int index, ParamID id);
 
 	//virtual MSTR GetPortMaxValue(int i);
 	//virtual MSTR GetPortMinValue(int i);

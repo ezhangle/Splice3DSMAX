@@ -703,20 +703,25 @@ void MaxPtrToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IParamBlock2* pbl
 	}
 }
 // Pblock conversion function
-void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, std::vector<ConnData>& dSpliceParams, Interval& ivValid)
+void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DGGraph& graph, Interval& ivValid)
 {
 	if (pblock == NULL)
 		return;
 
 	// Iterate over all PB2 parameters, send to associated splice port
-	for (auto itr = dSpliceParams.begin(); itr != dSpliceParams.end(); itr++)
+	size_t nPorts = graph.getDGPortCount();
+	for (size_t i = 0; i < nPorts; i++)
 	{
-		ParamID id = itr->first;
+		FabricSplice::DGPort port = graph.getDGPort(i);
+		FabricCore::Variant option = port.getOption(MAX_PID_OPT);
+		int id = -1;
+		if(option.isSInt32())
+			id = option.getSInt32();
+		//int id = port.getIntegerOption(MAX_PID_OPT);
 		// Its possible some params are not supported by Max.
 		if (id == -1)
 			continue;
-		int type = pblock->GetParameterType(id);
-		FabricSplice::DGPort& port = itr->second;
+		int type = pblock->GetParameterType((ParamID)id);
 		FabricCore::RTVal portVal = port.getRTVal();
 
 		// If we are a tab parameter, set all values
@@ -732,43 +737,43 @@ void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, std::vector<Conn
 		{
 		case TYPE_INT:		
 		case TYPE_INDEX:
-			ParameterBlockValuesToSplice<int>(port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<int>(port, t, pblock, (ParamID)id, ivValid);
 			break;
 		case TYPE_TIMEVALUE:
-			ParameterBlockValuesToSplice<TimeValue, float>(port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<TimeValue, float>(port, t, pblock, (ParamID)id, ivValid);
 			break;
 		case TYPE_FLOAT:
 		case TYPE_ANGLE:
 		case TYPE_WORLD:
 		case TYPE_PCNT_FRAC:
-			ParameterBlockValuesToSplice<float>(port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<float>(port, t, pblock, (ParamID)id, ivValid);
 			break;
 		case TYPE_RGBA:
-			ParameterBlockValuesToSplice<Color>(port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<Color>(port, t, pblock, (ParamID)id, ivValid);
 			break;
 		//case TYPE_POINT2:
 		//	MaxValueToSplice(port, pblock->GetPoint3(id, t));
 		//	break;
 		case TYPE_POINT3:
-			ParameterBlockValuesToSplice<Point3>(port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<Point3>(port, t, pblock, (ParamID)id, ivValid);
 			break;
 		case TYPE_FRGBA:
 		case TYPE_POINT4:
-			ParameterBlockValuesToSplice<Point4>(port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<Point4>(port, t, pblock, (ParamID)id, ivValid);
 			break;
 		case TYPE_BOOL:
-			ParameterBlockValuesToSplice<int, bool>(port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<int, bool>(port, t, pblock, (ParamID)id, ivValid);
 			break;
 		case TYPE_MATRIX3:
-			ParameterBlockValuesToSplice<Matrix3>(port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<Matrix3>(port, t, pblock, (ParamID)id, ivValid);
 			break;
 		case TYPE_STRING:
 		case TYPE_FILENAME:
-			ParameterBlockValuesToSplice<const MCHAR*>(port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<const MCHAR*>(port, t, pblock, (ParamID)id, ivValid);
 			break;
 		case TYPE_INODE:
 			{
-				MaxPtrToSplice(port, t, pblock, id, ivValid);
+				MaxPtrToSplice(port, t, pblock, (ParamID)id, ivValid);
 				break;
 			}
 		case TYPE_MTL:			break;
@@ -784,31 +789,31 @@ void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, std::vector<Conn
 
 
 //////////////////////////////////////////////////////////////////////////
+//
+//SpliceLayerNamePLCB::SpliceLayerNamePLCB( std::vector<ConnData>& data, ReferenceTarget* owner ) 
+//	: m_dConnData(data)
+//	, m_pOwner(owner)
+//{
+//
+//}
 
-SpliceLayerNamePLCB::SpliceLayerNamePLCB( std::vector<ConnData>& data, ReferenceTarget* owner ) 
-	: m_dConnData(data)
-	, m_pOwner(owner)
-{
-
-}
-
-void SpliceLayerNamePLCB::proc( ILoad *iload )
-{
-	if (m_pOwner == NULL)
-		return;
-
-	IParamBlock2* pblock = m_pOwner->GetParamBlock(0);
-	if (pblock == NULL)
-		return;
-
-	ParamBlockDesc2* pDesc = pblock->GetDesc();
-
-	for (auto conn = m_dConnData.begin(); conn != m_dConnData.end(); conn++)
-	{
-		if (conn->first == -1)
-			continue;
-
-		MSTR name = MSTR::FromACP(conn->second.getName());
-		SetMaxParamName(pDesc, conn->first, name);
-	}
-}
+//void SpliceLayerNamePLCB::proc( ILoad *iload )
+//{
+//	if (m_pOwner == NULL)
+//		return;
+//
+//	IParamBlock2* pblock = m_pOwner->GetParamBlock(0);
+//	if (pblock == NULL)
+//		return;
+//
+//	ParamBlockDesc2* pDesc = pblock->GetDesc();
+//
+//	for (auto conn = m_dConnData.begin(); conn != m_dConnData.end(); conn++)
+//	{
+//		if (conn->first == -1)
+//			continue;
+//
+//		MSTR name = MSTR::FromACP(conn->second.getName());
+//		SetMaxParamName(pDesc, conn->first, name);
+//	}
+//}

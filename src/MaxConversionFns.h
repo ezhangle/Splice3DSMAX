@@ -18,6 +18,17 @@ extern void Convert(INode* node, TimeValue t, Interval& ivValid, Matrix3& out);;
 extern void Convert(Object* pObject, TimeValue t, Interval& ivValid, Mesh& out);;
 extern void Convert(INode* pNode, TimeValue t, Interval& ivValid, Mesh& out);
 
+extern FabricCore::Variant GetVariant(int param);
+extern FabricCore::Variant GetVariant(float param);
+extern FabricCore::Variant GetVariant(bool param);
+extern FabricCore::Variant GetVariant(const Point3& param);
+extern FabricCore::Variant GetVariant(const Point4& param);
+extern FabricCore::Variant GetVariant(const Color& param);
+extern FabricCore::Variant GetVariant(const Quat& param);
+extern FabricCore::Variant GetVariant(const Matrix3& param);
+extern FabricCore::Variant GetVariant(const MCHAR* param);
+extern FabricCore::Variant GetVariant(const MSTR& param);
+
 extern FabricCore::RTVal GetRTVal(int param);
 extern FabricCore::RTVal GetRTVal(float param);
 extern FabricCore::RTVal GetRTVal(bool param);

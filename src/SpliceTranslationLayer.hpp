@@ -595,14 +595,13 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 
 		iload->CloseChunk();
 	}
-	// We should always have a time port.
-	m_timePort = m_graph.getDGPort("time");
-	// We should have named an out port
+
+	// Reset/reconnect our time/parent ports
+	ResetPorts();
+	// Get our output port
 	if (!outName.empty())
 		m_valuePort = m_graph.getDGPort(outName.data());
 
-	// PLCB hooks up our parameter block to the max ports
-	//iload->RegisterPostLoadCallback(new SpliceLayerNamePLCB(this));
 	return IO_OK;
 }
 #pragma endregion
@@ -969,10 +968,11 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(int i, 
 //}
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::SetSpliceGraph(const FabricSplice::DGGraph& graph) 
+void SpliceTranslationLayer<TBaseClass, TResultType>::SetSpliceGraph(const FabricSplice::DGGraph& graph, IParamBlock2* pblock) 
 { 
 	// Reset all variables.
 	m_graph = graph; 
+	ReplaceReference(0, pblock);
 	ResetPorts();
 };
 
@@ -1026,6 +1026,14 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 		catch (FabricCore::Exception e) 
 		{
 			logMessage(e.getDescData());
+		}
+		catch (FabricSplice::Exception e)
+		{
+			logMessage(e.what());
+		}
+		catch (...) 
+		{
+			logMessage("ERROR: Unhandled exception.  Unable to recover");
 		}
 	}
 

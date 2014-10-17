@@ -18,7 +18,7 @@ IF NOT DEFINED BOOST_DIR (
   SET BOOST_DIR=%SGREPODIR%\ThirdParty\PreBuilt\Windows\x86_64\Release\boost\1.55.0\lib
 )
 
-set DISTDIR=%FABRIC_DIR%\SpliceIntegrations\FabricSplice3dsmax2014
+set DISTDIR=%FABRIC_DIR%\SpliceIntegrations\FabricSplice3dsmax2014\
 set SCINTILLANETDIR=%DISTDIR%ScintillaNET\
 
 echo Starting VS Launcher

@@ -146,7 +146,7 @@ BOOL SpliceStaticFPInterface::LoadSpliceFile(const TSTR& file)
 					SpliceTranslationFPInterface* pSpliceInterface = (SpliceTranslationFPInterface*)pRef->GetInterface(ISPLICE__INTERFACE);
 					if (pSpliceInterface != NULL)
 					{
-						pSpliceInterface->SetSpliceGraph(graph);
+						pSpliceInterface->SetSpliceGraph(graph, nullptr);
 						pSpliceInterface->SetOutPort(port);
 					}
 				}

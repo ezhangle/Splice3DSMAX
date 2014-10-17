@@ -95,10 +95,22 @@ sliderTime = 50f
 assert ((p2.transform as string) == "(matrix3 [1,-2.38419e-007,-2.5332e-007] [2.45869e-007,0.798292,0.60227] [1.3411e-007,-0.60227,0.798292] [8.39596,-11.0702,13.6661])") message:"Bad rotation after setting splice float input" options:#(#dialog)
 assert ((p3.transform as string) == "(matrix3 [0.739942,0.516122,0.431398] [-0.620885,0.277274,0.733227] [0.258819,-0.810393,0.525619] [1.66667,10,0])") message:"Bad rotation values"  options:#(#dialog)
 
+entryPt = "unitTestSharedGraph"
+klCode = "
+require Math;
+
+operator unitTestSharedGraph(io Mat44 outValArray[]) {
+  for (Integer i = 0; i < outValArray.size(); i++) {
+    outValArray[i].setIdentity();
+    outValArray[i].setTranslation(Vec3(i, i*2, 0));
+  }
+}"
+
 p4 = Point()
 p4.controller = SpliceMatrixController()
-p4.controller.OutPort = "myValOut"
+p4.controller.OutPort = "outValArray"
 p4.controller.OutPortIndex = 0
+p4.controller.SetKLCode entryPt klCode
 
 p5 = Point()
 p5.controller = SpliceMatrixController()

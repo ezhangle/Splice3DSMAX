@@ -336,7 +336,7 @@ public:
 
 	// Set splice values
 	const FabricSplice::DGGraph& GetSpliceGraph() { return m_graph; }
-	void SetSpliceGraph(const FabricSplice::DGGraph& graph);
+	void SetSpliceGraph(const FabricSplice::DGGraph& graph, IParamBlock2* pblock);
 	void SetOutPort(const FabricSplice::DGPort& port) { m_valuePort = port; };
 
 	virtual void ResetPorts();

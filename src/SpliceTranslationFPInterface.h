@@ -146,7 +146,7 @@ public:
 	// Allow others to set the splice graph etc we are using.
 	// These functions are not called directly from MaxScript, instead
 	// they are used by the static interface
-	virtual void SetSpliceGraph(const FabricSplice::DGGraph& graph) = 0;
+	virtual void SetSpliceGraph(const FabricSplice::DGGraph& graph, IParamBlock2* pblock) = 0;
 	virtual void SetOutPort(const FabricSplice::DGPort& port) = 0;
 
 	// Show the MaxScript-based editor

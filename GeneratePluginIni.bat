@@ -13,7 +13,6 @@ REM default plugin path settings, remove the -p argument to max at the end of
 REM this script and add the path to the 3dsMax
 echo Generating new plugin ini file @ %TARGETDIR%
 
-echo %0
 del "%TARGETDIR%Generated.Plugin.Splice.ini"
 REM add in original plugins
 @echo [Directories] >> "%TARGETDIR%Generated.Plugin.Splice.ini"

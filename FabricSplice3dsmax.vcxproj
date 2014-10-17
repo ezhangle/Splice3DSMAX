@@ -24,6 +24,15 @@
     <RootNamespace>CP3dsmaxIntegration</RootNamespace>
   </PropertyGroup>
   <Import Project="ProjectProperties.props" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(FABRIC_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(FABRIC_DIR)\lib;$(BOOST_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.cpp" />
     <ClCompile Include="src\DynamicParamBlocks\DynPBUndo.cpp" />

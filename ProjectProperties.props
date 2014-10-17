@@ -41,7 +41,7 @@
 		<CharacterSet>Unicode</CharacterSet>
 
 		<IntDir>build\FabricSplice3dsmax\obj\$(Configuration)\</IntDir>
-		<OutDir>$(STAGEDIR)\Splice\Applications\FabricSplice3dsmax$(MaxVersion)\plugin\</OutDir>
+		<OutDir>$(FABRIC_DIR)\SpliceIntegrations\FabricSplice3dsmax$(MaxVersion)\plugin\</OutDir>
 		<TargetExt>.dlu</TargetExt>
 		<ConfigurationType>DynamicLibrary</ConfigurationType>
 		<UseDebugLibraries>false</UseDebugLibraries>
@@ -54,7 +54,7 @@
 	<ItemDefinitionGroup>
 		<!-- default values for compiler -->
 		<ClCompile>
-			<AdditionalIncludeDirectories>$(FABRIC_SPLICE_API_DIR);$(FABRIC_CAPI_DIR)\include;$(MaxSDKPath)maxsdk\include</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;$(MaxSDKPath)maxsdk\include</AdditionalIncludeDirectories>
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<StringPooling>true</StringPooling>
@@ -62,12 +62,12 @@
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
      		<PreprocessorDefinitions>FEC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ClCompile>
-
+		
 		<!-- 2014 very helpfully changed the installed path -->
 		<ClCompile Condition="'$(MaxVersion)' &gt; '2013'">
-			<AdditionalIncludeDirectories>$(FABRIC_SPLICE_API_DIR);$(MaxSDKPath)include;$(FABRIC_CAPI_DIR)\include;</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(MaxSDKPath)include;</AdditionalIncludeDirectories>
 		</ClCompile>
-		
+
 		<!-- Turn on E&C for Debug Win32 builds -->
 		<ClCompile Condition="'$(IsDebug)'">
 			<DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -96,12 +96,14 @@
 			<SubSystem>Windows</SubSystem>
 			<AdditionalDependencies>FabricCore-1.13.lib;FabricSplice-1.13.0_s.lib;assetmanagement.lib;atscore.lib;biped.lib;bmm.lib;core.lib;crowd.lib;custdlg.lib;databridge.lib;edmodel.lib;expr.lib;flt.lib;geom.lib;gfx.lib;GraphicsDriver.lib;gup.lib;igame.lib;imageviewers.lib;manipsys.lib;maxnet.lib;maxscrpt.lib;maxutil.lib;menuman.lib;menus.lib;mesh.lib;mnmath.lib;paramblk2.lib;particle.lib;particleflow.lib;physique.lib;poly.lib;polypaint.lib;renderutil.lib;rtmax.lib;tessint.lib;viewfile.lib;zlibdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies Condition="'$(MaxVersion)'!='2012'">GraphicsUtility.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>$(FABRIC_DIR)\lib;$(BOOST_DIR);$(MaxSDKPath)maxsdk\x64\lib\</AdditionalLibraryDirectories>
 		</Link>
 
-		<Link Condition="'$(Platform)'=='x64'">
-			<AdditionalLibraryDirectories>$(FABRIC_SPLICE_API_DIR);$(FABRIC_CAPI_DIR)\lib;$(BOOST_DIR);$(MaxSDKPath)maxsdk\x64\lib\</AdditionalLibraryDirectories>
-			<AdditionalLibraryDirectories Condition="'$(MaxVersion)' &gt; '2013'">$(FABRIC_SPLICE_API_DIR);$(FABRIC_CAPI_DIR)\lib;$(BOOST_DIR);$(MaxSDKPath)\lib\x64\Release\</AdditionalLibraryDirectories>
-		</Link>	
+		<!-- 2014 very helpfully changed the installed path -->
+		<Link Condition="'$(MaxVersion)' &gt; '2013'">
+			<AdditionalLibraryDirectories>$(MaxSDKPath)\lib\x64\Release\</AdditionalLibraryDirectories>
+		</Link>
+		
 
 	</ItemDefinitionGroup>
 	<ImportGroup Label="PropertySheets">

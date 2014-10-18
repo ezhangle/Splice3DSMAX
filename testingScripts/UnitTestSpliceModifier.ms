@@ -1,3 +1,10 @@
+fn CompArray a b = (a as string == b as string)
+fn CompBB anode expSize = (
+	bb = (nodeLocalBoundingBox anode)
+	size = length (bb[1] - bb[2])
+	res =abs(size - expSize) < 0.001
+)
+
 m = plane()
 m.length = 200
 m.width = 50
@@ -28,3 +35,10 @@ spliceMod.SetKLCode entryPt klCode
 
 spliceMod.frequency = 1;
 spliceMod.amplitude  = 10;
+
+assert (CompBB m 207.122) message:"Incorrect modifier BB" options:#(#dialog)
+
+-- Test the modifier inherits the underlying object correctly
+assert (CompArray (GetTriMeshFaceCount m) #(20000, 10201)) message:"Bad Init Tri Count" options:#(#dialog)
+m.baseobject.widthSegs = 200
+assert (CompArray (GetTriMeshFaceCount m) #(40000, 20301)) message:"Bad Init Tri Count" options:#(#dialog)	

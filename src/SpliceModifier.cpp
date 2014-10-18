@@ -127,6 +127,9 @@ void SpliceModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os,
 	if (!m_graph.isValid() || m_graph.getKLOperatorCount() == 0)
 		return;
 
+	// Oddly - max doesn't seem to notify us when our input changes: we need to re-evaluate every time
+	m_valid.SetEmpty();
+
 	// Send our input to Max
 	Interval ivValid = FOREVER;
 	// A modifier is a special kind of mesh, in that we pipe our

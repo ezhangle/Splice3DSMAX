@@ -155,6 +155,9 @@ IParamBlock2* CreateParamBlock( ParamBlockDesc2* pDesc, IParamBlock2* pCopyBlock
 
 ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, ParamID desiredId/*=-1*/ )
 {
+	if (type < 0)
+		return -1;
+
 	// Add a new parameter to our new descriptor
 	// All parameters have computed names and are animatable
 	// so long as they are not reference types...
@@ -397,7 +400,36 @@ const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, int
 	return AddSpliceParameter(rGraph, type, CStr::FromMCHAR(pName).data(), mode);
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Helper functions for accessing options
+int GetPortParamID(FabricSplice::DGPort& aPort)
+{
+	if (aPort.isValid())
+	{
+		FabricCore::Variant option = aPort.getOption(MAX_PID_OPT);
+		if(option.isSInt32())
+			return (int)option.getSInt32();
+	}
+	return -1;
+}
 
+void SetPortParamID(FabricSplice::DGPort& aPort, ParamID id) 
+{
+	aPort.setOption(MAX_PID_OPT, GetVariant((int)id));
+}
+
+const char* GetPortName( FabricSplice::DGPort& aPort )
+{
+	return aPort.getName();
+}
+
+const char* GetPortType( FabricSplice::DGPort& aPort )
+{
+	return aPort.getDataType();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Converting types to/from Fabric
 BitArray GetLegalMaxTypes(const char* cType)
 {
 	BitArray res(TYPE_DOUBLE);
@@ -495,12 +527,20 @@ const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, con
 	if (isArray)
 		spliceType = spliceType + "[]";
 
-	if (!rGraph.hasDGNodeMember(cName)) {
-		rGraph.addDGNodeMember(cName, spliceType.data(), FabricCore::Variant(), "", inExtension);
-		return rGraph.addDGPort(cName, cName, mode);
+	try {
+		if (!rGraph.hasDGNodeMember(cName)) {
+			rGraph.addDGNodeMember(cName, spliceType.data(), FabricCore::Variant(), "", inExtension);
+			return rGraph.addDGPort(cName, cName, mode);
+		}
+		// Port already exists
+		return rGraph.getDGPort(cName);
 	}
-	// Port already exists
-	return rGraph.getDGPort(cName);
+	catch(FabricSplice::Exception e) 
+	{
+		CStr message = "ERROR on AddPort to Splice: ";
+		logMessage(message + e.what());
+		return FabricSplice::DGPort();
+	}
 }
 
 const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, int type, const char* cName, FabricSplice::Port_Mode mode, bool isArray/*=false*/, const char* inExtension)
@@ -677,11 +717,7 @@ void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DG
 	for (size_t i = 0; i < nPorts; i++)
 	{
 		FabricSplice::DGPort port = graph.getDGPort(i);
-		FabricCore::Variant option = port.getOption(MAX_PID_OPT);
-		int id = -1;
-		if(option.isSInt32())
-			id = option.getSInt32();
-		//int id = port.getIntegerOption(MAX_PID_OPT);
+		int id = ::GetPortParamID(port);
 		// Its possible some params are not supported by Max.
 		if (id == -1)
 			continue;
@@ -692,7 +728,7 @@ void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DG
 		int nTabParams = 1;
 		if (is_tab(type))
 		{
-			nTabParams = pblock->Count(id);
+			nTabParams = pblock->Count((ParamID)id);
 			DbgAssert(port.isArray());
 			portVal.setArraySize(nTabParams);
 		}

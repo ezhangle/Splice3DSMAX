@@ -3,6 +3,7 @@
 #include "MaxScript/MaxScript.h"
 #include "SpliceEvents.h"
 #include "FabricSplice.h"
+#include "FabricCore.h"
 
 #if MAX_VERSION_MAJOR < 15
 #define p_end end
@@ -24,6 +25,10 @@ SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
 			SpliceStaticFPInterface::fn_getGlobalOperatorCount, _T("GetGlobalOperatorCount"), 0, TYPE_INT, 0, 0,
 			SpliceStaticFPInterface::fn_getGlobalOperatorName, _T("GetGlobalOperatorName"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("index"),	0,	TYPE_INDEX,
+			SpliceStaticFPInterface::fn_reloadFabricExtension, _T("LoadExtension"), 0, TYPE_BOOL, 0, 3,
+				_M("extension"),	0,	TYPE_TSTR_BV,
+				_M("version"),	0,	TYPE_TSTR_BV,
+				_M("reload"),	0,	TYPE_bool,
 
 		properties,
 //			SpliceStaticFPInterface::prop_getPythonFile,SpliceStaticFPInterface::prop_setPythonFile, _T("PythonFile"), 0,TYPE_TSTR,
@@ -167,6 +172,22 @@ MSTR SpliceStaticFPInterface::GetGlobalKLOperatorName(int index)
 	MSTR rval;
 	rval.FromACP(opName);
 	return rval;
+}
+
+
+BOOL SpliceStaticFPInterface::LoadExtension( const MSTR& extension, const MSTR& version, bool reload)
+{
+	const FabricCore::Client* pClient = NULL;
+	FECS_DGGraph_getClient(&pClient);
+
+	// No client, nothing to do (the extension will be loaded when requested
+	if(pClient == nullptr)
+		return FALSE;
+
+	CStr cExtension = extension.ToCStr();
+	CStr cVersion = version.ToCStr();
+	FEC_ClientLoadExtension(pClient->getFECClientRef(), cExtension.data(), cVersion.data(), reload);
+	return TRUE;
 }
 
 bool SpliceStaticFPInterface::GetSpliceRendering()

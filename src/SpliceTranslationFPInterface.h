@@ -45,7 +45,7 @@ public:
 		prop_getKLFile,
 		prop_setKLFile,
 
-		prop_numPorts,
+		prop_getPortCount,
 		prop_portNames,
 
 		prop_getOutPortName,
@@ -74,7 +74,7 @@ public:
 		FN_5(fn_addIOPort, TYPE_INT, AddIOPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_INT, TYPE_BOOL, TYPE_TSTR_BV);
 
 		FN_1(fn_removePortIdx, TYPE_bool, RemovePort, TYPE_INDEX);
-		FN_1(fn_removePortName, TYPE_bool, RemovePortMSTR, TYPE_NAME);
+		FN_1(fn_removePortName, TYPE_bool, RemovePortMSTR, TYPE_TSTR_BV);
 		FN_1(fn_getPortName, TYPE_TSTR_BV, GetPortNameMSTR, TYPE_INT);
 		VFN_2(fn_setPortName, SetPortNameMSTR, TYPE_INT, TYPE_TSTR_BV);
 		FN_1(fn_getPortType, TYPE_TSTR_BV, GetPortTyeMSTR, TYPE_INT);
@@ -87,7 +87,7 @@ public:
 		// Properties 
 
 		PROP_FNS(prop_getKLFile, GetKLFileMSTR, prop_setKLFile, SetKLFileMSTR, TYPE_TSTR_BV)
-		RO_PROP_FN(prop_numPorts, GetNumPorts, TYPE_INT)
+		RO_PROP_FN(prop_getPortCount, GetPortCount, TYPE_INT)
 		PROP_FNS(prop_getOutPortName, GetOutPortNameMSTR, prop_setOutPortName, SetOutPortNameMSTR, TYPE_TSTR_BV)
 		PROP_FNS(prop_getOutPortArrayIdx, GetOutPortArrayIdx, prop_setOutPortArrayIdx, SetOutPortArrayIdx, TYPE_INT)
 
@@ -112,7 +112,7 @@ public:
 	// Port creation/management
 
 	// Get the number of ports on this graph
-	virtual int GetNumPorts() = 0;
+	virtual int GetPortCount() = 0;
 	//virtual Tab<TSTR*> GetPortNames()=0;
 
 	// Splice port management
@@ -127,7 +127,7 @@ public:
 
 	// Get name of port
 	virtual const char* GetPortName(int i) = 0;
-	virtual void SetPortName(int i, const char* name) = 0;
+	virtual bool SetPortName(int i, const char* name) = 0;
 	virtual const char* GetPortType(int i) = 0;
 	// Returns if the in port is an array type or not
 	virtual bool IsPortArray(int i)=0;
@@ -298,7 +298,7 @@ FPInterfaceDesc* GetDescriptor()
 				_M("portIndex"),	0,	TYPE_INDEX,
 		properties,
 			SpliceTranslationFPInterface::prop_getKLFile, SpliceTranslationFPInterface::prop_setKLFile, _T("KLFile"), 0, TYPE_TSTR_BV,
-			SpliceTranslationFPInterface::prop_numPorts, FP_NO_FUNCTION, _T("NumPorts"), 0, TYPE_INT,
+			SpliceTranslationFPInterface::prop_getPortCount, FP_NO_FUNCTION, _T("PortCount"), 0, TYPE_INT,
 			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_setOutPortName, _T("OutPort"), 0, TYPE_TSTR_BV,
 			SpliceTranslationFPInterface::prop_getOutPortArrayIdx, SpliceTranslationFPInterface::prop_setOutPortArrayIdx, _T("OutPortIndex"), 0, TYPE_INT,
 		p_end

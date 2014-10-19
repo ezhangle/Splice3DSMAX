@@ -171,7 +171,7 @@ public:
 				float fovX = pView->GetFOV();
 				//convert to vertical fov as the RTR camera is always using this mode:
 				double aspect = double(width) / double(height);
-				float fovY = (2.0 * atan(1.0 / aspect * tan(fovX / 2.0)));
+				double fovY = (2.0 * atan(1.0 / aspect * tan(fovX / 2.0)));
 				inlineCamera.setMember("fovY", FabricSplice::constructFloat64RTVal(fovY));
 			}
 			

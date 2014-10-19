@@ -21,7 +21,7 @@ BOOL SpliceTranslationFPInterface::SetSpliceGraph(ReferenceTarget* rtarg)
 bool SpliceTranslationFPInterface::RemovePortMSTR(const MSTR& name) 
 {
 	CStr cName = name.ToCStr();
-	for (int i = 0; i < GetNumPorts(); i++)
+	for (int i = 0; i < GetPortCount(); i++)
 	{
 		if (strcmp(GetPortName(i), cName.data()) == 0)
 			return RemovePort(i);

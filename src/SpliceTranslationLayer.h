@@ -15,11 +15,6 @@
 //////////////////////////////////////////////////////////////////////////
 // includes and forward declarations
 
-// We are having name clashes with Windows DeletePort
-#ifdef DeletePort
-#undef DeletePort
-#endif //DeletePort
-
 #include <vector>
 #include "SpliceTranslationFPInterface.h"
 #include "MaxConversionFns.h"
@@ -59,8 +54,11 @@ IParamBlock2* CreateParamBlock(ParamBlockDesc2* pDesc, IParamBlock2* pCopyThis, 
 /** Get all Max types that can be converted to the given Splice type */
 BitArray GetLegalMaxTypes(const char* spliceType);
 
-/** Returns the Max ParamType2 that matches the named Splice type */
+/** Returns the Max ParamType2 that matches the named Splice type (NOTE - may not be legal for PB2) */
 int SpliceTypeToMaxType(const char* cType);
+
+/** Returns the default Max ParamType2 that matches the named Splice type */
+int SpliceTypeToDefaultMaxType(const char* cType);
 
 /** Add a new value port to the given DGGraph 
 	This adds in the appropriate Splice type to recieve
@@ -297,9 +295,12 @@ public:
 	// Splice port management
 	// Create a new port.  A matching Max parameter 
 	// will be added as well of maxType, if MaxType is -1 
-	int CreatePort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=false);
+	int AddInputPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=false);
+	int AddOutputPort(const char* klType, const char* name, bool isArray=false, const char* inExtension=false);
+	int AddIOPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=false);
+
 	// Remove specified port and matching max parameter
-	bool DeletePort(int i);
+	bool RemovePort(int i);
 
 	// Get name of port
 	const char* GetPortName(int i) { return (i < GetNumPorts()) ? m_graph.getDGPort(i).getName() : NULL; }

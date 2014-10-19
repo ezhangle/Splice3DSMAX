@@ -1,7 +1,11 @@
+resetMaxFile #noPrompt
+thisfile = getThisScriptFilename()
+witcherFbx =  (getFilenamePath thisfile) + "testfiles/Witcher_Creep.fbx"
+
 m = SpliceMesh()
-m.CreatePort "FbxFile" "String" -2
-m.CreatePort "fbxCharacter" "FbxCharacter" -1 Extension:"FbxHelpers"
-m.CreatePort "poseTexture" "InlineMatrixArrayTexture" -1 Extension:"InlineDrawing"
+m.AddInputPort "FbxFile" "String" -2
+m.AddInputPort "fbxCharacter" "FbxCharacter" -1 Extension:"FbxHelpers"
+m.AddInputPort "poseTexture" "InlineMatrixArrayTexture" -1 Extension:"InlineDrawing"
 
 entryPt = "characterDrawing"
 klCode = "
@@ -38,7 +42,7 @@ operator characterDrawing(
       InlineMeshShape skinShape = InlineMeshShape(fbxCharacter.getName() + \"_\" + i, fbxCharacter.getGeometry(i));
 
       InlineInstance skinInstance = SimpleInlineInstance(fbxCharacter.getName(), characterTransform, skinShape, characterMaterial);
-      skinInstance.setInstanceUniform(InlineUniform('skinningMatrices', InlineTexture(poseTexture)));
+      skinInstance.setInstanceUniform(InlineUniform('skinningMatrices', poseTexture));
       skinInstance.setInstanceUniform(InlineUniform('bindShapeTransform', fbxCharacter.getBindShapeTransform(i)));
     }
   }
@@ -54,6 +58,6 @@ operator characterDrawing(
 }"
 
 m.SetKLCode entryPt klCode
-m.FbxFile = "D:\Users\Stephen\Downloads\SpliceTestingScripts (1)\Witcher_Creep.fbx"
+m.FbxFile = witcherFbx
 
 Splice.Rendering = true

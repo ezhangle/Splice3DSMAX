@@ -36,5 +36,4 @@ operator eventLogger() {
 "
 m.SetKLCode entryPt klCode
 
-
 Splice.manipulation = true

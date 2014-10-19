@@ -47,9 +47,9 @@ p3 = point()
 spliceCtrl = SpliceRotationController()
 p3.controller.rotation.controller = spliceCtrl
 spliceCtrl.OutPort = "outRotationVal"
-spliceCtrl.CreatePort "xRot" "Scalar" 5
-spliceCtrl.CreatePort "yRot" "Scalar" 5
-spliceCtrl.CreatePort "zRot" "Scalar" 5
+spliceCtrl.AddInputPort "xRot" "Scalar" 5
+spliceCtrl.AddInputPort "yRot" "Scalar" 5
+spliceCtrl.AddInputPort "zRot" "Scalar" 5
 
 entryPt = "unitTestRotationChaining"
 klCode = "
@@ -106,15 +106,18 @@ operator unitTestSharedGraph(io Mat44 outValArray[], Scalar xMult, Scalar yMult,
   }
 }"
 
+-------------------------------------------------------------------------------------------------------------
+-- Test shared graphs, array output.
+
 p4 = Point()
 spliceCtrl = SpliceMatrixController()
 p4.controller = spliceCtrl
 spliceCtrl.OutPort = "outValArray"
 spliceCtrl.OutPortIndex = 0
 
-spliceCtrl.CreatePort "xMult" "Scalar" -2
-spliceCtrl.CreatePort "yMult" "Scalar" -2
-spliceCtrl.CreatePort "zMult" "Scalar" -2
+spliceCtrl.AddInputPort "xMult" "Scalar" -2
+spliceCtrl.AddInputPort "yMult" "Scalar" -2
+spliceCtrl.AddInputPort "zMult" "Scalar" -2
 
 spliceCtrl.SetKLCode entryPt klCode
 

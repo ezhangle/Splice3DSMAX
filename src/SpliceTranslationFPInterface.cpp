@@ -18,6 +18,17 @@ BOOL SpliceTranslationFPInterface::SetSpliceGraph(ReferenceTarget* rtarg)
 	return FALSE;
 }
 
+bool SpliceTranslationFPInterface::RemovePortMSTR(const MSTR& name) 
+{
+	CStr cName = name.ToCStr();
+	for (int i = 0; i < GetNumPorts(); i++)
+	{
+		if (strcmp(GetPortName(i), cName.data()) == 0)
+			return RemovePort(i);
+	}
+	return false;
+}
+
 void DoShowKLEditor(ReferenceTarget* pTarget)
 {
 	if (pTarget == NULL)

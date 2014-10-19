@@ -479,6 +479,16 @@ int SpliceTypeToMaxType(const char* cType)
 	return -1;
 }
 
+// This function is simply here to override the default PB2 type for PolygonMesh.
+// The correct type for PolyMesh is TYPE_MESH, but unfortunately the PB2
+// doesn't support that data, so we need it to create an INODE parameter instead.
+int SpliceTypeToDefaultMaxType(const char* cType)
+{
+	if (strcmp(cType, "PolygonMesh") == 0)
+		return TYPE_INODE;
+	return SpliceTypeToMaxType(cType);
+}
+
 const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, const char* type, const char* cName, FabricSplice::Port_Mode mode, bool isArray/*=false*/, const char* inExtension)
 {
 	std::string spliceType(type);
@@ -572,64 +582,14 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		{
 			SpliceTranslationLayer<Control, float>* curInstance = (SpliceTranslationLayer<Control, float>*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-			if (curInstance == NULL) return 0;
-
-			// Ignore anything from the edit box.
-			if (wParam == IDC_PARAM_NAME || wParam > (IDC_PARAM_NAME<<1)) break;
+			if (curInstance == NULL) 
+				return 0;
 
 			// If we are the KL editor button, pop that editor
 			if (wParam == IDC_BTN_EDIT_KL)
 			{
 				curInstance->ShowKLEditor(curInstance);
-				break;
 			}
-
-			// We are from the buttons - which means we have a parameter to create
-			MCHAR sName[128];
-			ICustEdit* iEditName = GetICustEdit(GetDlgItem(hWnd, IDC_PARAM_NAME));
-			if (iEditName == NULL)
-				break;
-			iEditName->GetText(sName, 128);
-			CStr cName = CStr::FromMCHAR(sName);
-
-			// Each button is a different type to create
-			int index = -1;
-			switch (wParam)
-			{
-			case IDC_CREATE_FLOAT:		
-				index = curInstance->CreatePort(cName, "Scalar", (ParamType2)TYPE_FLOAT); 
-				break;
-			case IDC_CREATE_INTEGER:
-				index = curInstance->CreatePort(cName, "Integer", (ParamType2)TYPE_INT);
-				break;
-			case IDC_CREATE_STRING:
-				index = curInstance->CreatePort(cName, "String", (ParamType2)TYPE_STRING); 
-				break;
-			case IDC_CREATE_BOOL:
-				index = curInstance->CreatePort(cName, "Bool", (ParamType2)TYPE_BOOL); 
-				break;
-				//case IDC_CREATE_MTL:
-				//	pid = curInstance->CreatePort(sName, TYPE_MTL); 
-				//	break;
-				//case IDC_CREATE_TEXMAP:
-				//	pid = curInstance->CreatePort(sName, TYPE_TEXMAP);
-				//	break;
-			case IDC_CREATE_COLOR:
-				index = curInstance->CreatePort(cName, "Color", (ParamType2)TYPE_RGBA);
-				break;
-				//case IDC_CREATE_INODE:
-				//	pid = curInstance->CreatePort(sName, TYPE_INODE); 
-				//	break;
-			}
-
-			// If a parameter was successfully created, reset our edit box
-			if (-1 != index)
-			{
-				iEditName->SetText(_M(""));
-			}
-
-			// Always release UI elements
-			ReleaseICustEdit(iEditName);
 		}
 		break;
 
@@ -670,7 +630,7 @@ void ParameterBlockValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IPa
 	ParameterBlockValuesToSplice<TResultType, TResultType>(dgPort, t, pblock, pid, ivValid);
 }
 
-// This helper function converts from INode to the appropriate Max type
+// This helper function converts from INode to the appropriate Splice type
 void MaxPtrToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IParamBlock2* pblock, ParamID id, Interval& ivValid)
 {
 	if (!dgPort)
@@ -678,8 +638,8 @@ void MaxPtrToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IParamBlock2* pbl
 
 	// There is no "INode" type in splice, so try to figure out a conversion
 	const char* cType = dgPort.getDataType();
-	int spliceType = SpliceTypeToMaxType(cType);
-	switch(spliceType)
+	int maxTypeRequired = SpliceTypeToMaxType(cType);
+	switch(maxTypeRequired)
 	{
 	case TYPE_POINT3:
 		{
@@ -700,14 +660,6 @@ void MaxPtrToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IParamBlock2* pbl
 		{
 			// Convert to mesh if possible
 			ParameterBlockValuesToSplice<INode*, Mesh>(dgPort, t, pblock, id, ivValid);
-			/*ObjectState os = pNode->EvalWorldState(t);
-			TriObject* pTriObject = static_cast<TriObject*>(os.obj->ConvertToType(t, triObjectClassID));
-			if (pTriObject != NULL)
-			{
-			MaxValueToSplice(dgPort, pTriObject->GetMesh());
-			if (pTriObject != os.obj)
-			pTriObject->MaybeAutoDelete();
-			}*/
 			break;
 		}
 	default:

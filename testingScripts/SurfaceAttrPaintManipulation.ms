@@ -10,8 +10,8 @@ resetxform bunny
 
 m = SpliceMesh()
 -- Add a link to a scene node - pass in both the mesh and the trnasform
-m.CreatePort "mesh0" "PolygonMesh" 17
-m.CreatePort "mesh0Transform" "Mat44" 17
+m.AddInputPort "mesh0" "PolygonMesh" 17
+m.AddInputPort "mesh0Transform" "Mat44" 17
 
 -- Connect the ports up to the teapot
 m.mesh0 = bunny

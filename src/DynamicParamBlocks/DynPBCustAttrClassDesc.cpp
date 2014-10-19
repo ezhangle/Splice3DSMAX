@@ -106,7 +106,7 @@ IOResult DynPBCustAttrClassDesc::Save( ISave *isave )
 
 		isave->BeginChunk( PB_DESC_HDR_CHUNK );
 		// Save descriptor ID
-		res = isave->Write( &pDesc->ID, sizeof pDesc->ID, &written );						if (res!=IO_OK) return res;
+		res = isave->Write( &pDesc->ID, sizeof pDesc->ID, &written );		if (res!=IO_OK) return res;
 		isave->EndChunk();			// PB_DESC_HDR_CHUNK
 
 		// iterate over parameters
@@ -124,8 +124,8 @@ IOResult DynPBCustAttrClassDesc::Save( ISave *isave )
 			ParamDef& def = pDesc->GetParamDef( (ParamID)j );
 			isave->BeginChunk( PB_DESC_PARAM_CHUNK );
 			// Write out our parameter
-			res = isave->Write( &def.type, sizeof def.type, &written );								if (res!=IO_OK) return res;
-			res = isave->Write( &def.ID, sizeof def.ID, &written );							if (res!=IO_OK) return res;
+			res = isave->Write( &def.type, sizeof def.type, &written );		if (res!=IO_OK) return res;
+			res = isave->Write( &def.ID, sizeof def.ID, &written );			if (res!=IO_OK) return res;
 			isave->EndChunk();			// PB_DESC_PARAM_CHUNK
 		}
 		

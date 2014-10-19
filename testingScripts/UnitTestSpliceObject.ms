@@ -6,7 +6,7 @@ fn CompBB anode expSize = (
 )
 fn FindPort sm name = (
 	for i = 1 to sm.numPorts do (
-		if (sm.GetPortName i) == "inMesh" do return true
+		if (sm.GetPortName i) == name do return true
 	)
 	return false
 )

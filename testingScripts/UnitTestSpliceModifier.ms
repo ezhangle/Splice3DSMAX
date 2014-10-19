@@ -12,9 +12,9 @@ m.lengthSegs = 100
 m.widthSegs = 100
 
 spliceMod = SpliceModifier()
-spliceMod.CreatePort "amplitude" "Scalar" -2
-spliceMod.CreatePort "frequency" "Scalar" -2
-spliceMod.CreatePort "phaseOffset" "Scalar" -2
+spliceMod.AddInputPort "amplitude" "Scalar" -2
+spliceMod.AddInputPort "frequency" "Scalar" -2
+spliceMod.AddInputPort "phaseOffset" "Scalar" -2
 
 addmodifier m spliceMod
 

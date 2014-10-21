@@ -20,6 +20,7 @@ public:
 		fn_loadSpliceFile,
 		fn_getGlobalOperatorCount,
 		fn_getGlobalOperatorName,
+		fn_reloadFabricExtension,
 
 		prop_getSpliceRendering,
 		prop_setSpliceRendering,
@@ -32,6 +33,8 @@ public:
 		FN_1(fn_loadSpliceFile, TYPE_BOOL, LoadSpliceFile, TYPE_TSTR_BV);
 		FN_0(fn_getGlobalOperatorCount, TYPE_INT, GetGlobalKLOperatorCount);
 		FN_1(fn_getGlobalOperatorName, TYPE_TSTR_BV, GetGlobalKLOperatorName, TYPE_INDEX);
+		FN_3(fn_reloadFabricExtension, TYPE_BOOL, LoadExtension, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_bool);
+
 		PROP_FNS(prop_getSpliceRendering, GetSpliceRendering, prop_setSpliceRendering, SetSpliceRendering, TYPE_bool);
 		PROP_FNS(prop_getSpliceManip, GetSpliceManip, prop_setSpliceManip, SetSpliceManip, TYPE_bool);
 	END_FUNCTION_MAP
@@ -45,6 +48,8 @@ public:
 
 	int GetGlobalKLOperatorCount();
 	MSTR GetGlobalKLOperatorName(int index);
+
+	BOOL LoadExtension(const MSTR& extension, const MSTR& version, bool reload);
 
 	bool GetSpliceRendering();
 	void SetSpliceRendering(bool isRendering);

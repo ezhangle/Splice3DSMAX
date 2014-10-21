@@ -170,7 +170,7 @@ void SetDefaultLogging()
 	// Faster message posting on debug for a clearer pic of whats happening
 	const int timeout = 100; 
 #else
-	// slower posting on release for better perf
+	// slower posting on release for better performance
 	const int timeout = 1000;
 #endif
 	SetTimer(NULL, NULL, timeout, (TIMERPROC)&printMessages);

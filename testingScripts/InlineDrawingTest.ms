@@ -1,7 +1,7 @@
 m = SpliceMesh()
-m.CreatePort "numPoints" "Integer" -2
-m.CreatePort "radius" "Scalar" -2
-m.CreatePort "points" "Points" -1
+m.AddInputPort "numPoints" "Integer" -2
+m.AddInputPort "radius" "Scalar" -2
+m.AddInputPort "points" "Points" -1
 
 entryPt = "drawingPoints";
 klCode = "

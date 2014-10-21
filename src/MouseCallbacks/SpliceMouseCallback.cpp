@@ -28,7 +28,7 @@ public:
 	{
 		if(m_rtval_commands.isValid())
 		{
-			for(int i=0; i< m_rtval_commands.getArraySize(); i++)
+			for(size_t i=0; i< m_rtval_commands.getArraySize(); i++)
 			{
 				m_rtval_commands.getArrayElement(i).callMethod("", "undoAction", 0, 0);
 			}
@@ -39,7 +39,7 @@ public:
 	{
 		if(m_rtval_commands.isValid())
 		{
-			for(int i = 0; i < m_rtval_commands.getArraySize(); i++)
+			for(size_t i = 0; i < m_rtval_commands.getArraySize(); i++)
 			{
 				m_rtval_commands.getArrayElement(i).callMethod("", "doAction", 0, 0);
 			}
@@ -515,6 +515,8 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 			}
 		}
 	}
+	
+	//bool result = klevent.callMethod("Boolean", "isAccepted", 0, 0).getBoolean();
 
 	if(host.maybeGetMember("redrawRequested").getBoolean())	{
 		Interface7* pCore = GetCOREInterface7();

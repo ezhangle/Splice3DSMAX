@@ -27,8 +27,12 @@ public:
 		fn_getKLOpName,
 		fn_setKLCode,
 	
-		fn_createPort,
-		fn_deletePort,
+		fn_addInputPort,
+		fn_addOutputPort,
+		fn_addIOPort,
+
+		fn_removePortIdx,
+		fn_removePortName,
 		fn_getPortName,
 		fn_setPortName,
 		fn_getPortType,
@@ -41,7 +45,7 @@ public:
 		prop_getKLFile,
 		prop_setKLFile,
 
-		prop_numPorts,
+		prop_getPortCount,
 		prop_portNames,
 
 		prop_getOutPortName,
@@ -65,8 +69,12 @@ public:
 		FN_0(fn_getKLCode, TYPE_TSTR_BV, GetKLCodeMSTR);
 		FN_0(fn_getKLOpName, TYPE_TSTR_BV, GetKLOperatorNameMSTR);
 
-		FN_5(fn_createPort, TYPE_INT, CreatePortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_INT, TYPE_BOOL, TYPE_TSTR_BV)
-		FN_1(fn_deletePort, TYPE_bool, DeletePort, TYPE_INT);
+		FN_5(fn_addInputPort, TYPE_INT, AddInputPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_INT, TYPE_BOOL, TYPE_TSTR_BV);
+		FN_4(fn_addOutputPort, TYPE_INT, AddOutputPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_BOOL, TYPE_TSTR_BV);
+		FN_5(fn_addIOPort, TYPE_INT, AddIOPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_INT, TYPE_BOOL, TYPE_TSTR_BV);
+
+		FN_1(fn_removePortIdx, TYPE_bool, RemovePort, TYPE_INDEX);
+		FN_1(fn_removePortName, TYPE_bool, RemovePortMSTR, TYPE_TSTR_BV);
 		FN_1(fn_getPortName, TYPE_TSTR_BV, GetPortNameMSTR, TYPE_INT);
 		VFN_2(fn_setPortName, SetPortNameMSTR, TYPE_INT, TYPE_TSTR_BV);
 		FN_1(fn_getPortType, TYPE_TSTR_BV, GetPortTyeMSTR, TYPE_INT);
@@ -79,7 +87,7 @@ public:
 		// Properties 
 
 		PROP_FNS(prop_getKLFile, GetKLFileMSTR, prop_setKLFile, SetKLFileMSTR, TYPE_TSTR_BV)
-		RO_PROP_FN(prop_numPorts, GetNumPorts, TYPE_INT)
+		RO_PROP_FN(prop_getPortCount, GetPortCount, TYPE_INT)
 		PROP_FNS(prop_getOutPortName, GetOutPortNameMSTR, prop_setOutPortName, SetOutPortNameMSTR, TYPE_TSTR_BV)
 		PROP_FNS(prop_getOutPortArrayIdx, GetOutPortArrayIdx, prop_setOutPortArrayIdx, SetOutPortArrayIdx, TYPE_INT)
 
@@ -104,18 +112,22 @@ public:
 	// Port creation/management
 
 	// Get the number of ports on this graph
-	virtual int GetNumPorts() = 0;
+	virtual int GetPortCount() = 0;
 	//virtual Tab<TSTR*> GetPortNames()=0;
 
 	// Splice port management
 	// Create a new port.  A matching Max parameter 
 	// will be added as well of maxType, if MaxType is -1 
-	virtual int CreatePort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=nullptr) = 0;
+	virtual int AddInputPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=nullptr) = 0;
+	virtual int AddOutputPort(const char* klType, const char* name, bool isArray=false, const char* inExtension=nullptr) = 0;
+	virtual int AddIOPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=nullptr) = 0;
+
 	// Remove specified port and matching max parameter
-	virtual bool DeletePort(int i) = 0;
+	virtual bool RemovePort(int i) = 0;
+
 	// Get name of port
 	virtual const char* GetPortName(int i) = 0;
-	virtual void SetPortName(int i, const char* name) = 0;
+	virtual bool SetPortName(int i, const char* name) = 0;
 	virtual const char* GetPortType(int i) = 0;
 	// Returns if the in port is an array type or not
 	virtual bool IsPortArray(int i)=0;
@@ -146,7 +158,7 @@ public:
 	// Allow others to set the splice graph etc we are using.
 	// These functions are not called directly from MaxScript, instead
 	// they are used by the static interface
-	virtual void SetSpliceGraph(const FabricSplice::DGGraph& graph) = 0;
+	virtual void SetSpliceGraph(const FabricSplice::DGGraph& graph, IParamBlock2* pblock) = 0;
 	virtual void SetOutPort(const FabricSplice::DGPort& port) = 0;
 
 	// Show the MaxScript-based editor
@@ -196,10 +208,19 @@ protected:
 	void SetPortNameMSTR(int i, MSTR name)	{ SetPortName(i, name.ToCStr()); }
 	MSTR GetPortTyeMSTR(int i)	{ return ToMSTR(GetPortType(i), 0); }
 
-	int CreatePortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
+	int AddInputPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
 	{
-		return CreatePort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data());
+		return AddInputPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data());
 	}
+	int AddOutputPortMSTR(const MSTR& name, const MSTR& type, bool isArray, const MSTR& inExtension)
+	{
+		return AddOutputPort(name.ToCStr().data(), type.ToCStr().data(), isArray, inExtension.ToCStr().data());
+	}
+	int AddIOPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
+	{
+		return AddIOPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data());
+	}
+	bool RemovePortMSTR(const MSTR& name);
 #pragma endregion
 };
 
@@ -235,15 +256,28 @@ FPInterfaceDesc* GetDescriptor()
 				_M("name"),		0,	TYPE_TSTR_BV,
 				_M("script"),	0,	TYPE_TSTR_BV,
 
-			SpliceTranslationFPInterface::fn_createPort, _T("CreatePort"), 0, TYPE_INDEX, 0, 5,
+			SpliceTranslationFPInterface::fn_addInputPort, _T("AddInputPort"), 0, TYPE_INDEX, 0, 5,
+				_M("name"),			0,	TYPE_TSTR_BV,
+				_M("fabricType"),	0,	TYPE_TSTR_BV,
+				_M("maxType"),		0,	TYPE_INT,
+				_M("isArray"),		0,	TYPE_bool, f_keyArgDefault, false,
+				_M("Extension"),	0,	TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+			SpliceTranslationFPInterface::fn_addOutputPort, _T("AddOutputPort"), 0, TYPE_INDEX, 0, 4,
+				_M("name"),			0,	TYPE_TSTR_BV,
+				_M("fabricType"),	0,	TYPE_TSTR_BV,
+				_M("isArray"),		0,	TYPE_bool, f_keyArgDefault, false,
+				_M("Extension"),	0,	TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+			SpliceTranslationFPInterface::fn_addIOPort, _T("AddIOPort"), 0, TYPE_INDEX, 0, 5,
 				_M("name"),			0,	TYPE_TSTR_BV,
 				_M("fabricType"),	0,	TYPE_TSTR_BV,
 				_M("maxType"),		0,	TYPE_INT,
 				_M("isArray"),		0,	TYPE_bool, f_keyArgDefault, false,
 				_M("Extension"),	0,	TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
 
-			SpliceTranslationFPInterface::fn_deletePort, _T("DeletePort"), 0, TYPE_bool, 0, 1,
+			SpliceTranslationFPInterface::fn_removePortIdx,	 _T("RemovePortByIndex"), 0, TYPE_bool, 0, 1,
 				_M("portIndex"),	0,	TYPE_INDEX,
+			SpliceTranslationFPInterface::fn_removePortName, _T("RemovePort"), 0, TYPE_bool, 0, 1,
+				_M("portName"),		0,	TYPE_TSTR_BV,
 
 			SpliceTranslationFPInterface::fn_getPortName, _T("GetPortName"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("portIndex"),	0,	TYPE_INDEX,
@@ -264,7 +298,7 @@ FPInterfaceDesc* GetDescriptor()
 				_M("portIndex"),	0,	TYPE_INDEX,
 		properties,
 			SpliceTranslationFPInterface::prop_getKLFile, SpliceTranslationFPInterface::prop_setKLFile, _T("KLFile"), 0, TYPE_TSTR_BV,
-			SpliceTranslationFPInterface::prop_numPorts, FP_NO_FUNCTION, _T("NumPorts"), 0, TYPE_INT,
+			SpliceTranslationFPInterface::prop_getPortCount, FP_NO_FUNCTION, _T("PortCount"), 0, TYPE_INT,
 			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_setOutPortName, _T("OutPort"), 0, TYPE_TSTR_BV,
 			SpliceTranslationFPInterface::prop_getOutPortArrayIdx, SpliceTranslationFPInterface::prop_setOutPortArrayIdx, _T("OutPortIndex"), 0, TYPE_INT,
 		p_end

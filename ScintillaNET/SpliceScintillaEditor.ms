@@ -67,22 +67,25 @@ struct spliceEditorStruct
 	fn evDelParam sender evt = (
 		local paramIdx = getIndex sender
 		local thisStruct = getStruct sender
-		success = thisStruct.mSpliceClass.DeletePort paramIdx
+		success = thisStruct.mSpliceClass.RemovePortByIndex paramIdx
 		-- Remove newly deleted param from table
 		if success do (
-			sender.Parent.Parent.Controls.Remove sender.Parent
+			local rowLayout = sender.parent
+			local paramTable = rowLayout.parent
+			paramTable.Controls.Clear()
+			thisStruct.CreateParameterRows paramTable
 		)		
 	),
 	
 	fn evCreateParam sender evt = (
 		local thisStruct = getStruct sender
-		global rowLayout = sender.parent
+		local rowLayout = sender.parent
 		local paramName = (FindCtrl rowLayout "ParamName")[1].Text
 		local paramType = (FindCtrl rowLayout "ParamType")[1].Text
 		local maxType = (FindCtrl rowLayout "MaxType")[1].SelectedIndex + 1
 		local asArray = (FindCtrl rowLayout "ParamArray")[1].Checked
 		maxType = -maxType -- Negating gives -1 (none) and -2 (default type)
-		thisStruct.mSpliceClass.CreatePort paramName paramType maxType isArray:asArray
+		thisStruct.mSpliceClass.AddInputPort paramName paramType maxType isArray:asArray
 		
 		-- Recreate parameter rows
 		local paramTable = rowLayout.parent
@@ -345,7 +348,7 @@ struct spliceEditorStruct
 	-------------------------------------------------------------------------------------------------------------------
 	fn CreateParameterRows tabLayout = (
 		-- Generate row contents, add to table
-		local nParams = mSpliceClass.NumPorts
+		local nParams = mSpliceClass.PortCount
 		tabLayout.RowCount = nParams + 1
 		for i = 1 to nParams do
 		(
@@ -403,6 +406,19 @@ struct spliceEditorStruct
 		tabCtrl.AutoSize = true;
         tabCtrl.dock = tabCtrl.dock.Fill
 		tabEditor = CreateEditorTab();
+		
+		-- Initialize the code.  This _must_ be done before creating the
+		-- parameter tab, as it is possible for calling GetKLCode to cause a
+		-- default parameter to be added to the DGNode
+		-- TODO: Add default parameters on creation, not
+		-- when showing UI
+		if (mSpliceClass != undefined) do 
+		(
+			mKlEditor.text = mSpliceClass.GetKLCode()
+			mEntryPt.text = mSpliceClass.GetKLOperatorName();
+			mOutputName.text = mSpliceClass.OutPort;
+		)
+		
 		-- Somewhere (post-create) our form fore color is set to grey?
 		-- Can't find out how, so we set our tabs explicitly here
 		tabEditor.ForeColor = tabEditor.ForeColor.Black
@@ -416,13 +432,7 @@ struct spliceEditorStruct
 		-- Add to form
 		mForm.controls.add tabCtrl
 
-		-- Initialize the code
-		if (mSpliceClass != undefined) do 
-		(
-			mKlEditor.text = mSpliceClass.GetKLCode()
-			mEntryPt.text = mSpliceClass.GetKLOperatorName();
-			mOutputName.text = mSpliceClass.OutPort;
-		)
+
 		
 		-- Use MaxForm's special display fn to ensure form is child of Max
 		mForm.showModeless()

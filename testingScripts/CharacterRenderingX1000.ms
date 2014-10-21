@@ -4,13 +4,13 @@ witcherFbx =  (getFilenamePath thisfile) + "testfiles/Witcher_Creep.fbx"
 
 
 m = SpliceMesh()
-m.CreatePort "filePath" "String" -2
-m.CreatePort "numCharacters" "Integer" -2
-m.CreatePort "spacing" "Scalar" -2
-m.CreatePort "fbxCharacter" "FbxCharacter" -1 Extension:"FbxHelpers"
-m.CreatePort "characters" "Character" -1 isArray:true Extension:"Characters"
-m.CreatePort "handles" "DrawingHandle" -1 isArray:true Extension:"Characters"
-m.CreatePort "poseTextures" "InlineMatrixArrayTexture" -1 isArray:true Extension:"InlineDrawing"
+m.AddInputPort "filePath" "String" -2
+m.AddInputPort "numCharacters" "Integer" -2
+m.AddInputPort "spacing" "Scalar" -2
+m.AddInputPort "fbxCharacter" "FbxCharacter" -1 Extension:"FbxHelpers"
+m.AddInputPort "characters" "Character" -1 isArray:true Extension:"Characters"
+m.AddInputPort "handles" "DrawingHandle" -1 isArray:true Extension:"Characters"
+m.AddInputPort "poseTextures" "InlineMatrixArrayTexture" -1 isArray:true Extension:"InlineDrawing"
 
 entryPt = "characterDrawing"
 klCode = "

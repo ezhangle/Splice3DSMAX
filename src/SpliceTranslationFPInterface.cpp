@@ -12,10 +12,21 @@ BOOL SpliceTranslationFPInterface::SetSpliceGraph(ReferenceTarget* rtarg)
 	if (pTargetInterface != nullptr)
 	{
 		// We are going to share the graph of the target interface
-		SetSpliceGraph(pTargetInterface->GetSpliceGraph());
+		SetSpliceGraph(pTargetInterface->GetSpliceGraph(), rtarg->GetParamBlock(0));
 		return TRUE;
 	}
 	return FALSE;
+}
+
+bool SpliceTranslationFPInterface::RemovePortMSTR(const MSTR& name) 
+{
+	CStr cName = name.ToCStr();
+	for (int i = 0; i < GetPortCount(); i++)
+	{
+		if (strcmp(GetPortName(i), cName.data()) == 0)
+			return RemovePort(i);
+	}
+	return false;
 }
 
 void DoShowKLEditor(ReferenceTarget* pTarget)

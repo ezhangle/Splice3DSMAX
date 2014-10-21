@@ -47,9 +47,9 @@ p3 = point()
 spliceCtrl = SpliceRotationController()
 p3.controller.rotation.controller = spliceCtrl
 spliceCtrl.OutPort = "outRotationVal"
-spliceCtrl.CreatePort "xRot" "Scalar" 5
-spliceCtrl.CreatePort "yRot" "Scalar" 5
-spliceCtrl.CreatePort "zRot" "Scalar" 5
+spliceCtrl.AddInputPort "xRot" "Scalar" 5
+spliceCtrl.AddInputPort "yRot" "Scalar" 5
+spliceCtrl.AddInputPort "zRot" "Scalar" 5
 
 entryPt = "unitTestRotationChaining"
 klCode = "
@@ -95,21 +95,42 @@ sliderTime = 50f
 assert ((p2.transform as string) == "(matrix3 [1,-2.38419e-007,-2.5332e-007] [2.45869e-007,0.798292,0.60227] [1.3411e-007,-0.60227,0.798292] [8.39596,-11.0702,13.6661])") message:"Bad rotation after setting splice float input" options:#(#dialog)
 assert ((p3.transform as string) == "(matrix3 [0.739942,0.516122,0.431398] [-0.620885,0.277274,0.733227] [0.258819,-0.810393,0.525619] [1.66667,10,0])") message:"Bad rotation values"  options:#(#dialog)
 
+entryPt = "unitTestSharedGraph"
+klCode = "
+require Math;
+
+operator unitTestSharedGraph(io Mat44 outValArray[], Scalar xMult, Scalar yMult, Scalar zMult) {
+  for (Integer i = 0; i < outValArray.size(); i++) {
+    outValArray[i].setIdentity();
+    outValArray[i].setTranslation(Vec3(i * xMult, i * yMult, i * zMult));
+  }
+}"
+
+-------------------------------------------------------------------------------------------------------------
+-- Test shared graphs, array output.
+
 p4 = Point()
-p4.controller = SpliceMatrixController()
-p4.controller.OutPort = "myValOut"
-p4.controller.OutPortIndex = 0
+spliceCtrl = SpliceMatrixController()
+p4.controller = spliceCtrl
+spliceCtrl.OutPort = "outValArray"
+spliceCtrl.OutPortIndex = 0
+
+spliceCtrl.AddInputPort "xMult" "Scalar" -2
+spliceCtrl.AddInputPort "yMult" "Scalar" -2
+spliceCtrl.AddInputPort "zMult" "Scalar" -2
+
+spliceCtrl.SetKLCode entryPt klCode
 
 p5 = Point()
 p5.controller = SpliceMatrixController()
 p5.controller.SetSpliceGraph p4.controller
-p5.controller.OutPort = "myValOut"
+p5.controller.OutPort = "outValArray"
 p5.controller.OutPortIndex = 1
 
 p6 = Point()
 p6.controller = SpliceMatrixController()
 p6.controller.SetSpliceGraph p4.controller
-p6.controller.OutPort = "myValOut"
+p6.controller.OutPort = "outValArray"
 p6.controller.OutPortIndex = 2
 
 print "All Passed!"

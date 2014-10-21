@@ -1,8 +1,8 @@
 m = SpliceMesh()
-m.CreatePort "speed" "Scalar" -2
-m.CreatePort "factor1" "Scalar" -2
-m.CreatePort "factor2" "Scalar" -2
-m.CreatePort "mesh" "PolygonMesh" -1
+m.AddInputPort "speed" "Scalar" -2
+m.AddInputPort "factor1" "Scalar" -2
+m.AddInputPort "factor2" "Scalar" -2
+m.AddInputPorto "mesh" "PolygonMesh" -1
 
 entryPt = "drawingPoints";
 klCode = "
@@ -189,8 +189,8 @@ operator drawingPoints(Scalar speed, Scalar factor1, Scalar factor2, io PolygonM
 }";
 m.SetKLCode entryPt klCode
 
---m.speed = 100.0f
---m.factor1 = 0.6f
---m.factor2 = 0.5f
+m.speed = 100.0f
+m.factor1 = 0.6f
+m.factor2 = 0.5f
 
---Splice.Rendering = true
+Splice.Rendering = true

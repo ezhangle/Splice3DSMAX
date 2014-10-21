@@ -88,8 +88,8 @@ extends:SpliceMesh
 	(
 		-- Initialize our scripted splice stuff
 		delegate.outport = "geo"
-		delegate.CreatePort "twist" "Scalar" -2
-		delegate.CreatePort "length" "Scalar" -2
+		delegate.AddInputPort "twist" "Scalar" -2
+		delegate.AddInputPort "length" "Scalar" -2
 		delegate.SetKLCode "geomGen" klScript
 	)
 )

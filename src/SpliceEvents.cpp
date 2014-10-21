@@ -181,7 +181,7 @@ public:
 			inlineCamera.setMember("farDistance", FabricSplice::constructFloat64RTVal(yon));
 
 
-			FabricCore::RTVal cameraMat = inlineCamera.maybeGetMember("mat44");
+          	FabricCore::RTVal cameraMat = FabricSplice::constructRTVal("Mat44");
 			FabricCore::RTVal cameraMatData = cameraMat.callMethod("Data", "data", 0, 0);
 
 			float * cameraMatFloats = (float*)cameraMatData.getData();
@@ -203,7 +203,7 @@ public:
 				cameraMatFloats[14] = 0.0f;
 				cameraMatFloats[15] = 1.0f;
 
-				inlineCamera.setMember("mat44", cameraMat);
+				inlineCamera.callMethod("", "setFromMat44", 1, &cameraMat);
 			}
 			inlineViewport.setMember("camera", inlineCamera);
 		}

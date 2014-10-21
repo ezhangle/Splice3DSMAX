@@ -77,7 +77,6 @@
     <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\DynamicDialogTemplate.h" />
     <ClInclude Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.h" />
     <ClInclude Include="src\DynamicParamBlocks\DynPBUndo.h" />
-    <ClInclude Include="src\FabricSplice3dsmax.h" />
     <ClInclude Include="src\SpliceTranslationLayer.h" />
   </ItemGroup>
 </Project>

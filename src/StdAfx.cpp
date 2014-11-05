@@ -12,3 +12,8 @@ TCHAR *GetString(int id)
 
 // Max Matrix class never bothered exporting its Identity member, so we define our own here.
 const Matrix3 Matrix3::Identity(1);
+
+// The following 
+#ifdef _DEBUG
+explicit_bool ifThisDoesntCompileUpdateSpliceVersion;
+#endif

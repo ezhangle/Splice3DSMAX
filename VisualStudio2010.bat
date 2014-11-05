@@ -7,8 +7,7 @@ IF NOT DEFINED FABRIC_DIR (
   SET FABRIC_DIR=%REPODIR%\..\..\..\stage\Windows\x86_64\Release
   ECHO Setting Fabric at %FABRIC_DIR%
   SET FABRIC_EXTS_PATH=%FABRIC_EXTS_PATH%;%FABRIC_DIR%\Exts
-)
-else ECHO Fabric found at %FABRIC_PATH%
+) ELSE ECHO Fabric found at %FABRIC_PATH%
 
 echo Allow the system to load FabricCore.1.13.dll
 SET PATH=%FABRIC_DIR%/lib;%PATH%

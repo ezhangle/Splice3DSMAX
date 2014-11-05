@@ -215,6 +215,7 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 	case TYPE_INT:		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_INT, 0, 0, SPIN_AUTOSCALE, p_end);  break;
 	case TYPE_RGBA:		pDesc->ParamOption(pid, p_ui, TYPE_COLORSWATCH, 0, p_end); break;
 	case TYPE_POINT3:	pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); break;
+	case TYPE_POINT4:	pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); break;
 	case TYPE_BOOL:		pDesc->ParamOption(pid, p_ui, TYPE_SINGLECHEKBOX, 0, p_end); break;
 	case TYPE_INODE:	pDesc->ParamOption(pid, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
 	case TYPE_MTL:		pDesc->ParamOption(pid, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
@@ -327,6 +328,9 @@ int GetDlgSize(IParamBlock2* pblock)
 		case TYPE_POINT3:
 			dlgSize += PARAM_Y * 3 * count;
 			break;
+		case TYPE_POINT4:
+			dlgSize += PARAM_Y * 4 * count;
+			break;
 		default:
 			dlgSize += PARAM_Y * count;
 			break;
@@ -389,6 +393,12 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2); 
 			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 4);
 			break;
+		case TYPE_POINT4:	
+			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs); 
+			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2); 
+			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 4);
+			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 6);
+			break;
 		}
 	}
 	return dialogTemplate;
@@ -404,7 +414,7 @@ const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, int
 // Helper functions for accessing options
 int GetPortParamID(FabricSplice::DGPort& aPort)
 {
-	if (aPort.isValid())
+	if (aPort)
 	{
 		FabricCore::Variant option = aPort.getOption(MAX_PID_OPT);
 		if(option.isSInt32())
@@ -483,32 +493,41 @@ BitArray GetLegalMaxTypes(const char* cType)
 	return res;
 }
 
-int SpliceTypeToMaxType(const char* cType)
+int SpliceTypeToMaxType(const char* cType, bool isArray /*=false*/)
 {
+	int res = -1;
 	if (strcmp(cType, "Integer") == 0 || 
 		strcmp(cType, "Size") == 0)
-		return TYPE_INT;
-	else if (strcmp(cType, "Scalar") == 0)
-		return TYPE_FLOAT;
-	else if (strcmp(cType, "Color") == 0)
-		return TYPE_FRGBA;
-	else if (strcmp(cType, "Vec3") == 0)
-		return TYPE_POINT3;
-	else if (strcmp(cType, "Vec4") == 0)
-		return TYPE_POINT4;
+		res = TYPE_INT;
 	else if (strcmp(cType, "Boolean") == 0)
-		return TYPE_BOOL;
+		res = TYPE_BOOL;
+	else if (strcmp(cType, "Scalar") == 0)
+		res =  TYPE_FLOAT;
+	else if (strcmp(cType, "Color") == 0)
+		res =  TYPE_FRGBA;
+	else if (strcmp(cType, "Vec2") == 0)
+		res =  TYPE_POINT2;
+	else if (strcmp(cType, "Vec3") == 0)
+		res =  TYPE_POINT3;
+	else if (strcmp(cType, "Vec4") == 0)
+		res =  TYPE_POINT4;
 	else if (strcmp(cType, "Mat44") == 0)
-		return TYPE_MATRIX3;
+		res =  TYPE_MATRIX3;
 	else if (strcmp(cType, "Quat") == 0)
-		return TYPE_QUAT;
+		res =  TYPE_QUAT;
 	else if (strcmp(cType, "String") == 0)
-		return TYPE_STRING;
+		res =  TYPE_STRING;
 	else if (strcmp(cType, "PolygonMesh") == 0)
-		return TYPE_MESH;
+		res =  TYPE_MESH;
+	else 
+	{
+		DbgAssert(0 && "NOTE: Add Default translation Type for this Splice Type");
+	}
 
-	DbgAssert(0 && "NOTE: Add Default translation Type for this Splice Type");
-	return -1;
+	if (isArray)
+		res |= TYPE_TAB;
+
+	return res;
 }
 
 // This function is simply here to override the default PB2 type for PolygonMesh.

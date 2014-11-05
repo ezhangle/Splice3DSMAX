@@ -5,7 +5,7 @@ fn CompBB anode expSize = (
 	res =abs(size - expSize) < 0.001
 )
 fn FindPort sm name = (
-	for i = 1 to sm.numPorts do (
+	for i = 1 to sm.PortCount do (
 		if (sm.GetPortName i) == name do return true
 	)
 	return false
@@ -32,7 +32,7 @@ assert (CompArray (GetTriMeshFaceCount sm) #(576, 312)) message:"Bad Init Tri Co
 assert (CompBB sm 110.851) message:"Bad init size" options:#(#dialog)
 	
 -- Add segments parameter, test setting it
-sm.CreatePort "inSegments" "Size" 1
+sm.AddInputPort "inSegments" "Size" 1
 assert (FindPort sm "inSegments") message:"Failed Creating inSegments" options:#(#dialog)
 assert (hasProperty sm "inSegments") message:"Failed creading Max param for inSegments" options:#(#dialog)
 
@@ -52,13 +52,13 @@ assert (CompArray (GetTriMeshFaceCount sm) #(1936, 1012)) message:"Bad Tri Count
 
 -- Create unsupported parameter.  This parameter has no matching Max data
 hasNewPort = false
-sm.CreatePort "inMesh" "PolygonMesh" -1
+sm.AddInputPort "inMesh" "PolygonMesh" -1
 assert (FindPort sm "inMesh") message:"Failed Creating inMesh" options:#(#dialog)
 -- Assert no matching parameter was created
 assert (hasProperty sm "inMesh" == false) message: "Error: Created invalid max param inMesh" options:#(#dialog)
 
 -- Create scalar with default type 
-sm.CreatePort "inRadius" "Scalar" -2
+sm.AddInputPort "inRadius" "Scalar" -2
 assert (FindPort sm "inRadius") message:"Failed Creating inRadius" options:#(#dialog)
 assert (hasProperty sm "inRadius") message: "Error: Created invalid max param inMesh" options:#(#dialog)
 

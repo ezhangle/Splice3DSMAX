@@ -16,8 +16,10 @@ public:
 	enum FN_IDS {
 		// System management callbacks
 		fn_showSceneGraphEditor,
-		fn_showKlEditor,
-		fn_loadSpliceFile,
+		
+		fn_importSpliceFile,
+		fn_exportSpliceFile,
+
 		fn_getGlobalOperatorCount,
 		fn_getGlobalOperatorName,
 		fn_reloadFabricExtension,
@@ -29,8 +31,8 @@ public:
 	};
 	BEGIN_FUNCTION_MAP	
 		FN_0(fn_showSceneGraphEditor, TYPE_BOOL, ShowSceneGraphEditor);
-		VFN_0(fn_showKlEditor, ShowKLEditor);
-		FN_1(fn_loadSpliceFile, TYPE_BOOL, LoadSpliceFile, TYPE_TSTR_BV);
+		FN_1(fn_importSpliceFile, TYPE_BOOL, ImportSpliceFile, TYPE_TSTR_BV);
+		FN_2(fn_exportSpliceFile, TYPE_BOOL, ExportSpliceFile, TYPE_TSTR_BV, TYPE_REFTARG);
 		FN_0(fn_getGlobalOperatorCount, TYPE_INT, GetGlobalKLOperatorCount);
 		FN_1(fn_getGlobalOperatorName, TYPE_TSTR_BV, GetGlobalKLOperatorName, TYPE_INDEX);
 		FN_3(fn_reloadFabricExtension, TYPE_BOOL, LoadExtension, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_bool);
@@ -44,7 +46,8 @@ public:
 
 	void ShowKLEditor();
 
-	BOOL LoadSpliceFile(const MSTR& file);
+	BOOL ImportSpliceFile(const MSTR& file);
+	BOOL ExportSpliceFile(const MSTR& file, ReferenceTarget* spliceEntity);
 
 	int GetGlobalKLOperatorCount();
 	MSTR GetGlobalKLOperatorName(int index);

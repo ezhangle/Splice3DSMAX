@@ -102,3 +102,10 @@ void DoShowKLEditor(ReferenceTarget* pTarget)
 	pop_value_locals();
 	pop_alloc_frame();
 }
+
+SpliceTranslationFPInterface* GetSpliceInterface( ReferenceTarget* pTarg )
+{
+	if (pTarg)
+		return static_cast<SpliceTranslationFPInterface*>(pTarg->GetInterface(ISPLICE__INTERFACE));
+	return nullptr;
+}

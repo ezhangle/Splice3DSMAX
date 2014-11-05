@@ -55,7 +55,7 @@ IParamBlock2* CreateParamBlock(ParamBlockDesc2* pDesc, IParamBlock2* pCopyThis, 
 BitArray GetLegalMaxTypes(const char* spliceType);
 
 /** Returns the Max ParamType2 that matches the named Splice type (NOTE - may not be legal for PB2) */
-int SpliceTypeToMaxType(const char* cType);
+int SpliceTypeToMaxType(const char* cType, bool isArray=false);
 
 /** Returns the default Max ParamType2 that matches the named Splice type */
 int SpliceTypeToDefaultMaxType(const char* cType);
@@ -349,6 +349,9 @@ public:
 	void SetSpliceGraph(const FabricSplice::DGGraph& graph, IParamBlock2* pblock);
 	void SetOutPort(const FabricSplice::DGPort& port) { m_valuePort = port; };
 
+	// Load from a saved JSON file spec
+	bool LoadFromFile(const MCHAR* filename, bool createMaxParams);
+	
 	virtual void ResetPorts();
 
 #pragma endregion

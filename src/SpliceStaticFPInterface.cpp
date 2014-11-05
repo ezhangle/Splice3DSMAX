@@ -19,9 +19,12 @@ SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
 		ISPLICE_STATIC_INTERFACE , _T("Splice"), 0, NULL, FP_CORE,
 		// Describe our function(s)
 			SpliceStaticFPInterface::fn_showSceneGraphEditor, _T("ShowSceneGraphEditor"), 0, TYPE_BOOL, 0, 0, 
-			SpliceStaticFPInterface::fn_showKlEditor, _T("ShowKlEditor"), 0, TYPE_VOID, 0, 0, 
-			SpliceStaticFPInterface::fn_loadSpliceFile, _T("LoadSpliceFile"), 0, TYPE_VOID, 0, 1,
+			SpliceStaticFPInterface::fn_importSpliceFile, _T("ImportSpliceFile"), 0, TYPE_BOOL, 0, 1,
 				_M("file"),	0,	TYPE_TSTR_BV,
+			SpliceStaticFPInterface::fn_exportSpliceFile, _T("ExportSpliceFile"), 0, TYPE_BOOL, 0, 2,
+				_M("file"),	0,	TYPE_TSTR_BV,
+				_M("spliceEntity"), 0, TYPE_REFTARG,
+			
 			SpliceStaticFPInterface::fn_getGlobalOperatorCount, _T("GetGlobalOperatorCount"), 0, TYPE_INT, 0, 0,
 			SpliceStaticFPInterface::fn_getGlobalOperatorName, _T("GetGlobalOperatorName"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("index"),	0,	TYPE_INDEX,
@@ -58,52 +61,25 @@ BOOL SpliceStaticFPInterface::ShowSceneGraphEditor()
 	return FALSE;
 }
 
-void SpliceStaticFPInterface::ShowKLEditor()
-{
-	// Pass off the call to MaxScript
-	//MSTR openEditor = _M("\
-	//				  LaunchKLEditor();\
-	//				  ");
-	//BOOL success = ExecuteMAXScriptScript(openEditor);
-}
-
-int GetParamType(const char* sType, bool isArray)
-{
-	int res = 0;
-	
-	if (strcmp(sType, "Scalar") == 0)
-		res = TYPE_FLOAT;
-	else if (strcmp(sType, "Boolean") == 0)
-		res = TYPE_BOOL;
-	else if (strcmp(sType, "Integer") == 0)
-		res = TYPE_INT;
-	else if (strcmp(sType, "String") == 0)
-		res = TYPE_STRING;
-	else if (strcmp(sType, "Color") == 0)
-		res = TYPE_FRGBA;
-	else if (strcmp(sType, "Vec3") == 0)
-		res = TYPE_POINT3;
-	else if (strcmp(sType, "Euler") == 0)
-		res = TYPE_POINT3; // TODO: How we keep this sane?
-	else if (strcmp(sType, "Mat44") == 0)
-		res = TYPE_MATRIX3;
-	else if (strcmp(sType, "PolygonMesh") == 0)
-		res = TYPE_REFTARG;
-	else if (strcmp(sType, "KeyFrameTrack") == 0)
-		res = 0; // TODO: How we keep this sane?
-
-
-	if (res && isArray)
-		res += TYPE_TAB;
-	return res;
-}
-
 ClassDesc2* GetClassDesc(int paramType)
 {
+	// TODO: Only the TYPE_MESH makes sense in a traditional
+	// import scenario.  
 	switch(paramType)
 	{
 	case TYPE_FLOAT:
+	case TYPE_INT:
+	case TYPE_BOOL:
 		return SpliceTranslationLayer<Control, float>::GetClassDesc();
+	case TYPE_POINT3:
+		return SpliceTranslationLayer<Control, Point3>::GetClassDesc();
+	//case TYPE_FRGBA:
+	//case TYPE_POINT4:
+	//	return SpliceTranslationLayer<Control, Point4>::GetClassDesc();
+	case TYPE_QUAT:
+		return SpliceTranslationLayer<Control, Quat>::GetClassDesc();
+	case TYPE_MATRIX3:
+		return SpliceTranslationLayer<Control, Matrix3>::GetClassDesc();
 	case TYPE_MESH:
 		return SpliceTranslationLayer<GeomObject, Mesh>::GetClassDesc();
 
@@ -111,11 +87,13 @@ ClassDesc2* GetClassDesc(int paramType)
 	return NULL;
 }
 
-BOOL SpliceStaticFPInterface::LoadSpliceFile(const TSTR& file)
+BOOL SpliceStaticFPInterface::ImportSpliceFile(const TSTR& file)
 {
-#pragma message("TODO: This code has not been tested yet")
-
 	FabricSplice::DGGraph graph;
+	// create a graph to hold our dependency graph nodes.
+	graph = FabricSplice::DGGraph("myGraph");
+	graph.constructDGNode();
+
 	CStr cFile = file.ToCStr();
 	bool res = graph.loadFromFile(cFile);
 	if (!res)
@@ -126,13 +104,13 @@ BOOL SpliceStaticFPInterface::LoadSpliceFile(const TSTR& file)
 	for (int i = 0; i < nPorts; i++)
 	{
 		std::string portName = graph.getDGPortName(i);
-		FabricSplice::DGPort port = graph.getDGPort(portName.c_str());
+		FabricSplice::DGPort port = graph.getDGPort(i);
 		if(!port.isValid())
 			continue;
 
 		const char* sDataType = port.getDataType();
 		bool isArray = port.isArray();
-		int paramType = GetParamType(sDataType, isArray);
+		int paramType = SpliceTypeToMaxType(sDataType);
 		FabricSplice::Port_Mode portMode = port.getMode();
 
 		// For each IO or OUT port, create a Max translation class
@@ -148,7 +126,8 @@ BOOL SpliceStaticFPInterface::LoadSpliceFile(const TSTR& file)
 				if (pCD != NULL)
 				{
 					ReferenceTarget* pRef = reinterpret_cast<ReferenceTarget*>(pCD->Create(TRUE));
-					SpliceTranslationFPInterface* pSpliceInterface = (SpliceTranslationFPInterface*)pRef->GetInterface(ISPLICE__INTERFACE);
+
+					SpliceTranslationFPInterface* pSpliceInterface = GetSpliceInterface(pRef);
 					if (pSpliceInterface != NULL)
 					{
 						pSpliceInterface->SetSpliceGraph(graph, nullptr);
@@ -159,6 +138,17 @@ BOOL SpliceStaticFPInterface::LoadSpliceFile(const TSTR& file)
 		}
 	}
 	return FALSE;
+}
+
+BOOL SpliceStaticFPInterface::ExportSpliceFile(const MSTR& file, ReferenceTarget* spliceEntity) 
+{
+	SpliceTranslationFPInterface* pSpliceInterface = GetSpliceInterface(spliceEntity);
+	if (pSpliceInterface == nullptr)
+		return FALSE;
+
+	CStr cFile = file.ToCStr();
+	FabricSplice::DGGraph* pGraph = const_cast<FabricSplice::DGGraph*>(&pSpliceInterface->GetSpliceGraph());
+	return pGraph->saveToFile(cFile.data());
 }
 
 int SpliceStaticFPInterface::GetGlobalKLOperatorCount()

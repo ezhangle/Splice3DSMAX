@@ -771,12 +771,6 @@ const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetPortType( int i 
 template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const char* name)
 { 
-	FabricSplice::explicit_bool val = m_valuePort;
-	if (!val)
-	{
-		bool v = val;
-		val = v;
-	}
 	// Do not set an empty name (fabric will throw)
 	if (strcmp(name, "") == 0)
 		return false;
@@ -934,6 +928,56 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetSpliceGraph(const Fabri
 	//ReplaceReference(0, pblock);
 	ResetPorts();
 };
+
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::LoadFromFile(const MCHAR* filename, bool createMaxParams) 
+{ 
+	CStr cFilename = CStr::FromMCHAR(filename);
+	bool res = m_graph.loadFromFile(cFilename);
+	if (!res)
+		return false;
+
+	// Re-connect our default parameters
+	ResetPorts();
+
+	// Try to find an output value for our class
+	bool foundOutPort = false;
+	int nPorts = m_graph.getDGPortCount();
+	for (int i = 0; i < nPorts; i++)
+	{
+		std::string portName = m_graph.getDGPortName(i);
+		FabricSplice::DGPort port = m_graph.getDGPort(i);
+		if(!port.isValid())
+			continue;
+
+		FabricSplice::Port_Mode portMode = port.getMode();
+
+		if (portMode != FabricSplice::Port_Mode_IN)
+		{
+			if (!foundOutPort)
+			{
+				const char* sDataType = port.getDataType();
+				BitArray paramTypes = ::GetLegalMaxTypes(sDataType);
+				// Is this legal for us?  If so, connect our value port
+				if (paramTypes[GetValueType()])
+				{
+					SetOutPort(port);
+					bool isArray = port.isArray();
+					if (isArray)
+						SetOutPortArrayIdx(0);
+					foundOutPort = true;
+				}
+			}
+		}
+		else if (createMaxParams)
+		{
+			// We have been requested to create Max parameters for all possible ports.
+			SetMaxConnectedType(i, -2); // Create default type
+		}
+	}
+	return foundOutPort;
+};
+
 
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()

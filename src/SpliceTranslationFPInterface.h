@@ -19,6 +19,7 @@ public:
 		fn_showSceneGraphEditor,
 
 		fn_setSpliceGraph,
+		fn_loadFromFile,
 		
 		fn_getOpCount,
 		fn_getOpName,
@@ -61,6 +62,7 @@ public:
 		FN_0(fn_showSceneGraphEditor, TYPE_BOOL, ShowSceneGraphEditor);
 
 		FN_1(fn_setSpliceGraph, TYPE_BOOL, SetSpliceGraph, TYPE_REFTARG);
+		FN_2(fn_loadFromFile, TYPE_bool, LoadFromFile, TYPE_FILENAME, TYPE_bool);
 
 		FN_0(fn_getOpCount, TYPE_INT, GetOperatorCount);
 		FN_1(fn_getOpName, TYPE_TSTR_BV, GetOperatorNameMSTR, TYPE_INT);
@@ -161,6 +163,9 @@ public:
 	virtual void SetSpliceGraph(const FabricSplice::DGGraph& graph, IParamBlock2* pblock) = 0;
 	virtual void SetOutPort(const FabricSplice::DGPort& port) = 0;
 
+	// Load the splice graph for this entity from the given filename
+	virtual bool LoadFromFile(const MCHAR* filename, bool createMaxParams)=0;
+
 	// Show the MaxScript-based editor
 	void ShowKLEditor(ReferenceTarget* pTarget)	{ DoShowKLEditor(pTarget); }
 
@@ -224,6 +229,8 @@ protected:
 #pragma endregion
 };
 
+// Inline fn for easy access to interface
+SpliceTranslationFPInterface* GetSpliceInterface(ReferenceTarget* pTarg);
 
 // This templated static function creates a static
 // descriptor per templated interface class

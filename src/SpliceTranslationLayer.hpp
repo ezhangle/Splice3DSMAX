@@ -589,15 +589,17 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLFile( const ch
 				FabricSplice::DGPort aPort = m_graph.getDGPort(i);
 
 				FabricSplice::Port_Mode mode = aPort.getMode();
-				int type = SpliceTypeToMaxType(aPort.getDataType());
 				if (mode != FabricSplice::Port_Mode_IN)
 				{
 					// Is this our in-port?
+					int type = SpliceTypeToMaxType(aPort.getDataType());
 					if (type == GetValueType())
 						m_valuePort = aPort;
 				}
 				else
 				{
+					int type = SpliceTypeToDefaultMaxType(aPort.getDataType());
+					
 					if (pNewDesc == NULL)
 						pNewDesc = GetClassDesc()->CreatePBDesc();
 					
@@ -605,7 +607,7 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLFile( const ch
 					ParamID pid = AddMaxParameter(pNewDesc, type, aPort.getName());
 					
 					// Store the max connection
-					aPort.setOption(MAX_PID_OPT, GetVariant(pid));
+					::SetPortParamID(aPort, pid);
 				}
 			}
 			// reset our parameters to whats currently being used.

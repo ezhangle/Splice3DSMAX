@@ -127,9 +127,9 @@ void myCompilerErrorFunc(
 	const char * level,
 	const char * desc
 	) {
-		CStr cstr;
-		cstr.printf("[Splice] KL Error: %s, Line %d, Col %d: %s\n", file, (int)row, (int)col, desc);
-		logMessage(cstr);
+	CStr cstr;
+	cstr.printf("[Splice] KL Error: %s, Line %d, Col %d: %s\n", file, (int)row, (int)col, desc);
+	logMessage(cstr);
 }
 
 void myKLReportFunc(const char * message, unsigned int length)

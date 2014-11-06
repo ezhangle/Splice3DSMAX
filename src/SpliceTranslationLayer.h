@@ -136,11 +136,6 @@ protected:
 
 #pragma region Splice Connections
 
-	// If this value is set, the file specified will be
-	// attempt to be loaded and its contents read into the
-	// m_KLScript value on load.
-	std::string m_KLFile;
-
 	// For now, till I figure out exactly how we go in->out of KL, restrict to 1 operator
 	std::string m_operator;
 
@@ -290,10 +285,6 @@ public:
 	std::string GetKLOperatorName();
 	std::string SetKLCode(const std::string& name, const std::string& script);
 
-	// Get/Set a link to an external KL file
-	const char* GetKLFile() { return m_KLFile.data(); }
-	std::string SetKLFile(const char* filename);
-
 	// Port creation/management
 
 	// Get the number of ports on this graph
@@ -346,11 +337,12 @@ public:
 
 	// Set splice values
 	const FabricSplice::DGGraph& GetSpliceGraph() { return m_graph; }
-	void SetSpliceGraph(const FabricSplice::DGGraph& graph, IParamBlock2* pblock);
+	void SetSpliceGraph(const FabricSplice::DGGraph& graph, bool createMaxParams);
 	void SetOutPort(const FabricSplice::DGPort& port) { m_valuePort = port; };
 
 	// Load from a saved JSON file spec
 	bool LoadFromFile(const MCHAR* filename, bool createMaxParams);
+	bool SaveToFile(const MCHAR* filename);
 	
 	virtual void ResetPorts();
 

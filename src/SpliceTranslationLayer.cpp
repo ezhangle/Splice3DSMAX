@@ -521,7 +521,7 @@ int SpliceTypeToMaxType(const char* cType, bool isArray /*=false*/)
 		res =  TYPE_MESH;
 	else 
 	{
-		DbgAssert(0 && "NOTE: Add Default translation Type for this Splice Type");
+		// DbgAssert(0 && "NOTE: Add Default translation Type for this Splice Type");
 	}
 
 	if (isArray)

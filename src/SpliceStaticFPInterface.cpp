@@ -19,11 +19,11 @@ SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
 		ISPLICE_STATIC_INTERFACE , _T("Splice"), 0, NULL, FP_CORE,
 		// Describe our function(s)
 			SpliceStaticFPInterface::fn_showSceneGraphEditor, _T("ShowSceneGraphEditor"), 0, TYPE_BOOL, 0, 0, 
-			SpliceStaticFPInterface::fn_importSpliceFile, _T("ImportSpliceFile"), 0, TYPE_BOOL, 0, 1,
+			SpliceStaticFPInterface::fn_importSpliceFile, _T("LoadFromFile"), 0, TYPE_BOOL, 0, 1,
 				_M("file"),	0,	TYPE_TSTR_BV,
-			SpliceStaticFPInterface::fn_exportSpliceFile, _T("ExportSpliceFile"), 0, TYPE_BOOL, 0, 2,
-				_M("file"),	0,	TYPE_TSTR_BV,
-				_M("spliceEntity"), 0, TYPE_REFTARG,
+			//SpliceStaticFPInterface::fn_exportSpliceFile, _T("SaveSpliec"), 0, TYPE_BOOL, 0, 2,
+			//	_M("file"),	0,	TYPE_TSTR_BV,
+			//	_M("spliceEntity"), 0, TYPE_REFTARG,
 			
 			SpliceStaticFPInterface::fn_getGlobalOperatorCount, _T("GetGlobalOperatorCount"), 0, TYPE_INT, 0, 0,
 			SpliceStaticFPInterface::fn_getGlobalOperatorName, _T("GetGlobalOperatorName"), 0, TYPE_TSTR_BV, 0, 1,
@@ -60,84 +60,56 @@ BOOL SpliceStaticFPInterface::ShowSceneGraphEditor()
 	//}
 	return FALSE;
 }
-
-ClassDesc2* GetClassDesc(int paramType)
-{
-	// TODO: Only the TYPE_MESH makes sense in a traditional
-	// import scenario.  
-	switch(paramType)
-	{
-	case TYPE_FLOAT:
-	case TYPE_INT:
-	case TYPE_BOOL:
-		return SpliceTranslationLayer<Control, float>::GetClassDesc();
-	case TYPE_POINT3:
-		return SpliceTranslationLayer<Control, Point3>::GetClassDesc();
-	//case TYPE_FRGBA:
-	//case TYPE_POINT4:
-	//	return SpliceTranslationLayer<Control, Point4>::GetClassDesc();
-	case TYPE_QUAT:
-		return SpliceTranslationLayer<Control, Quat>::GetClassDesc();
-	case TYPE_MATRIX3:
-		return SpliceTranslationLayer<Control, Matrix3>::GetClassDesc();
-	case TYPE_MESH:
-		return SpliceTranslationLayer<GeomObject, Mesh>::GetClassDesc();
-
-	}
-	return NULL;
-}
+//
+//ClassDesc2* GetClassDesc(int paramType)
+//{
+//	// TODO: Only the TYPE_MESH makes sense in a traditional
+//	// import scenario.  
+//	switch(paramType)
+//	{
+//	case TYPE_FLOAT:
+//	case TYPE_INT:
+//	case TYPE_BOOL:
+//		return SpliceTranslationLayer<Control, float>::GetClassDesc();
+//	case TYPE_POINT3:
+//		return SpliceTranslationLayer<Control, Point3>::GetClassDesc();
+//	//case TYPE_FRGBA:
+//	//case TYPE_POINT4:
+//	//	return SpliceTranslationLayer<Control, Point4>::GetClassDesc();
+//	case TYPE_QUAT:
+//		return SpliceTranslationLayer<Control, Quat>::GetClassDesc();
+//	case TYPE_MATRIX3:
+//		return SpliceTranslationLayer<Control, Matrix3>::GetClassDesc();
+//	case TYPE_MESH:
+//		return SpliceTranslationLayer<GeomObject, Mesh>::GetClassDesc();
+//
+//	}
+//	return NULL;
+//}
 
 BOOL SpliceStaticFPInterface::ImportSpliceFile(const TSTR& file)
 {
-	FabricSplice::DGGraph graph;
-	// create a graph to hold our dependency graph nodes.
-	graph = FabricSplice::DGGraph("myGraph");
-	graph.constructDGNode();
-
-	CStr cFile = file.ToCStr();
-	bool res = graph.loadFromFile(cFile);
-	if (!res)
-		return false;
-
-	// Find output values, and construct new classes for them
-	int nPorts = graph.getDGPortCount();
-	for (int i = 0; i < nPorts; i++)
+	ClassDesc2* pCD = SpliceTranslationLayer<GeomObject, Mesh>::GetClassDesc();
+	BOOL res = FALSE;
+	if (pCD != NULL)
 	{
-		std::string portName = graph.getDGPortName(i);
-		FabricSplice::DGPort port = graph.getDGPort(i);
-		if(!port.isValid())
-			continue;
+		//ClassDesc2* pCD = GetClassDesc(paramType);
+		// No matter the kind of import, we always create a type mesh
+		// This is because its the only type of object we can easily add
+		// to the Scene graph, and is the only type that really makes sense
+		Object* pRef = reinterpret_cast<Object*>(pCD->Create(TRUE));
 
-		const char* sDataType = port.getDataType();
-		bool isArray = port.isArray();
-		int paramType = SpliceTypeToMaxType(sDataType);
-		FabricSplice::Port_Mode portMode = port.getMode();
+		SpliceTranslationFPInterface* pSpliceInterface = GetSpliceInterface(pRef);
+		if (pSpliceInterface != NULL)
+			res = pSpliceInterface->LoadFromFile(file, true);
 
-		// For each IO or OUT port, create a Max translation class
-		if (portMode != FabricSplice::Port_Mode_IN)
-		{
-			int nToCreate = 1;
-			if (isArray)
-				nToCreate = port.getSliceCount();
-
-			for (int j = 0; j < nToCreate; j++)
-			{
-				ClassDesc2* pCD = GetClassDesc(paramType);
-				if (pCD != NULL)
-				{
-					ReferenceTarget* pRef = reinterpret_cast<ReferenceTarget*>(pCD->Create(TRUE));
-
-					SpliceTranslationFPInterface* pSpliceInterface = GetSpliceInterface(pRef);
-					if (pSpliceInterface != NULL)
-					{
-						pSpliceInterface->SetSpliceGraph(graph, nullptr);
-						pSpliceInterface->SetOutPort(port);
-					}
-				}
-			}
+		if (!res)
+			pRef->MaybeAutoDelete();
+		else {
+			GetCOREInterface()->CreateObjectNode(pRef);
 		}
 	}
-	return FALSE;
+	return res;
 }
 
 BOOL SpliceStaticFPInterface::ExportSpliceFile(const MSTR& file, ReferenceTarget* spliceEntity) 

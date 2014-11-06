@@ -20,6 +20,7 @@ public:
 
 		fn_setSpliceGraph,
 		fn_loadFromFile,
+		fn_saveToFile,
 		
 		fn_getOpCount,
 		fn_getOpName,
@@ -43,9 +44,6 @@ public:
 		fn_setMaxConnectedType,
 		fn_getLegalMaxTypes,
 
-		prop_getKLFile,
-		prop_setKLFile,
-
 		prop_getPortCount,
 		prop_portNames,
 
@@ -63,6 +61,7 @@ public:
 
 		FN_1(fn_setSpliceGraph, TYPE_BOOL, SetSpliceGraph, TYPE_REFTARG);
 		FN_2(fn_loadFromFile, TYPE_bool, LoadFromFile, TYPE_FILENAME, TYPE_bool);
+		FN_1(fn_saveToFile, TYPE_bool, SaveToFile, TYPE_FILENAME);
 
 		FN_0(fn_getOpCount, TYPE_INT, GetOperatorCount);
 		FN_1(fn_getOpName, TYPE_TSTR_BV, GetOperatorNameMSTR, TYPE_INT);
@@ -88,7 +87,6 @@ public:
 
 		// Properties 
 
-		PROP_FNS(prop_getKLFile, GetKLFileMSTR, prop_setKLFile, SetKLFileMSTR, TYPE_TSTR_BV)
 		RO_PROP_FN(prop_getPortCount, GetPortCount, TYPE_INT)
 		PROP_FNS(prop_getOutPortName, GetOutPortNameMSTR, prop_setOutPortName, SetOutPortNameMSTR, TYPE_TSTR_BV)
 		PROP_FNS(prop_getOutPortArrayIdx, GetOutPortArrayIdx, prop_setOutPortArrayIdx, SetOutPortArrayIdx, TYPE_INT)
@@ -106,10 +104,6 @@ public:
 	virtual std::string GetKLCode() = 0;
 	virtual std::string GetKLOperatorName() = 0;
 	virtual std::string SetKLCode(const std::string& name, const std::string& script) = 0;
-
-	// Get/Set a link to an external KL file
-	virtual const char* GetKLFile() = 0;
-	virtual std::string SetKLFile(const char* file) = 0;
 
 	// Port creation/management
 
@@ -160,11 +154,12 @@ public:
 	// Allow others to set the splice graph etc we are using.
 	// These functions are not called directly from MaxScript, instead
 	// they are used by the static interface
-	virtual void SetSpliceGraph(const FabricSplice::DGGraph& graph, IParamBlock2* pblock) = 0;
+	virtual void SetSpliceGraph(const FabricSplice::DGGraph& graph, bool createMaxParams) = 0;
 	virtual void SetOutPort(const FabricSplice::DGPort& port) = 0;
 
 	// Load the splice graph for this entity from the given filename
 	virtual bool LoadFromFile(const MCHAR* filename, bool createMaxParams)=0;
+	virtual bool SaveToFile(const MCHAR* filename)=0;
 
 	// Show the MaxScript-based editor
 	void ShowKLEditor(ReferenceTarget* pTarget)	{ DoShowKLEditor(pTarget); }
@@ -196,9 +191,6 @@ protected:
 
 	// TODO: Add default vals for these
 	MSTR_GETTER(GetKLOperatorName, 0);
-	
-	MSTR_GETTER(GetKLFile, 0);
-	MSTR_SETTER(SetKLFile);
 
 	MSTR_GETTER(GetOutPortName, 0);
 	MSTR_SETTER(SetOutPortName);
@@ -304,7 +296,6 @@ FPInterfaceDesc* GetDescriptor()
 			SpliceTranslationFPInterface::fn_getLegalMaxTypes, _T("GetLegalMaxTypes"), 0, TYPE_BITARRAY, 0, 1,
 				_M("portIndex"),	0,	TYPE_INDEX,
 		properties,
-			SpliceTranslationFPInterface::prop_getKLFile, SpliceTranslationFPInterface::prop_setKLFile, _T("KLFile"), 0, TYPE_TSTR_BV,
 			SpliceTranslationFPInterface::prop_getPortCount, FP_NO_FUNCTION, _T("PortCount"), 0, TYPE_INT,
 			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_setOutPortName, _T("OutPort"), 0, TYPE_TSTR_BV,
 			SpliceTranslationFPInterface::prop_getOutPortArrayIdx, SpliceTranslationFPInterface::prop_setOutPortArrayIdx, _T("OutPortIndex"), 0, TYPE_INT,

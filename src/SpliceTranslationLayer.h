@@ -298,6 +298,8 @@ public:
 	const char* GetPortType(int i);
 	bool IsPortArray(int i) { return (i < GetPortCount()) ? m_graph.getDGPort(i).isArray() : NULL; }
 
+	std::string GetAllPortSignature() { return (m_graph) ? m_graph.generateKLOperatorParameterList().getString_cstr() : NULL; }
+
 	// Get the name of the port we our value from
 	const char* GetOutPortName() { return m_valuePort.getName(); }
 	bool SetOutPortName(const char* name);

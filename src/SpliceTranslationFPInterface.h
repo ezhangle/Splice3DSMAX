@@ -53,6 +53,8 @@ public:
 		prop_getOutPortArrayIdx,
 		prop_setOutPortArrayIdx,
 
+		prop_getAllPortSignature,
+
 		num_params
 	};
 
@@ -81,6 +83,7 @@ public:
 		FN_1(fn_getPortType, TYPE_TSTR_BV, GetPortTyeMSTR, TYPE_INT);
 		FN_1(fn_isPortArray, TYPE_bool, IsPortArray, TYPE_INT);
 
+		
 		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxConnectedType, TYPE_INT);
 		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxConnectedType, TYPE_INT, TYPE_INT);
 		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypes, TYPE_INT);
@@ -90,7 +93,8 @@ public:
 		RO_PROP_FN(prop_getPortCount, GetPortCount, TYPE_INT)
 		PROP_FNS(prop_getOutPortName, GetOutPortNameMSTR, prop_setOutPortName, SetOutPortNameMSTR, TYPE_TSTR_BV)
 		PROP_FNS(prop_getOutPortArrayIdx, GetOutPortArrayIdx, prop_setOutPortArrayIdx, SetOutPortArrayIdx, TYPE_INT)
-
+		RO_PROP_FN(prop_getAllPortSignature, GetAllPortSignatureMSTR, TYPE_TSTR_BV)
+		
 	END_FUNCTION_MAP
 
 	// Implement the functions exposed above
@@ -127,6 +131,11 @@ public:
 	virtual const char* GetPortType(int i) = 0;
 	// Returns if the in port is an array type or not
 	virtual bool IsPortArray(int i)=0;
+
+	// Returns a string with all available ports on this graph
+	// This is helpful in the KL code editor to quickly add parameters
+	// to the entry operator signature
+	virtual std::string GetAllPortSignature()=0;
 
 	virtual const char* GetOutPortName() = 0;
 	virtual bool SetOutPortName(const char* name) = 0;
@@ -194,6 +203,8 @@ protected:
 
 	MSTR_GETTER(GetOutPortName, 0);
 	MSTR_SETTER(SetOutPortName);
+
+	MSTR_GETTER(GetAllPortSignature, 0);
 	
 	MSTR GetKLCodeMSTR() { return ToMSTR(GetKLCode().data(), 0); }
 	MSTR SetKLCodeMSTR(MSTR name, MSTR script) { 
@@ -305,6 +316,7 @@ FPInterfaceDesc* GetDescriptor()
 			SpliceTranslationFPInterface::prop_getPortCount, FP_NO_FUNCTION, _T("PortCount"), 0, TYPE_INT,
 			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_setOutPortName, _T("OutPort"), 0, TYPE_TSTR_BV,
 			SpliceTranslationFPInterface::prop_getOutPortArrayIdx, SpliceTranslationFPInterface::prop_setOutPortArrayIdx, _T("OutPortIndex"), 0, TYPE_INT,
+			SpliceTranslationFPInterface::prop_getAllPortSignature, FP_NO_FUNCTION, _T("AllPortsSignature"), 0, TYPE_TSTR_BV,
 		p_end
 		);
 	return &_ourDesc;

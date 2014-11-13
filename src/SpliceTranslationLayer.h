@@ -141,8 +141,6 @@ protected:
 
 	// The evaluation graph is the brains of the KL system. (I think)
 	FabricSplice::DGGraph m_graph;
-	// Every class in Max is time-sensitive.
-	FabricSplice::DGPort m_timePort;
 	// Every splice class generates a result
 	FabricSplice::DGPort m_valuePort;
 	// If our valuePort is an array port, this value specifies
@@ -206,13 +204,6 @@ public:
 	// in the same dll it is allocated from
 	void						DeleteThis()						{ delete this; }
 #pragma endregion
-
-	/*! We need to store the name of our parameters in order to display them correctly.
-		The values set by this function are the labels for the parameters we can see in Max
-		\param pid - The id of the parameter.
-		\param s - the label for the parameter*/
-	//NameData& AddParamData(ParamID pid, const MCHAR* s);
-	//NameData* GetParamData(ParamID pid);
 
 	/*! Gets the type of the data evaluated by this class
 		This return value needs to match the TDataType template param */

@@ -29,8 +29,6 @@ public:
 	SpliceMesh(BOOL loading);
 	virtual ~SpliceMesh();	
 
-	virtual void DeleteThis() { delete this; }	
-
 	// From BaseObject
 	virtual CreateMouseCallBack* GetCreateMouseCallBack();
 	virtual int Display(TimeValue t, INode* inode, ViewExp *vpt, int flags);

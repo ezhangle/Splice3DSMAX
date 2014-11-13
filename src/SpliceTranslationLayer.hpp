@@ -56,6 +56,13 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init()
 		m_graph.constructDGNode();
 		m_graph.setUserPointer(this);
 
+		// Set static context values
+		MSTR filepath = GetCOREInterface()->GetCurFilePath();
+		FabricCore::RTVal evalContext = m_graph.getEvalContext();
+		evalContext.setMember("host", FabricSplice::constructStringRTVal("3dsMax"));
+		evalContext.setMember("graph", FabricSplice::constructStringRTVal(m_graph.getName()));
+		evalContext.setMember("currentFilePath", FabricSplice::constructStringRTVal(filepath.ToCStr().data()));
+
 		ResetPorts();
 		return true;
 	}
@@ -545,8 +552,8 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCode(const std
 			// Tell max, we might have changed here.
 			NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
 			m_valid = NEVER;
-			doGather.LogSomething("OK");// TODO: Globalize this
-		}
+			doGather.LogSomething("OK");
+		}                                                                                                                                                                                                                                                           
 		else
 		{
 			// Theoretically, we should never actually reach this code.  Fabric will throw if somethins outta whack
@@ -900,9 +907,9 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetSpliceGraph(const Fabri
 			if (!foundOutPort)
 			{
 				const char* sDataType = port.getDataType();
-				BitArray paramTypes = ::GetLegalMaxTypes(sDataType);
+				int type = SpliceTypeToMaxType(sDataType);
 				// Is this legal for us?  If so, connect our value port
-				if (paramTypes[GetValueType()])
+				if (type >= 0)
 				{
 					SetOutPort(port);
 					bool isArray = port.isArray();
@@ -951,8 +958,6 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
 {
 	// Setup any necessary ports for the current graph
 	m_valuePort = FabricSplice::DGPort();
-	// Our graphs always include a time component
-	m_timePort = AddSpliceParameter(m_graph, TYPE_TIMEVALUE, _M("time"), FabricSplice::Port_Mode_IN);
 }
 
 #pragma endregion
@@ -966,17 +971,15 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 	if (!m_graph.isValid())
 		return m_value;
 
-	// Set time, if the input requests it.
-	if (m_timePort.isValid())
-	{
-		MaxValueToSplice(m_timePort, 0, ivValid, TicksToSec(t));
-	}
-
 	// If our value is valid, do not re-evaluate
 	if (!m_valid.InInterval(t))
 	{
 		try
 		{
+			// setup the context
+			FabricCore::RTVal evalContext = m_graph.getEvalContext();
+			evalContext.setMember("time", FabricSplice::constructFloat32RTVal(TicksToSec(t)));
+
 			// Reset our internal validity times;
 			m_valid.SetInfinite();
 			// Set  all Max values on their splice equivalents

@@ -106,7 +106,10 @@ BOOL SpliceStaticFPInterface::ImportSpliceFile(const TSTR& file)
 		if (!res)
 			pRef->MaybeAutoDelete();
 		else {
-			GetCOREInterface()->CreateObjectNode(pRef);
+			INode* pNode = GetCOREInterface()->CreateObjectNode(pRef);
+			MSTR name;
+			name.FromACP(pSpliceInterface->GetKLOperatorName().data());
+			pNode->SetName(name);
 		}
 	}
 	return res;

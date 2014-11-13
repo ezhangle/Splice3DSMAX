@@ -241,6 +241,12 @@ FPInterfaceDesc* GetDescriptor()
 		0,
 		// Describe our function(s)
 			SpliceTranslationFPInterface::fn_showSceneGraphEditor, _T("ShowSceneGraphEditor"), 0, TYPE_BOOL, 0, 0, 
+			SpliceTranslationFPInterface::fn_loadFromFile, _T("LoadFromFile"), 0, TYPE_bool, 0, 2, 
+				_M("filename"),	0,	TYPE_FILENAME,
+				_M("createMaxParams"),	0,	TYPE_bool,
+
+			SpliceTranslationFPInterface::fn_saveToFile, _T("SaveToFile"), 0, TYPE_bool, 0, 1, 
+				_M("filename"),	0,	TYPE_FILENAME,
 
 			SpliceTranslationFPInterface::fn_setSpliceGraph, _T("SetSpliceGraph"), 0, TYPE_BOOL, 0, 1,
 				_M("source"),	0,	TYPE_REFTARG,

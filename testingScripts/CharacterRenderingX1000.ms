@@ -30,7 +30,7 @@ operator evalCharacter<<<index>>>(
 }
 
 operator characterDrawing(
-  io Scalar time, 
+  in EvalContext context,
 
   String filePath, 
   Integer numCharacters, 
@@ -116,7 +116,7 @@ operator characterDrawing(
   /////////////////
   // Now update the pose of the character, and push the skinningMatrices to the poseTexture.
   if(fbxCharacter.initialized()){
-    evalCharacter<<<numCharacters>>>(time, characters, poseTextures);
+    evalCharacter<<<numCharacters>>>(context.time, characters, poseTextures);
   }
 }"
 

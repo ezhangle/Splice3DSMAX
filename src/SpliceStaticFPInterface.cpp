@@ -21,24 +21,33 @@ SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
 			SpliceStaticFPInterface::fn_showSceneGraphEditor, _T("ShowSceneGraphEditor"), 0, TYPE_BOOL, 0, 0, 
 			SpliceStaticFPInterface::fn_importSpliceFile, _T("LoadFromFile"), 0, TYPE_BOOL, 0, 1,
 				_M("file"),	0,	TYPE_TSTR_BV,
-			//SpliceStaticFPInterface::fn_exportSpliceFile, _T("SaveSpliec"), 0, TYPE_BOOL, 0, 2,
-			//	_M("file"),	0,	TYPE_TSTR_BV,
-			//	_M("spliceEntity"), 0, TYPE_REFTARG,
 			
 			SpliceStaticFPInterface::fn_getGlobalOperatorCount, _T("GetGlobalOperatorCount"), 0, TYPE_INT, 0, 0,
 			SpliceStaticFPInterface::fn_getGlobalOperatorName, _T("GetGlobalOperatorName"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("index"),	0,	TYPE_INDEX,
-			SpliceStaticFPInterface::fn_reloadFabricExtension, _T("LoadExtension"), 0, TYPE_BOOL, 0, 3,
+			SpliceStaticFPInterface::fn_loadFabricExtension, _T("LoadExtension"), 0, TYPE_BOOL, 0, 3,
 				_M("extension"),	0,	TYPE_TSTR_BV,
 				_M("version"),	0,	TYPE_TSTR_BV,
 				_M("reload"),	0,	TYPE_bool,
 
+			SpliceStaticFPInterface::fn_enableLogging, _T("EnableLoggers"), 0, TYPE_INT, 0, 1,
+				_M("loggers"),	0,	TYPE_ENUM, SpliceStaticFPInterface::loggingEnums,
+			SpliceStaticFPInterface::fn_disableLogging, _T("DisableLoggers"), 0, TYPE_INT, 0, 1,
+				_M("loggers"),	0,	TYPE_ENUM, SpliceStaticFPInterface::loggingEnums,
+
+
 		properties,
-//			SpliceStaticFPInterface::prop_getPythonFile,SpliceStaticFPInterface::prop_setPythonFile, _T("PythonFile"), 0,TYPE_TSTR,
 			SpliceStaticFPInterface::prop_getSpliceRendering,SpliceStaticFPInterface::prop_setSpliceRendering, _T("Rendering"), 0,TYPE_bool,
 			SpliceStaticFPInterface::prop_getSpliceManip,SpliceStaticFPInterface::prop_setSpliceManip, _T("Manipulation"), 0,TYPE_bool,
-//			SpliceStaticFPInterface::prop_getMaxImageSize,SpliceStaticFPInterface::prop_setMaxImageSize, _T("MaxImageSize"), 0,TYPE_INT,
-//			SpliceStaticFPInterface::prop_getMaxTextureRenderThreads,SpliceStaticFPInterface::prop_setMaxTextureRenderThreads, _T("MaxTextureRenderThreads"), 0,TYPE_INT,
+
+		enums,
+			SpliceStaticFPInterface::loggingEnums, LOG_ENUM_COUNT,
+				_T("logGeneric"), LOG_GENERIC,
+				_T("logErrors"), LOG_ERROR,
+				_T("logCompiler"), LOG_COMPILER_ERROR,
+				_T("logKLReports"), LOG_KL_REPORTS,
+				_T("logKLStatus"), LOG_KL_STATUS,
+				_T("logAll"), LOG_ALL,
 		p_end
 		);
 	return &_theInstance;
@@ -139,7 +148,6 @@ MSTR SpliceStaticFPInterface::GetGlobalKLOperatorName(int index)
 	return rval;
 }
 
-
 BOOL SpliceStaticFPInterface::LoadExtension( const MSTR& extension, const MSTR& version, bool reload)
 {
 	const FabricCore::Client* pClient = NULL;
@@ -153,6 +161,38 @@ BOOL SpliceStaticFPInterface::LoadExtension( const MSTR& extension, const MSTR& 
 	CStr cVersion = version.ToCStr();
 	FEC_ClientLoadExtension(pClient->getFECClientRef(), cExtension.data(), cVersion.data(), reload);
 	return TRUE;
+}
+
+int SpliceStaticFPInterface::EnableLogging(int loggers) {
+	if (loggers & LOG_GENERIC)
+		SetGenericLoggerEnabled(true);
+	if (loggers & LOG_ERROR)
+		SetErrorLoggerEnabled(true);
+	if (loggers & LOG_COMPILER_ERROR)
+		SetCompilerLoggerEnabled(true);
+	if (loggers & LOG_KL_STATUS)
+		SetKLStatusLoggerEnabled(true);
+	if (loggers & LOG_KL_REPORTS)
+		SetKLReportLoggerEnabled(true);
+
+	m_FabrigLogging |= (loggers&LOG_ALL);
+	return m_FabrigLogging;
+}
+
+int SpliceStaticFPInterface::DisableLogging(int loggers) {
+	if (loggers & LOG_GENERIC)
+		SetGenericLoggerEnabled(false);
+	if (loggers & LOG_ERROR)
+		SetErrorLoggerEnabled(false);
+	if (loggers & LOG_COMPILER_ERROR)
+		SetCompilerLoggerEnabled(false);
+	if (loggers & LOG_KL_STATUS)
+		SetKLStatusLoggerEnabled(false);
+	if (loggers & LOG_KL_REPORTS)
+		SetKLReportLoggerEnabled(false);
+
+	m_FabrigLogging = m_FabrigLogging&~loggers;
+	return m_FabrigLogging;
 }
 
 bool SpliceStaticFPInterface::GetSpliceRendering()

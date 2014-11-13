@@ -96,6 +96,7 @@ __declspec( dllexport ) int LibInitialize(void)
 	
 	// setup the callback functions
 	SetDefaultLogging();
+	SpliceStaticFPInterface::GetInstance()->EnableLogging(SpliceStaticFPInterface::LOG_ALL);
 
 	// We need to initialize our MaxScript exposure for all classes as well.
 	SpliceTranslationLayer<Control, float>::InitMixinInterface();
@@ -105,7 +106,7 @@ __declspec( dllexport ) int LibInitialize(void)
 	SpliceTranslationLayer<OSModifier, Mesh>::InitMixinInterface();
 	SpliceTranslationLayer<GeomObject, Mesh>::InitMixinInterface();
 
-	SpliceStaticFPInterface::GetInstance();
+	
 
 	// Fix potential deadlock on startup with ATi cards
 	// and really fast machines.  The problem is that 

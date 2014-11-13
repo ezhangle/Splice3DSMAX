@@ -4,6 +4,7 @@
 #include <maxscript/maxscript.h>
 #include <maxscript/util/listener.h>
 #include "CriticalSection.h"
+#include "SpliceStaticFPInterface.h"
 
 //////////////////////////////////////////////////////////////////////////
 #pragma region Printing to the Listener
@@ -24,6 +25,11 @@ std::wstring s2ws(const std::string& s)
 //////////////////////////////////////////////////////////////////////////
 #pragma region GatherCompilerResults
 
+bool WasLogging()
+{
+	return (SpliceStaticFPInterface::GetInstance()->EnableLogging(0)&SpliceStaticFPInterface::LOG_COMPILER_ERROR) != 0;
+}
+
 std::list<GatherCompilerResults*> s_CompilerStack;
 void gatherCompilerErrorFunc(
 	unsigned int row, 
@@ -33,11 +39,13 @@ void gatherCompilerErrorFunc(
 	const char * desc)
 {
 	CStr cstr;
-	cstr.printf("[MyCallback] KL Error: %s, Line %d, Col %d: %s\n", file, (int)row, (int)col, desc);
+	cstr.printf("[CompilerError] KL Error: %s, Line %d, Col %d: %s\n", file, (int)row, (int)col, desc);
 	if (!s_CompilerStack.empty() && s_CompilerStack.back() != NULL)
 	{
 		s_CompilerStack.back()->LogSomething(cstr.data());
 	}
+	if (WasLogging())
+		logMessage(cstr);
 }
 
 GatherCompilerResults::GatherCompilerResults()
@@ -52,7 +60,8 @@ GatherCompilerResults::~GatherCompilerResults()
 	if (s_CompilerStack.empty())
 	{
 		// Reset our logging output to default channels.
-		SetDefaultLogging();
+		if (WasLogging())
+			SpliceStaticFPInterface::GetInstance()->EnableLogging(SpliceStaticFPInterface::LOG_COMPILER_ERROR);
 	}
 }
 
@@ -158,12 +167,6 @@ void CALLBACK printMessages(HWND hwnd, UINT uMsg, UINT timerId, DWORD dwTime)
 
 void SetDefaultLogging()
 {
-	FabricSplice::Logging::setLogFunc(myLogFunc);
-	FabricSplice::Logging::setLogErrorFunc(myLogErrorFunc);
-	FabricSplice::Logging::setCompilerErrorFunc(myCompilerErrorFunc);
-	FabricSplice::Logging::setKLReportFunc(myKLReportFunc);
-	FabricSplice::Logging::setKLStatusFunc(myKLStatusFunc);
-
 	// cache the main thread ID (this thread)
 	s_MainTreadId = GetCurrentThreadId();
 #ifdef _DEBUG
@@ -174,4 +177,29 @@ void SetDefaultLogging()
 	const int timeout = 1000;
 #endif
 	SetTimer(NULL, NULL, timeout, (TIMERPROC)&printMessages);
+}
+
+extern void SetGenericLoggerEnabled( bool enable )
+{
+	FabricSplice::Logging::setLogFunc((enable) ? myLogFunc : NULL);
+}
+
+extern void SetErrorLoggerEnabled( bool enable )
+{
+	FabricSplice::Logging::setLogErrorFunc((enable) ? myLogErrorFunc : NULL);
+}
+
+extern void SetCompilerLoggerEnabled( bool enable )
+{
+	FabricSplice::Logging::setCompilerErrorFunc((enable) ? myCompilerErrorFunc : NULL);
+}
+
+extern void SetKLReportLoggerEnabled( bool enable )
+{
+	FabricSplice::Logging::setKLReportFunc((enable) ? myKLReportFunc : NULL);
+}
+
+extern void SetKLStatusLoggerEnabled( bool enable )
+{
+	FabricSplice::Logging::setKLStatusFunc((enable) ? myKLStatusFunc : NULL);
 }

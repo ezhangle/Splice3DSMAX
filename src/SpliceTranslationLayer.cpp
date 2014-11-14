@@ -540,6 +540,30 @@ int SpliceTypeToDefaultMaxType(const char* cType)
 	return SpliceTypeToMaxType(cType);
 }
 
+bool IsPortPersistable(FabricSplice::DGPort& port) {
+	if (!port)
+		return false;
+
+	FabricCore::RTVal rtVal = port.getRTVal();
+	if(rtVal.isValid())
+	{
+		if(rtVal.isObject())
+		{
+			if(!rtVal.isNullObject())
+			{
+				FabricCore::RTVal objectRtVal = FabricSplice::constructRTVal("Object", 1, &rtVal);
+				if(objectRtVal.isValid())
+				{
+					FabricCore::RTVal persistable = FabricSplice::constructInterfaceRTVal("Persistable", objectRtVal);
+					if(!persistable.isNullObject())
+						return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, const char* type, const char* cName, FabricSplice::Port_Mode mode, bool isArray/*=false*/, const char* inExtension)
 {
 	std::string spliceType(type);
@@ -549,8 +573,14 @@ const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, con
 	try {
 		if (!rGraph.hasDGNodeMember(cName)) {
 			rGraph.addDGNodeMember(cName, spliceType.data(), FabricCore::Variant(), "", inExtension);
-			return rGraph.addDGPort(cName, cName, mode);
+			FabricSplice::DGPort port = rGraph.addDGPort(cName, cName, mode);
+
+			// Does this port support custom persistence?  If so, mark it as persisted
+			if (IsPortPersistable(port))
+				rGraph.setMemberPersistence(cName, true);
+			return port;
 		}
+
 		// Port already exists
 		return rGraph.getDGPort(cName);
 	}

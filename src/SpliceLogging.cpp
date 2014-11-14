@@ -165,7 +165,7 @@ void CALLBACK printMessages(HWND hwnd, UINT uMsg, UINT timerId, DWORD dwTime)
 	postLogMessages();
 }
 
-void SetDefaultLogging()
+void InitLoggingTimer()
 {
 	// cache the main thread ID (this thread)
 	s_MainTreadId = GetCurrentThreadId();

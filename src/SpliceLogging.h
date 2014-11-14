@@ -18,7 +18,7 @@ public:
 
 // Call this function to set the logging
 // capacity of Splice to the default
-extern void SetDefaultLogging();
+extern void InitLoggingTimer();
 
 extern void SetGenericLoggerEnabled(bool enable);
 extern void SetErrorLoggerEnabled(bool enable);

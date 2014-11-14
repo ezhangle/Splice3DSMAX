@@ -13,7 +13,6 @@ SpliceEvents* SpliceEvents::s_Instance = nullptr;
 SpliceEvents::SpliceEvents()
 	: m_VptCallback(nullptr)
 {
-
 }
 
 SpliceEvents::~SpliceEvents()
@@ -83,6 +82,10 @@ class SpliceViewportDrawCallback : public ViewportDisplayCallback
 public:
 	SpliceViewportDrawCallback()
 	{
+	}
+	~SpliceViewportDrawCallback() 
+	{
+		ReleaseAllDrawContexts();
 	}
 
 	virtual void Display( TimeValue t, ViewExp *vpt, int flags )
@@ -219,6 +222,14 @@ public:
 		else if(SpliceEvents::s_DrawContexts[id].isNullObject())
 			SpliceEvents::s_DrawContexts[id] = FabricSplice::constructObjectRTVal("DrawContext");
 		return SpliceEvents::s_DrawContexts[id];
+	}
+
+	void ReleaseAllDrawContexts() 
+	{
+		for (int i = 0; i < MAX_VPTS; i++) {
+			// We release our draw contexts by assigning blank RTVals over them
+			SpliceEvents::s_DrawContexts[i] = FabricCore::RTVal();
+		}
 	}
 };
 

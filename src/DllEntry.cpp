@@ -86,13 +86,14 @@ __declspec( dllexport ) ULONG CanAutoDefer()
 	return FALSE;
 }
 
+// Clean up all traces of Splice, and unhook vpt/mouse hooks
 void OnReset(void* /*param*/, NotifyInfo* /*info*/)
 {
-	// Clean up all traces of 
-	//SpliceEvents::ReleaseInstance();
-	//FabricSplice::DestroyClient();
+	SpliceEvents::ReleaseInstance();
+	FabricSplice::DestroyClient();
 }
 
+// Initialize things
 void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 {
 	FabricSplice::Initialize();
@@ -107,11 +108,14 @@ void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 
 	RegisterNotification(OnReset, NULL, NOTIFY_SYSTEM_POST_RESET);
 	RegisterNotification(OnReset, NULL, NOTIFY_SYSTEM_POST_NEW);
-	//RegisterNotification(OnReset, NULL, NOTIFY_FILE_PRE_OPEN);
+	RegisterNotification(OnReset, NULL, NOTIFY_FILE_PRE_OPEN);
 }
 
-void OnShutdown(void* /*param*/, NotifyInfo* /*info*/)
+// Clean up splice, and unhook all notifications.
+void OnShutdown(void* param, NotifyInfo* info)
 {
+	// On shutdown we release all info
+	OnReset(param, info);
 	UnRegisterNotification(OnReset, NULL);
 }
 

@@ -32,9 +32,6 @@ SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(bool ini
 template<typename TBaseClass, typename TResultType>
 SpliceTranslationLayer<TBaseClass, TResultType>::~SpliceTranslationLayer()
 {
-	// Delete the current operator(s).
-	//m_graph.clear();
-
 	// We _must_ have been released by now
 	DbgAssert(m_pblock == NULL);
 
@@ -51,26 +48,9 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init()
 {
 	if (!m_graph.isValid())
 	{
-		//{
-		//	FabricSplice::DGGraph graphA("3dsMaxGraph");
-		//	graphA.constructDGNode(dgNodeName);
-		//	graphA.setUserPointer(this);
-
-		//	FabricSplice::DGGraph graphB("3dsMaxGraph");
-		//	graphB.constructDGNode(dgNodeName);
-		//	graphB.setUserPointer(this);
-		//}
-		//static int cntr = 1;
-		
 		// create a graph to hold our dependency graph nodes.
-		//CStr name;
-		//name.printf("3dsMaxGraph_%i", cntr++);
 		m_graph = FabricSplice::DGGraph("3dsMaxGraph");
-
-		//CStr dgNodeName;
-		//dgNodeName.printf("%s_DGNode", name.data());
 		m_graph.constructDGNode();
-
 		m_graph.setUserPointer(this);
 
 		// Set static context values

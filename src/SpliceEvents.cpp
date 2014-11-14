@@ -26,14 +26,14 @@ SpliceEvents::~SpliceEvents()
 
 void SpliceEvents::HookMouseEvents()
 {
-	GetCOREInterface()->PushCommandMode(&m_MouseCommandMode);
+	if (!MouseEventsHooked())
+		GetCOREInterface()->PushCommandMode(&m_MouseCommandMode);
 }
 
 void SpliceEvents::UnHookMouseEvents()
 {
 	Interface* pCore = GetCOREInterface();
-	if (pCore->GetCommandMode() == &m_MouseCommandMode)
-		pCore->PopCommandMode();
+	pCore->DeleteMode(&m_MouseCommandMode);
 }
 
 bool SpliceEvents::MouseEventsHooked()
@@ -251,9 +251,11 @@ void SpliceEvents::HookViewportRender()
 	}
 	else 
 	{
-		if (m_VptCallback == nullptr)
+		if (m_VptCallback == nullptr) 
+		{
 			m_VptCallback = new SpliceViewportDrawCallback();
-		GetCOREInterface()->RegisterViewportDisplayCallback(FALSE, m_VptCallback) ;
+			GetCOREInterface()->RegisterViewportDisplayCallback(FALSE, m_VptCallback) ;
+		}
 	}
 }
 

@@ -35,6 +35,7 @@ public:
 		fn_getGlobalOperatorCount,
 		fn_getGlobalOperatorName,
 		fn_loadFabricExtension,
+		fn_registerFabricExtension,
 
 		fn_enableLogging,
 		fn_disableLogging,
@@ -55,7 +56,9 @@ public:
 		FN_1(fn_getGlobalOperatorName, TYPE_TSTR_BV, GetGlobalKLOperatorName, TYPE_INDEX);
 		
 		FN_3(fn_loadFabricExtension, TYPE_BOOL, LoadExtension, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_bool);
+		FN_6(fn_registerFabricExtension, TYPE_bool, RegisterExtension, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_TAB_BR, TYPE_bool, TYPE_bool);
 
+		
 		FN_1(fn_enableLogging, TYPE_INT, EnableLogging, TYPE_ENUM);
 		FN_1(fn_disableLogging, TYPE_INT, DisableLogging, TYPE_ENUM);
 
@@ -77,6 +80,7 @@ public:
 	MSTR GetGlobalKLOperatorName(int index);
 
 	BOOL LoadExtension(const MSTR& extension, const MSTR& version, bool reload);
+	bool RegisterExtension(const MSTR& extension, const MSTR& version, const MSTR& override, const Tab<MSTR*>& files, bool load, bool reload);
 
 	// Set the currently enabled/disabled logging
 	int EnableLogging(int v);

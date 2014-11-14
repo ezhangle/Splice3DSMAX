@@ -4,6 +4,7 @@
 #include "SpliceEvents.h"
 #include "FabricSplice.h"
 #include "FabricCore.h"
+#include <fstream>      // std::ifstream
 
 #if MAX_VERSION_MAJOR < 15
 #define p_end end
@@ -28,6 +29,13 @@ SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
 			SpliceStaticFPInterface::fn_loadFabricExtension, _T("LoadExtension"), 0, TYPE_BOOL, 0, 3,
 				_M("extension"),	0,	TYPE_TSTR_BV,
 				_M("version"),	0,	TYPE_TSTR_BV,
+				_M("reload"),	0,	TYPE_bool,
+			SpliceStaticFPInterface::fn_registerFabricExtension, _T("RegisterExtension"), 0, TYPE_BOOL, 0, 6,
+				_M("extension"),	0,	TYPE_TSTR_BV,
+				_M("version"),	0,	TYPE_TSTR_BV,
+				_M("versionOverride"),	0,	TYPE_TSTR_BV,
+				_M("files"),	0,	TYPE_TSTR_TAB_BV,
+				_M("load"),	0,	TYPE_bool,
 				_M("reload"),	0,	TYPE_bool,
 
 			SpliceStaticFPInterface::fn_enableLogging, _T("EnableLoggers"), 0, TYPE_INT, 0, 1,
@@ -160,8 +168,80 @@ BOOL SpliceStaticFPInterface::LoadExtension( const MSTR& extension, const MSTR& 
 	CStr cExtension = extension.ToCStr();
 	CStr cVersion = version.ToCStr();
 	FEC_ClientLoadExtension(pClient->getFECClientRef(), cExtension.data(), cVersion.data(), reload);
+
+	// If the call failed for any reason, we need to clear the exception status from Fabric
+	uint32_t length = FEC_GetLastExceptionLength();
+	if ( length > 0 )
+	{
+		MSTR message = MSTR::FromACP(FEC_GetLastExceptionCString(), length);
+		FEC_ClearLastException();
+		throw UserThrownError(message.data(), FALSE);
+	}
 	return TRUE;
 }
+
+bool ReadFileIntoString(const char* file, std::string& outcontents) {
+	std::ifstream is (file, std::ifstream::in);
+	if (is) {
+		// get length of file:
+		is.seekg (0, is.end);
+		std::streamoff length = is.tellg();
+		is.seekg (0, is.beg);
+
+		outcontents.resize(length);
+
+		// read data as a block:
+		is.read (const_cast<char*>(outcontents.data()), length);
+
+		is.close();
+		return true;
+	}
+	return false;
+}
+
+bool SpliceStaticFPInterface::RegisterExtension( const MSTR& extension, const MSTR& version, const MSTR& override, const Tab<MSTR*>& files, bool load, bool reload )
+{
+	const FabricCore::Client* pClient = NULL;
+	FECS_DGGraph_getClient(&pClient);
+
+	// No client, nothing to do (the extension will be loaded when requested
+	if(pClient == nullptr)
+		return FALSE;
+
+	CStr cExtension = extension.ToCStr();
+	CStr cVersion = version.ToCStr();
+	CStr cOverride = version.ToCStr();
+	std::vector<std::string> fileNames;
+	std::vector<std::string> fileContents;
+	std::vector<FEC_KLSourceFile> fileHolder;
+
+	// Read file contents into the buffers
+	int numFiles = files.Count();
+	fileNames.resize(numFiles);
+	fileContents.resize(numFiles);
+	fileHolder.resize(numFiles);
+	for (int i = 0; i < numFiles; i++) {
+		fileNames[i] = files[i]->ToACP();
+		if (!ReadFileIntoString(fileNames[i].data(), fileContents[i]))
+			return false;
+
+		fileHolder[i].filenameCStr = fileNames[i].data();
+		fileHolder[i].sourceCodeCStr = fileContents[i].data();
+	}
+
+	FEC_RegisterKLExtension(pClient->getFECClientRef(), cExtension, cVersion, cOverride, numFiles, &fileHolder[0], load, reload);
+
+	// If the call failed for any reason, we need to clear the exception status from Fabric
+	uint32_t length = FEC_GetLastExceptionLength();
+	if ( length > 0 )
+	{
+		MSTR message = MSTR::FromACP(FEC_GetLastExceptionCString(), length);
+		FEC_ClearLastException();
+		throw UserThrownError(message.data(), FALSE);
+	}
+	return true;
+}
+
 
 int SpliceStaticFPInterface::EnableLogging(int loggers) {
 	if (loggers & LOG_GENERIC)
@@ -225,3 +305,4 @@ void SpliceStaticFPInterface::SetSpliceManip(bool isManipulating)
 	else
 		SpliceEvents::GetInstance()->UnHookMouseEvents();
 }
+

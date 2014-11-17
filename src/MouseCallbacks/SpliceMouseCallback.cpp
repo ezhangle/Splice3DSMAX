@@ -351,43 +351,36 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	int eventType = Event_MouseMove;
 
 	// Generate mouse down/up events
-	bool bCloseHold = false;
 	if (!m_LMouseDown && flags&MOUSE_LBUTTON)
 	{
 		eventType = Event_MouseButtonPress;
 		m_LMouseDown = true;
-		theHold.Begin();
 	}
 	else if (m_LMouseDown && (flags&MOUSE_LBUTTON) == 0)
 	{
 		eventType = Event_MouseButtonRelease;
 		m_LMouseDown = false;
-		bCloseHold = true;
 	}
 
 	if (!m_RMouseDown && flags&MOUSE_RBUTTON)
 	{
 		eventType = Event_MouseButtonPress;
-		theHold.Begin();
 		m_RMouseDown = true;
 	}
 	else if (m_RMouseDown && (flags&MOUSE_RBUTTON) == 0)
 	{
 		eventType = Event_MouseButtonRelease;
-		bCloseHold = true;
 		m_RMouseDown = false;
 	}
 
 	if (!m_MMouseDown && flags&MOUSE_MBUTTON)
 	{
 		eventType = Event_MouseButtonPress;
-		theHold.Begin();
 		m_MMouseDown = true;
 	}
 	else if (m_MMouseDown && (flags&MOUSE_MBUTTON) == 0)
 	{
 		eventType = Event_MouseButtonRelease;
-		bCloseHold = true;
 		m_MMouseDown = false;
 	}
 
@@ -527,16 +520,20 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	}
 
 	if(host.callMethod("Boolean", "undoRedoCommandsAdded", 0, 0).getBoolean()){
-		if (theHold.Holding()){
-			FabricCore::RTVal fabricUndoVal = host.callMethod("UndoRedoCommand[]", "getUndoRedoCommands", 0, 0);
-			CustomKLUndoRedoCommandObject* pNewUndo = new CustomKLUndoRedoCommandObject(fabricUndoVal);
-			theHold.Put(pNewUndo);
+		bool bCloseHold = false;
+		if (!theHold.Holding()){
+			theHold.Begin();
+			bCloseHold = true;
 		}
+		FabricCore::RTVal fabricUndoVal = host.callMethod("UndoRedoCommand[]", "getUndoRedoCommands", 0, 0);
+		CustomKLUndoRedoCommandObject* pNewUndo = new CustomKLUndoRedoCommandObject(fabricUndoVal);
+		theHold.Put(pNewUndo);
+
+		// if we are in mouse-up, then close our hold
+		if (bCloseHold)
+			theHold.Accept(_T("Splice Actions"));
 	}
 
-	// if we are in mouse-up, then close our hold
-	if (bCloseHold)
-		theHold.Accept(_T("Splice Actions"));
 
 	klevent.invalidate();
 	return res;

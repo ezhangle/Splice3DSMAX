@@ -24,7 +24,7 @@ set CURRDIR=%~dp0
 echo Ensure that the Splice plugin will be able to find the extensions 
 set FABRIC_EXTS_PATH=%FABRIC_EXTS_PATH%;%CURRDIR%..\..\Exts
 
-echo Allow the system to load FabricCore.1.13.dll
+echo Allow the system to load FabricCore dll
 set PATH=%PATH%;%CURRDIR%..\..\lib
 
 echo Save the Scintilla folder to an environment variable that will be accessed in MaxScript

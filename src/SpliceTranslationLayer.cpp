@@ -163,7 +163,7 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 	// so long as they are not reference types...
 	int flags = P_COMPUTED_NAME;
 	int baseType = base_type(type);
-	if (baseType != TYPE_INODE && baseType != TYPE_MTL && baseType != TYPE_TEXMAP)
+	if (!reftarg_type(baseType))
 		flags |= P_ANIMATABLE;
 	if (is_tab(type))
 		flags |= P_VARIABLE_SIZE;
@@ -428,6 +428,46 @@ void SetPortParamID(FabricSplice::DGPort& aPort, ParamID id)
 	aPort.setOption(MAX_PID_OPT, GetVariant((int)id));
 }
 
+std::string GetPortConnection(FabricSplice::DGPort& aPort) 
+{
+	std::string res;
+	if (aPort)
+	{
+		FabricCore::Variant option = aPort.getOption(MAX_SRC_OPT);
+		if(option.isString())
+			res = option.getStringData();
+	}
+	return res;
+}
+
+void SetPortConnection(FabricSplice::DGPort& aPort, const char* name) 
+{
+	if (aPort)
+	{
+		FabricCore::Variant variant = GetVariant(name);
+		aPort.setOption(MAX_SRC_OPT, variant);
+	}
+}
+
+int GetPortConnectionIndex(FabricSplice::DGPort& aPort) 
+{
+	if (aPort)
+	{
+		FabricCore::Variant option = aPort.getOption(MAX_SRC_IDX_OPT);
+		if(option.isSInt32())
+			return (int)option.getSInt32();
+	}
+	return -1;
+}
+
+void SetPortConnectionIndex(FabricSplice::DGPort& aPort, int index) 
+{
+	if (aPort)
+	{
+		return aPort.setOption(MAX_SRC_IDX_OPT, GetVariant(index));
+	}
+}
+
 const char* GetPortName( FabricSplice::DGPort& aPort )
 {
 	return aPort.getName();
@@ -490,6 +530,8 @@ BitArray GetLegalMaxTypes(const char* cType)
 		res.Set(TYPE_INODE);
 		res.Set(TYPE_REFTARG); // Can only be type Object
 	}
+	// All param types can be set to a reference target when connecting ports.
+	res.Set(TYPE_REFTARG);
 	return res;
 }
 
@@ -823,6 +865,43 @@ void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DG
 		case TYPE_INODE:
 			{
 				MaxPtrToSplice(port, t, pblock, (ParamID)id, ivValid);
+				break;
+			}
+		case TYPE_REFTARG:
+			{
+				ReferenceTarget* pSrcContainer = pblock->GetReferenceTarget(id);
+				if (pSrcContainer == nullptr)
+					continue;
+
+				// If we have a reftarg type, we may be connected to another graph
+				std::string portConnection = GetPortConnection(port);
+				if (portConnection.length() > 0) {
+					
+					SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
+					if (pSrcContInterface == nullptr)
+						continue;
+
+					pSrcContInterface->TriggerEvaluate(t, ivValid);
+					FabricSplice::DGPort srcPort = pSrcContInterface->GetPort(portConnection.data());
+					if (srcPort)
+					{
+						FabricCore::RTVal srcVal = srcPort.getRTVal();
+						int srcIndex = GetPortConnectionIndex(port);
+						// If we are connected to an array, take only a single element
+						if (srcIndex >= 0 && srcVal.isArray()) {
+							// Check for OOR
+							if (srcIndex >= srcVal.getArraySize())
+								continue;
+							srcVal = srcVal.getArrayElement(srcIndex);
+						}
+						port.setRTVal(srcVal);
+					}
+				}
+				else 
+				{
+					// TODO
+					//MaxPtrToSplice(port, t, )
+				}
 				break;
 			}
 		case TYPE_MTL:			break;

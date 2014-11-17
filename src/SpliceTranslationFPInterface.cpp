@@ -29,6 +29,16 @@ bool SpliceTranslationFPInterface::RemovePortMSTR(const MSTR& name)
 	return false;
 }
 
+bool SpliceTranslationFPInterface::ConnectPortMSTR( const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex )
+{
+	if (pSrcContainer == NULL)
+		return false;
+
+	CStr cMyPortName = myPortName.ToCStr();
+	CStr cSrcPortName = srcPortName.ToCStr();
+	return ConnectPort(cMyPortName, pSrcContainer, cSrcPortName, srcPortIndex);
+}
+
 void DoShowKLEditor(ReferenceTarget* pTarget)
 {
 	if (pTarget == NULL)

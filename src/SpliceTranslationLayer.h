@@ -29,6 +29,8 @@ class DynPBCustAttrClassDesc;
 // Stores a connection between Max data (ParamID) and Splice data (DGPort)
 //typedef std::pair<ParamID, FabricSplice::DGPort> ConnData;
 #define MAX_PID_OPT "MaxPID"
+#define MAX_SRC_OPT "SrcPort"
+#define MAX_SRC_IDX_OPT "SrcIdx"
 //////////////////////////////////////////////////////////////////////////
 #pragma region Utility functions
 /** Add a new parameter definition to the given pblock descriptor
@@ -76,6 +78,10 @@ const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, int
 /** Get various useful info's from fabric Ports */
 int GetPortParamID(FabricSplice::DGPort& aPort);
 void SetPortParamID(FabricSplice::DGPort& aPort, ParamID id);
+std::string GetPortConnection(FabricSplice::DGPort& aPort);
+void SetPortConnection(FabricSplice::DGPort& aPort, const char* name);
+int GetPortConnectionIndex(FabricSplice::DGPort& aPort);
+void SetPortConnectionIndex(FabricSplice::DGPort& aPort, int index);
 const char* GetPortName(FabricSplice::DGPort& aPort);
 const char* GetPortType(FabricSplice::DGPort& aPort);
 
@@ -279,8 +285,9 @@ public:
 	// Port creation/management
 
 	// Get the number of ports on this graph
-	virtual int GetPortCount() { return m_graph.getDGPortCount(); }
-	//virtual Tab<TSTR*> GetPortNames();
+	int GetPortCount() { return m_graph.getDGPortCount(); }
+	FabricSplice::DGPort GetPort(int i) { return (i < GetPortCount() && i > 0) ? m_graph.getDGPort(i) : FabricSplice::DGPort(); }
+	FabricSplice::DGPort GetPort(const char* name) { return m_graph.getDGPort(name); }
 
 	// Splice port management
 	// Create a new port.  A matching Max parameter 
@@ -310,6 +317,11 @@ public:
 	// Return the ID of port in our paramblock, or -1 if not connected
 	int GetPortParamID(int index);
 	void SetPortParamID(int index, ParamID id);
+
+	// Connect myPortName to the output port on pSrcContainer named srcPortName
+	bool ConnectPort(const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex);
+	// Disconnect a previously connected port.
+	bool DisconnectPort(const char* myPortName);
 
 	//virtual MSTR GetPortMaxValue(int i);
 	//virtual MSTR GetPortMinValue(int i);
@@ -343,6 +355,8 @@ public:
 
 	// Push our parameters to the Splice system, and get the results back...
 	const TResultType& Evaluate(TimeValue t, Interval& ivValid);
+	// Do an evaluation, but do not return the calculated value
+	void TriggerEvaluate(TimeValue t, Interval& ivValid);
 
 	/*! Every client should call this function to create the hook
 		up our maxscript exposure */

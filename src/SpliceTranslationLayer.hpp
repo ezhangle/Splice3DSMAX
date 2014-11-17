@@ -798,6 +798,69 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetPortParamID(int i, Para
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectPort( const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex )
+{
+	if (pSrcContainer == nullptr)
+		return false;
+
+	SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
+	if (pSrcContInterface == nullptr)
+	 return false;
+
+	// First, do our ports exist?
+	FabricSplice::DGPort srcPort = pSrcContInterface->GetPort(srcPortName);
+	if (!srcPort || srcPort.getMode() == FabricSplice::Port_Mode_IN)
+		return false;
+	FabricSplice::DGPort destPort = GetPort(myPortName);
+	if (!destPort || destPort.getMode() != FabricSplice::Port_Mode_IN)
+		return false;
+
+	// Are they of the same type?
+	if (strcmp(srcPort.getDataType(), destPort.getDataType()) != 0)
+		return false;
+
+	// Are we connecting to an array, and is that expected?
+	if ((srcPortIndex >= 0) && !srcPort.isArray())
+		return false;
+
+	// Ok - these ports are good to go.  Connect 'em up.
+	int res = SetMaxConnectedType(destPort, TYPE_REFTARG);
+	if (res < 0)
+		return false;
+	m_pblock->SetValue((ParamID)res, 0, pSrcContainer);
+	SetPortConnection(destPort, srcPortName);
+	SetPortConnectionIndex(destPort, srcPortIndex);
+
+	// Ensure there are enough indices in the RTVal array
+	if (srcPortIndex >= 0) 
+	{
+		FabricCore::RTVal rtVal = srcPort.getRTVal();
+		if (rtVal.getArraySize() <= (uint32_t)srcPortIndex)
+			rtVal.setArraySize(srcPortIndex + 1);
+	}
+	return true;
+}
+
+
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::DisconnectPort(const char* myPortName)
+{
+	FabricSplice::DGPort connectedPort = GetPort(myPortName);
+	if (connectedPort) 
+	{
+		std::string connection = GetPortConnection(connectedPort);
+		if (connection == "") 
+		{
+			SetMaxConnectedType(connectedPort, -1);
+			connectedPort.setOption(MAX_SRC_OPT, FabricCore::Variant());
+			return true;
+		}
+	}
+	return false;
+}
+
 template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::GetMaxConnectedType( int i )
 {
@@ -845,7 +908,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(FabricS
 	{
 		// Check that its not the correct type already
 		if (m_pblock->GetParamDef((ParamID)pid).type == maxType)
-			return maxType;
+			return pid;
 
 		// Wrong type, remove original
 		DeleteMaxParameter((ParamID)pid);
@@ -856,7 +919,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(FabricS
 	ParamID newId = AddMaxParameter(pNewDesc, maxType, ::GetPortName(aPort));
 	CreateParamBlock(pNewDesc);
 	::SetPortParamID(aPort, newId);
-	return true;
+	return newId;
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -1012,6 +1075,14 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 	ivValid &= m_valid;
 	return m_value;
 }
+
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::TriggerEvaluate( TimeValue t, Interval& ivValid )
+{
+	// Call evaluate
+	Evaluate(t, ivValid);
+}
+
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::InitMixinInterface()
 {

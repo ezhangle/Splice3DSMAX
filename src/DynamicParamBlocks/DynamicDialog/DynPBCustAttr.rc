@@ -111,6 +111,11 @@ BEGIN
     IDS_SPLICE_FLT_CTRL_CLASS_NAME "Splice Float"
 END
 
+STRINGTABLE
+BEGIN
+    IDS_SPLICE_REFTARG_CLASS_NAME "Reference Target"
+END
+
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 

@@ -51,7 +51,7 @@ __declspec( dllexport ) const TCHAR* LibDescription()
 // This function returns the number of plug-in classes this DLL
 __declspec( dllexport ) int LibNumberClasses()
 {
-	return 10;
+	return 11;
 }
 
 // This function returns the number of plug-in classes this DLL
@@ -65,6 +65,7 @@ __declspec( dllexport ) ClassDesc* LibClassDesc(int i)
 	case 3: return SpliceTranslationLayer<Control, Matrix3>::GetClassDesc();
 	case 8: return SpliceTranslationLayer<OSModifier, Mesh>::GetClassDesc();
 	case 9: return SpliceTranslationLayer<GeomObject, Mesh>::GetClassDesc();
+	case 10: return SpliceTranslationLayer<ReferenceTarget, int>::GetClassDesc();
 //	case 3: return GetDynPBlockClassDesc();
 		default: return 0;
 	}
@@ -128,6 +129,7 @@ __declspec( dllexport ) int LibInitialize(void)
 	SpliceTranslationLayer<Control, Matrix3>::InitMixinInterface();
 	SpliceTranslationLayer<OSModifier, Mesh>::InitMixinInterface();
 	SpliceTranslationLayer<GeomObject, Mesh>::InitMixinInterface();
+	SpliceTranslationLayer<ReferenceTarget, int>::InitMixinInterface();
 
 	// Force init/cleanup of client
 	RegisterNotification(OnStartup, NULL, NOTIFY_SYSTEM_STARTUP);

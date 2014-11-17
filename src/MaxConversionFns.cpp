@@ -169,6 +169,11 @@ FabricCore::Variant GetVariant(const MCHAR* param)
 	return FabricCore::Variant::CreateString(cStr.data());
 }
 
+FabricCore::Variant GetVariant(const char* param)
+{
+	return FabricCore::Variant::CreateString(param);
+}
+
 #pragma endregion // GetVariants
 
 #pragma region Get RTVals
@@ -332,6 +337,12 @@ FabricCore::RTVal GetRTVal(const Mesh& param)
 
 
 #pragma region Splice to Max
+
+template<>
+void SpliceToMaxValue(FabricCore::RTVal& rtVal, int& param)
+{
+	param = static_cast<float>(rtVal.getSInt32());
+}
 
 template<>
 void SpliceToMaxValue(FabricCore::RTVal& rtVal, float& param)

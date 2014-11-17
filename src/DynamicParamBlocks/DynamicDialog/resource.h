@@ -18,6 +18,7 @@
 #define IDS_SPLICE_SCL_CTRL_CLASS_NAME  14
 #define IDS_SPLICE_FLT_CTRL_CLASS_NAME  15
 #define IDD_UTIL_UI                     102
+#define IDS_SPLICE_REFTARG_CLASS_NAME   104
 #define IDD_PARAM_GENERATION_UI         900
 #define IDC_CLOSEBUTTON                 1000
 #define IDC_DOSTUFF                     1000
@@ -45,7 +46,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        104
+#define _APS_NEXT_RESOURCE_VALUE        105
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1018
 #define _APS_NEXT_SYMED_VALUE           101

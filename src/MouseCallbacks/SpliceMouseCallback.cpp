@@ -330,6 +330,12 @@ FabricCore::RTVal SetupViewport(ViewExp* pView)
 	return inlineViewport;
 }
 
+// Lazily duplicating the method here from SpliceLogging.cpp because I was getting errors when I moved it to a header file. 
+std::wstring s2ws2(const std::string& s)
+{
+	std::wstring r(s.begin(), s.end());
+	return r;
+}
 
 int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2 m )
 {
@@ -530,8 +536,18 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 		theHold.Put(pNewUndo);
 
 		// if we are in mouse-up, then close our hold
-		if (bCloseHold)
-			theHold.Accept(_T("Splice Actions"));
+		if (bCloseHold){
+			if (fabricUndoVal.getArraySize() == 1){
+				std::string desc(fabricUndoVal.getArrayElement(0).callMethod("String", "getDesc", 0, 0).getStringCString());
+#ifdef _UNICODE
+				theHold.Accept(s2ws2(desc).data());
+#else
+				theHold.Accept((desc + std::string("\n")).data());
+#endif
+			}
+			else	
+				theHold.Accept(_T("Splice Manipulation"));
+		}
 	}
 
 

@@ -86,35 +86,28 @@ void SpliceControlRotation::Copy(Control *)
 
 void SpliceControlRotation::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
-	try
+	if(method == CTRL_RELATIVE)
 	{
-		if(method == CTRL_RELATIVE)
-		{
-			Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
-			Point3 pos = pInVal->GetTrans();
-			MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
-			const Quat& res = Evaluate(t, interval);
-			// To apply the value relatively, we pre-rotate by the result
-			Matrix3 tmRot;
-			res.MakeMatrix(tmRot);
-			*pInVal = *pInVal * tmRot;
-			pInVal->SetTrans(pos);
-		}
-		else
-		{
-			Quat* pOutVal = reinterpret_cast<Quat*>(val);
-			MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3(1));
-			*pOutVal = Evaluate(t, interval);
-		}
+		Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
+		Point3 pos = pInVal->GetTrans();
+		MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
+		const Quat& res = Evaluate(t, interval);
+		// To apply the value relatively, we pre-rotate by the result
+		Matrix3 tmRot;
+		res.MakeMatrix(tmRot);
+		*pInVal = *pInVal * tmRot;
+		pInVal->SetTrans(pos);
+	}
+	else
+	{
+		Quat* pOutVal = reinterpret_cast<Quat*>(val);
+		MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3(1));
+		*pOutVal = Evaluate(t, interval);
+	}
 
-		// We cannot detect validity intervals from KL graphs, 
-		// so just set validity to the current instant.
-		interval.SetInstant(t);
-	}
-	catch(FabricCore::Exception e)
-	{
-		//logError(e.getDesc_cstr());
-	}
+	// We cannot detect validity intervals from KL graphs, 
+	// so just set validity to the current instant.
+	interval.SetInstant(t);
 }
 
 

@@ -9,6 +9,7 @@
 #include "FabricCore.h"
 #include "FabricSplice.h"
 #include "..\SpliceEvents.h"
+#include "..\Splice3dsmax.h"
 
 class CustomKLUndoRedoCommandObject : public RestoreObj
 {
@@ -338,6 +339,8 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	if (msg == MOUSE_IDLE)
 		return TRUE;
 
+	MAXSPLICE_CATCH_BEGIN()
+
 	int res = FALSE;
 	
 	// Hide the cursor (we assume here for the point of Siggraph demo's that we are in painting mode)
@@ -458,17 +461,7 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	args[3] = FabricSplice::constructUInt32RTVal(modifiers);
 	klevent.callMethod("", "init", 4, &args[0]);
 
-	try{
-		mEventDispatcher.callMethod("Boolean", "onEvent", 1, &klevent);
-	}
-	catch(FabricCore::Exception e)    {
-		logMessage(e.getDesc_cstr());
-		res = 0;
-	}
-	catch(FabricSplice::Exception e){
-		logMessage(e.what());
-		res = 0;
-	}
+	mEventDispatcher.callMethod("Boolean", "onEvent", 1, &klevent);
 
 	bool result = klevent.callMethod("Boolean", "isAccepted", 0, 0).getBoolean();
 	
@@ -547,10 +540,14 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 
 	klevent.invalidate();
 	return res;
+
+	MAXSPLICE_CATCH_RETURN(FALSE)
 }
 
 void SpliceMouseCallback::EnterMode()
 {
+	MAXSPLICE_CATCH_BEGIN();
+
 	const FabricCore::Client * client = NULL;
 	FECS_DGGraph_getClient(&client);
 
@@ -569,10 +566,13 @@ void SpliceMouseCallback::EnterMode()
 		mEventDispatcher.callMethod("", "activateManipulation", 0, 0);
 		//in_ctxt.Redraw(true);
 	}
+	MAXSPLICE_CATCH_END()
 }
 
 void SpliceMouseCallback::ExitMode()
 {
+	MAXSPLICE_CATCH_BEGIN()
+
 	DbgAssert(!theHold.Holding());
 	if (theHold.Holding())
 		theHold.Accept(_T("ERROR - Splice Actions"));
@@ -584,4 +584,6 @@ void SpliceMouseCallback::ExitMode()
 		mEventDispatcher.callMethod("", "deactivateManipulation", 0, 0);
 		mEventDispatcher.invalidate();
 	}
+
+	MAXSPLICE_CATCH_END()
 }

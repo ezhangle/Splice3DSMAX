@@ -49,27 +49,18 @@ bool SpliceEvents::MouseEventsHooked()
 
 void doSpliceDrawing(void *data)
 {
-	// draw all gizmos
-	try
-	{
+	// Invoke the Splice Drawing now that we have the OpenGL context bound.
+
+	MAXSPLICE_CATCH_BEGIN();
+
 		ViewExp *vpt = reinterpret_cast<ViewExp*>(data);
 		int id = vpt->GetViewID();
 		if(SpliceEvents::s_DrawContexts[id].isValid())
 		{
 			FabricSplice::SceneManagement::drawOpenGL(SpliceEvents::s_DrawContexts[id]);
 		}
-	}
-	catch(FabricSplice::Exception e)
-	{
-		CStr res = e.what();
-		logMessage(res);
-	}
-	catch(FabricCore::Exception e)
-	{
-		CStr res = e.getDesc_cstr();
-		logMessage(res);
-	}
-	
+
+	MAXSPLICE_CATCH_END()
 }
 
 FabricCore::RTVal SpliceEvents::s_DrawContexts[MAX_VPTS];
@@ -90,6 +81,8 @@ public:
 
 	virtual void Display( TimeValue t, ViewExp *vpt, int flags )
 	{
+		MAXSPLICE_CATCH_BEGIN();
+
 		if(!FabricSplice::SceneManagement::hasRenderableContent())
 			return;
 		
@@ -118,6 +111,8 @@ public:
 			static StripTab stab; 
 			gw->processStrips(id, stripCt, &stab, doSpliceDrawing);
 		}
+
+		MAXSPLICE_CATCH_END();
 	}
 
 	virtual void GetViewportRect( TimeValue t, ViewExp *vpt, Rect *rect )

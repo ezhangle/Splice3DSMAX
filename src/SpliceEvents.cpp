@@ -13,7 +13,6 @@ SpliceEvents* SpliceEvents::s_Instance = nullptr;
 SpliceEvents::SpliceEvents()
 	: m_VptCallback(nullptr)
 {
-
 }
 
 SpliceEvents::~SpliceEvents()
@@ -27,14 +26,14 @@ SpliceEvents::~SpliceEvents()
 
 void SpliceEvents::HookMouseEvents()
 {
-	GetCOREInterface()->PushCommandMode(&m_MouseCommandMode);
+	if (!MouseEventsHooked())
+		GetCOREInterface()->PushCommandMode(&m_MouseCommandMode);
 }
 
 void SpliceEvents::UnHookMouseEvents()
 {
 	Interface* pCore = GetCOREInterface();
-	if (pCore->GetCommandMode() == &m_MouseCommandMode)
-		pCore->PopCommandMode();
+	pCore->DeleteMode(&m_MouseCommandMode);
 }
 
 bool SpliceEvents::MouseEventsHooked()
@@ -83,6 +82,10 @@ class SpliceViewportDrawCallback : public ViewportDisplayCallback
 public:
 	SpliceViewportDrawCallback()
 	{
+	}
+	~SpliceViewportDrawCallback() 
+	{
+		ReleaseAllDrawContexts();
 	}
 
 	virtual void Display( TimeValue t, ViewExp *vpt, int flags )
@@ -220,6 +223,14 @@ public:
 			SpliceEvents::s_DrawContexts[id] = FabricSplice::constructObjectRTVal("DrawContext");
 		return SpliceEvents::s_DrawContexts[id];
 	}
+
+	void ReleaseAllDrawContexts() 
+	{
+		for (int i = 0; i < MAX_VPTS; i++) {
+			// We release our draw contexts by assigning blank RTVals over them
+			SpliceEvents::s_DrawContexts[i] = FabricCore::RTVal();
+		}
+	}
 };
 
 void SpliceEvents::HookViewportRender()
@@ -240,9 +251,11 @@ void SpliceEvents::HookViewportRender()
 	}
 	else 
 	{
-		if (m_VptCallback == nullptr)
+		if (m_VptCallback == nullptr) 
+		{
 			m_VptCallback = new SpliceViewportDrawCallback();
-		GetCOREInterface()->RegisterViewportDisplayCallback(FALSE, m_VptCallback) ;
+			GetCOREInterface()->RegisterViewportDisplayCallback(FALSE, m_VptCallback) ;
+		}
 	}
 }
 

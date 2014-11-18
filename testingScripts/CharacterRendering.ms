@@ -15,7 +15,7 @@ require FbxHelpers;
 
 operator characterDrawing(
   String FbxFile, 
-  io Scalar time,
+  in EvalContext context,
   io FbxCharacter fbxCharacter,
   io InlineMatrixArrayTexture poseTexture
 ) {
@@ -50,9 +50,9 @@ operator characterDrawing(
   ///
   // Update the pose
   if(fbxCharacter.initialized()){
-    report('Eval at Time: ' + time);
+    report('Eval at Time: ' + context.time);
     ClipPose pose = fbxCharacter.getPose();
-    pose.evaluate(time);
+    pose.evaluate(context.time);
     poseTexture.update(fbxCharacter.getSkinningMatrices());
   }
 }"

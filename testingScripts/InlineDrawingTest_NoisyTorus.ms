@@ -2,7 +2,7 @@ m = SpliceMesh()
 m.AddInputPort "speed" "Scalar" -2
 m.AddInputPort "factor1" "Scalar" -2
 m.AddInputPort "factor2" "Scalar" -2
-m.AddInputPorto "mesh" "PolygonMesh" -1
+m.AddInputPort "mesh" "PolygonMesh" -1
 
 entryPt = "drawingPoints";
 klCode = "
@@ -22,7 +22,7 @@ function Float32 lerp(Float32 t, Float32 a, Float32 b)
 {
   return a + t * (b - a);
 }
-
+p
 function Float32 grad(SInt32 hash, Float32 x, Float32 y, Float32 z) 
 {
   SInt32 h = hash & 15;
@@ -130,7 +130,7 @@ operator deform<<<index>>>(
     positions[index] = originalPositions[index] + randomVel * factor;
 }
 
-operator drawingPoints(Scalar speed, Scalar factor1, Scalar factor2, io PolygonMesh mesh, in Scalar time) {
+operator drawingPoints(Scalar speed, Scalar factor1, Scalar factor2, io PolygonMesh mesh, in EvalContext context) {
 
   GeometryAttributes attributes = null;
   Vec3Attribute positionsAttr = null;
@@ -171,7 +171,7 @@ operator drawingPoints(Scalar speed, Scalar factor1, Scalar factor2, io PolygonM
 
   Size numPositions = positionsAttr.values.size();
   deform<<<numPositions>>>(
-    time, 
+    context.time, 
     speed,
     factor1,
     factor2,
@@ -182,10 +182,6 @@ operator drawingPoints(Scalar speed, Scalar factor1, Scalar factor2, io PolygonM
   );
   mesh.incrementPointPositionsVersion();
   mesh.getNormals().incrementVersion();
-
-
-
-
 }";
 m.SetKLCode entryPt klCode
 

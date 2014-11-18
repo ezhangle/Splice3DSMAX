@@ -32,9 +32,6 @@ SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(bool ini
 template<typename TBaseClass, typename TResultType>
 SpliceTranslationLayer<TBaseClass, TResultType>::~SpliceTranslationLayer()
 {
-	// Delete the current operator(s).
-	m_graph.clear();
-
 	// We _must_ have been released by now
 	DbgAssert(m_pblock == NULL);
 
@@ -52,11 +49,19 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init()
 	if (!m_graph.isValid())
 	{
 		// create a graph to hold our dependency graph nodes.
-		m_graph = FabricSplice::DGGraph("myGraph");
+		m_graph = FabricSplice::DGGraph("3dsMaxGraph");
 		m_graph.constructDGNode();
 		m_graph.setUserPointer(this);
 
+		// Set static context values
+		MSTR filepath = GetCOREInterface()->GetCurFilePath();
+		FabricCore::RTVal evalContext = m_graph.getEvalContext();
+		evalContext.setMember("host", FabricSplice::constructStringRTVal("3dsMax"));
+		evalContext.setMember("graph", FabricSplice::constructStringRTVal(m_graph.getName()));
+		evalContext.setMember("currentFilePath", FabricSplice::constructStringRTVal(filepath.ToCStr().data()));
+
 		ResetPorts();
+
 		return true;
 	}
 	return false;
@@ -519,12 +524,6 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCode(const std
 		return "ERROR: Cannot cannot compile empty script";// TODO: Globalize this
 
 	GatherCompilerResults doGather;
-	if (!m_KLFile.empty())
-	{
-		// Warn that the link between file and this operator is breaking
-		doGather.LogSomething("WARNING: Manually setting code of file-linked class");// TODO: Globalize this
-		m_KLFile.clear();
-	}
 
 	// Try-catch
 	try {
@@ -551,8 +550,8 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCode(const std
 			// Tell max, we might have changed here.
 			NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
 			m_valid = NEVER;
-			doGather.LogSomething("OK");// TODO: Globalize this
-		}
+			doGather.LogSomething("OK");
+		}                                                                                                                                                                                                                                                           
 		else
 		{
 			// Theoretically, we should never actually reach this code.  Fabric will throw if somethins outta whack
@@ -564,58 +563,6 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCode(const std
 		doGather.LogSomething(e.what());
 	}
 	return doGather.GetGatheredResults();
-}
-
-template<typename TBaseClass, typename TResultType>
-std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLFile( const char* filename )
-{
-	// Dont even attempt to load an empty string
-	if (filename != NULL)
-	{
-		bool res = m_graph.loadFromFile(filename);
-		if (res)
-		{
-			// Invalid current value
-			m_valid = NEVER;
-
-			// Clear existing ports?
-			// On successful load, we want to hook up our ports
-			UINT nPorts = m_graph.getDGPortCount();
-
-			// Create the default new descriptor
-			ParamBlockDesc2* pNewDesc = NULL;
-			for (UINT i = 0; i < nPorts; i++)
-			{
-				FabricSplice::DGPort aPort = m_graph.getDGPort(i);
-
-				FabricSplice::Port_Mode mode = aPort.getMode();
-				if (mode != FabricSplice::Port_Mode_IN)
-				{
-					// Is this our in-port?
-					int type = SpliceTypeToMaxType(aPort.getDataType());
-					if (type == GetValueType())
-						m_valuePort = aPort;
-				}
-				else
-				{
-					int type = SpliceTypeToDefaultMaxType(aPort.getDataType());
-					
-					if (pNewDesc == NULL)
-						pNewDesc = GetClassDesc()->CreatePBDesc();
-					
-					// Add a new parameter to our pblock
-					ParamID pid = AddMaxParameter(pNewDesc, type, aPort.getName());
-					
-					// Store the max connection
-					::SetPortParamID(aPort, pid);
-				}
-			}
-			// reset our parameters to whats currently being used.
-			CreateParamBlock(pNewDesc);
-			m_KLFile = filename;
-		}
-	}
-	return "OK";
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -851,6 +798,69 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetPortParamID(int i, Para
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectPort( const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex )
+{
+	if (pSrcContainer == nullptr)
+		return false;
+
+	SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
+	if (pSrcContInterface == nullptr)
+	 return false;
+
+	// First, do our ports exist?
+	FabricSplice::DGPort srcPort = pSrcContInterface->GetPort(srcPortName);
+	if (!srcPort || srcPort.getMode() == FabricSplice::Port_Mode_IN)
+		return false;
+	FabricSplice::DGPort destPort = GetPort(myPortName);
+	if (!destPort || destPort.getMode() != FabricSplice::Port_Mode_IN)
+		return false;
+
+	// Are they of the same type?
+	if (strcmp(srcPort.getDataType(), destPort.getDataType()) != 0)
+		return false;
+
+	// Are we connecting to an array, and is that expected?
+	if ((srcPortIndex >= 0) && !srcPort.isArray())
+		return false;
+
+	// Ok - these ports are good to go.  Connect 'em up.
+	int res = SetMaxConnectedType(destPort, TYPE_REFTARG);
+	if (res < 0)
+		return false;
+	m_pblock->SetValue((ParamID)res, 0, pSrcContainer);
+	SetPortConnection(destPort, srcPortName);
+	SetPortConnectionIndex(destPort, srcPortIndex);
+
+	// Ensure there are enough indices in the RTVal array
+	if (srcPortIndex >= 0) 
+	{
+		FabricCore::RTVal rtVal = srcPort.getRTVal();
+		if (rtVal.getArraySize() <= (uint32_t)srcPortIndex)
+			rtVal.setArraySize(srcPortIndex + 1);
+	}
+	return true;
+}
+
+
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::DisconnectPort(const char* myPortName)
+{
+	FabricSplice::DGPort connectedPort = GetPort(myPortName);
+	if (connectedPort) 
+	{
+		std::string connection = GetPortConnection(connectedPort);
+		if (connection == "") 
+		{
+			SetMaxConnectedType(connectedPort, -1);
+			connectedPort.setOption(MAX_SRC_OPT, FabricCore::Variant());
+			return true;
+		}
+	}
+	return false;
+}
+
 template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::GetMaxConnectedType( int i )
 {
@@ -868,19 +878,12 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(FabricS
 	if (!aPort.isValid())
 		return -1;
 
-	// -1 means no max connection
-	if (maxType == -1) 
-	{
-		int id = ::GetPortParamID(aPort);
-		if (id >= 0)
-			DeleteMaxParameter((ParamID)id);
-		return -1;
-	}
-
 	// The user has requested the default type (-2)
 	const char* spliceType = ::GetPortType(aPort);
-	if (maxType < 0)
+	if (maxType == -2)
 		maxType = SpliceTypeToDefaultMaxType(spliceType);
+	else if (maxType == -1) 
+	{ /* do nothing here, delete was requested */ }
 	else
 	{
 		// Figure out what kind of parameter
@@ -891,13 +894,21 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(FabricS
 			maxType = SpliceTypeToDefaultMaxType(spliceType); // Reset to default
 	}
 
-	// Do we have an existing Max parameter?
+	// -1 means no max connection, remove one if exists
 	int pid = ::GetPortParamID(aPort);
+	if (maxType == -1) 
+	{
+		if (pid >= 0)
+			DeleteMaxParameter((ParamID)pid);
+		return -1;
+	}
+
+	// Do we have an existing Max parameter?
 	if (pid >= 0)
 	{
 		// Check that its not the correct type already
 		if (m_pblock->GetParamDef((ParamID)pid).type == maxType)
-			return maxType;
+			return pid;
 
 		// Wrong type, remove original
 		DeleteMaxParameter((ParamID)pid);
@@ -908,7 +919,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(FabricS
 	ParamID newId = AddMaxParameter(pNewDesc, maxType, ::GetPortName(aPort));
 	CreateParamBlock(pNewDesc);
 	::SetPortParamID(aPort, newId);
-	return true;
+	return newId;
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -923,12 +934,84 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(int i, 
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::SetSpliceGraph(const FabricSplice::DGGraph& graph, IParamBlock2* pblock) 
+void SpliceTranslationLayer<TBaseClass, TResultType>::SetSpliceGraph(const FabricSplice::DGGraph& graph, bool createMaxParams) 
 { 
+	// First, clear any existing parameters
+	ReplaceReference(0, nullptr);
+
 	// Reset all variables.
 	m_graph = graph; 
-	//ReplaceReference(0, pblock);
+
+	// Invalid current value
+	m_valid = NEVER;
+
 	ResetPorts();
+
+	// Early exit
+	if (!m_graph.isValid())
+		return;
+
+	// Try to find an output value for our class
+	bool foundOutPort = false;
+	int nPorts = m_graph.getDGPortCount();
+	for (int i = 0; i < nPorts; i++)
+	{
+		std::string portName = m_graph.getDGPortName(i);
+		FabricSplice::DGPort port = m_graph.getDGPort(i);
+		if(!port.isValid())
+			continue;
+
+		FabricSplice::Port_Mode portMode = port.getMode();
+
+		if (portMode != FabricSplice::Port_Mode_IN)
+		{
+			if (!foundOutPort)
+			{
+				const char* sDataType = port.getDataType();
+				int type = SpliceTypeToMaxType(sDataType);
+				// Is this legal for us?  If so, connect our value port
+				if (type >= 0)
+				{
+					SetOutPort(port);
+					bool isArray = port.isArray();
+					if (isArray)
+						SetOutPortArrayIdx(0);
+					foundOutPort = true;
+				}
+			}
+		}
+		else if (createMaxParams)
+		{
+			// We have been requested to create Max parameters for all possible ports.
+			SetMaxConnectedType(i, -2); // Create default type
+		}
+	}
+
+	if (!foundOutPort)
+		m_valuePort = FabricSplice::DGPort();
+};
+
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::LoadFromFile(const MCHAR* filename, bool createMaxParams) 
+{ 
+	CStr cFilename = CStr::FromMCHAR(filename);
+	FabricSplice::DGGraph graph("newGraph");
+	bool res = graph.loadFromFile(cFilename);
+	if (!res)
+		return false;
+
+	SetSpliceGraph(graph, true);
+	return true;
+};
+
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::SaveToFile(const MCHAR* filename) 
+{ 
+	if (!m_graph.isValid())
+		return false;
+
+	CStr cFile = CStr::FromMCHAR(filename);
+	return m_graph.saveToFile(cFile.data());
 };
 
 template<typename TBaseClass, typename TResultType>
@@ -936,8 +1019,6 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
 {
 	// Setup any necessary ports for the current graph
 	m_valuePort = FabricSplice::DGPort();
-	// Our graphs always include a time component
-	m_timePort = AddSpliceParameter(m_graph, TYPE_TIMEVALUE, _M("time"), FabricSplice::Port_Mode_IN);
 }
 
 #pragma endregion
@@ -951,17 +1032,15 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 	if (!m_graph.isValid())
 		return m_value;
 
-	// Set time, if the input requests it.
-	if (m_timePort.isValid())
-	{
-		MaxValueToSplice(m_timePort, 0, ivValid, TicksToSec(t));
-	}
-
 	// If our value is valid, do not re-evaluate
 	if (!m_valid.InInterval(t))
 	{
 		try
 		{
+			// setup the context
+			FabricCore::RTVal evalContext = m_graph.getEvalContext();
+			evalContext.setMember("time", FabricSplice::constructFloat32RTVal(TicksToSec(t)));
+
 			// Reset our internal validity times;
 			m_valid.SetInfinite();
 			// Set  all Max values on their splice equivalents
@@ -996,6 +1075,14 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 	ivValid &= m_valid;
 	return m_value;
 }
+
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::TriggerEvaluate( TimeValue t, Interval& ivValid )
+{
+	// Call evaluate
+	Evaluate(t, ivValid);
+}
+
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::InitMixinInterface()
 {

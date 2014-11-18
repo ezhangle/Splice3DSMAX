@@ -23,11 +23,11 @@ klCode = "
 require Math;
 require Geometry;
 
-operator SpliceModifier(io PolygonMesh modifierMesh, in Scalar amplitude, in Scalar frequency, in Scalar phaseOffset, in Scalar time) {
+operator SpliceModifier(io PolygonMesh modifierMesh, in Scalar amplitude, in Scalar frequency, in Scalar phaseOffset, in EvalContext context) {
   for (Integer i = 0; i < modifierMesh.pointCount(); i++)
   {
 		Vec3 v = modifierMesh.getPointPosition(i);
-		v.z = sin(time + phaseOffset + v.y * frequency / 10) * amplitude;
+		v.z = sin(context.time + phaseOffset + v.y * frequency / 10) * amplitude;
 		modifierMesh.setPointPosition(i, v);
   }
 }";

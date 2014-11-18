@@ -29,6 +29,8 @@ class DynPBCustAttrClassDesc;
 // Stores a connection between Max data (ParamID) and Splice data (DGPort)
 //typedef std::pair<ParamID, FabricSplice::DGPort> ConnData;
 #define MAX_PID_OPT "MaxPID"
+#define MAX_SRC_OPT "SrcPort"
+#define MAX_SRC_IDX_OPT "SrcIdx"
 //////////////////////////////////////////////////////////////////////////
 #pragma region Utility functions
 /** Add a new parameter definition to the given pblock descriptor
@@ -55,7 +57,7 @@ IParamBlock2* CreateParamBlock(ParamBlockDesc2* pDesc, IParamBlock2* pCopyThis, 
 BitArray GetLegalMaxTypes(const char* spliceType);
 
 /** Returns the Max ParamType2 that matches the named Splice type (NOTE - may not be legal for PB2) */
-int SpliceTypeToMaxType(const char* cType);
+int SpliceTypeToMaxType(const char* cType, bool isArray=false);
 
 /** Returns the default Max ParamType2 that matches the named Splice type */
 int SpliceTypeToDefaultMaxType(const char* cType);
@@ -76,6 +78,10 @@ const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, int
 /** Get various useful info's from fabric Ports */
 int GetPortParamID(FabricSplice::DGPort& aPort);
 void SetPortParamID(FabricSplice::DGPort& aPort, ParamID id);
+std::string GetPortConnection(FabricSplice::DGPort& aPort);
+void SetPortConnection(FabricSplice::DGPort& aPort, const char* name);
+int GetPortConnectionIndex(FabricSplice::DGPort& aPort);
+void SetPortConnectionIndex(FabricSplice::DGPort& aPort, int index);
 const char* GetPortName(FabricSplice::DGPort& aPort);
 const char* GetPortType(FabricSplice::DGPort& aPort);
 
@@ -136,18 +142,11 @@ protected:
 
 #pragma region Splice Connections
 
-	// If this value is set, the file specified will be
-	// attempt to be loaded and its contents read into the
-	// m_KLScript value on load.
-	std::string m_KLFile;
-
 	// For now, till I figure out exactly how we go in->out of KL, restrict to 1 operator
 	std::string m_operator;
 
 	// The evaluation graph is the brains of the KL system. (I think)
 	FabricSplice::DGGraph m_graph;
-	// Every class in Max is time-sensitive.
-	FabricSplice::DGPort m_timePort;
 	// Every splice class generates a result
 	FabricSplice::DGPort m_valuePort;
 	// If our valuePort is an array port, this value specifies
@@ -211,13 +210,6 @@ public:
 	// in the same dll it is allocated from
 	void						DeleteThis()						{ delete this; }
 #pragma endregion
-
-	/*! We need to store the name of our parameters in order to display them correctly.
-		The values set by this function are the labels for the parameters we can see in Max
-		\param pid - The id of the parameter.
-		\param s - the label for the parameter*/
-	//NameData& AddParamData(ParamID pid, const MCHAR* s);
-	//NameData* GetParamData(ParamID pid);
 
 	/*! Gets the type of the data evaluated by this class
 		This return value needs to match the TDataType template param */
@@ -290,15 +282,12 @@ public:
 	std::string GetKLOperatorName();
 	std::string SetKLCode(const std::string& name, const std::string& script);
 
-	// Get/Set a link to an external KL file
-	const char* GetKLFile() { return m_KLFile.data(); }
-	std::string SetKLFile(const char* filename);
-
 	// Port creation/management
 
 	// Get the number of ports on this graph
-	virtual int GetPortCount() { return m_graph.getDGPortCount(); }
-	//virtual Tab<TSTR*> GetPortNames();
+	int GetPortCount() { return m_graph.getDGPortCount(); }
+	FabricSplice::DGPort GetPort(int i) { return (i < GetPortCount() && i > 0) ? m_graph.getDGPort(i) : FabricSplice::DGPort(); }
+	FabricSplice::DGPort GetPort(const char* name) { return m_graph.getDGPort(name); }
 
 	// Splice port management
 	// Create a new port.  A matching Max parameter 
@@ -316,6 +305,8 @@ public:
 	const char* GetPortType(int i);
 	bool IsPortArray(int i) { return (i < GetPortCount()) ? m_graph.getDGPort(i).isArray() : NULL; }
 
+	std::string GetAllPortSignature() { return (m_graph) ? m_graph.generateKLOperatorParameterList().getString_cstr() : NULL; }
+
 	// Get the name of the port we our value from
 	const char* GetOutPortName() { return m_valuePort.getName(); }
 	bool SetOutPortName(const char* name);
@@ -326,6 +317,11 @@ public:
 	// Return the ID of port in our paramblock, or -1 if not connected
 	int GetPortParamID(int index);
 	void SetPortParamID(int index, ParamID id);
+
+	// Connect myPortName to the output port on pSrcContainer named srcPortName
+	bool ConnectPort(const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex);
+	// Disconnect a previously connected port.
+	bool DisconnectPort(const char* myPortName);
 
 	//virtual MSTR GetPortMaxValue(int i);
 	//virtual MSTR GetPortMinValue(int i);
@@ -346,15 +342,21 @@ public:
 
 	// Set splice values
 	const FabricSplice::DGGraph& GetSpliceGraph() { return m_graph; }
-	void SetSpliceGraph(const FabricSplice::DGGraph& graph, IParamBlock2* pblock);
+	void SetSpliceGraph(const FabricSplice::DGGraph& graph, bool createMaxParams);
 	void SetOutPort(const FabricSplice::DGPort& port) { m_valuePort = port; };
 
+	// Load from a saved JSON file spec
+	bool LoadFromFile(const MCHAR* filename, bool createMaxParams);
+	bool SaveToFile(const MCHAR* filename);
+	
 	virtual void ResetPorts();
 
 #pragma endregion
 
 	// Push our parameters to the Splice system, and get the results back...
 	const TResultType& Evaluate(TimeValue t, Interval& ivValid);
+	// Do an evaluation, but do not return the calculated value
+	void TriggerEvaluate(TimeValue t, Interval& ivValid);
 
 	/*! Every client should call this function to create the hook
 		up our maxscript exposure */

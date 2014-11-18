@@ -25,6 +25,7 @@ struct spliceEditorStruct
 	mDispResults,
 	mEntryPt,
 	mOutputName,
+	mAvailablePorts,
 	mForm,
 
 	
@@ -104,47 +105,69 @@ struct spliceEditorStruct
 		-- Provide a link from the form back to this struct
 		-- This allows dotnet event handlers to get this structs instance
 		layout.tag = dotnetmxsvalue this
-		layout.RowCount = 4;
+		layout.RowCount = 5;
 		layout.ColumnCount = 2;
 		
 		colStyle = dotNetObject "system.windows.forms.ColumnStyle"
 		colStyle.sizetype = colStyle.sizetype.absolute
-		colStyle.Width = 80
+		colStyle.Width = 70
 		layout.ColumnStyles.Add colStyle
 		colStyle = dotNetObject "system.windows.forms.ColumnStyle"
 		colStyle.sizetype = colStyle.sizetype.percent
 		colStyle.Width = 100
 		layout.ColumnStyles.Add colStyle
 		
+		row = 0
 		-- First item is the entry pt:
 		------------------------------------- Row 1 ----------------------------------------
 		aLabel = dotNetObject "System.Windows.Forms.Label"
 		aLabel.text = "Entry:"
+		aLabel.TextAlign = aLabel.TextAlign.MiddleLeft
 		mEntryPt = dotNetObject "System.Windows.Forms.TextBox"
 		mEntryPt.anchor = dotnet.combineEnums mEntryPt.anchor.Top mEntryPt.anchor.Left mEntryPt.anchor.Right
 		
 		rowStyle = dotNetObject "system.windows.forms.rowstyle"
 		rowStyle.sizetype = rowStyle.sizetype.absolute
-		rowStyle.height = 30
+		rowStyle.height = 25
 		layout.RowStyles.Add(rowStyle);
-		layout.controls.add aLabel 0 0
-		layout.controls.add mEntryPt 1 0
-			
+		layout.controls.add aLabel 0 row
+		layout.controls.add mEntryPt 1 row
+		
 		-- 2nd item is an output port:
 		------------------------------------- Row 2 ----------------------------------------
+		row = row + 1
 		aLabel = dotNetObject "System.Windows.Forms.Label"
 		aLabel.text = "Output:\t"
+		aLabel.TextAlign = aLabel.TextAlign.MiddleLeft
 		mOutputName = dotNetObject "System.Windows.Forms.TextBox"
 		mOutputName.anchor = dotnet.combineEnums mEntryPt.anchor.Top mEntryPt.anchor.Left mEntryPt.anchor.Right
 		
 		rowStyle = dotNetObject "system.windows.forms.rowstyle"
 		rowStyle.sizetype = rowStyle.sizetype.absolute
-		rowStyle.height = 30
+		rowStyle.height = 25
 		layout.RowStyles.Add(rowStyle);
-		layout.controls.add aLabel 0 1
-		layout.controls.add mOutputName 1 1
+		layout.controls.add aLabel 0 row
+		layout.controls.add mOutputName 1 row
 		
-		------------------------------------- Row 2 ----------------------------------------
+		-- 3rd item is all available ports:
+		------------------------------------- Row 3 ----------------------------------------
+		row = row + 1
+		aLabel = dotNetObject "System.Windows.Forms.Label"
+		aLabel.text = "Available:\t"
+		aLabel.TextAlign = aLabel.TextAlign.MiddleLeft
+		mAvailablePorts = dotNetObject "System.Windows.Forms.TextBox"
+		mAvailablePorts.anchor = dotnet.combineEnums mEntryPt.anchor.Top mEntryPt.anchor.Left mEntryPt.anchor.Right
+		mAvailablePorts.ReadOnly = true
+		
+		rowStyle = dotNetObject "system.windows.forms.rowstyle"
+		rowStyle.sizetype = rowStyle.sizetype.absolute
+		rowStyle.height = 25
+		layout.RowStyles.Add(rowStyle);
+		layout.controls.add aLabel 0 row
+		layout.controls.add mAvailablePorts 1 row
+		
+		------------------------------------- Row 4----------------------------------------
+		row = row + 1
 		-- Create a splitter to allow user to resize Code/Results window
 		splitterResults = dotNetObject "System.Windows.Forms.SplitContainer"
 		splitterResults.Dock = splitterResults.Dock.Fill;
@@ -181,10 +204,11 @@ struct spliceEditorStruct
 		rowStyle.sizetype = rowStyle.sizetype.percent
 		rowStyle.height = 100
 		layout.RowStyles.Add(rowStyle);
-		layout.controls.Add splitterResults 0 2
-		layout.SetColumnSpan splitterResults 2
+		layout.controls.Add splitterResults 0 row
+		layout.SetColumnSpan splitterResults row
 		
-		------------------------------------- Row 3 ----------------------------------------
+		------------------------------------- Row 5 ----------------------------------------
+		row = row + 1
 		mBtnCompile = dotNetObject "System.windows.forms.button"
 		mBtnCompile.text = "Compile"
 		mBtnCompile.Anchor = dotnet.combineEnums mBtnCompile.Anchor.Top mEntryPt.anchor.Right
@@ -193,7 +217,7 @@ struct spliceEditorStruct
 		rowStyle.sizetype = rowStyle.sizetype.absolute
 		rowStyle.height = 30
 		layout.RowStyles.Add(rowStyle);
-		layout.controls.Add mBtnCompile 1 3
+		layout.controls.Add mBtnCompile 1 row
 
 		-- Add event handlerse
 		dotNet.addEventHandler mBtnCompile "click" evDoCompile
@@ -417,6 +441,7 @@ struct spliceEditorStruct
 			mKlEditor.text = mSpliceClass.GetKLCode()
 			mEntryPt.text = mSpliceClass.GetKLOperatorName();
 			mOutputName.text = mSpliceClass.OutPort;
+			mAvailablePorts.text = mSpliceClass.AllPortsSignature
 		)
 		
 		-- Somewhere (post-create) our form fore color is set to grey?

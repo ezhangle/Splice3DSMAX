@@ -29,6 +29,16 @@ bool SpliceTranslationFPInterface::RemovePortMSTR(const MSTR& name)
 	return false;
 }
 
+bool SpliceTranslationFPInterface::ConnectPortMSTR( const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex )
+{
+	if (pSrcContainer == NULL)
+		return false;
+
+	CStr cMyPortName = myPortName.ToCStr();
+	CStr cSrcPortName = srcPortName.ToCStr();
+	return ConnectPort(cMyPortName, pSrcContainer, cSrcPortName, srcPortIndex);
+}
+
 void DoShowKLEditor(ReferenceTarget* pTarget)
 {
 	if (pTarget == NULL)
@@ -101,4 +111,11 @@ void DoShowKLEditor(ReferenceTarget* pTarget)
 	// Magic Max Script stuff to clear the frame and locals.
 	pop_value_locals();
 	pop_alloc_frame();
+}
+
+SpliceTranslationFPInterface* GetSpliceInterface( ReferenceTarget* pTarg )
+{
+	if (pTarg)
+		return static_cast<SpliceTranslationFPInterface*>(pTarg->GetInterface(ISPLICE__INTERFACE));
+	return nullptr;
 }

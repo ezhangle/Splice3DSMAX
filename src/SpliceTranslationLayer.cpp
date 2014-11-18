@@ -163,7 +163,7 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 	// so long as they are not reference types...
 	int flags = P_COMPUTED_NAME;
 	int baseType = base_type(type);
-	if (baseType != TYPE_INODE && baseType != TYPE_MTL && baseType != TYPE_TEXMAP)
+	if (!reftarg_type(baseType))
 		flags |= P_ANIMATABLE;
 	if (is_tab(type))
 		flags |= P_VARIABLE_SIZE;
@@ -215,6 +215,7 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 	case TYPE_INT:		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_INT, 0, 0, SPIN_AUTOSCALE, p_end);  break;
 	case TYPE_RGBA:		pDesc->ParamOption(pid, p_ui, TYPE_COLORSWATCH, 0, p_end); break;
 	case TYPE_POINT3:	pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); break;
+	case TYPE_POINT4:	pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); break;
 	case TYPE_BOOL:		pDesc->ParamOption(pid, p_ui, TYPE_SINGLECHEKBOX, 0, p_end); break;
 	case TYPE_INODE:	pDesc->ParamOption(pid, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
 	case TYPE_MTL:		pDesc->ParamOption(pid, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
@@ -327,6 +328,9 @@ int GetDlgSize(IParamBlock2* pblock)
 		case TYPE_POINT3:
 			dlgSize += PARAM_Y * 3 * count;
 			break;
+		case TYPE_POINT4:
+			dlgSize += PARAM_Y * 4 * count;
+			break;
 		default:
 			dlgSize += PARAM_Y * count;
 			break;
@@ -389,6 +393,12 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2); 
 			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 4);
 			break;
+		case TYPE_POINT4:	
+			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs); 
+			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2); 
+			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 4);
+			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 6);
+			break;
 		}
 	}
 	return dialogTemplate;
@@ -404,7 +414,7 @@ const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, int
 // Helper functions for accessing options
 int GetPortParamID(FabricSplice::DGPort& aPort)
 {
-	if (aPort.isValid())
+	if (aPort)
 	{
 		FabricCore::Variant option = aPort.getOption(MAX_PID_OPT);
 		if(option.isSInt32())
@@ -416,6 +426,46 @@ int GetPortParamID(FabricSplice::DGPort& aPort)
 void SetPortParamID(FabricSplice::DGPort& aPort, ParamID id) 
 {
 	aPort.setOption(MAX_PID_OPT, GetVariant((int)id));
+}
+
+std::string GetPortConnection(FabricSplice::DGPort& aPort) 
+{
+	std::string res;
+	if (aPort)
+	{
+		FabricCore::Variant option = aPort.getOption(MAX_SRC_OPT);
+		if(option.isString())
+			res = option.getStringData();
+	}
+	return res;
+}
+
+void SetPortConnection(FabricSplice::DGPort& aPort, const char* name) 
+{
+	if (aPort)
+	{
+		FabricCore::Variant variant = GetVariant(name);
+		aPort.setOption(MAX_SRC_OPT, variant);
+	}
+}
+
+int GetPortConnectionIndex(FabricSplice::DGPort& aPort) 
+{
+	if (aPort)
+	{
+		FabricCore::Variant option = aPort.getOption(MAX_SRC_IDX_OPT);
+		if(option.isSInt32())
+			return (int)option.getSInt32();
+	}
+	return -1;
+}
+
+void SetPortConnectionIndex(FabricSplice::DGPort& aPort, int index) 
+{
+	if (aPort)
+	{
+		return aPort.setOption(MAX_SRC_IDX_OPT, GetVariant(index));
+	}
 }
 
 const char* GetPortName( FabricSplice::DGPort& aPort )
@@ -480,35 +530,46 @@ BitArray GetLegalMaxTypes(const char* cType)
 		res.Set(TYPE_INODE);
 		res.Set(TYPE_REFTARG); // Can only be type Object
 	}
+	// All param types can be set to a reference target when connecting ports.
+	res.Set(TYPE_REFTARG);
 	return res;
 }
 
-int SpliceTypeToMaxType(const char* cType)
+int SpliceTypeToMaxType(const char* cType, bool isArray /*=false*/)
 {
+	int res = -1;
 	if (strcmp(cType, "Integer") == 0 || 
 		strcmp(cType, "Size") == 0)
-		return TYPE_INT;
-	else if (strcmp(cType, "Scalar") == 0)
-		return TYPE_FLOAT;
-	else if (strcmp(cType, "Color") == 0)
-		return TYPE_FRGBA;
-	else if (strcmp(cType, "Vec3") == 0)
-		return TYPE_POINT3;
-	else if (strcmp(cType, "Vec4") == 0)
-		return TYPE_POINT4;
+		res = TYPE_INT;
 	else if (strcmp(cType, "Boolean") == 0)
-		return TYPE_BOOL;
+		res = TYPE_BOOL;
+	else if (strcmp(cType, "Scalar") == 0)
+		res =  TYPE_FLOAT;
+	else if (strcmp(cType, "Color") == 0)
+		res =  TYPE_FRGBA;
+	else if (strcmp(cType, "Vec2") == 0)
+		res =  TYPE_POINT2;
+	else if (strcmp(cType, "Vec3") == 0)
+		res =  TYPE_POINT3;
+	else if (strcmp(cType, "Vec4") == 0)
+		res =  TYPE_POINT4;
 	else if (strcmp(cType, "Mat44") == 0)
-		return TYPE_MATRIX3;
+		res =  TYPE_MATRIX3;
 	else if (strcmp(cType, "Quat") == 0)
-		return TYPE_QUAT;
+		res =  TYPE_QUAT;
 	else if (strcmp(cType, "String") == 0)
-		return TYPE_STRING;
+		res =  TYPE_STRING;
 	else if (strcmp(cType, "PolygonMesh") == 0)
-		return TYPE_MESH;
+		res =  TYPE_MESH;
+	else 
+	{
+		// DbgAssert(0 && "NOTE: Add Default translation Type for this Splice Type");
+	}
 
-	DbgAssert(0 && "NOTE: Add Default translation Type for this Splice Type");
-	return -1;
+	if (isArray)
+		res |= TYPE_TAB;
+
+	return res;
 }
 
 // This function is simply here to override the default PB2 type for PolygonMesh.
@@ -521,6 +582,30 @@ int SpliceTypeToDefaultMaxType(const char* cType)
 	return SpliceTypeToMaxType(cType);
 }
 
+bool IsPortPersistable(FabricSplice::DGPort& port) {
+	if (!port)
+		return false;
+
+	FabricCore::RTVal rtVal = port.getRTVal();
+	if(rtVal.isValid())
+	{
+		if(rtVal.isObject())
+		{
+			if(!rtVal.isNullObject())
+			{
+				FabricCore::RTVal objectRtVal = FabricSplice::constructRTVal("Object", 1, &rtVal);
+				if(objectRtVal.isValid())
+				{
+					FabricCore::RTVal persistable = FabricSplice::constructInterfaceRTVal("Persistable", objectRtVal);
+					if(!persistable.isNullObject())
+						return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, const char* type, const char* cName, FabricSplice::Port_Mode mode, bool isArray/*=false*/, const char* inExtension)
 {
 	std::string spliceType(type);
@@ -530,8 +615,14 @@ const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, con
 	try {
 		if (!rGraph.hasDGNodeMember(cName)) {
 			rGraph.addDGNodeMember(cName, spliceType.data(), FabricCore::Variant(), "", inExtension);
-			return rGraph.addDGPort(cName, cName, mode);
+			FabricSplice::DGPort port = rGraph.addDGPort(cName, cName, mode);
+
+			// Does this port support custom persistence?  If so, mark it as persisted
+			if (IsPortPersistable(port))
+				rGraph.setMemberPersistence(cName, true);
+			return port;
 		}
+
 		// Port already exists
 		return rGraph.getDGPort(cName);
 	}
@@ -774,6 +865,43 @@ void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DG
 		case TYPE_INODE:
 			{
 				MaxPtrToSplice(port, t, pblock, (ParamID)id, ivValid);
+				break;
+			}
+		case TYPE_REFTARG:
+			{
+				ReferenceTarget* pSrcContainer = pblock->GetReferenceTarget(id);
+				if (pSrcContainer == nullptr)
+					continue;
+
+				// If we have a reftarg type, we may be connected to another graph
+				std::string portConnection = GetPortConnection(port);
+				if (portConnection.length() > 0) {
+					
+					SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
+					if (pSrcContInterface == nullptr)
+						continue;
+
+					pSrcContInterface->TriggerEvaluate(t, ivValid);
+					FabricSplice::DGPort srcPort = pSrcContInterface->GetPort(portConnection.data());
+					if (srcPort)
+					{
+						FabricCore::RTVal srcVal = srcPort.getRTVal();
+						int srcIndex = GetPortConnectionIndex(port);
+						// If we are connected to an array, take only a single element
+						if (srcIndex >= 0 && srcVal.isArray()) {
+							// Check for OOR
+							if (srcIndex >= srcVal.getArraySize())
+								continue;
+							srcVal = srcVal.getArrayElement(srcIndex);
+						}
+						port.setRTVal(srcVal);
+					}
+				}
+				else 
+				{
+					// TODO
+					//MaxPtrToSplice(port, t, )
+				}
 				break;
 			}
 		case TYPE_MTL:			break;

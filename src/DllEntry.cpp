@@ -14,6 +14,7 @@ CREATED BY:		Ingenuity Engine
 #include "StdAfx.h"
 #include "SpliceStaticFPInterface.h"
 #include <notify.h>
+#include "SpliceEvents.h"
 
 // This function is called by Windows when the DLL is loaded.  This 
 // function may also be called many times during time critical operations
@@ -50,7 +51,7 @@ __declspec( dllexport ) const TCHAR* LibDescription()
 // This function returns the number of plug-in classes this DLL
 __declspec( dllexport ) int LibNumberClasses()
 {
-	return 10;
+	return 11;
 }
 
 // This function returns the number of plug-in classes this DLL
@@ -64,6 +65,7 @@ __declspec( dllexport ) ClassDesc* LibClassDesc(int i)
 	case 3: return SpliceTranslationLayer<Control, Matrix3>::GetClassDesc();
 	case 8: return SpliceTranslationLayer<OSModifier, Mesh>::GetClassDesc();
 	case 9: return SpliceTranslationLayer<GeomObject, Mesh>::GetClassDesc();
+	case 10: return SpliceTranslationLayer<ReferenceTarget, int>::GetClassDesc();
 //	case 3: return GetDynPBlockClassDesc();
 		default: return 0;
 	}
@@ -85,18 +87,41 @@ __declspec( dllexport ) ULONG CanAutoDefer()
 	return FALSE;
 }
 
-void RestartRendering(void* /*param*/, NotifyInfo* /*info*/)
+// Clean up all traces of Splice, and unhook vpt/mouse hooks
+void OnReset(void* /*param*/, NotifyInfo* /*info*/)
 {
-	GetCOREInterface()->EnableSceneRedraw();
+	SpliceEvents::ReleaseInstance();
+	FabricSplice::DestroyClient();
+}
+
+// Initialize things
+void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
+{
+	FabricSplice::Initialize();
+
+	// setup the callback functions
+	InitLoggingTimer();
+	SpliceStaticFPInterface::GetInstance()->EnableLogging(SpliceStaticFPInterface::LOG_ALL);
+
+	// Pre-load a client
+	//static FabricCore::Client client = FabricSplice::ConstructClient();
+	//client.enableBackgroundTasks();
+
+	RegisterNotification(OnReset, NULL, NOTIFY_SYSTEM_POST_RESET);
+	RegisterNotification(OnReset, NULL, NOTIFY_SYSTEM_POST_NEW);
+	RegisterNotification(OnReset, NULL, NOTIFY_FILE_PRE_OPEN);
+}
+
+// Clean up splice, and unhook all notifications.
+void OnShutdown(void* param, NotifyInfo* info)
+{
+	// On shutdown we release all info
+	OnReset(param, info);
+	UnRegisterNotification(OnReset, NULL);
 }
 
 __declspec( dllexport ) int LibInitialize(void)
 {
-    FabricSplice::Initialize();
-	
-	// setup the callback functions
-	SetDefaultLogging();
-
 	// We need to initialize our MaxScript exposure for all classes as well.
 	SpliceTranslationLayer<Control, float>::InitMixinInterface();
 	SpliceTranslationLayer<Control, Point3>::InitMixinInterface();
@@ -104,21 +129,11 @@ __declspec( dllexport ) int LibInitialize(void)
 	SpliceTranslationLayer<Control, Matrix3>::InitMixinInterface();
 	SpliceTranslationLayer<OSModifier, Mesh>::InitMixinInterface();
 	SpliceTranslationLayer<GeomObject, Mesh>::InitMixinInterface();
+	SpliceTranslationLayer<ReferenceTarget, int>::InitMixinInterface();
 
-	SpliceStaticFPInterface::GetInstance();
-
-	// Fix potential deadlock on startup with ATi cards
-	// and really fast machines.  The problem is that 
-	// when we are starting, we may still be initializing
-	// our OGL Window.  In the glViewport function, we have
-	// a 3-way tie for responsible lock, as we try to
-	// trigger a render and block on drawMutex while the
-	// render thread is waiting in glViewport, and our OGLFunc
-	// is stuck waiting on GetMessage.  All in all, a giant
-	// cluster-fuck.
-	//GetCOREInterface()->DisableSceneRedraw();
-	// Once the system has started (and OGL threads have init'ed), allow rendering
-	//RegisterNotification(RestartRendering, NULL, NOTIFY_SYSTEM_STARTUP);
+	// Force init/cleanup of client
+	RegisterNotification(OnStartup, NULL, NOTIFY_SYSTEM_STARTUP);
+	RegisterNotification(OnShutdown, NULL, NOTIFY_SYSTEM_SHUTDOWN);
 	return TRUE;
 }
 

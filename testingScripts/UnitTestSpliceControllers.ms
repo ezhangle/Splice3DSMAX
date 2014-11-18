@@ -7,8 +7,8 @@ entryPt = "unitTestBasicTransform"
 klCode = "
 require Math;
 
-operator unitTestBasicTransform(io Mat44 outMatrixVal, in Mat44 parentValue, in Scalar time) {
-  outMatrixVal.setTranslation(Vec3(time * 7, 0, 0));
+operator unitTestBasicTransform(io Mat44 outMatrixVal, in Mat44 parentValue, in EvalContext context) {
+  outMatrixVal.setTranslation(Vec3(context.time * 7, 0, 0));
 }
 "
 p1.controller.SetKLCode entryPt klCode
@@ -28,7 +28,7 @@ entryPt = "unitTestPositionInheritance"
 klCode = "
 require Math;
 
-operator unitTestPositionInheritance(io Vec3 outPositionVal, in Mat44 parentValue, in Scalar time) {
+operator unitTestPositionInheritance(io Vec3 outPositionVal, in Mat44 parentValue) {
   Vec4 offset(0, 0, 26, 1);
   offset = parentValue * offset; // Make offset relative to parent
   outPositionVal = Vec3(offset.x, offset.y, offset.z);
@@ -55,7 +55,7 @@ entryPt = "unitTestRotationChaining"
 klCode = "
 require Math;
 
-operator unitTestRotationChaining(io Quat outRotationVal, in Mat44 parentValue, in Scalar xRot, in Scalar yRot, in Scalar zRot, in Scalar time) {
+operator unitTestRotationChaining(io Quat outRotationVal, in Scalar xRot, in Scalar yRot, in Scalar zRot) {
   outRotationVal = Quat(Euler(xRot, yRot, zRot));
 }"
 
@@ -84,8 +84,8 @@ entryPt = "unitTestFloatChaining"
 klCode = "
 require Math;
 
-operator unitTestFloatChaining(io Scalar outSinTime, in Scalar time) {
-  outSinTime = sin(time);
+operator unitTestFloatChaining(io Scalar outSinTime, in EvalContext context) {
+  outSinTime = sin(context.time);
 }"
 
 spliceFloatCtrl.SetKLCode entryPt klCode

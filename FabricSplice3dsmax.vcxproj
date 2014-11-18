@@ -39,6 +39,7 @@
     <ClCompile Include="src\SpliceMesh.cpp" />
     <ClCompile Include="src/DllEntry.cpp" />
     <ClCompile Include="src\SpliceModifier.cpp" />
+    <ClCompile Include="src\SpliceReferenceTarget.cpp" />
     <ClCompile Include="src\SpliceStaticFPInterface.cpp" />
     <ClCompile Include="src\SpliceTranslationFPInterface.cpp" />
     <ClCompile Include="src\SpliceTranslationLayer.cpp" />

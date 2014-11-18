@@ -19,6 +19,8 @@ public:
 		fn_showSceneGraphEditor,
 
 		fn_setSpliceGraph,
+		fn_loadFromFile,
+		fn_saveToFile,
 		
 		fn_getOpCount,
 		fn_getOpName,
@@ -38,12 +40,11 @@ public:
 		fn_getPortType,
 		fn_isPortArray,
 
+		fn_connectPorts,
+
 		fn_getMaxConnectedType,
 		fn_setMaxConnectedType,
 		fn_getLegalMaxTypes,
-
-		prop_getKLFile,
-		prop_setKLFile,
 
 		prop_getPortCount,
 		prop_portNames,
@@ -54,6 +55,8 @@ public:
 		prop_getOutPortArrayIdx,
 		prop_setOutPortArrayIdx,
 
+		prop_getAllPortSignature,
+
 		num_params
 	};
 
@@ -61,6 +64,8 @@ public:
 		FN_0(fn_showSceneGraphEditor, TYPE_BOOL, ShowSceneGraphEditor);
 
 		FN_1(fn_setSpliceGraph, TYPE_BOOL, SetSpliceGraph, TYPE_REFTARG);
+		FN_2(fn_loadFromFile, TYPE_bool, LoadFromFile, TYPE_FILENAME, TYPE_bool);
+		FN_1(fn_saveToFile, TYPE_bool, SaveToFile, TYPE_FILENAME);
 
 		FN_0(fn_getOpCount, TYPE_INT, GetOperatorCount);
 		FN_1(fn_getOpName, TYPE_TSTR_BV, GetOperatorNameMSTR, TYPE_INT);
@@ -80,17 +85,19 @@ public:
 		FN_1(fn_getPortType, TYPE_TSTR_BV, GetPortTyeMSTR, TYPE_INT);
 		FN_1(fn_isPortArray, TYPE_bool, IsPortArray, TYPE_INT);
 
+		FN_4(fn_connectPorts, TYPE_bool, ConnectPortMSTR, TYPE_TSTR_BV, TYPE_REFTARG, TYPE_TSTR_BV, TYPE_INT);
+		
 		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxConnectedType, TYPE_INT);
 		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxConnectedType, TYPE_INT, TYPE_INT);
 		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypes, TYPE_INT);
 
 		// Properties 
 
-		PROP_FNS(prop_getKLFile, GetKLFileMSTR, prop_setKLFile, SetKLFileMSTR, TYPE_TSTR_BV)
 		RO_PROP_FN(prop_getPortCount, GetPortCount, TYPE_INT)
 		PROP_FNS(prop_getOutPortName, GetOutPortNameMSTR, prop_setOutPortName, SetOutPortNameMSTR, TYPE_TSTR_BV)
 		PROP_FNS(prop_getOutPortArrayIdx, GetOutPortArrayIdx, prop_setOutPortArrayIdx, SetOutPortArrayIdx, TYPE_INT)
-
+		RO_PROP_FN(prop_getAllPortSignature, GetAllPortSignatureMSTR, TYPE_TSTR_BV)
+		
 	END_FUNCTION_MAP
 
 	// Implement the functions exposed above
@@ -105,15 +112,12 @@ public:
 	virtual std::string GetKLOperatorName() = 0;
 	virtual std::string SetKLCode(const std::string& name, const std::string& script) = 0;
 
-	// Get/Set a link to an external KL file
-	virtual const char* GetKLFile() = 0;
-	virtual std::string SetKLFile(const char* file) = 0;
-
 	// Port creation/management
 
 	// Get the number of ports on this graph
 	virtual int GetPortCount() = 0;
-	//virtual Tab<TSTR*> GetPortNames()=0;
+	virtual FabricSplice::DGPort GetPort(int i)=0;
+	virtual FabricSplice::DGPort GetPort(const char* name)=0;
 
 	// Splice port management
 	// Create a new port.  A matching Max parameter 
@@ -132,6 +136,11 @@ public:
 	// Returns if the in port is an array type or not
 	virtual bool IsPortArray(int i)=0;
 
+	// Returns a string with all available ports on this graph
+	// This is helpful in the KL code editor to quickly add parameters
+	// to the entry operator signature
+	virtual std::string GetAllPortSignature()=0;
+
 	virtual const char* GetOutPortName() = 0;
 	virtual bool SetOutPortName(const char* name) = 0;
 
@@ -147,6 +156,18 @@ public:
 	virtual int SetMaxConnectedType(int i, int type) = 0;
 	virtual BitArray GetLegalMaxTypes(int i) = 0;
 
+	// Connect myPortName to the output port on pSrcContainer named srcPortName
+	// Returns true if successfully connected, false if for any reason the
+	// port was not connected.  Once connected, each evaluation the output
+	// from srcPortName will be transferred into the in-port myPortName
+	virtual bool ConnectPort(const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex)=0;
+	// Disconnect a previously connected port.  Returns true if the port was previously connected and
+	// has been successfully disconnected, false if disconnect failed or if no connection existed.
+	virtual bool DisconnectPort(const char* myPortName)=0;
+
+	// Allow external classes to trigger evaluations on us
+	virtual void TriggerEvaluate(TimeValue t, Interval& ivValid)=0;
+
 	// Get the fabric graph driving this max class.
 	virtual const FabricSplice::DGGraph& GetSpliceGraph() = 0;
 	
@@ -158,8 +179,12 @@ public:
 	// Allow others to set the splice graph etc we are using.
 	// These functions are not called directly from MaxScript, instead
 	// they are used by the static interface
-	virtual void SetSpliceGraph(const FabricSplice::DGGraph& graph, IParamBlock2* pblock) = 0;
+	virtual void SetSpliceGraph(const FabricSplice::DGGraph& graph, bool createMaxParams) = 0;
 	virtual void SetOutPort(const FabricSplice::DGPort& port) = 0;
+
+	// Load the splice graph for this entity from the given filename
+	virtual bool LoadFromFile(const MCHAR* filename, bool createMaxParams)=0;
+	virtual bool SaveToFile(const MCHAR* filename)=0;
 
 	// Show the MaxScript-based editor
 	void ShowKLEditor(ReferenceTarget* pTarget)	{ DoShowKLEditor(pTarget); }
@@ -191,12 +216,11 @@ protected:
 
 	// TODO: Add default vals for these
 	MSTR_GETTER(GetKLOperatorName, 0);
-	
-	MSTR_GETTER(GetKLFile, 0);
-	MSTR_SETTER(SetKLFile);
 
 	MSTR_GETTER(GetOutPortName, 0);
 	MSTR_SETTER(SetOutPortName);
+
+	MSTR_GETTER(GetAllPortSignature, 0);
 	
 	MSTR GetKLCodeMSTR() { return ToMSTR(GetKLCode().data(), 0); }
 	MSTR SetKLCodeMSTR(MSTR name, MSTR script) { 
@@ -221,9 +245,15 @@ protected:
 		return AddIOPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data());
 	}
 	bool RemovePortMSTR(const MSTR& name);
+
+	bool ConnectPortMSTR(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex);
+	MSTR_SETTER(DisconnectPort);
+
 #pragma endregion
 };
 
+// Inline fn for easy access to interface
+SpliceTranslationFPInterface* GetSpliceInterface(ReferenceTarget* pTarg);
 
 // This templated static function creates a static
 // descriptor per templated interface class
@@ -242,6 +272,12 @@ FPInterfaceDesc* GetDescriptor()
 		0,
 		// Describe our function(s)
 			SpliceTranslationFPInterface::fn_showSceneGraphEditor, _T("ShowSceneGraphEditor"), 0, TYPE_BOOL, 0, 0, 
+			SpliceTranslationFPInterface::fn_loadFromFile, _T("LoadFromFile"), 0, TYPE_bool, 0, 2, 
+				_M("filename"),	0,	TYPE_FILENAME,
+				_M("createMaxParams"),	0,	TYPE_bool,
+
+			SpliceTranslationFPInterface::fn_saveToFile, _T("SaveToFile"), 0, TYPE_bool, 0, 1, 
+				_M("filename"),	0,	TYPE_FILENAME,
 
 			SpliceTranslationFPInterface::fn_setSpliceGraph, _T("SetSpliceGraph"), 0, TYPE_BOOL, 0, 1,
 				_M("source"),	0,	TYPE_REFTARG,
@@ -289,18 +325,24 @@ FPInterfaceDesc* GetDescriptor()
 			SpliceTranslationFPInterface::fn_isPortArray, _T("IsPortArray"), 0, TYPE_bool, 0, 1,
 				_M("portIndex"),	0,	TYPE_INDEX,
 
+			SpliceTranslationFPInterface::fn_connectPorts, _T("ConnectPorts"), 0, TYPE_bool, 0, 4,
+				_M("myPortName"),	0,	TYPE_TSTR_BV,
+				_M("srcSpliceGraph"),	0,	TYPE_REFTARG,
+				_M("srcPortName"),	0,	TYPE_TSTR_BV,
+				_M("srcPortIndex"),	0,	TYPE_INT, f_keyArgDefault, -1,
+
 			SpliceTranslationFPInterface::fn_getMaxConnectedType, _T("GetMaxType"), 0, TYPE_INT, 0, 1,
 				_M("portIndex"),	0,	TYPE_INDEX,
 			SpliceTranslationFPInterface::fn_setMaxConnectedType, _T("SetMaxType"), 0, TYPE_INT, 0, 2,
 				_M("portIndex"),	0,	TYPE_INDEX,
 				_M("maxType"),		0,	TYPE_INT,
 			SpliceTranslationFPInterface::fn_getLegalMaxTypes, _T("GetLegalMaxTypes"), 0, TYPE_BITARRAY, 0, 1,
-				_M("portIndex"),	0,	TYPE_INDEX,
+				_M("portIndex"),	0,	TYPE_INDEX, 
 		properties,
-			SpliceTranslationFPInterface::prop_getKLFile, SpliceTranslationFPInterface::prop_setKLFile, _T("KLFile"), 0, TYPE_TSTR_BV,
 			SpliceTranslationFPInterface::prop_getPortCount, FP_NO_FUNCTION, _T("PortCount"), 0, TYPE_INT,
 			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_setOutPortName, _T("OutPort"), 0, TYPE_TSTR_BV,
 			SpliceTranslationFPInterface::prop_getOutPortArrayIdx, SpliceTranslationFPInterface::prop_setOutPortArrayIdx, _T("OutPortIndex"), 0, TYPE_INT,
+			SpliceTranslationFPInterface::prop_getAllPortSignature, FP_NO_FUNCTION, _T("AllPortsSignature"), 0, TYPE_TSTR_BV,
 		p_end
 		);
 	return &_ourDesc;

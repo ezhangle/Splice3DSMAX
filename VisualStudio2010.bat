@@ -9,7 +9,7 @@ IF NOT DEFINED FABRIC_DIR (
   SET FABRIC_EXTS_PATH=%FABRIC_EXTS_PATH%;%FABRIC_DIR%\Exts
 ) ELSE ECHO Fabric found at %FABRIC_PATH%
 
-echo Allow the system to load FabricCore.1.13.dll
+echo Allow the system to load FabricCore dll
 SET PATH=%FABRIC_DIR%/lib;%PATH%
 
 IF NOT DEFINED BOOST_DIR ( 
@@ -20,7 +20,7 @@ set DISTDIR=%FABRIC_DIR%\SpliceIntegrations\FabricSplice3dsmax2014\
 set SCINTILLANETDIR=%DISTDIR%ScintillaNET\
 
 echo Starting VS Launcher
-call "C:\Program Files (x86)\Common Files\microsoft shared\MSEnv\VSLauncher.exe" "%SLN%"
+call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.exe" "%SLN%"
 
 pause.
 

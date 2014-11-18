@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug 2013|x64">
       <Configuration>Debug 2013</Configuration>
@@ -22,6 +22,18 @@
     <ProjectGuid>{771FD8D0-EE9B-442E-9D32-B2C60B807FEF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CP3dsmaxIntegration</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug 2013|x64'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug 2014|x64'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release 2013|x64'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="ProjectProperties.props" />
   <ItemGroup>
@@ -53,6 +65,7 @@
     <ClInclude Include="src\MaxConversionFns.h" />
     <ClInclude Include="src\MouseCallbacks\SpliceCommandMode.h" />
     <ClInclude Include="src\MouseCallbacks\SpliceMouseCallback.h" />
+    <ClInclude Include="src\Splice3dsmax.h" />
     <ClInclude Include="src\SpliceEvents.h" />
     <ClInclude Include="src\SpliceLogging.h" />
     <ClInclude Include="src\SpliceStaticFPInterface.h" />

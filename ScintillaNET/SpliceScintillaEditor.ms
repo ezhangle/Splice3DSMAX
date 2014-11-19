@@ -191,9 +191,11 @@ struct spliceEditorStruct
 		mKlEditor.Margins.Margin0.Width = 20
 		mKlEditor.Dock = (dotNetClass "System.Windows.Forms.DockStyle").Fill
 		
-		mDispResults = dotNetObject "System.Windows.Forms.TextBox"
+		mDispResults = dotNetObject "System.Windows.Forms.RichTextBox"
 		mDispResults.multiline = true
 		mDispResults.ReadOnly = true
+		mDispResults.WordWrap = false
+		mDispResults.ScrollBars = mDispResults.ScrollBars.Both
 		mDispResults.BackColor = mDispResults.BackColor.LightGray
 		mDispResults.Dock = (dotNetClass "System.Windows.Forms.DockStyle").Fill
 		

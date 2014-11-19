@@ -82,8 +82,6 @@ void SpliceControlRotation::Copy(Control *)
 
 }
 
-
-
 void SpliceControlRotation::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
 	if(method == CTRL_RELATIVE)

@@ -25,9 +25,14 @@ std::wstring s2ws(const std::string& s)
 //////////////////////////////////////////////////////////////////////////
 #pragma region GatherCompilerResults
 
-bool WasLogging()
+bool WasLoggingCompiler()
 {
 	return (SpliceStaticFPInterface::GetInstance()->EnableLogging(0)&SpliceStaticFPInterface::LOG_COMPILER_ERROR) != 0;
+}
+
+bool WasLoggingErrors()
+{
+	return (SpliceStaticFPInterface::GetInstance()->EnableLogging(0)&SpliceStaticFPInterface::LOG_ERROR) != 0;
 }
 
 std::list<GatherCompilerResults*> s_CompilerStack;
@@ -44,7 +49,19 @@ void gatherCompilerErrorFunc(
 	{
 		s_CompilerStack.back()->LogSomething(cstr.data());
 	}
-	if (WasLogging())
+	if (WasLoggingCompiler() || WasLoggingErrors())
+		logMessage(cstr);
+}
+
+void gatherLogErrorFunc(const char * message, unsigned int length)
+{
+	CStr cstr;
+	cstr.printf("[Error] %s\n", message);
+	if (!s_CompilerStack.empty() && s_CompilerStack.back() != NULL)
+	{
+		s_CompilerStack.back()->LogSomething(cstr.data());
+	}
+	if (WasLoggingCompiler() || WasLoggingErrors())
 		logMessage(cstr);
 }
 
@@ -52,6 +69,7 @@ GatherCompilerResults::GatherCompilerResults()
 {
 	s_CompilerStack.push_back(this);
 	FabricSplice::Logging::setCompilerErrorFunc(gatherCompilerErrorFunc);
+	FabricSplice::Logging::setLogErrorFunc(gatherLogErrorFunc);
 }
 
 GatherCompilerResults::~GatherCompilerResults()
@@ -60,8 +78,10 @@ GatherCompilerResults::~GatherCompilerResults()
 	if (s_CompilerStack.empty())
 	{
 		// Reset our logging output to default channels.
-		if (WasLogging())
+		if (WasLoggingCompiler())
 			SpliceStaticFPInterface::GetInstance()->EnableLogging(SpliceStaticFPInterface::LOG_COMPILER_ERROR);
+		if (WasLoggingErrors())
+			SpliceStaticFPInterface::GetInstance()->EnableLogging(SpliceStaticFPInterface::LOG_ERROR);
 	}
 }
 

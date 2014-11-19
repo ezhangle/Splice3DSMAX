@@ -353,6 +353,8 @@ public:
 
 #pragma endregion
 
+	/// Invalidate our cached values, will cause a re-evalaute of the graph next evaluation
+	void Invalidate() { m_valid.SetEmpty(); }
 	// Push our parameters to the Splice system, and get the results back...
 	const TResultType& Evaluate(TimeValue t, Interval& ivValid);
 	// Do an evaluation, but do not return the calculated value

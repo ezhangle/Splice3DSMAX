@@ -43,6 +43,11 @@ private:
 	bool CloneSpliceData(SpliceTranslationLayer<Control, Matrix3>* pMyClone) { return true; } ; // No cloning for me...
 
 	FabricSplice::DGPort m_parentValuePort;
+
+	// Our cache is only valid if the parent has not changed.
+	// We cache the parents transform, and invalidate our cache
+	// if it changes.
+	Matrix3 m_cachedParentVal;
 };
 
 class SpliceControlMatrixClassDesc : public DynPBCustAttrClassDesc {
@@ -90,7 +95,7 @@ void SpliceControlMatrix::Copy(Control *)
 
 void SpliceControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
-
+	Invalidate();
 	Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
 	if(method == CTRL_ABSOLUTE)
 	{
@@ -98,7 +103,12 @@ void SpliceControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, G
 	}
 	else
 	{
+		// if our parents value has changed, invalidate our cache
+		if (!(m_cachedParentVal == *pInVal))
+			Invalidate();
 		MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
+		// Cache parent transform for next eval
+		m_cachedParentVal = *pInVal;
 	}
 	*pInVal = Evaluate(t, interval);
 

@@ -873,7 +873,7 @@ void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DG
 			}
 		case TYPE_REFTARG:
 			{
-				ReferenceTarget* pSrcContainer = pblock->GetReferenceTarget(id);
+				ReferenceTarget* pSrcContainer = pblock->GetReferenceTarget((ParamID)id);
 				if (pSrcContainer == nullptr)
 					continue;
 
@@ -894,7 +894,7 @@ void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DG
 						// If we are connected to an array, take only a single element
 						if (srcIndex >= 0 && srcVal.isArray()) {
 							// Check for OOR
-							if (srcIndex >= srcVal.getArraySize())
+							if ((uint32_t)srcIndex >= srcVal.getArraySize())
 								continue;
 							srcVal = srcVal.getArrayElement(srcIndex);
 						}

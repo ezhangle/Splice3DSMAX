@@ -341,7 +341,7 @@ FabricCore::RTVal GetRTVal(const Mesh& param)
 template<>
 void SpliceToMaxValue(FabricCore::RTVal& rtVal, int& param)
 {
-	param = static_cast<float>(rtVal.getSInt32());
+	param = rtVal.getSInt32();
 }
 
 template<>

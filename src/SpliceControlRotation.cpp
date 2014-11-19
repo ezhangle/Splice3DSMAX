@@ -88,6 +88,7 @@ void SpliceControlRotation::GetValue(TimeValue t, void *val, Interval &interval,
 {
 	if(method == CTRL_RELATIVE)
 	{
+		Invalidate(); // Evaluate every time in case parent changes too
 		Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
 		Point3 pos = pInVal->GetTrans();
 		MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);

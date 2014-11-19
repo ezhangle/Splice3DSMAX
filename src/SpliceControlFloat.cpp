@@ -89,6 +89,7 @@ void SpliceControlFloat::GetValue(TimeValue t, void *val, Interval &interval, Ge
 	float* pVal = reinterpret_cast<float*>(val);
 	if(method == CTRL_RELATIVE)
 	{
+		Invalidate(); // Evaluate every time in case parent changes too
 		MaxValueToSplice(m_parentValuePort, 0, interval, *pVal);
 	}
 	else

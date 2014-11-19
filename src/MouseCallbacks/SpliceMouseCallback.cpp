@@ -462,8 +462,6 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 
 	mEventDispatcher.callMethod("Boolean", "onEvent", 1, &klevent);
 
-	bool result = klevent.callMethod("Boolean", "isAccepted", 0, 0).getBoolean();
-	
     // The manipulation system has requested that a custom command be invoked. 
     // Invoke the custom command passing the speficied args. 
 	std::string customCommand(host.maybeGetMember("customCommand").getStringCString());
@@ -477,7 +475,7 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 			// e.g. 
 			// $Sphere01.radius = 3.0
 			std::string args;
-			for(int i=0; i<customCommandArgs.getArraySize(); i++){
+			for(uint32_t i=0; i<customCommandArgs.getArraySize(); i++){
 				args += std::string(customCommandArgs.getArrayElement(i).getStringCString());
 			}
 			result = ExecuteMAXScriptScript(TSTR::FromCStr((customCommand + args).data()), quietErrors);
@@ -499,7 +497,7 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 				// e.g. 
 				// theHold.Accept "MyChanges"
 				std::string args;
-				for(int i=0; i<customCommandArgs.getArraySize(); i++){
+				for(uint32_t i=0; i<customCommandArgs.getArraySize(); i++){
 					args += std::string(" ");
 					args += std::string(customCommandArgs.getArrayElement(i).getStringCString());
 				}
@@ -508,8 +506,6 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 		}
 	}
 	
-	//bool result = klevent.callMethod("Boolean", "isAccepted", 0, 0).getBoolean();
-
 	if(host.maybeGetMember("redrawRequested").getBoolean())	{
 		Interface7* pCore = GetCOREInterface7();
 		ViewExp& vp = pCore->GetViewExp(hwnd);

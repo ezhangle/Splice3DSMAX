@@ -85,24 +85,17 @@ void SpliceControlPosition::Copy(Control *)
 
 void SpliceControlPosition::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
-	try
+	if(method == CTRL_RELATIVE)
 	{
-		if(method == CTRL_RELATIVE)
-		{
-			Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
-			MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
-			pInVal->SetTrans(Evaluate(t, interval));
-		}
-		else
-		{
-			Point3* pOutVal = reinterpret_cast<Point3*>(val);
-			MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3::Identity);
-			*pOutVal = Evaluate(t, interval);
-		}
+		Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
+		MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
+		pInVal->SetTrans(Evaluate(t, interval));
 	}
-	catch(FabricCore::Exception e)
+	else
 	{
-		logMessage(e.getDesc_cstr());
+		Point3* pOutVal = reinterpret_cast<Point3*>(val);
+		MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3::Identity);
+		*pOutVal = Evaluate(t, interval);
 	}
 }
 

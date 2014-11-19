@@ -85,25 +85,19 @@ void SpliceControlFloat::Copy(Control *)
 
 void SpliceControlFloat::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
-	try
-	{
-		float* pVal = reinterpret_cast<float*>(val);
-		if(method == CTRL_RELATIVE)
-		{
-			MaxValueToSplice(m_parentValuePort, 0, interval, *pVal);
-		}
-		else
-		{
-			MaxValueToSplice(m_parentValuePort, 0, interval, float(0));
-		}
 
-		// Evaluate value from splice
-		*pVal = Evaluate(t, interval);
-	}
-	catch(FabricCore::Exception e)
+	float* pVal = reinterpret_cast<float*>(val);
+	if(method == CTRL_RELATIVE)
 	{
-		//logError(e.getDesc_cstr());
+		MaxValueToSplice(m_parentValuePort, 0, interval, *pVal);
 	}
+	else
+	{
+		MaxValueToSplice(m_parentValuePort, 0, interval, float(0));
+	}
+
+	// Evaluate value from splice
+	*pVal = Evaluate(t, interval);
 }
 
 

@@ -122,6 +122,7 @@
   <ItemDefinitionGroup>
     <PostBuildEvent>
       <Command>copy "$(ProjectDir)3dsMax2014.bat" "$(FABRIC_DIR)SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/" /Y
+copy "$(ProjectDir)SetupMenu.ms" "$(FABRIC_DIR)SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/" /Y
 xcopy "$(ProjectDir)ScintillaNET" "$(FABRIC_DIR)SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/ScintillaNET" /E /I /Y
 xcopy "$(ProjectDir)testingScripts" "$(FABRIC_DIR)SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/samples" /E /I /Y
 call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)"

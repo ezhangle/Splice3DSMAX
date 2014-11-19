@@ -743,6 +743,8 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 template<typename TResultType, typename TConvertType>
 void ParameterBlockValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
 {
+	MAXSPLICE_CATCH_BEGIN()
+
 	int type = pblock->GetParameterType(pid);
 	int nParams = 1;
 	if (is_tab(type))
@@ -753,6 +755,8 @@ void ParameterBlockValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IPa
 		pblock->GetValue(pid, t, pVals[i], ivValid, i);
 	MaxValuesToSplice<TResultType, TConvertType>(dgPort, t, ivValid, pVals, nParams);
 	delete pVals;
+
+	MAXSPLICE_CATCH_END()
 }
 
 template<typename TResultType>

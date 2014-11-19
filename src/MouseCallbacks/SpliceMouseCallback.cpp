@@ -9,6 +9,7 @@
 #include "FabricCore.h"
 #include "FabricSplice.h"
 #include "..\SpliceEvents.h"
+#include "..\Splice3dsmax.h"
 
 class CustomKLUndoRedoCommandObject : public RestoreObj
 {
@@ -329,6 +330,12 @@ FabricCore::RTVal SetupViewport(ViewExp* pView)
 	return inlineViewport;
 }
 
+// Lazily duplicating the method here from SpliceLogging.cpp because I was getting errors when I moved it to a header file. 
+std::wstring s2ws2(const std::string& s)
+{
+	std::wstring r(s.begin(), s.end());
+	return r;
+}
 
 int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2 m )
 {
@@ -337,6 +344,8 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 
 	if (msg == MOUSE_IDLE)
 		return TRUE;
+
+	MAXSPLICE_CATCH_BEGIN()
 
 	int res = FALSE;
 	
@@ -348,43 +357,36 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	int eventType = Event_MouseMove;
 
 	// Generate mouse down/up events
-	bool bCloseHold = false;
 	if (!m_LMouseDown && flags&MOUSE_LBUTTON)
 	{
 		eventType = Event_MouseButtonPress;
 		m_LMouseDown = true;
-		theHold.Begin();
 	}
 	else if (m_LMouseDown && (flags&MOUSE_LBUTTON) == 0)
 	{
 		eventType = Event_MouseButtonRelease;
 		m_LMouseDown = false;
-		bCloseHold = true;
 	}
 
 	if (!m_RMouseDown && flags&MOUSE_RBUTTON)
 	{
 		eventType = Event_MouseButtonPress;
-		theHold.Begin();
 		m_RMouseDown = true;
 	}
 	else if (m_RMouseDown && (flags&MOUSE_RBUTTON) == 0)
 	{
 		eventType = Event_MouseButtonRelease;
-		bCloseHold = true;
 		m_RMouseDown = false;
 	}
 
 	if (!m_MMouseDown && flags&MOUSE_MBUTTON)
 	{
 		eventType = Event_MouseButtonPress;
-		theHold.Begin();
 		m_MMouseDown = true;
 	}
 	else if (m_MMouseDown && (flags&MOUSE_MBUTTON) == 0)
 	{
 		eventType = Event_MouseButtonRelease;
-		bCloseHold = true;
 		m_MMouseDown = false;
 	}
 
@@ -458,17 +460,7 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	args[3] = FabricSplice::constructUInt32RTVal(modifiers);
 	klevent.callMethod("", "init", 4, &args[0]);
 
-	try{
-		mEventDispatcher.callMethod("Boolean", "onEvent", 1, &klevent);
-	}
-	catch(FabricCore::Exception e)    {
-		logMessage(e.getDesc_cstr());
-		res = 0;
-	}
-	catch(FabricSplice::Exception e){
-		logMessage(e.what());
-		res = 0;
-	}
+	mEventDispatcher.callMethod("Boolean", "onEvent", 1, &klevent);
 
 	bool result = klevent.callMethod("Boolean", "isAccepted", 0, 0).getBoolean();
 	
@@ -534,23 +526,41 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	}
 
 	if(host.callMethod("Boolean", "undoRedoCommandsAdded", 0, 0).getBoolean()){
-		if (theHold.Holding()){
-			FabricCore::RTVal fabricUndoVal = host.callMethod("UndoRedoCommand[]", "getUndoRedoCommands", 0, 0);
-			CustomKLUndoRedoCommandObject* pNewUndo = new CustomKLUndoRedoCommandObject(fabricUndoVal);
-			theHold.Put(pNewUndo);
+		bool bCloseHold = false;
+		if (!theHold.Holding()){
+			theHold.Begin();
+			bCloseHold = true;
+		}
+		FabricCore::RTVal fabricUndoVal = host.callMethod("UndoRedoCommand[]", "getUndoRedoCommands", 0, 0);
+		CustomKLUndoRedoCommandObject* pNewUndo = new CustomKLUndoRedoCommandObject(fabricUndoVal);
+		theHold.Put(pNewUndo);
+
+		// if we are in mouse-up, then close our hold
+		if (bCloseHold){
+			if (fabricUndoVal.getArraySize() == 1){
+				std::string desc(fabricUndoVal.getArrayElement(0).callMethod("String", "getDesc", 0, 0).getStringCString());
+#ifdef _UNICODE
+				theHold.Accept(s2ws2(desc).data());
+#else
+				theHold.Accept((desc + std::string("\n")).data());
+#endif
+			}
+			else	
+				theHold.Accept(_T("Splice Manipulation"));
 		}
 	}
 
-	// if we are in mouse-up, then close our hold
-	if (bCloseHold)
-		theHold.Accept(_T("Splice Actions"));
 
 	klevent.invalidate();
 	return res;
+
+	MAXSPLICE_CATCH_RETURN(FALSE)
 }
 
 void SpliceMouseCallback::EnterMode()
 {
+	MAXSPLICE_CATCH_BEGIN();
+
 	const FabricCore::Client * client = NULL;
 	FECS_DGGraph_getClient(&client);
 
@@ -569,10 +579,13 @@ void SpliceMouseCallback::EnterMode()
 		mEventDispatcher.callMethod("", "activateManipulation", 0, 0);
 		//in_ctxt.Redraw(true);
 	}
+	MAXSPLICE_CATCH_END()
 }
 
 void SpliceMouseCallback::ExitMode()
 {
+	MAXSPLICE_CATCH_BEGIN()
+
 	DbgAssert(!theHold.Holding());
 	if (theHold.Holding())
 		theHold.Accept(_T("ERROR - Splice Actions"));
@@ -584,4 +597,6 @@ void SpliceMouseCallback::ExitMode()
 		mEventDispatcher.callMethod("", "deactivateManipulation", 0, 0);
 		mEventDispatcher.invalidate();
 	}
+
+	MAXSPLICE_CATCH_END()
 }

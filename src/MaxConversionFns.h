@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Splice3dsmax.h"
+
 //////////////////////////////////////////////////////////////////////////////////////
 // Max->Splice
 
@@ -54,6 +56,8 @@ void MaxValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, Interval& ivVa
 	if (!dgPort.isValid())
 		return;
 
+	MAXSPLICE_CATCH_BEGIN()
+
 	// Initialize handle to splice values
 	//FabricCore::Variant spliceVal;
 	TConvertType convert;
@@ -77,6 +81,7 @@ void MaxValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, Interval& ivVa
 			dgPort.setRTVal(GetRTVal(convert));
 		}
 	}
+	MAXSPLICE_CATCH_END()
 }
 
 template<typename TResultType>

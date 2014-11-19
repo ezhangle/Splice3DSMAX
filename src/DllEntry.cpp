@@ -14,6 +14,7 @@ CREATED BY:		Ingenuity Engine
 #include "StdAfx.h"
 #include "SpliceStaticFPInterface.h"
 #include <notify.h>
+#include <MaxScript/MaxScript.h>
 #include "SpliceEvents.h"
 
 // This function is called by Windows when the DLL is loaded.  This 
@@ -110,6 +111,24 @@ void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 	RegisterNotification(OnReset, NULL, NOTIFY_SYSTEM_POST_RESET);
 	RegisterNotification(OnReset, NULL, NOTIFY_SYSTEM_POST_NEW);
 	RegisterNotification(OnReset, NULL, NOTIFY_FILE_PRE_OPEN);
+
+	
+	// Magic initialization stuff for maxscript.
+	static bool menus_setup = false;
+	if (!menus_setup) {
+		init_MAXScript();
+		menus_setup = TRUE;
+
+		// On first run, evaluate the script that defines our function
+		char* mxsMenuSetup = nullptr;
+		size_t buffSize = 0;
+		if (_dupenv_s(&mxsMenuSetup, &buffSize, "SPLICE3DSMAXDIR") == 0) {
+			MSTR mxsMenuSetupPath = MSTR::FromACP(mxsMenuSetup, buffSize);
+			mxsMenuSetupPath = mxsMenuSetupPath + _T("SetupMenu.ms");
+			filein_script(mxsMenuSetupPath.data());
+			free(mxsMenuSetup);
+		}
+	}
 }
 
 // Clean up splice, and unhook all notifications.

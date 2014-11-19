@@ -19,16 +19,16 @@ if NOT EXIST Generated.Plugin.Splice.ini (
 	@echo mental ray Help=http://www.autodesk.com/mentalray-help-2013-enu >> Generated.Plugin.Splice.ini
 )
 
-set CURRDIR=%~dp0
+set SPLICE3DSMAXDIR=%~dp0
 
 echo Ensure that the Splice plugin will be able to find the extensions 
-set FABRIC_EXTS_PATH=%FABRIC_EXTS_PATH%;%CURRDIR%..\..\Exts
+set FABRIC_EXTS_PATH=%FABRIC_EXTS_PATH%;%SPLICE3DSMAXDIR%..\..\Exts
 
-echo Allow the system to load FabricCore.1.13.dll
-set PATH=%PATH%;%CURRDIR%..\..\lib
+echo Allow the system to load FabricCore dll
+set PATH=%PATH%;%SPLICE3DSMAXDIR%..\..\lib
 
 echo Save the Scintilla folder to an environment variable that will be accessed in MaxScript
-set SCINTILLANETDIR=%CURRDIR%ScintillaNET\
+set SCINTILLANETDIR=%SPLICE3DSMAXDIR%ScintillaNET\
 
 rem Launch Max
 call "%ADSK_3DSMAX_x64_2014%\3dsmax.exe" -vo -p %~dp0/Generated.Plugin.Splice.ini

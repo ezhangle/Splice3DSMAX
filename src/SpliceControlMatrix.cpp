@@ -14,6 +14,7 @@
 
 #include "StdAfx.h"
 #include "SpliceTranslationLayer.hpp"
+#include "Splice3dsmax.h"
 
 #define SpliceControlMatrix_CLASS_ID	Class_ID(0x6a53772, 0x7c2c7c4b)
 
@@ -89,23 +90,18 @@ void SpliceControlMatrix::Copy(Control *)
 
 void SpliceControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
-	try
+
+	Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
+	if(method == CTRL_ABSOLUTE)
 	{
-		Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
-		if(method == CTRL_ABSOLUTE)
-		{
-			MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3::Identity);
-		}
-		else
-		{
-			MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
-		}
-		*pInVal = Evaluate(t, interval);
+		MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3::Identity);
 	}
-	catch(FabricCore::Exception e)
+	else
 	{
-		logMessage(e.getDesc_cstr());
+		MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
 	}
+	*pInVal = Evaluate(t, interval);
+
 }
 
 

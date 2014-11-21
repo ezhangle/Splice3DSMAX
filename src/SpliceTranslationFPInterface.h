@@ -4,7 +4,9 @@
 
 #define ISPLICE__INTERFACE Interface_ID(0x5a5f19c9, 0x25881449)
 
-extern void DoShowKLEditor(ReferenceTarget* pTarget);
+// Call the given function name, passing a single argument pTarger, and optionally returning it's result
+extern Value* CallMaxScriptFunction(MCHAR* function, ReferenceTarget* fnArgument, bool returnResult);
+extern Value* CallMaxScriptFunction(MCHAR* function, Value* fnArgument, bool returnResult);
 
 // We need to make this function a templated type, just so
 // we can get multiple compilations for our different clients.
@@ -12,7 +14,14 @@ extern void DoShowKLEditor(ReferenceTarget* pTarget);
 // the class created for each client, and each implementation
 // of GetDesc needs to return the unique type.
 class SpliceTranslationFPInterface : public FPMixinInterface {
+private:
+	Value* m_klEditor;
+
 public:
+
+	SpliceTranslationFPInterface();
+	~SpliceTranslationFPInterface();
+
 	// The follow exposes our functions to Max
 	enum FN_IDS {
 		// System management callbacks
@@ -57,6 +66,8 @@ public:
 
 		prop_getAllPortSignature,
 
+		prop_klEditor,
+
 		num_params
 	};
 
@@ -97,6 +108,8 @@ public:
 		PROP_FNS(prop_getOutPortName, GetOutPortNameMSTR, prop_setOutPortName, SetOutPortNameMSTR, TYPE_TSTR_BV)
 		PROP_FNS(prop_getOutPortArrayIdx, GetOutPortArrayIdx, prop_setOutPortArrayIdx, SetOutPortArrayIdx, TYPE_INT)
 		RO_PROP_FN(prop_getAllPortSignature, GetAllPortSignatureMSTR, TYPE_TSTR_BV)
+
+		RO_PROP_FN(prop_klEditor, GetKLEditor, TYPE_VALUE)
 		
 	END_FUNCTION_MAP
 
@@ -128,6 +141,9 @@ public:
 
 	// Remove specified port and matching max parameter
 	virtual bool RemovePort(int i) = 0;
+
+	// Reset any auto-generated ports.
+	virtual void ResetPorts()=0;
 
 	// Get name of port
 	virtual const char* GetPortName(int i) = 0;
@@ -187,10 +203,15 @@ public:
 	virtual bool SaveToFile(const MCHAR* filename)=0;
 
 	// Show the MaxScript-based editor
-	void ShowKLEditor(ReferenceTarget* pTarget)	{ DoShowKLEditor(pTarget); }
+	Value* GetKLEditor() { return m_klEditor; }
+	void ShowKLEditor();
+	void CloseKLEditor();
+	void UpdateKLEditor();
 
 protected:
 
+	// This function allows us to go up the other pants leg of 
+	//virtual ReferenceTarget* CastToRefTarg()=0;
 #pragma region MSTR<->CStr conversion
 
 	// Our MSTR version of the function converts to CStr and passes on to real handler
@@ -343,6 +364,7 @@ FPInterfaceDesc* GetDescriptor()
 			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_setOutPortName, _T("OutPort"), 0, TYPE_TSTR_BV,
 			SpliceTranslationFPInterface::prop_getOutPortArrayIdx, SpliceTranslationFPInterface::prop_setOutPortArrayIdx, _T("OutPortIndex"), 0, TYPE_INT,
 			SpliceTranslationFPInterface::prop_getAllPortSignature, FP_NO_FUNCTION, _T("AllPortsSignature"), 0, TYPE_TSTR_BV,
+			SpliceTranslationFPInterface::prop_klEditor,	FP_NO_FUNCTION,		_T("KLEditor"),		0,	TYPE_VALUE,
 		p_end
 		);
 	return &_ourDesc;

@@ -195,6 +195,9 @@ public:
 	virtual RefTargetHandle		GetReference(int i)					{ return (i == 0) ? m_pblock : NULL; }
 	virtual void				SetReference(int i, RefTargetHandle rtarg);
 	RefResult					NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget, PartID& partID,  RefMessage message);
+	// We use the RefDeleted callback to detect when we are 
+	// removed from the scene graph so we can take down the KLEditor
+	void						RefDeleted();
 
 	// Sub-anims are the entities that appear in the TrackView
 	virtual	int					NumSubs()							{ return 1; }
@@ -274,6 +277,8 @@ public:
 			return GetDescriptor<TBaseClass, TResultType>();
 		return SpliceTranslationFPInterface::GetDescByID(id);
 	}
+
+	ReferenceTarget* CastToRefTarg() { return this; }
 
 	int GetOperatorCount();
 	std::string GetOperatorName(int i);

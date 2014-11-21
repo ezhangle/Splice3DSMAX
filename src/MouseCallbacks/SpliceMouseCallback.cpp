@@ -10,44 +10,8 @@
 #include "FabricSplice.h"
 #include "..\SpliceEvents.h"
 #include "..\Splice3dsmax.h"
+#include "..\SpliceRestoreObjects.h"
 
-class CustomKLUndoRedoCommandObject : public RestoreObj
-{
-	FabricCore::RTVal m_rtval_commands;
-
-public:
-	CustomKLUndoRedoCommandObject(FabricCore::RTVal& commands) 
-	{
-		m_rtval_commands = commands;
-	}
-	~CustomKLUndoRedoCommandObject() 
-	{
-		m_rtval_commands.invalidate();
-	};
-	
-	virtual void Restore( int isUndo )
-	{
-		if(m_rtval_commands.isValid())
-		{
-			for(size_t i=0; i< m_rtval_commands.getArraySize(); i++)
-			{
-				m_rtval_commands.getArrayElement(i).callMethod("", "undoAction", 0, 0);
-			}
-		}
-	}
-
-	virtual void Redo()
-	{
-		if(m_rtval_commands.isValid())
-		{
-			for(size_t i = 0; i < m_rtval_commands.getArraySize(); i++)
-			{
-				m_rtval_commands.getArrayElement(i).callMethod("", "doAction", 0, 0);
-			}
-		}
-	}
-
-};
 // The following IDs are taken from ManipulationConstants.kl in the 'Manipulation' extension.
 // The IDs cover all of the event types propagated by Qt.
 // A given DCC will not support all event types, but the IDs must match between

@@ -712,14 +712,14 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_COMMAND:
 		{
-			SpliceTranslationLayer<Control, float>* curInstance = (SpliceTranslationLayer<Control, float>*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+			SpliceTranslationFPInterface* curInstance = reinterpret_cast<SpliceTranslationFPInterface*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 			if (curInstance == NULL) 
 				return 0;
 
 			// If we are the KL editor button, pop that editor
 			if (wParam == IDC_BTN_EDIT_KL)
 			{
-				curInstance->ShowKLEditor(curInstance);
+				curInstance->ShowKLEditor();
 			}
 		}
 		break;

@@ -6,6 +6,17 @@
 #include <maxscript\maxwrapper\mxsobjects.h>
 
 
+SpliceTranslationFPInterface::SpliceTranslationFPInterface()
+	: m_klEditor(nullptr)
+{
+
+}
+
+SpliceTranslationFPInterface::~SpliceTranslationFPInterface()
+{
+	CloseKLEditor();
+}
+
 BOOL SpliceTranslationFPInterface::SetSpliceGraph(ReferenceTarget* rtarg)
 {
 	SpliceTranslationFPInterface* pTargetInterface = static_cast<SpliceTranslationFPInterface*>(rtarg->GetInterface(ISPLICE__INTERFACE));
@@ -39,10 +50,44 @@ bool SpliceTranslationFPInterface::ConnectPortMSTR( const MSTR& myPortName, Refe
 	return ConnectPort(cMyPortName, pSrcContainer, cSrcPortName, srcPortIndex);
 }
 
-void DoShowKLEditor(ReferenceTarget* pTarget)
+void SpliceTranslationFPInterface::ShowKLEditor()
 {
-	if (pTarget == NULL)
-		return;
+	CloseKLEditor();
+
+	//Value* valueArg = MAXClass::make_wrapper_for(this);
+	Value* valueArg = FPMixinInterfaceValue::intern(this);
+	m_klEditor = CallMaxScriptFunction(_M("fn_From_Cpp_ShowKLEditor"), valueArg, true);
+	// MxS will always return something, but its not always a value we can use
+	if (m_klEditor == &undefined)
+		m_klEditor = nullptr;
+}
+
+void SpliceTranslationFPInterface::CloseKLEditor()
+{
+	if (m_klEditor != nullptr) 
+	{
+		CallMaxScriptFunction(_M("fn_From_Cpp_CloseKLEditor_Dialog"), m_klEditor, false);
+		m_klEditor->make_collectable();
+		m_klEditor = nullptr;
+	}
+}
+
+void SpliceTranslationFPInterface::UpdateKLEditor()
+{
+	if (m_klEditor != nullptr)
+		CallMaxScriptFunction(_M("fn_From_Cpp_UpdateKLEditor"), m_klEditor, false);
+}
+
+Value* CallMaxScriptFunction(MCHAR* function, ReferenceTarget* fnArgument, bool returnResult) 
+{
+	Value* valueArg = MAXClass::make_wrapper_for(fnArgument);
+	return CallMaxScriptFunction(function, valueArg, returnResult);
+}
+
+Value* CallMaxScriptFunction(MCHAR* function, Value* fnArgument, bool returnResult)
+{
+	if (fnArgument == nullptr)
+		return nullptr;
 
 	// We are going to called a function defined entirely in MaxScript
 	// to pop the editor dialog.  This MxS argument is required to take
@@ -70,14 +115,14 @@ void DoShowKLEditor(ReferenceTarget* pTarget)
 	}
 	init_thread_locals();
 	push_alloc_frame();
-	six_value_locals(name, fn, mod, index, target, result);
+	four_value_locals(name, fn, target, result);
 	save_current_frames();
 	set_error_trace_back_active(FALSE);
 
 	try	{
 		// Create the name of the maxscript function we want.
 		// and look it up in the global names
-		vl.name = Name::intern(_T("fn_From_Cpp_ShowKLEditor"));
+		vl.name = Name::intern(function);
 		vl.fn = globals->get(vl.name);
 
 		// For some reason we get a global thunk back, so lets
@@ -93,14 +138,9 @@ void DoShowKLEditor(ReferenceTarget* pTarget)
 		// call to do the actual conversion. If we didn't
 		// get a MAXScriptFunction, we can't convert.
 		if (vl.fn != NULL) {
-
 			// Ok. our KL editor takes takes 1 parameter
-			Value* arg = MAXClass::make_wrapper_for(pTarget);
-			if (arg != NULL)
-			{
-				// Call the function and save the result.
-				vl.result = static_cast<Primitive*>(vl.fn)->apply(&arg, 1);
-			}
+			// Call the function and save the result.
+			vl.result = static_cast<Primitive*>(vl.fn)->apply(&fnArgument, 1);
 		}
 	} catch (...) {
 		clear_error_source_data();
@@ -108,9 +148,15 @@ void DoShowKLEditor(ReferenceTarget* pTarget)
 		MAXScript_signals = 0;
 	}
 
+	// If we are returning this value, we need to protect it from GC
+	Value* res = nullptr;
+	if (returnResult)
+		res = vl.result ? vl.result->make_heap_permanent() : nullptr;
+
 	// Magic Max Script stuff to clear the frame and locals.
 	pop_value_locals();
 	pop_alloc_frame();
+	return res;
 }
 
 SpliceTranslationFPInterface* GetSpliceInterface( ReferenceTarget* pTarg )

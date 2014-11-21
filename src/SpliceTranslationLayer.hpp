@@ -7,6 +7,7 @@
 #include "SpliceLogging.h"
 #include "MaxConversionFns.h"
 #include "Splice3dsmax.h"
+#include "SpliceRestoreObjects.h"
 
 //////////////////////////////////////////////////////////////////////////
 //--- SpliceTranslationLayer -------------------------------------------------------
@@ -132,9 +133,6 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::DeleteMaxParameter(ParamID
 	// Delete parameter from new descriptor
 	pNewDesc->DeleteParam(pid);
 
-	// Ensure that our max->splice connection is broken for this parameter
-	DbgAssert(false && "Check This");
-
 	// Replace old pblock with new one (will copy values).
 	CreateParamBlock(pNewDesc);
 	return true;
@@ -211,7 +209,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::BeginEditParams(IObjParam 
 		MAKEINTRESOURCE(IDD_PARAM_GENERATION_UI),
 		DlgProc,
 		GetString(IDS_PARAMS),
-		(LPARAM)this);
+		(LPARAM)static_cast<SpliceTranslationFPInterface*>(this));
 
 	// Generate our Dialog, and assign an mParamMap
 	MaybePostParamUI();
@@ -238,7 +236,7 @@ ParamDlg *SpliceTranslationLayer<TBaseClass, TResultType>::CreateParamDlg(HWND h
 		MAKEINTRESOURCE(IDD_PARAM_GENERATION_UI),
 		DlgProc,
 		GetString(IDS_PARAMS).data(),
-		(LPARAM)this);
+		(LPARAM)static_cast<SpliceTranslationFPInterface*>(this));
 
 	return CreateMyAutoParamDlg(hwMtlEdit, imp);
 }
@@ -345,6 +343,18 @@ RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged( Int
 	}
 
 	return REF_SUCCEED;
+}
+
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::RefDeleted() {
+	// If we have no nodes referencing this class, then kill our UI
+	if (GetKLEditor() != nullptr)
+	{
+		ULONG handle = 0;
+		NotifyDependents(FOREVER, (PartID)&handle, REFMSG_GET_NODE_HANDLE);
+		if (handle == 0)
+			CloseKLEditor();
+	}
 }
 #pragma endregion
 
@@ -582,6 +592,10 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCode(const std
 template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
 {
+	HoldActions hold(_M("Add Input Port"));
+
+	if (theHold.Holding())
+		theHold.Put(new SplicePortChangeObject(this));
 	FabricSplice::DGPort aPort = AddSpliceParameter(m_graph, spliceType, name, FabricSplice::Port_Mode_IN, isArray, inExtension);
 	// Can/Should we create a matching max type for this?
 	return SetMaxConnectedType(aPort, maxType);
@@ -590,6 +604,9 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* na
 template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::AddOutputPort(const char* name, const char* spliceType, bool isArray/*=false*/, const char* inExtension)
 {
+	HoldActions hold(_M("Add Output Port"));
+	if (theHold.Holding())
+		theHold.Put(new SplicePortChangeObject(this));
 	// Create the port
 	FabricSplice::DGPort aPort = AddSpliceParameter(m_graph, spliceType, name, FabricSplice::Port_Mode_OUT, isArray, inExtension);
 	return -1;
@@ -598,6 +615,10 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::AddOutputPort(const char* n
 template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::AddIOPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
 {
+	HoldActions hold(_M("Add IO Port"));
+	if (theHold.Holding())
+		theHold.Put(new SplicePortChangeObject(this));
+
 	// Create the port
 	FabricSplice::DGPort aPort = AddSpliceParameter(m_graph, spliceType, name, FabricSplice::Port_Mode_IO, isArray, inExtension);
 
@@ -612,6 +633,10 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::RemovePort(int i)
 		return false;
 
 	MAXSPLICE_CATCH_BEGIN()
+
+	HoldActions hold(_M("Remove Port"));
+	if (theHold.Holding())
+		theHold.Put(new SplicePortChangeObject(this));
 
 	// Ensure the max data is released
 	int pid = GetPortParamID(i);
@@ -648,6 +673,10 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(int i, const c
 	const char* curname = aPort.getName();
 	if (strcmp(curname, name) == 0)
 		return true;
+
+	HoldActions hold(_M("Set Port Name"));
+	if (theHold.Holding())
+		theHold.Put(new SplicePortChangeObject(this));
 
 	// For now, just reset the port by deleting/recreating it.
 	// This doesn't recreate any data, just the port connecting to it
@@ -752,6 +781,9 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const char*
 		// We have a valid value already, do we need to change it?
 		if (strcmp(oldName.data(), name) == 0)
 			return true;
+
+		if (theHold.Holding())
+			theHold.Put(new SplicePortChangeObject(this));
 
 		// We cannot rename, we must remove original and recreate
 		
@@ -858,6 +890,9 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectPort( const char* m
 	if ((srcPortIndex >= 0) && !srcPort.isArray())
 		return false;
 
+	if (theHold.Holding())
+		theHold.Put(new SplicePortChangeObject(this));
+
 	// Ok - these ports are good to go.  Connect 'em up.
 	int res = SetMaxConnectedType(destPort, TYPE_REFTARG);
 	if (res < 0)
@@ -889,6 +924,9 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::DisconnectPort(const char*
 		std::string connection = GetPortConnection(connectedPort);
 		if (connection == "") 
 		{
+			if (theHold.Holding())
+				theHold.Put(new SplicePortChangeObject(this));
+
 			SetMaxConnectedType(connectedPort, -1);
 			connectedPort.setOption(MAX_SRC_OPT, FabricCore::Variant());
 			return true;

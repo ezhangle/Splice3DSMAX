@@ -51,6 +51,7 @@ struct spliceEditorStruct
 		local thisStruct = getStruct sender
 		local spliceClass = thisStruct.mSpliceClass
 		spliceClass.SetPortName paramIdx sender.Text
+		thisStruct.UpdateKLCodeTab()
 	),
 	
 	fn evMaxTypeChange sender evt = (
@@ -71,10 +72,8 @@ struct spliceEditorStruct
 		success = thisStruct.mSpliceClass.RemovePortByIndex paramIdx
 		-- Remove newly deleted param from table
 		if success do (
-			local rowLayout = sender.parent
-			local paramTable = rowLayout.parent
-			paramTable.Controls.Clear()
-			thisStruct.CreateParameterRows paramTable
+			thisStruct.UpdateParameterTab()
+			thisStruct.UpdateKLCodeTab()
 		)		
 	),
 	
@@ -89,9 +88,8 @@ struct spliceEditorStruct
 		thisStruct.mSpliceClass.AddInputPort paramName paramType maxType isArray:asArray
 		
 		-- Recreate parameter rows
-		local paramTable = rowLayout.parent
-		paramTable.Controls.Clear()
-		thisStruct.CreateParameterRows paramTable
+		thisStruct.UpdateParameterTab()
+		thisStruct.UpdateKLCodeTab()
 	),
 	
 	-------------------------------------------------------------------------------------
@@ -268,11 +266,15 @@ struct spliceEditorStruct
 		ctrlLayout.height = 26
 		ctrlLayout.Dock = ctrlLayout.Dock.Fill;
 		
+		tabsUsed = index * 3
+		
 		-- Add editable name box
 		local paramName = mSpliceClass.GetPortName index
 		local nameEdit = dotNetObject "System.Windows.Forms.TextBox"
 		nameEdit.Name = "ParamName"
 		nameEdit.Text = paramName
+		nameEdit.TabStop = true
+		nameEdit.TabIndex = tabsUsed + 1
 		ctrlLayout.Controls.Add nameEdit
 		dotNet.addEventHandler nameEdit "TextChanged" evRenameParam
 		
@@ -283,6 +285,7 @@ struct spliceEditorStruct
 		typeLabel.Enabled = false
 		typeLabel.Text = spliceType
 		typeLabel.Width = 110;
+		typeLabel.TabStop = false
 		global __label = typeLabel
 		typeLabel.BackColor = typeLabel.BackColor.LightGray;
 		ctrlLayout.Controls.Add typeLabel
@@ -295,6 +298,7 @@ struct spliceEditorStruct
 		isArrayCB.Text = "Is Array"
 		isArrayCB.Enabled = false
 		isArrayCB.Width = 75
+		isArrayCB.TabStop = false
 		ctrlLayout.Controls.Add isArrayCB
 
 		-- Allow user to switch between legal max types for input
@@ -306,6 +310,8 @@ struct spliceEditorStruct
 		ddlist.items.addrange #("-none-")
 		ddlist.items.addrange (GenerateNamesForTypes legalMaxTypes)
 		ddlist.SelectedIndex = (GetSelBitIndex legalMaxTypes maxType)
+		ddlist.TabStop = true
+		ddlist.TabIndex = tabsUsed + 2
 		dotNet.addEventHandler ddlist "SelectedIndexChanged" evMaxTypeChange
 		ctrlLayout.Controls.Add ddlist
 	
@@ -315,6 +321,8 @@ struct spliceEditorStruct
 		-- Allow user to delete parameters
 		local delBtn = dotNetObject  "System.Windows.Forms.Button"
 		delBtn.Text = "Delete"
+		delBtn.TabStop = true
+		delBtn.TabIndex = tabsUsed + 3
 		dotNet.addEventHandler delBtn "Click" evDelParam
 		ctrlLayout.Controls.Add delBtn
 		
@@ -322,6 +330,8 @@ struct spliceEditorStruct
 	),
 	
 	fn CreateNewParameterCtrl = (
+		local nParams = mSpliceClass.PortCount
+		local tabIndex  = nParams * 3 + 100
 		-- Create a horizontal layout
 		ctrlLayout = dotNetObject "System.Windows.Forms.FlowLayoutPanel"
 		ctrlLayout.FlowDirection = ctrlLayout.FlowDirection.LeftToRight
@@ -333,6 +343,7 @@ struct spliceEditorStruct
 		local nameEdit = dotNetObject "System.Windows.Forms.TextBox"
 		nameEdit.Name = "ParamName"
 		nameEdit.Text = "-Param Name-"
+		nameEdit.TabIndex = tabIndex + 1
 		ctrlLayout.Controls.Add nameEdit
 		
 		-- Add editable type
@@ -340,6 +351,7 @@ struct spliceEditorStruct
 		spliceType.Name = "SpliceType"
 		spliceType.items.addrange #("Size", "Scalar", "Vec2", "Vec3", "Vec4", "Color", "Boolean", "Mat44", "Quat", "String", "PolygonMesh")
 		spliceType.Width = 110;
+		spliceType.TabIndex = tabIndex + 2
 		spliceType.Name = "ParamType"
 		ctrlLayout.Controls.Add spliceType
 		
@@ -348,6 +360,7 @@ struct spliceEditorStruct
 		isArrayCB.Name = "ParamArray"
 		isArrayCB.Text = "Is Array"
 		isArrayCB.Width = 75
+		isArrayCB.TabIndex = tabIndex + 3
 		ctrlLayout.Controls.Add isArrayCB
 
 		-- Create empty dd list as place holder
@@ -356,6 +369,7 @@ struct spliceEditorStruct
 		maxType.DropDownStyle = maxType.DropDownStyle.DropDownList
 		maxType.items.addrange #("-none-", "-default type-")
 		maxType.SelectedIndex = 1
+		maxType.TabIndex = tabIndex + 4
 		ctrlLayout.Controls.Add maxType
 	
 		-- See http://tech-artists.org/forum/showthread.php?588-Maxscript-dotNet-and-the-vicious-ComboBox
@@ -365,6 +379,7 @@ struct spliceEditorStruct
 		-- Allow user to delete parameters
 		local createBtn = dotNetObject  "System.Windows.Forms.Button"
 		createBtn.Text = "Create"
+		createBtn.TabIndex = tabIndex + 5
 		dotNet.addEventHandler createBtn "Click" evCreateParam
 		ctrlLayout.Controls.Add createBtn
 		
@@ -422,11 +437,29 @@ struct spliceEditorStruct
 		tabParams;
 	),
 	
+	fn UpdateParameterTab = (
+		-- This is a nasty nasty way to access the paramtable
+		paramTable = mForm.Controls.Item[0].Controls.Item[1].Controls.Item[0]
+		paramTable.Controls.Clear()
+		CreateParameterRows paramTable
+	),
+	
+	fn UpdateKLCodeTab = (
+		if (mSpliceClass != undefined) do 
+		(
+			mKlEditor.text = mSpliceClass.GetKLCode()
+			mEntryPt.text = mSpliceClass.GetKLOperatorName();
+			mOutputName.text = mSpliceClass.OutPort;
+			mAvailablePorts.text = mSpliceClass.AllPortsSignature
+		)
+	),
+	
 	on create do 
 	(
 		mForm = dotNetObject "MaxCustomControls.MaxForm"
 		mForm.Height = 460;
 		mForm.Width = 600;
+		mForm.TabStop = false;
 		
 		tabCtrl = dotNetObject "System.Windows.Forms.TabControl"
 		tabCtrl.AutoSize = true;
@@ -436,15 +469,7 @@ struct spliceEditorStruct
 		-- Initialize the code.  This _must_ be done before creating the
 		-- parameter tab, as it is possible for calling GetKLCode to cause a
 		-- default parameter to be added to the DGNode
-		-- TODO: Add default parameters on creation, not
-		-- when showing UI
-		if (mSpliceClass != undefined) do 
-		(
-			mKlEditor.text = mSpliceClass.GetKLCode()
-			mEntryPt.text = mSpliceClass.GetKLOperatorName();
-			mOutputName.text = mSpliceClass.OutPort;
-			mAvailablePorts.text = mSpliceClass.AllPortsSignature
-		)
+		updateKLCodeTab()
 		
 		-- Somewhere (post-create) our form fore color is set to grey?
 		-- Can't find out how, so we set our tabs explicitly here
@@ -462,7 +487,7 @@ struct spliceEditorStruct
 
 		
 		-- Use MaxForm's special display fn to ensure form is child of Max
-		mForm.showModeless()
+		mForm.ShowModeless()
 		-- Transfer scope to .Net from MxS
 		dotNet.setLifeTimeControl mForm #dotNet
 	)
@@ -470,5 +495,23 @@ struct spliceEditorStruct
 
 -- Entry point, this fn will be called from C++ with instance of class to be edited.
 fn fn_From_Cpp_ShowKLEditor spliceClass = (
-	global newStruct = spliceEditorStruct mSpliceClass:spliceClass
+	newStruct = spliceEditorStruct mSpliceClass:spliceClass
+	newStruct
+)
+
+-- Entry point, this fn will be called from C++ with instance of class to be updated.
+fn fn_From_Cpp_UpdateKLEditor klEditorStruct = (
+	if (klEditorStruct != undefined) do (
+		-- Update port UI.  
+		klEditorStruct.UpdateParameterTab()
+		-- Update KL Code?
+		klEditorStruct.UpdateKLCodeTab()
+	)
+)
+
+fn fn_From_Cpp_CloseKLEditor_Dialog klEditorStruct = (
+	-- Create the struct to hold our values
+	if (klEditorStruct != undefined) do (
+		klEditorStruct.mForm.Close()
+	)
 )

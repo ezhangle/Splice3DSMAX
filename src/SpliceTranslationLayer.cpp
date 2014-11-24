@@ -84,6 +84,9 @@ bool CopyValue(int type, ParamID newId, IParamBlock2* pNewBlock, ParamID oldId, 
 			case TYPE_TEXMAP:
 				pNewBlock->SetValue(newId, i, pCopyBlock->GetTexmap(oldId));
 				break;
+			case TYPE_MATRIX3:
+				pNewBlock->SetValue(newId, i, pCopyBlock->GetMatrix3(oldId));
+				break;
 			case TYPE_INODE:
 				pNewBlock->SetValue(newId, i, pCopyBlock->GetINode(oldId));
 				break;

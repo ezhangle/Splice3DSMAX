@@ -10,6 +10,14 @@ object EventLogger : Manipulator {
 
 function EventLogger.onEvent!(io Event event){
     report(\"EventLogger.onEvent:\" + event);
+	KeyEvent ke = event;
+	if (ke != null) {
+	  if (ke.key == Key_C)
+		{
+			report(\"Key C being swallowed\");
+			ke.accept();
+		}
+	}
 }
 
 function EventLogger.onEnable!(){

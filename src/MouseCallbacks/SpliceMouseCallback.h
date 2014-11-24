@@ -6,12 +6,15 @@ class SpliceMouseCallback :
 {
 private:
 	//bool m_dragging;
-	FabricCore::RTVal mEventDispatcher;
+	static FabricCore::RTVal mEventDispatcher;
 
 	// Cache previous mouse state, 
 	bool m_LMouseDown;
 	bool m_MMouseDown;
 	bool m_RMouseDown;
+
+	// Keyboard hook
+	HHOOK m_kbHookHandle;
 
 public:
 	SpliceMouseCallback(void);
@@ -32,5 +35,6 @@ public:
 	void EnterMode();
 	void ExitMode();
 
+	static FabricCore::RTVal& GetEventDispatcher() { return mEventDispatcher; };
 };
 

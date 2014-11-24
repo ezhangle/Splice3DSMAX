@@ -52,6 +52,7 @@
     </ClCompile>
     <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\resource.h" />
     <ClInclude Include="src\MaxConversionFns.h" />
+    <ClInclude Include="src\MouseCallbacks\KbdTranslation.h" />
     <ClInclude Include="src\MouseCallbacks\SpliceCommandMode.h" />
     <ClInclude Include="src\MouseCallbacks\SpliceMouseCallback.h" />
     <ClInclude Include="src\Splice3dsmax.h" />

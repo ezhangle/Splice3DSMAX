@@ -130,7 +130,7 @@ IParamBlock2* CreateParamBlock( ParamBlockDesc2* pDesc, IParamBlock2* pCopyBlock
 
 				// if the id is -ve, we have removed that 
 				// parameter (and therefore have nothing to copy)
-				if (id <= 0)
+				if (id == -1)
 					continue;
 
 				// Get parameter definitions

@@ -151,54 +151,88 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 
 	FabricCore::RTVal klevent = FabricSplice::constructObjectRTVal("MouseEvent");
 
-	int eventType = Event_MouseMove;
+	int eventType;
 
-	// Generate mouse down/up events
-	if (!m_LMouseDown && flags&MOUSE_LBUTTON)
-	{
-		eventType = Event_MouseButtonPress;
-		m_LMouseDown = true;
+	if(msg == MOUSE_KEYBOARD){
+		// the key event is handled by the KeyboardHookProc
+		return TRUE;
 	}
-	else if (m_LMouseDown && (flags&MOUSE_LBUTTON) == 0)
-	{
-		eventType = Event_MouseButtonRelease;
-		m_LMouseDown = false;
-	}
+	else if(msg == MOUSE_FREEMOVE){
+		eventType = Event_MouseMove;
 
-	if (!m_RMouseDown && flags&MOUSE_RBUTTON)
-	{
-		eventType = Event_MouseButtonPress;
-		m_RMouseDown = true;
-	}
-	else if (m_RMouseDown && (flags&MOUSE_RBUTTON) == 0)
-	{
-		eventType = Event_MouseButtonRelease;
-		m_RMouseDown = false;
-	}
+		// Generate mouse up events
+		if (m_LMouseDown && (flags&MOUSE_LBUTTON) == 0)
+		{
+			eventType = Event_MouseButtonRelease;
+			m_LMouseDown = false;
+		}
 
-	if (!m_MMouseDown && flags&MOUSE_MBUTTON)
-	{
+		if (m_RMouseDown && (flags&MOUSE_RBUTTON) == 0)
+		{
+			eventType = Event_MouseButtonRelease;
+			m_RMouseDown = false;
+		}
+
+		if (m_MMouseDown && (flags&MOUSE_MBUTTON) == 0)
+		{
+			eventType = Event_MouseButtonRelease;
+			m_MMouseDown = false;
+		}
+	}
+	else if(msg == MOUSE_POINT){
 		eventType = Event_MouseButtonPress;
-		m_MMouseDown = true;
+		// Generate mouse down events
+		if (!m_LMouseDown && flags&MOUSE_LBUTTON)
+			m_LMouseDown = true;
+
+		if (!m_RMouseDown && flags&MOUSE_RBUTTON)
+			m_RMouseDown = true;
+
+		if (!m_MMouseDown && flags&MOUSE_MBUTTON)
+			m_MMouseDown = true;
 	}
-	else if (m_MMouseDown && (flags&MOUSE_MBUTTON) == 0)
-	{
-		eventType = Event_MouseButtonRelease;
-		m_MMouseDown = false;
+	else if(msg == MOUSE_DBLCLICK){
+		eventType = Event_MouseButtonDblClick;
+
+		if (!m_LMouseDown && flags&MOUSE_LBUTTON)
+		{
+			eventType = Event_MouseButtonPress;
+			m_LMouseDown = true;
+		}
+
+		if (!m_RMouseDown && flags&MOUSE_RBUTTON)
+		{
+			eventType = Event_MouseButtonPress;
+			m_RMouseDown = true;
+		}
+
+		if (!m_MMouseDown && flags&MOUSE_MBUTTON)
+		{
+			eventType = Event_MouseButtonPress;
+			m_MMouseDown = true;
+		}
+		
 	}
+	else if(msg == MOUSE_MOVE){
+		eventType = Event_MouseMove;
+	}
+	else{
+		eventType = Event_MouseMove;
+	}
+	
+	long buttons = 0;
+	if(m_LMouseDown)
+		buttons += MouseButton_LeftButton;
+	if(m_RMouseDown)
+		buttons += MouseButton_RightButton;
+	if(m_MMouseDown)
+		buttons += MouseButton_MiddleButton;
 
 	FabricCore::RTVal klpos = FabricSplice::constructRTVal("Vec2");
 	klpos.setMember("x", FabricSplice::constructFloat32RTVal((float)m.x));
 	klpos.setMember("y", FabricSplice::constructFloat32RTVal((float)m.y));
 	klevent.setMember("pos", klpos);
 
-	long buttons = 0;
-	if(flags&MOUSE_LBUTTON)
-		buttons += MouseButton_LeftButton;
-	if(flags&MOUSE_RBUTTON)
-		buttons += MouseButton_RightButton;
-	if(flags&MOUSE_MBUTTON)
-		buttons += MouseButton_MiddleButton;
 
 	// In Max, we may have different behaviour, so figure out what we can do here
 	klevent.setMember("button", FabricSplice::constructUInt32RTVal(buttons));

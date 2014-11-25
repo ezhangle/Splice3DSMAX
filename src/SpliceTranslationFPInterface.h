@@ -208,6 +208,8 @@ public:
 	void CloseKLEditor();
 	void UpdateKLEditor();
 
+	// After load, reconnect names.
+	virtual void ReconnectPostLoad()=0;
 protected:
 
 	// This function allows us to go up the other pants leg of 

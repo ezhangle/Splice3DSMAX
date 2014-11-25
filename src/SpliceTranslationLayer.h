@@ -207,6 +207,7 @@ public:
 	// Save and Load.
 	IOResult					Save(ISave *isave);
 	IOResult					Load(ILoad *iload);
+	void						ReconnectPostLoad();
 
 	ReferenceTarget*			Clone(RemapDir &remap);
 	// Delete this virtual function ensures memory is de-allocated 

@@ -921,34 +921,3 @@ void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DG
 }
 
 #pragma endregion
-
-
-//////////////////////////////////////////////////////////////////////////
-//
-//SpliceLayerNamePLCB::SpliceLayerNamePLCB( std::vector<ConnData>& data, ReferenceTarget* owner ) 
-//	: m_dConnData(data)
-//	, m_pOwner(owner)
-//{
-//
-//}
-
-//void SpliceLayerNamePLCB::proc( ILoad *iload )
-//{
-//	if (m_pOwner == NULL)
-//		return;
-//
-//	IParamBlock2* pblock = m_pOwner->GetParamBlock(0);
-//	if (pblock == NULL)
-//		return;
-//
-//	ParamBlockDesc2* pDesc = pblock->GetDesc();
-//
-//	for (auto conn = m_dConnData.begin(); conn != m_dConnData.end(); conn++)
-//	{
-//		if (conn->first == -1)
-//			continue;
-//
-//		MSTR name = MSTR::FromACP(conn->second.getName());
-//		SetMaxParamName(pDesc, conn->first, name);
-//	}
-//}

@@ -110,7 +110,7 @@ IOResult DynPBCustAttrClassDesc::Save( ISave *isave )
 		isave->EndChunk();			// PB_DESC_HDR_CHUNK
 
 		// iterate over parameters
-		for ( UINT j=0; j<pDesc->count; ++j )
+		for ( UINT j=0; j<pDesc->Count(); ++j )
 		{
 			// Write out each parameter
 			// Here we write out the minimum data needed to recreate the parameter.
@@ -121,7 +121,8 @@ IOResult DynPBCustAttrClassDesc::Save( ISave *isave )
 			// We do have to careful to save the ID - because we calculate it,
 			// and it _must_ be consistent between saves...
 
-			ParamDef& def = pDesc->GetParamDef( (ParamID)j );
+			ParamID paramId = pDesc->IndextoID(j);
+			ParamDef& def = pDesc->GetParamDef( paramId );
 			isave->BeginChunk( PB_DESC_PARAM_CHUNK );
 			// Write out our parameter
 			res = isave->Write( &def.type, sizeof def.type, &written );		if (res!=IO_OK) return res;

@@ -60,8 +60,12 @@ struct spliceEditorStruct
 		local typeIdx = sender.SelectedIndex
 		local spliceClass = thisStruct.mSpliceClass
 		local legalTypes  = (spliceClass.GetLegalMaxTypes paramIdx) as array
-		local newType = legalTypes[typeIdx] - 1
-		local asArray = (FindCtrl sender.parent "ParamArray")[1].Checked
+		local newType = -1
+		local asArray = false
+		if(typeIdx > 0) do (
+			newType = legalTypes[typeIdx] - 1
+			asArray = (FindCtrl sender.parent "ParamArray")[1].Checked
+		)
 		if asArray then newType += 0x0800
 		spliceClass.SetMaxType paramIdx newType
 	),

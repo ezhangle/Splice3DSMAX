@@ -410,9 +410,14 @@ ReferenceTarget *SpliceTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir
 template<typename TBaseClass, typename TResultType>
 IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
 {	
+	FabricSplice::PersistenceInfo info;
+    info.hostAppName = FabricCore::Variant::CreateString("Splice 3dsmax");
+    info.hostAppVersion = FabricCore::Variant::CreateString("2014");
+	info.filePath = FabricCore::Variant::CreateString(WStr(isave->FileName()).ToCStr());
+
 	// Save out all the data needed to recreate parameters
 	isave->BeginChunk(PARAM_SPLICE_DATA);
-	std::string data = m_graph.getPersistenceDataJSON();
+	std::string data = m_graph.getPersistenceDataJSON(&info);
 	isave->WriteCString(data.data());
 	isave->EndChunk();
 
@@ -447,10 +452,15 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 		{
 		case PARAM_SPLICE_DATA:
 			{
+				FabricSplice::PersistenceInfo info;
+				info.hostAppName = FabricCore::Variant::CreateString("Splice 3dsmax");
+				info.hostAppVersion = FabricCore::Variant::CreateString("2014");
+				info.filePath = FabricCore::Variant::CreateString(WStr(iload->FileName()).ToCStr());
+
 				// First, read the size of the string.
 				char *buff = nullptr;
 				iload->ReadCStringChunk(&buff);
-				m_graph.setFromPersistenceDataJSON(buff);
+				m_graph.setFromPersistenceDataJSON(buff, &info);
 				break;
 			}
 		case PARAM_VALUE_NAME:

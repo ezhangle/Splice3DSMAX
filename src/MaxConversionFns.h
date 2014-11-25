@@ -31,6 +31,7 @@ extern FabricCore::Variant GetVariant(const Matrix3& param);
 extern FabricCore::Variant GetVariant(const MCHAR* param);
 extern FabricCore::Variant GetVariant(const MSTR& param);
 extern FabricCore::Variant GetVariant(const char* param);
+extern FabricCore::Variant GetVariant(const FPValue& value);
 // Annoyingly, if we don't have a conversion function for a type,
 // some types get silently promoted to bool, and we call the wrong fn
 template<typename T>

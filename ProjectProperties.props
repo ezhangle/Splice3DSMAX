@@ -6,17 +6,33 @@
 		<IsRelease>$([System.Convert]::ToString( $([System.Text.RegularExpressions.Regex]::IsMatch($(Configuration), '[Rr]elease'))))</IsRelease>
 
 		<!-- variable contains max version -->
+		<MaxVersion>2012</MaxVersion>
+		<MaxVersion Condition="'$(Configuration.Contains(2012))'">2012</MaxVersion>
 		<MaxVersion Condition="'$(Configuration.Contains(2013))'">2013</MaxVersion>
 		<MaxVersion Condition="'$(Configuration.Contains(2014))'">2014</MaxVersion>
 		<MaxVersion Condition="'$(Configuration.Contains(2015))'">2015</MaxVersion>
 
 		<!-- version specific path selectors -->
+		<MaxPath Condition="'$(MaxVersion)'=='2012' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2012)</MaxPath>
 		<MaxPath Condition="'$(MaxVersion)'=='2013' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2013)</MaxPath>
 		<MaxPath Condition="'$(MaxVersion)'=='2014' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2014)</MaxPath>
 		<MaxPath Condition="'$(MaxVersion)'=='2015' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2015)</MaxPath>
 
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2014'">$(FABRIC_SCENE_GRAPH_DIR)\ThirdParty\PreBuilt\Windows\x86_64\Release\3dsmax\3ds Max 2014 SDK\</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2015'">$(FABRIC_SCENE_GRAPH_DIR)\ThirdParty\PreBuilt\Windows\x86_64\Release\3dsmax\3ds Max 2015 SDK\</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2012'">$(ADSK_3DSMAX_SDK_2012)</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2013'">$(ADSK_3DSMAX_SDK_2013)</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2014'">$(ADSK_3DSMAX_SDK_2014)</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2015'">$(ADSK_3DSMAX_SDK_2015)</MaxSDKPath>
+
+		<!-- If no install of Max SDK is present, default to the fabric system build values  -->
+		<MaxSDKPath Condition="'$(MaxSDKPath)'==''">$(FABRIC_SCENE_GRAPH_DIR)\ThirdParty\PreBuilt\Windows\x86_64\Release\3dsmax\3ds Max $(MaxVersion) SDK\</MaxSDKPath>
+
+		<!-- Autodesc changed the folder structure for 2014 SDK -->
+		<MaxSDKLibPath Condition="'$(MaxVersion)' &lt; '2014'">$(MaxSDKPath)\x64\lib\</MaxSDKLibPath>
+		<MaxSDKLibPath Condition="'$(MaxVersion)' &gt; '2013'">$(MaxSDKPath)\lib\x64\Release</MaxSDKLibPath>
+
+		<!-- switcher for unicode build -->
+		<IsUnicode Condition="'$(MaxVersion)' &lt; '2013'">false</IsUnicode>
+		<IsUnicode Condition="'$(MaxVersion)' &gt; '2012'">true</IsUnicode>
 
 	</PropertyGroup>
 	
@@ -27,7 +43,6 @@
 		<PlatformToolset>v100</PlatformToolset>
 		<IsUnicode>true</IsUnicode>
 		<CharacterSet>Unicode</CharacterSet>
-
 		<IntDir>build\FabricSplice3dsmax\obj\$(Configuration)\</IntDir>
 		<OutDir>$(FABRIC_DIR)\SpliceIntegrations\FabricSplice3dsmax$(MaxVersion)\plugin\</OutDir>
 		<TargetExt>.dlu</TargetExt>
@@ -35,14 +50,23 @@
 		<UseDebugLibraries>false</UseDebugLibraries>
     <PreprocessorDefinitions>FEC_STATIC;FECS_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 	</PropertyGroup>
+
+	<!-- Rest Unicode values -->
 	<PropertyGroup Condition="!'$(IsUnicode)'" Label="Configuration">
 		<CharacterSet>MultiByte</CharacterSet>
+	</PropertyGroup>
+	<!-- Set appropriate compiler version -->
+	<PropertyGroup Condition="'$(MaxVersion)' &lt; '2013'">
+		<PlatformToolset>v90</PlatformToolset>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(MaxVersion)' &gt; '2014'">
+		<PlatformToolset>v110</PlatformToolset>
 	</PropertyGroup>
 
 	<ItemDefinitionGroup>
 		<!-- default values for compiler -->
 		<ClCompile>
-			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;$(MaxSDKPath)\maxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<StringPooling>true</StringPooling>
@@ -50,6 +74,15 @@
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
      		<PreprocessorDefinitions>FEC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ClCompile>
+
+		<!-- 2014 very helpfully changed the installed path -->
+		<ClCompile Condition="'$(MaxVersion)' &gt; '2013'">
+			<AdditionalIncludeDirectories>$(MaxSDKPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ClCompile>
+    <ClCompile Condition="'$(MaxVersion)' &lt; '2014'">
+        <AdditionalIncludeDirectories>$(MaxSDKPath)\maxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+        
 
 		<!-- Turn on E&C for Debug Win32 builds -->
 		<ClCompile Condition="'$(IsDebug)'">

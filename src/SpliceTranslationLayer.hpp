@@ -107,7 +107,12 @@ ParamBlockDesc2* SpliceTranslationLayer<TBaseClass, TResultType>::CopyPBDescript
 
 			// Calling AddMaxParameter to create a new ParamDef
 			// to copy our existing paramdef.
-			AddMaxParameter(pNewDesc, pbDef.type, pbDef.int_name, curPId);
+			ParamID newPid = AddMaxParameter(pNewDesc, pbDef.type, pbDef.int_name, curPId);
+
+			// Ensure we copy available options
+			CStr portName = CStr::FromMCHAR(pbDef.int_name);
+			FabricSplice::DGPort port = GetPort(portName);
+			SetMaxParamLimits(pNewDesc, newPid, port);
 		}
 	}
 	// Return the new descriptor. This object is now the
@@ -1023,6 +1028,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(FabricS
 	// If this is a legal type for this parameter, then go ahead
 	ParamBlockDesc2* pNewDesc = CopyPBDescriptor();
 	ParamID newId = AddMaxParameter(pNewDesc, maxType, ::GetPortName(aPort));
+	SetMaxParamLimits(pNewDesc, newId, aPort);
 	CreateParamBlock(pNewDesc);
 	::SetPortParamID(aPort, newId);
 	return newId;
@@ -1038,6 +1044,50 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(int i, 
 	}
 	return -1;
 }
+
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortOption(const char* portname, const char* option, FPValue* value)
+{
+	FabricSplice::DGPort aPort = m_graph.getDGPort(portname);
+	if (aPort)
+		return ::SetPortOption(aPort, option, value);
+	return false;
+}
+
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortValue(const char* portname, FPValue* value)
+{
+	FabricSplice::DGPort aPort = m_graph.getDGPort(portname);
+	if (aPort)
+		return ::SetPortValue(aPort, value);
+	return false;
+}
+
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortUIMinMax(const char* portname, FPValue* uiMin, FPValue* uiMax)
+{
+	FabricSplice::DGPort aPort = GetPort(portname);
+	if (!aPort)
+		return false;
+
+	bool res = true;
+	res &= ::SetPortOption(aPort, "uiMin", uiMin);
+	res &= ::SetPortOption(aPort, "uiMax", uiMax);
+	if (m_pblock != nullptr) 
+	{
+		int pid = ::GetPortParamID(aPort);
+		if (pid >= 0)
+		{
+			MaybeRemoveParamUI();
+			SetMaxParamLimits(m_pblock->GetDesc(), (ParamID)pid, aPort);
+			// Delete existing autogen UI
+			SAFE_DELETE(m_dialogTemplate);
+			MaybePostParamUI();
+		}
+	}
+	return res;
+}
+
 
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::SetSpliceGraph(const FabricSplice::DGGraph& graph, bool createMaxParams) 

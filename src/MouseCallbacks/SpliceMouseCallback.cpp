@@ -146,8 +146,6 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 
 	MAXSPLICE_CATCH_BEGIN()
 
-	int res = FALSE;
-	
 	// Hide the cursor (we assume here for the point of Siggraph demo's that we are in painting mode)
 	SetCursor(NULL);
 

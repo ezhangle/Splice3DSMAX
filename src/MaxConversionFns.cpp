@@ -174,6 +174,48 @@ FabricCore::Variant GetVariant(const char* param)
 	return FabricCore::Variant::CreateString(param);
 }
 
+extern FabricCore::Variant GetVariant(const FPValue& value)
+{
+	if (is_tab(value.type)) 
+	{
+		// For the sake of getting the count, the memory structure of every tab is the same
+		int size = value.i_tab->Count();
+		FabricCore::Variant res = FabricCore::Variant::CreateArray(size);
+		for (int i = 0; i < size; i++) 
+		{
+			//res.setElementTake(i, GetVariant())
+		}
+		return res;
+	}
+	else 
+	{
+		switch ((int)value.type)
+		{
+		case TYPE_BOOL:
+			return GetVariant(value.b); 
+		case TYPE_INT:
+			return GetVariant(value.i);
+		case TYPE_FLOAT:
+		case TYPE_ANGLE:
+		case TYPE_WORLD:
+		case TYPE_PCNT_FRAC:
+			return GetVariant(value.f);
+		case TYPE_RGBA:
+			return GetVariant(*value.clr);
+		case TYPE_POINT3:
+			return GetVariant(*value.p);
+		case TYPE_POINT4:
+			return GetVariant(*value.p4);
+		case TYPE_QUAT:
+			return GetVariant(*value.q);
+		case TYPE_TSTR:
+			return GetVariant(*value.tstr);
+		default:
+			return FabricCore::Variant();
+		}
+	}
+}
+
 #pragma endregion // GetVariants
 
 #pragma region Get RTVals

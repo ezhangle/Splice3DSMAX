@@ -55,6 +55,10 @@ public:
 		fn_setMaxConnectedType,
 		fn_getLegalMaxTypes,
 
+		fn_setPortOption,
+		fn_setPortMinMax,
+		fn_setPortValue,
+
 		prop_getPortCount,
 		prop_portNames,
 
@@ -101,6 +105,11 @@ public:
 		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxConnectedType, TYPE_INT);
 		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxConnectedType, TYPE_INT, TYPE_INT);
 		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypes, TYPE_INT);
+
+		FN_3(fn_setPortOption, TYPE_bool, SetPortOptionMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_FPVALUE);
+		FN_2(fn_setPortValue, TYPE_bool, SetPortValueMSTR, TYPE_TSTR_BV, TYPE_FPVALUE);
+
+		FN_3(fn_setPortMinMax, TYPE_bool, SetPortUIMinMaxMSTR, TYPE_TSTR_BV, TYPE_FPVALUE, TYPE_FPVALUE);
 
 		// Properties 
 
@@ -165,12 +174,17 @@ public:
 	// Set the index.  If idx == -1, set our out port to not be an array
 	virtual void SetOutPortArrayIdx(int idx) = 0;
 
-	//virtual MSTR GetPortMaxValue(int i);
-	//virtual MSTR GetPortMinValue(int i);
-
 	virtual int GetMaxConnectedType(int i) = 0;
 	virtual int SetMaxConnectedType(int i, int type) = 0;
 	virtual BitArray GetLegalMaxTypes(int i) = 0;
+
+	// Allow setting various options on our ports
+	virtual bool SetPortOption(const char* port, const char* option, FPValue* value)=0;
+	// Allow setting values directly on our ports
+	virtual bool SetPortValue(const char* port, FPValue* value)=0;
+
+	// Convenience functions
+	virtual bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax)=0;
 
 	// Connect myPortName to the output port on pSrcContainer named srcPortName
 	// Returns true if successfully connected, false if for any reason the
@@ -210,6 +224,7 @@ public:
 
 	// After load, reconnect names.
 	virtual void ReconnectPostLoad()=0;
+
 protected:
 
 	// This function allows us to go up the other pants leg of 
@@ -271,6 +286,10 @@ protected:
 
 	bool ConnectPortMSTR(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex);
 	MSTR_SETTER(DisconnectPort);
+
+	bool SetPortOptionMSTR(const MSTR& port, const MSTR& option, FPValue* value)	{ return SetPortOption(port.ToCStr(), option.ToCStr(), value); }
+	bool SetPortValueMSTR(const MSTR& port, FPValue* value)	{ return SetPortValue(port.ToCStr(), value); }
+	bool SetPortUIMinMaxMSTR(const MSTR& port, FPValue* uiMin, FPValue* uiMax)	{ return SetPortUIMinMax(port.ToCStr(), uiMin, uiMax); }
 
 #pragma endregion
 };
@@ -361,6 +380,21 @@ FPInterfaceDesc* GetDescriptor()
 				_M("maxType"),		0,	TYPE_INT,
 			SpliceTranslationFPInterface::fn_getLegalMaxTypes, _T("GetLegalMaxTypes"), 0, TYPE_BITARRAY, 0, 1,
 				_M("portIndex"),	0,	TYPE_INDEX, 
+
+			SpliceTranslationFPInterface::fn_setPortOption, _T("SetPortOption"), 0, TYPE_bool, 0, 3,
+				_M("port"),		0,	TYPE_TSTR_BV, 
+				_M("option"),	0,	TYPE_TSTR_BV, 
+				_M("value"),	0,	TYPE_FPVALUE, 
+
+			SpliceTranslationFPInterface::fn_setPortMinMax, _T("SetPortValue"), 0, TYPE_bool, 0, 2,
+				_M("port"),		0,	TYPE_TSTR_BV, 
+				_M("value"),	0,	TYPE_FPVALUE, 
+
+			SpliceTranslationFPInterface::fn_setPortMinMax, _T("SetPortMinMax"), 0, TYPE_bool, 0, 3,
+				_M("port"),		0,	TYPE_TSTR_BV, 
+				_M("uiMin"),	0,	TYPE_FPVALUE, 
+				_M("uiMax"),	0,	TYPE_FPVALUE, 
+
 		properties,
 			SpliceTranslationFPInterface::prop_getPortCount, FP_NO_FUNCTION, _T("PortCount"), 0, TYPE_INT,
 			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_setOutPortName, _T("OutPort"), 0, TYPE_TSTR_BV,

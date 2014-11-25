@@ -427,7 +427,8 @@ template<>
 void SpliceToMaxValue(FabricCore::RTVal& rtMesh, Mesh& param)
 {
 	// Cache version number, compare for purposes of caching.
-	UINT32 version = rtMesh.maybeGetMemberRef("version").getUInt32();
+	// this line was causing asserts. 
+	//UINT32 version = rtMesh.maybeGetMemberRef("version").getUInt32();
 
 	UINT nbPoints = rtMesh.callMethod("UInt32", "pointCount", 0, 0).getUInt32();
 	UINT nbPolygons = rtMesh.callMethod("UInt32", "polygonCount", 0, 0).getUInt32();

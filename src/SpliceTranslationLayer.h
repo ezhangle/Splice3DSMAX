@@ -203,6 +203,10 @@ public:
 	// removed from the scene graph so we can take down the KLEditor
 	void						RefDeleted();
 
+	// We use RefAdded t detect wehn we can update the name of the graph in the eval
+	// context. Only once we have a reference can we lookup the INode and get the name. 
+	void						RefAdded(	RefMakerHandle 	rm);
+
 	// Sub-anims are the entities that appear in the TrackView
 	virtual	int					NumSubs()							{ return 1; }
 	virtual	Animatable*			SubAnim( int i )					{ return (i == 0) ? m_pblock : NULL; }

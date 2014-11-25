@@ -61,7 +61,15 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init()
 		MSTR filepath = GetCOREInterface()->GetCurFilePath();
 		FabricCore::RTVal evalContext = m_graph.getEvalContext();
 		evalContext.setMember("host", FabricSplice::constructStringRTVal("3dsMax"));
-		evalContext.setMember("graph", FabricSplice::constructStringRTVal(m_graph.getName()));
+
+		// given a scene base object or modifier, look for a referencing node via successive 
+		// reference enumerations up through the ref hierarchy untill we find an inode.
+		INode* node = GetCOREInterface7()->FindNodeFromBaseObject(m_pblock);
+		if(node)
+			evalContext.setMember("graph", FabricSplice::constructStringRTVal( TSTR(node->GetName()).ToCStr().data() ));
+		else
+			evalContext.setMember("graph", FabricSplice::constructStringRTVal(m_graph.getName()));
+
 		evalContext.setMember("currentFilePath", FabricSplice::constructStringRTVal(filepath.ToCStr().data()));
 
 		ResetPorts();
@@ -359,6 +367,28 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::RefDeleted() {
 		NotifyDependents(FOREVER, (PartID)&handle, REFMSG_GET_NODE_HANDLE);
 		if (handle == 0)
 			CloseKLEditor();
+	}
+}
+
+
+
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::RefAdded(	RefMakerHandle 	rm) {
+	if (m_graph.isValid())
+	{
+		MAXSPLICE_CATCH_BEGIN();
+
+		// Set static context values
+		MSTR filepath = GetCOREInterface()->GetCurFilePath();
+		FabricCore::RTVal evalContext = m_graph.getEvalContext();
+
+		// given a scene base object or modifier, look for a referencing node via successive 
+		// reference enumerations up through the ref hierarchy untill we find an inode.
+		INode* node = GetCOREInterface7()->FindNodeFromBaseObject(this);
+		if(node)
+			evalContext.setMember("graph", FabricSplice::constructStringRTVal( TSTR(node->GetName()).ToCStr().data() ));
+
+		MAXSPLICE_CATCH_END();
 	}
 }
 #pragma endregion

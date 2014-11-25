@@ -406,11 +406,6 @@ ReferenceTarget *SpliceTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir
 #define KL_CODE_OUTPORT_CHUNK	0x21
 #define KL_CODE_SOURCE_CHUNK	0x22
 
-void WriteString(ISave *isave, const char* s, USHORT chunkID)
-{
-
-}
-
 // Save our local parameters
 template<typename TBaseClass, typename TResultType>
 IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
@@ -429,6 +424,16 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
 
 	return IO_OK;
 }
+
+// Post load callback on load gives classes a chance to clean up
+class RenameMaxParamsCallback : public PostLoadCallback {
+private:
+	SpliceTranslationFPInterface* m_owner;
+
+public:
+	RenameMaxParamsCallback(SpliceTranslationFPInterface* pOwner) : m_owner(pOwner) {}
+	virtual void proc( ILoad *iload ) { m_owner->ReconnectPostLoad(); delete this; }
+};
 
 // Load our local parameters
 template<typename TBaseClass, typename TResultType>
@@ -461,6 +466,7 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 		iload->CloseChunk();
 	}
 
+	iload->RegisterPostLoadCallback(new RenameMaxParamsCallback(this));
 	// Reset/reconnect our time/parent ports
 	ResetPorts();
 	// Get our output port
@@ -468,6 +474,21 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 		m_valuePort = m_graph.getDGPort(outName.data());
 
 	return IO_OK;
+}
+
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
+{
+	for (int i = 0; i < GetPortCount(); i++) {
+		int pid = GetPortParamID(i);
+		if (pid >= 0)
+		{
+			MSTR str = MSTR::FromACP(GetPortName(i));
+			SetMaxParamName(m_pblock->GetDesc(), (ParamID)pid, str);
+			// Delete existing autogen UI
+			SAFE_DELETE(m_dialogTemplate);
+		}
+	}
 }
 #pragma endregion
 
@@ -736,8 +757,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(int i, const c
 
 	// We are done with old port, remove it.
 	m_graph.removeDGPort(curname);
-	std::string allPortsJson = m_graph.getPersistenceDataJSON();
-
+	
 	// Now, rename the max parameter
 	int paramID = ::GetPortParamID(renamedPort);
 	if (paramID >= 0)

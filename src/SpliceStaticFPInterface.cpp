@@ -61,6 +61,7 @@ SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
 	return &_theInstance;
 }
 
+
 // Implement the functions exposed above
 BOOL SpliceStaticFPInterface::ShowSceneGraphEditor()
 {
@@ -123,10 +124,11 @@ BOOL SpliceStaticFPInterface::ImportSpliceFile(const TSTR& file)
 		if (!res)
 			pRef->MaybeAutoDelete();
 		else {
+			// Give the new node the name of the splice preset. 
 			INode* pNode = GetCOREInterface()->CreateObjectNode(pRef);
-			MSTR name;
-			name.FromACP(pSpliceInterface->GetKLOperatorName().data());
-			pNode->SetName(name);
+			TSTR directory, filename, extension;
+			SplitFilename (file, &directory, &filename, &extension);
+			pNode->SetName(filename.ToWStr());
 		}
 	}
 	return res;

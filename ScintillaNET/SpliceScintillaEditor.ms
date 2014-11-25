@@ -349,7 +349,7 @@ struct spliceEditorStruct
 		-- Add editable type
 		local spliceType =  dotNetObject "System.Windows.Forms.ComboBox"
 		spliceType.Name = "SpliceType"
-		spliceType.items.addrange #("Size", "Scalar", "Vec2", "Vec3", "Vec4", "Color", "Boolean", "Mat44", "Quat", "String", "PolygonMesh")
+		spliceType.items.addrange #("Integer", "Scalar", "Vec2", "Vec3", "Vec4", "Color", "Boolean", "Mat44", "Quat", "String", "PolygonMesh")
 		spliceType.Width = 110;
 		spliceType.TabIndex = tabIndex + 2
 		spliceType.Name = "ParamType"

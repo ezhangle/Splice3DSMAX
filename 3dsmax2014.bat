@@ -21,16 +21,16 @@ if NOT EXIST Generated.Plugin.Splice.ini (
 
 set SPLICE3DSMAXDIR=%~dp0
 
-echo Ensure that the Splice plugin will be able to find the extensions 
+REM Ensure that the Splice plugin will be able to find the extensions 
 set FABRIC_EXTS_PATH=%FABRIC_EXTS_PATH%;%SPLICE3DSMAXDIR%..\..\Exts
 
-echo Allow the system to load FabricCore dll
+REM Allow the system to load FabricCore dll
 set PATH=%PATH%;%SPLICE3DSMAXDIR%..\..\lib
 
-echo Save the Scintilla folder to an environment variable that will be accessed in MaxScript
+REM Save the Scintilla folder to an environment variable that will be accessed in MaxScript
 set SCINTILLANETDIR=%SPLICE3DSMAXDIR%ScintillaNET\
 
-rem Launch Max
+REM Launch Max
 call "%ADSK_3DSMAX_x64_2014%\3dsmax.exe" -vo -p %~dp0/Generated.Plugin.Splice.ini
 
 rem echo on

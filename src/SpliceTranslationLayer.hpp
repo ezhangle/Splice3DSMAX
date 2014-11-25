@@ -977,7 +977,9 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(FabricS
 	if (maxType == -2)
 		maxType = SpliceTypeToDefaultMaxType(spliceType);
 	else if (maxType == -1) 
-	{ /* do nothing here, delete was requested */ }
+	{ 
+		/* do nothing here, delete was requested */ 
+	}
 	else
 	{
 		// Figure out what kind of parameter

@@ -43,6 +43,7 @@ class DynPBCustAttrClassDesc;
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const MCHAR* sName, ParamID desiredId=-1 );
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName );
 void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name);
+void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort& port);
 
 /*! Generate a Win32 dialog for the passed pblok
 	\param pblock - The list of parameters to generate UI for
@@ -84,6 +85,9 @@ int GetPortConnectionIndex(FabricSplice::DGPort& aPort);
 void SetPortConnectionIndex(FabricSplice::DGPort& aPort, int index);
 const char* GetPortName(FabricSplice::DGPort& aPort);
 const char* GetPortType(FabricSplice::DGPort& aPort);
+
+bool SetPortOption(FabricSplice::DGPort& aPort, const char* option, FPValue* value);
+bool SetPortValue(FabricSplice::DGPort& aPort, FPValue* value);
 
 /** Given a Max value, send it to the dgPort in the appropriate fashion */
 
@@ -345,6 +349,12 @@ public:
 	// \param i The index of the splice port
 	// \return A BitArray, where each set bit indicates a legal ParamType for the given port
 	virtual BitArray GetLegalMaxTypes(int i) { return ::GetLegalMaxTypes(GetPortType(i)); }
+
+	// Allow setting various options on ports 
+	// Set UI limits.  This will not actually limit the value, but for sliders etc it will limit what is presented to the user.
+	bool SetPortOption(const char* name, const char* option, FPValue* value);
+	bool SetPortValue(const char* name, FPValue* value);
+	bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax);
 
 	// Set splice values
 	const FabricSplice::DGGraph& GetSpliceGraph() { return m_graph; }

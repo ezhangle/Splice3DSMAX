@@ -208,14 +208,13 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 	// A quick way to define UI options.
 	// Note that we always pass 0 for the ctrl id, this is because
 	// we honestly don't know what our ctrl Id's will be.
-	switch((int)type)
+	switch((int)baseType)
 	{
 	case TYPE_FLOAT:	
 	case TYPE_ANGLE:	
 	case TYPE_PCNT_FRAC:	
 	case TYPE_WORLD:	
 		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_FLOAT, 0, 0, SPIN_AUTOSCALE, p_end); ;
-		//pDesc->ParamOption(pid, p_range, float(0), float(1), p_end); 
 		break;
 
 	case TYPE_INT:		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_INT, 0, 0, SPIN_AUTOSCALE, p_end);  break;
@@ -232,20 +231,6 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 	// Our new parameter isn't named yet.  Assign
 	// the same name our last parameter held.
 	SetMaxParamName(pDesc, pid, sName);
-
-	// If we have a specific index requested, move it into the correct spot
-	//if (index >= 0)
-	//{
-	//	ParamDef newDef = pDesc->GetParamDef(pid);
-	//	int curIdx = pDesc->IDtoIndex(pid);
-	//	if (curIdx != index)
-	//	{
-	//		// offset remaining items down
-	//		ParamDef* pCurDef = pDesc->paramdefs + (index * sizeof(ParamDef));
-	//		memmove(pCurDef + 1, pCurDef, sizeof(ParamDef));
-	//		*pCurDef = newDef;
-	//	}
-	//}
 	return pid;
 }
 
@@ -253,6 +238,47 @@ ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName )
 {
 	MSTR sName = MSTR::FromACP(cName);
 	return AddMaxParameter(pDesc, type, sName.data());
+}
+
+void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort& port)
+{
+	ParamDef& def = pDesc->GetParamDef(pid);
+	int baseType = base_type(def.type);
+
+	FabricCore::Variant uiMin = port.getOption("uiMin");
+	FabricCore::Variant uiMax = port.getOption("uiMax");
+	switch((int)baseType)
+	{
+	case TYPE_FLOAT:	
+	case TYPE_ANGLE:	
+	case TYPE_PCNT_FRAC:	
+	case TYPE_WORLD:
+		{
+			float vMin = uiMin.isFloat32() ? uiMin.getFloat32() : 0.0f;
+			float vMax = uiMax.isFloat32() ? uiMax.getFloat32() : 100.0f;
+			pDesc->ParamOption(pid, p_range, vMin, vMax, p_end); 
+			break;
+		}
+	case TYPE_INT:
+		{
+			int vMin = uiMin.isSInt32() ? uiMin.getSInt32() : 0;
+			int vMax = uiMax.isSInt32() ? uiMax.getSInt32() : 100;
+			pDesc->ParamOption(pid, p_range,  vMin, vMax, p_end); 
+			break;
+		}
+	//case TYPE_RGBA:		pDesc->ParamOption(pid, p_ui, TYPE_COLORSWATCH, 0, p_end); break;
+	case TYPE_POINT3:
+		{
+			//Point3 uiMin = port.getOption()
+			break;
+		}
+	//case TYPE_POINT4:	pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); break;
+	//case TYPE_BOOL:		pDesc->ParamOption(pid, p_ui, TYPE_SINGLECHEKBOX, 0, p_end); break;
+	//case TYPE_INODE:	pDesc->ParamOption(pid, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
+	//case TYPE_MTL:		pDesc->ParamOption(pid, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
+	//case TYPE_TEXMAP:	pDesc->ParamOption(pid, p_ui, TYPE_TEXMAPBUTTON, 0, p_end); break;
+	//case TYPE_STRING:	pDesc->ParamOption(pid, p_ui, TYPE_EDITBOX, 0, p_end); break;
+	}
 }
 
 void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name)
@@ -482,6 +508,36 @@ const char* GetPortName( FabricSplice::DGPort& aPort )
 const char* GetPortType( FabricSplice::DGPort& aPort )
 {
 	return aPort.getDataType();
+}
+
+
+bool SetPortOption(FabricSplice::DGPort& aPort, const char* option, FPValue* value)
+{
+	MAXSPLICE_CATCH_BEGIN()
+
+	if (value == nullptr)
+		return false;
+	FabricCore::Variant variant = GetVariant(*value);
+	// if (!variant.isNull()) Do we want to allow setting Null values (remove option?);
+		aPort.setOption(option, variant);
+	return true;
+	MAXSPLICE_CATCH_END()
+	return false;
+}
+
+bool SetPortValue(FabricSplice::DGPort& aPort, FPValue* value)
+{
+	MAXSPLICE_CATCH_BEGIN()
+	if (value == nullptr)
+		return false;
+	FabricCore::Variant variant = GetVariant(*value);
+	if (!variant.isNull())
+	{
+		aPort.setVariant(variant);
+		return true;
+	}
+	MAXSPLICE_CATCH_END()
+	return false;
 }
 
 //////////////////////////////////////////////////////////////////////////

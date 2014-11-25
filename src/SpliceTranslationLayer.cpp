@@ -214,13 +214,22 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 	case TYPE_ANGLE:	
 	case TYPE_PCNT_FRAC:	
 	case TYPE_WORLD:	
-		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_FLOAT, 0, 0, SPIN_AUTOSCALE, p_end); ;
+		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_FLOAT, 0, 0, SPIN_AUTOSCALE, p_end);
+		pDesc->ParamOption(pid, p_range, -99999999.0, 99999999.0, p_end); 
 		break;
-
-	case TYPE_INT:		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_INT, 0, 0, SPIN_AUTOSCALE, p_end);  break;
+	case TYPE_INT:		
+		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_INT, 0, 0, SPIN_AUTOSCALE, p_end);  
+		pDesc->ParamOption(pid, p_range, -99999999, 99999999, p_end); 
+		break;
 	case TYPE_RGBA:		pDesc->ParamOption(pid, p_ui, TYPE_COLORSWATCH, 0, p_end); break;
-	case TYPE_POINT3:	pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); break;
-	case TYPE_POINT4:	pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); break;
+	case TYPE_POINT3:	
+		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); 
+		pDesc->ParamOption(pid, p_range, -99999999.0, 99999999.0, p_end); 
+		break;
+	case TYPE_POINT4:	
+		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); 
+		pDesc->ParamOption(pid, p_range, -99999999.0, 99999999.0, p_end); 
+		break;
 	case TYPE_BOOL:		pDesc->ParamOption(pid, p_ui, TYPE_SINGLECHEKBOX, 0, p_end); break;
 	case TYPE_INODE:	pDesc->ParamOption(pid, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
 	case TYPE_MTL:		pDesc->ParamOption(pid, p_ui, TYPE_MTLBUTTON, 0, p_end); break;

@@ -37,17 +37,17 @@ extern FabricCore::Variant GetVariant(const FPValue& value);
 template<typename T>
 FabricCore::Variant GetVariant(const T& param) { ThisShouldNotCompile }
 
-extern FabricCore::RTVal GetRTVal(int param);
-extern FabricCore::RTVal GetRTVal(float param);
-extern FabricCore::RTVal GetRTVal(bool param);
-extern FabricCore::RTVal GetRTVal(const Point3& param);
-extern FabricCore::RTVal GetRTVal(const Point4& param);
-extern FabricCore::RTVal GetRTVal(const Color& param);
-extern FabricCore::RTVal GetRTVal(const Quat& param);
-extern FabricCore::RTVal GetRTVal(const Matrix3& param);
-extern FabricCore::RTVal GetRTVal(const MCHAR* param);
-extern FabricCore::RTVal GetRTVal(const MSTR& param);
-extern FabricCore::RTVal GetRTVal(const Mesh& param);
+extern FabricCore::RTVal ConvertToRTVal(int param, FabricCore::RTVal val);
+extern FabricCore::RTVal ConvertToRTVal(float param, FabricCore::RTVal val);
+extern FabricCore::RTVal ConvertToRTVal(bool param, FabricCore::RTVal val);
+extern FabricCore::RTVal ConvertToRTVal(const Point3& param, FabricCore::RTVal val);
+extern FabricCore::RTVal ConvertToRTVal(const Point4& param, FabricCore::RTVal val);
+extern FabricCore::RTVal ConvertToRTVal(const Color& param, FabricCore::RTVal val);
+extern FabricCore::RTVal ConvertToRTVal(const Quat& param, FabricCore::RTVal val);
+extern FabricCore::RTVal ConvertToRTVal(const Matrix3& param, FabricCore::RTVal val);
+extern FabricCore::RTVal ConvertToRTVal(const MCHAR* param, FabricCore::RTVal val);
+extern FabricCore::RTVal ConvertToRTVal(const MSTR& param, FabricCore::RTVal val);
+extern FabricCore::RTVal ConvertToRTVal(const Mesh& param, FabricCore::RTVal val);
 
 // Entry point to the Max->Splice value translation
 template<typename TResultType, typename TConvertType>
@@ -69,7 +69,8 @@ void MaxValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, Interval& ivVa
 		for (int i = 0; i < nParams; i++)
 		{
 			Convert(params[i], t, ivValid, convert);
-			FabricCore::RTVal aVal = GetRTVal(convert);
+			FabricCore::RTVal aVal = spliceVal.getArrayElement(i);
+			ConvertToRTVal(convert, aVal);
 			spliceVal.setArrayElement(i, aVal);
 		}
 	}
@@ -79,7 +80,8 @@ void MaxValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, Interval& ivVa
 		if (nParams > 0)
 		{
 			Convert(*params, t, ivValid, convert);
-			dgPort.setRTVal(GetRTVal(convert));
+			FabricCore::RTVal aVal = dgPort.getRTVal();
+			dgPort.setRTVal(ConvertToRTVal(convert, aVal));
 		}
 	}
 	MAXSPLICE_CATCH_END()

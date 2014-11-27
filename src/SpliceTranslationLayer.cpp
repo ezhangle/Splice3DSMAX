@@ -873,7 +873,7 @@ void MaxPtrToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IParamBlock2* pbl
 	}
 }
 // Pblock conversion function
-void SetAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DGGraph& graph, Interval& ivValid)
+void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DGGraph& graph, Interval& ivValid)
 {
 	if (pblock == NULL)
 		return;

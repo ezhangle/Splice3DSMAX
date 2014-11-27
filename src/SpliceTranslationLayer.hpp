@@ -1223,25 +1223,28 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 	{
 		MAXSPLICE_CATCH_BEGIN();
 
+		if(m_graph.usesEvalContext())
+		{
 			// setup the context
 			FabricCore::RTVal evalContext = m_graph.getEvalContext();
 			evalContext.setMember("time", FabricSplice::constructFloat32RTVal(TicksToSec(t)));
-
+			
+			m_valid.SetInstant(t);
+		}
+		else
+		{
 			// Reset our internal validity times;
 			m_valid.SetInfinite();
-			// Set  all Max values on their splice equivalents
-			SetAllMaxValuesToSplice(t, m_pblock, m_graph, m_valid);
+		}
 
-			// Trigger graph evaluation
-			m_graph.evaluate();
+		// Set  all Max values on their splice equivalents
+		TransferAllMaxValuesToSplice(t, m_pblock, m_graph, m_valid);
 
-			// Get our value back!
-			SpliceToMaxValue(m_valuePort, m_value, GetOutPortArrayIdx());
+		// Trigger graph evaluation
+		m_graph.evaluate();
 
-			// TODO: Until we have a reliable way to 
-			// detect if the operator uses the time
-			// port, our validity can only be the current frame
-			m_valid.SetInstant(t);
+		// Get our value back!
+		SpliceToMaxValue(m_valuePort, m_value, GetOutPortArrayIdx());
 		
 		MAXSPLICE_CATCH_END();
 

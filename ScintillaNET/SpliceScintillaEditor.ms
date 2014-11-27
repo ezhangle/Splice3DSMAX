@@ -86,10 +86,11 @@ struct spliceEditorStruct
 		local rowLayout = sender.parent
 		local paramName = (FindCtrl rowLayout "ParamName")[1].Text
 		local paramType = (FindCtrl rowLayout "ParamType")[1].Text
+		local paramExtension = (FindCtrl rowLayout "Extension")[1].Text
 		local maxType = (FindCtrl rowLayout "MaxType")[1].SelectedIndex + 1
 		local asArray = (FindCtrl rowLayout "ParamArray")[1].Checked
 		maxType = -maxType -- Negating gives -1 (none) and -2 (default type)
-		thisStruct.mSpliceClass.AddInputPort paramName paramType maxType isArray:asArray
+		thisStruct.mSpliceClass.AddInputPort paramName paramType maxType isArray:asArray Extension:paramExtension
 		
 		-- Recreate parameter rows
 		thisStruct.UpdateParameterTab()
@@ -294,6 +295,19 @@ struct spliceEditorStruct
 		typeLabel.BackColor = typeLabel.BackColor.LightGray;
 		ctrlLayout.Controls.Add typeLabel
 		
+		-- Add extension configuration
+		-- Splice doesn't alow us to query the extension used. 
+		-- local ext = mSpliceClass.GetPortExtension index
+		-- local extLabel = dotNetObject "System.Windows.Forms.TextBox"
+		-- extLabel.Name = "Extension"
+		-- extLabel.Enabled = false
+		-- extLabel.Text = spliceType
+		-- extLabel.Width = 110;
+		-- extLabel.TabStop = false
+		-- global __label = extLabel
+		-- extLabel.BackColor = extLabel.BackColor.LightGray;
+		-- ctrlLayout.Controls.Add extLabel
+		
 		-- Add isArray checkbox
 		local isArray = mSpliceClass.IsPortArray index
 		local isArrayCB = dotNetObject "System.Windows.Forms.Checkbox"
@@ -333,6 +347,52 @@ struct spliceEditorStruct
 		ctrlLayout;
 	),
 	
+	fn CreateNewParameterLabels = (
+		local nParams = mSpliceClass.PortCount
+		local tabIndex  = nParams * 3 + 100
+		-- Create a horizontal layout
+		ctrlLayout = dotNetObject "System.Windows.Forms.FlowLayoutPanel"
+		ctrlLayout.FlowDirection = ctrlLayout.FlowDirection.LeftToRight
+		ctrlLayout.WrapContents = false
+		ctrlLayout.height = 26
+		ctrlLayout.Dock = ctrlLayout.Dock.Fill;
+		
+		-- Add editable name box
+
+		nameLabel = dotNetObject "System.Windows.Forms.Label"
+		nameLabel.text = "Name:"
+		nameLabel.TextAlign = nameLabel.TextAlign.MiddleLeft
+		ctrlLayout.Controls.Add nameLabel
+
+		-- Add editable type label
+		typeLabel = dotNetObject "System.Windows.Forms.Label"
+		typeLabel.text = "KLType:"
+		typeLabel.TextAlign = typeLabel.TextAlign.MiddleLeft
+		ctrlLayout.Controls.Add typeLabel
+
+		-- Add isarray lable
+		isArrayLabel = dotNetObject "System.Windows.Forms.Label"
+		isArrayLabel.text = "IsArray:"
+		isArrayLabel.TextAlign = isArrayLabel.TextAlign.MiddleLeft
+		ctrlLayout.Controls.Add isArrayLabel
+
+		-- Add editable extension box
+
+		extLabel = dotNetObject "System.Windows.Forms.Label"
+		extLabel.text = "Extension:"
+		extLabel.TextAlign = extLabel.TextAlign.MiddleLeft
+		ctrlLayout.Controls.Add extLabel
+
+		-- Create empty dd list as place holder
+
+		maxTypeLabel = dotNetObject "System.Windows.Forms.Label"
+		maxTypeLabel.text = "MaxType:"
+		maxTypeLabel.TextAlign = maxTypeLabel.TextAlign.MiddleRight
+		ctrlLayout.Controls.Add maxTypeLabel
+
+		ctrlLayout;
+	),
+	
 	fn CreateNewParameterCtrl = (
 		local nParams = mSpliceClass.PortCount
 		local tabIndex  = nParams * 3 + 100
@@ -346,7 +406,7 @@ struct spliceEditorStruct
 		-- Add editable name box
 		local nameEdit = dotNetObject "System.Windows.Forms.TextBox"
 		nameEdit.Name = "ParamName"
-		nameEdit.Text = "-Param Name-"
+		nameEdit.Text = "-New Port Name-"
 		nameEdit.TabIndex = tabIndex + 1
 		ctrlLayout.Controls.Add nameEdit
 		
@@ -358,22 +418,29 @@ struct spliceEditorStruct
 		spliceType.TabIndex = tabIndex + 2
 		spliceType.Name = "ParamType"
 		ctrlLayout.Controls.Add spliceType
-		
+
 		-- Add isArray checkbox
 		local isArrayCB = dotNetObject "System.Windows.Forms.Checkbox"
 		isArrayCB.Name = "ParamArray"
 		isArrayCB.Text = "Is Array"
 		isArrayCB.Width = 75
-		isArrayCB.TabIndex = tabIndex + 3
+		isArrayCB.TabIndex = tabIndex + 4
 		ctrlLayout.Controls.Add isArrayCB
 
+		-- Add editable extension box
+		local extEdit = dotNetObject "System.Windows.Forms.TextBox"
+		extEdit.Name = "Extension"
+		extEdit.Text = ""
+		extEdit.TabIndex = tabIndex + 3
+		ctrlLayout.Controls.Add extEdit
+		
 		-- Create empty dd list as place holder
 		local maxType  =  dotNetObject "System.Windows.Forms.ComboBox"
 		maxType.Name = "MaxType"
 		maxType.DropDownStyle = maxType.DropDownStyle.DropDownList
 		maxType.items.addrange #("-none-", "-default type-")
 		maxType.SelectedIndex = 1
-		maxType.TabIndex = tabIndex + 4
+		maxType.TabIndex = tabIndex + 5
 		ctrlLayout.Controls.Add maxType
 	
 		-- See http://tech-artists.org/forum/showthread.php?588-Maxscript-dotNet-and-the-vicious-ComboBox
@@ -383,7 +450,7 @@ struct spliceEditorStruct
 		-- Allow user to delete parameters
 		local createBtn = dotNetObject  "System.Windows.Forms.Button"
 		createBtn.Text = "Create"
-		createBtn.TabIndex = tabIndex + 5
+		createBtn.TabIndex = tabIndex + 6
 		dotNet.addEventHandler createBtn "Click" evCreateParam
 		ctrlLayout.Controls.Add createBtn
 		
@@ -392,6 +459,26 @@ struct spliceEditorStruct
 	
 	-------------------------------------------------------------------------------------------------------------------
 	fn CreateParameterRows tabLayout = (
+
+		-- Add a heading row for the existing ports.
+		portsHeadingLayout = dotNetObject "System.Windows.Forms.FlowLayoutPanel"
+		portsHeadingLayout.FlowDirection = portsHeadingLayout.FlowDirection.LeftToRight
+		portsHeadingLayout.WrapContents = false
+		portsHeadingLayout.height = 26
+		portsHeadingLayout.Dock = portsHeadingLayout.Dock.Fill;
+
+		nameLabel = dotNetObject "System.Windows.Forms.Label"
+		nameLabel.text = "Existing Ports:"
+		nameLabel.TextAlign = nameLabel.TextAlign.MiddleLeft
+		portsHeadingLayout.Controls.Add nameLabel
+
+		rowStyle = dotNetObject "system.windows.forms.rowstyle"
+		rowStyle.sizetype = rowStyle.sizetype.absolute
+		rowStyle.height = 30
+		tabLayout.RowStyles.Add(rowStyle);
+		tabLayout.Controls.Add portsHeadingLayout 0 0
+
+
 		-- Generate row contents, add to table
 		local nParams = mSpliceClass.PortCount
 		tabLayout.RowCount = nParams + 1
@@ -402,16 +489,25 @@ struct spliceEditorStruct
 			rowStyle.sizetype = rowStyle.sizetype.absolute
 			rowStyle.height = 30
 			tabLayout.RowStyles.Add(rowStyle);
-			tabLayout.Controls.Add paramCtrl 0 (i-1)
+			tabLayout.Controls.Add paramCtrl 0 (i)
 		)
 		
+
+		-- Add empty row to allow new creations...
+		local labelsRow = CreateNewParameterLabels()
+		rowStyle = dotNetObject "system.windows.forms.rowstyle"
+		rowStyle.sizetype = rowStyle.sizetype.absolute
+		rowStyle.height = 30
+		tabLayout.RowStyles.Add(rowStyle);
+		tabLayout.Controls.Add labelsRow 0 (nParams+1) 
+
 		-- Add empty row to allow new creations...
 		local emptyRow = CreateNewParameterCtrl()
 		rowStyle = dotNetObject "system.windows.forms.rowstyle"
 		rowStyle.sizetype = rowStyle.sizetype.absolute
 		rowStyle.height = 30
 		tabLayout.RowStyles.Add(rowStyle);
-		tabLayout.Controls.Add emptyRow 0 nParams
+		tabLayout.Controls.Add emptyRow 0 (nParams+2)
 		tabLayout
 	),
 	
@@ -422,7 +518,7 @@ struct spliceEditorStruct
 		-- Create layout.  This layout arranges the list of input Splice parameters
 		local tabLayout = dotNetObject "System.Windows.Forms.TableLayoutPanel"
 		tabLayout.AutoSize = true;
-        tabLayout.Dock = tabLayout.Dock.Fill
+		tabLayout.Dock = tabLayout.Dock.Fill
 		tabLayout.Name = "ParameterTable";
 		-- Provide a link from the form back to this struct
 		-- This allows dotnet event handlers to get this structs instance

@@ -21,19 +21,19 @@ require Math;
 require RiggingToolbox;
 
 operator solveIK(
-   in Mat44 root,
-   in Mat44 iktarget,
+	in Mat44 parentValue,
+	io Mat44 SpliceMatrixControllerVal,
+	in Mat44 iktarget,
 	io Xfo transforms[],
 	Scalar bone0Length,
 	Scalar bone1Length,
-	Scalar bone2Length,
-	io Mat44 SpliceMatrixControllerVal
+	Scalar bone2Length
 ) {
-   report(bone0Length);
+  SpliceMatrixControllerVal = parentValue;
 	UInt32 numJoints = 4;// including a 'nub' joint.
 	Xfo basePose[];
 	basePose.resize(numJoints);
-	basePose[0] = root;
+	basePose[0] = parentValue;
 	basePose[1] = basePose[0] * Xfo(Vec3(0.0, 0.0, bone0Length), Quat(Euler(0.0, 0.4, 0.0)));
 	basePose[2] = basePose[1] * Xfo(Vec3(0.0, 0.0, bone1Length), Quat(Euler(0.0, 0.4, 0.0)));
 	basePose[3] = basePose[2] * Xfo(Vec3(0.0, 0.0, bone2Length), Quat(Euler(0.0, 0.4, 0.0)));
@@ -43,8 +43,18 @@ operator solveIK(
 customIKSolver.SetKLCode "solveIK" klCode
 root = point()
 root.name = "root"
-root.pos = [0,0,60]
-customIKSolver.root = root
+root[3].controller = customIKSolver
+root.cross = off
+
+body = point()
+body.name = "body"
+body.Box = on
+body.cross = off
+body.size = 48.6
+body.pos = [0,0,60]
+root.parent = body
+
+
 
 target = point()
 target.name = "target"
@@ -85,8 +95,3 @@ fn createJoint name id length = (
 createJoint "Joint0" 0 boneLengths[1]
 createJoint "Joint1" 1 boneLengths[2]
 createJoint "Joint2" 2 boneLengths[3]
-
-
--- create a helper just to hold the ik controller so we can inspect its UI.
-customIKSolver = Point()
-customIKSolver[3].controller = customIKSolver

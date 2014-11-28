@@ -728,17 +728,17 @@ const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetPortName( int i 
 
 
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(int i, const char* name) 
+bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(const char* oldName, const char* newName) 
 {
 	MAXSPLICE_CATCH_BEGIN()
 
-	if (i < 0 || i >= GetPortCount())
+	FabricSplice::DGPort aPort = m_graph.getDGPort(oldName);
+	if (!aPort)
 		return false;
 
-	FabricSplice::DGPort aPort = m_graph.getDGPort(i);
-	const char* curname = aPort.getName();
-	if (strcmp(curname, name) == 0)
+	if (strcmp(oldName, newName) == 0)
 		return true;
+
 
 	HoldActions hold(_M("Set Port Name"));
 	if (theHold.Holding())
@@ -749,11 +749,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(int i, const c
 	FabricSplice::Port_Mode mode = aPort.getMode();
 	const char* member = aPort.getMember();
 	// Add new port
-	FabricSplice::DGPort renamedPort = m_graph.addDGPort(name, member, mode);
-
-	std::string allValues = m_graph.getPersistenceDataJSON();
-
-	// 
+	FabricSplice::DGPort renamedPort = m_graph.addDGPort(newName, member, mode);
 	const char* portType = ::GetPortType(renamedPort);
 
 	// Clone option data from the old port
@@ -773,7 +769,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(int i, const c
 			{
 				// Is this the port we are looking for?
 				const FabricCore::Variant* namevar = portVal->getDictValue("name");
-				if (namevar == nullptr || strcmp(namevar->getString_cstr(), curname) != 0)
+				if (namevar == nullptr || strcmp(namevar->getString_cstr(), oldName) != 0)
 					continue;
 
 				// Double check, we might have 2 ports named the same
@@ -801,13 +797,13 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(int i, const c
 	}
 
 	// We are done with old port, remove it.
-	m_graph.removeDGPort(curname);
+	m_graph.removeDGPort(oldName);
 	
 	// Now, rename the max parameter
 	int paramID = ::GetPortParamID(renamedPort);
 	if (paramID >= 0)
 	{
-		MSTR str = MSTR::FromACP(name);
+		MSTR str = MSTR::FromACP(newName);
 		MaybeRemoveParamUI();
 		SetMaxParamName(m_pblock->GetDesc(), (ParamID)paramID, str);
 		// Delete existing autogen UI
@@ -816,20 +812,31 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(int i, const c
 	}
 
 	// Verify everything was hooked back  up.
-	renamedPort = m_graph.getDGPort(name);
+	renamedPort = m_graph.getDGPort(newName);
 	return renamedPort.isValid();
 
 	MAXSPLICE_CATCH_RETURN(false);
 }
 
 template<typename TBaseClass, typename TResultType>
-const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetPortType( int i )
+const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetPortType( const char* port )
 {
-	if (i < 0 || i >= GetPortCount())
-		return "ERROR: OOR index on GetPortType";
-	FabricSplice::DGPort aPort = m_graph.getDGPort(i);
-	return ::GetPortType(aPort);
+	FabricSplice::DGPort aPort = m_graph.getDGPort(port);
+	if (aPort)
+		return ::GetPortType(aPort);
+	return "ERROR: Port not found";
 }
+
+
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::IsPortArray( const char* port )
+{
+	FabricSplice::DGPort aPort = m_graph.getDGPort(port);
+	if (aPort)
+		return aPort.isArray();
+	return false;
+}
+
 
 template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const char* name)
@@ -1001,12 +1008,15 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::DisconnectPort(const char*
 }
 
 template<typename TBaseClass, typename TResultType>
-int SpliceTranslationLayer<TBaseClass, TResultType>::GetMaxConnectedType( int i )
+int SpliceTranslationLayer<TBaseClass, TResultType>::GetMaxConnectedType( const char* portName )
 {
-	int pid = GetPortParamID(i);
-	if (pid >= 0)
-	{
-		return m_pblock->GetParameterType((ParamID)pid);
+	FabricSplice::DGPort aPort = GetPort(portName);
+	if (aPort) {
+		int pid = ::GetPortParamID(aPort);
+		if (pid >= 0)
+		{
+			return m_pblock->GetParameterType((ParamID)pid);
+		}
 	}
 	return -1;
 }
@@ -1065,13 +1075,11 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(FabricS
 }
 
 template<typename TBaseClass, typename TResultType>
-int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(int i, int maxType)
+int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(const char* portName, int maxType)
 {
-	if (i >= 0 && i < GetPortCount())
-	{
-		FabricSplice::DGPort aPort = m_graph.getDGPort(i);
+	FabricSplice::DGPort aPort = m_graph.getDGPort(portName);
+	if (aPort)
 		return SetMaxConnectedType(aPort, maxType);
-	}
 	return -1;
 }
 
@@ -1169,7 +1177,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetSpliceGraph(const Fabri
 		else if (createMaxParams)
 		{
 			// We have been requested to create Max parameters for all possible ports.
-			SetMaxConnectedType(i, -2); // Create default type
+			SetMaxConnectedType(port, -2); // Create default type
 		}
 	}
 
@@ -1223,7 +1231,7 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 	{
 		MAXSPLICE_CATCH_BEGIN();
 
-		if(m_graph.usesEvalContext())
+		if(true)//m_graph.usesEvalContext())
 		{
 			// setup the context
 			FabricCore::RTVal evalContext = m_graph.getEvalContext();

@@ -13,8 +13,9 @@ try (
 )
 
 -- Event Helpers
+fn getName evSender = ( res = evSender.Parent.tag.value)
+fn setName evSender name = ( evSender.Parent.tag = dotnetmxsvalue name)
 fn getStruct evSender = ( res = evSender.parent.parent.tag.value )
-fn getIndex evSender = ( res = evSender.Parent.Parent.Controls.GetChildIndex evSender.Parent + 1)
 fn FindCtrl layout name = ( res = layout.Controls.Find name true )
 
 struct spliceEditorStruct
@@ -47,19 +48,19 @@ struct spliceEditorStruct
 		)
 	),
 	fn evRenameParam sender evt = (
-		local paramIdx = getIndex sender
+		local paramName = getName sender
 		local thisStruct = getStruct sender
 		local spliceClass = thisStruct.mSpliceClass
-		spliceClass.SetPortName paramIdx sender.Text
+		if spliceClass.SetPortName paramName sender.Text do ( setName sender sender.Text )
 		thisStruct.UpdateKLCodeTab()
 	),
 	
 	fn evMaxTypeChange sender evt = (
-		local paramIdx = getIndex sender
+		local paramName = getName sender
 		local thisStruct = getStruct sender
 		local typeIdx = sender.SelectedIndex
 		local spliceClass = thisStruct.mSpliceClass
-		local legalTypes  = (spliceClass.GetLegalMaxTypes paramIdx) as array
+		local legalTypes  = (spliceClass.GetLegalMaxTypes paramName) as array
 		local newType = -1
 		local asArray = false
 		if(typeIdx > 0) do (
@@ -67,13 +68,13 @@ struct spliceEditorStruct
 			asArray = (FindCtrl sender.parent "ParamArray")[1].Checked
 		)
 		if asArray then newType += 0x0800
-		spliceClass.SetMaxType paramIdx newType
+		spliceClass.SetMaxType paramName newType
 	),
 	
 	fn evDelParam sender evt = (
-		local paramIdx = getIndex sender
+		local paramName = getName sender
 		local thisStruct = getStruct sender
-		success = thisStruct.mSpliceClass.RemovePortByIndex paramIdx
+		success = thisStruct.mSpliceClass.RemovePortByMSTR paramName
 		-- Remove newly deleted param from table
 		if success do (
 			thisStruct.UpdateParameterTab()
@@ -270,7 +271,6 @@ struct spliceEditorStruct
 		ctrlLayout.WrapContents = false
 		ctrlLayout.height = 26
 		ctrlLayout.Dock = ctrlLayout.Dock.Fill;
-		
 		tabsUsed = index * 3
 		
 		-- Add editable name box
@@ -282,9 +282,18 @@ struct spliceEditorStruct
 		nameEdit.TabIndex = tabsUsed + 1
 		ctrlLayout.Controls.Add nameEdit
 		dotNet.addEventHandler nameEdit "TextChanged" evRenameParam
+
+		-- The following line does not actually set the name of the 
+		-- param/edit, what it does is remembers the name of the parameter
+		-- being edited by this ctrlLayout, so evHandlers can
+		-- call functions on the appropriate port in splice
+		-- NOTE: This used to be the param index, but I discovered that renaming
+		-- parameters could reorder their index, so using full names
+		-- seemed much safer.
+		setName nameEdit paramName
 		
 		-- Add non-editable type
-		local spliceType = mSpliceClass.GetPortType index
+		local spliceType = mSpliceClass.GetPortType paramName
 		local typeLabel = dotNetObject "System.Windows.Forms.TextBox"
 		typeLabel.Name = "ParamType"
 		typeLabel.Enabled = false
@@ -309,7 +318,7 @@ struct spliceEditorStruct
 		-- ctrlLayout.Controls.Add extLabel
 		
 		-- Add isArray checkbox
-		local isArray = mSpliceClass.IsPortArray index
+		local isArray = mSpliceClass.IsPortArray paramName
 		local isArrayCB = dotNetObject "System.Windows.Forms.Checkbox"
 		isArrayCB.Checked = isArray
 		isArrayCB.Name = "ParamArray"
@@ -320,8 +329,8 @@ struct spliceEditorStruct
 		ctrlLayout.Controls.Add isArrayCB
 
 		-- Allow user to switch between legal max types for input
-		local maxType = mSpliceClass.GetMaxType index
-		local legalMaxTypes = mSpliceClass.GetLegalMaxTypes index
+		local maxType = mSpliceClass.GetMaxType paramName
+		local legalMaxTypes = mSpliceClass.GetLegalMaxTypes paramName
 		local ddlist  =  dotNetObject "System.Windows.Forms.ComboBox"
 		ddlist.Name = "MaxType"
 		ddlist.DropDownStyle = ddlist.DropDownStyle.DropDownList
@@ -431,7 +440,7 @@ struct spliceEditorStruct
 		local extEdit = dotNetObject "System.Windows.Forms.TextBox"
 		extEdit.Name = "Extension"
 		extEdit.Text = ""
-		extEdit.TabIndex = tabIndex + 3
+		extEdit.TabIndex = tabIndex + 5
 		ctrlLayout.Controls.Add extEdit
 		
 		-- Create empty dd list as place holder
@@ -440,7 +449,7 @@ struct spliceEditorStruct
 		maxType.DropDownStyle = maxType.DropDownStyle.DropDownList
 		maxType.items.addrange #("-none-", "-default type-")
 		maxType.SelectedIndex = 1
-		maxType.TabIndex = tabIndex + 5
+		maxType.TabIndex = tabIndex + 6
 		ctrlLayout.Controls.Add maxType
 	
 		-- See http://tech-artists.org/forum/showthread.php?588-Maxscript-dotNet-and-the-vicious-ComboBox
@@ -450,7 +459,7 @@ struct spliceEditorStruct
 		-- Allow user to delete parameters
 		local createBtn = dotNetObject  "System.Windows.Forms.Button"
 		createBtn.Text = "Create"
-		createBtn.TabIndex = tabIndex + 6
+		createBtn.TabIndex = tabIndex + 7
 		dotNet.addEventHandler createBtn "Click" evCreateParam
 		ctrlLayout.Controls.Add createBtn
 		

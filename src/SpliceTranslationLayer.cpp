@@ -297,14 +297,18 @@ void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name)
 {
 	if (pDesc == NULL)
 		return;
-
-	// Each PB2 owns its own string memory, ensure its cleaned up.
-	ParamDef& newDef = pDesc->GetParamDef(pid);
-	free((void*)newDef.int_name);
-	if (name != NULL)
-		newDef.int_name = _tcsdup(name);
-	else
-		newDef.int_name = NULL;
+	// Some ports don't have max params. Skip these ones. 
+	// Note: We would only get here if a port has a pid option, but the max param has
+	// been removed. The pid should be removed from the port when its max param is removed.
+	if(pDesc->IDtoIndex(pid) != -1){
+		// Each PB2 owns its own string memory, ensure its cleaned up.
+		ParamDef& newDef = pDesc->GetParamDef(pid);
+		free((void*)newDef.int_name);
+		if (name != NULL)
+			newDef.int_name = _tcsdup(name);
+		else
+			newDef.int_name = NULL;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -821,8 +825,10 @@ void ParameterBlockValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IPa
 
 	int type = pblock->GetParameterType(pid);
 	int nParams = 1;
-	if (is_tab(type))
+	if (is_tab(type)){
 		nParams = pblock->Count(pid);
+		DbgAssert(dgPort.isArray());
+	}
 
 	TResultType* pVals = new TResultType[nParams];
 	for (int i = 0; i < nParams; i++)
@@ -886,68 +892,63 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplic
 	for (size_t i = 0; i < nPorts; i++)
 	{
 		FabricSplice::DGPort port = graph.getDGPort(i);
-		int id = ::GetPortParamID(port);
-		// Its possible some params are not supported by Max.
-		if (id == -1)
+		ParamID pid = ParamID(::GetPortParamID(port));
+		
+		if(pblock->IDtoIndex(pid) == -1){
+			// Some ports report a ParamID, but infact its invalid. 
+			// We now set the PID meta data to -1 on a port when its type set to '-None-' (-1).
 			continue;
-		int type = pblock->GetParameterType((ParamID)id);
-		FabricCore::RTVal portVal = port.getRTVal();
-
-		// If we are a tab parameter, set all values
-		int nTabParams = 1;
-		if (is_tab(type))
-		{
-			nTabParams = pblock->Count((ParamID)id);
-			DbgAssert(port.isArray());
-			portVal.setArraySize(nTabParams);
 		}
-
+		// Its possible some params are not supported by Max.
+		if (pid == -1)
+			continue;
+		int type = pblock->GetParameterType(pid);
 		switch ((int)base_type(type))
 		{
 		case TYPE_INT:		
 		case TYPE_INDEX:
-			ParameterBlockValuesToSplice<int>(port, t, pblock, (ParamID)id, ivValid);
+			ParameterBlockValuesToSplice<int>(port, t, pblock, pid, ivValid);
 			break;
 		case TYPE_TIMEVALUE:
-			ParameterBlockValuesToSplice<TimeValue, float>(port, t, pblock, (ParamID)id, ivValid);
+			ParameterBlockValuesToSplice<TimeValue, float>(port, t, pblock, pid, ivValid);
 			break;
 		case TYPE_FLOAT:
 		case TYPE_ANGLE:
 		case TYPE_WORLD:
 		case TYPE_PCNT_FRAC:
-			ParameterBlockValuesToSplice<float>(port, t, pblock, (ParamID)id, ivValid);
+			ParameterBlockValuesToSplice<float>(port, t, pblock, pid, ivValid);
 			break;
 		case TYPE_RGBA:
-			ParameterBlockValuesToSplice<Color>(port, t, pblock, (ParamID)id, ivValid);
+			ParameterBlockValuesToSplice<Color>(port, t, pblock, pid, ivValid);
 			break;
 		//case TYPE_POINT2:
 		//	MaxValueToSplice(port, pblock->GetPoint3(id, t));
 		//	break;
 		case TYPE_POINT3:
-			ParameterBlockValuesToSplice<Point3>(port, t, pblock, (ParamID)id, ivValid);
+			ParameterBlockValuesToSplice<Point3>(port, t, pblock, pid, ivValid);
 			break;
 		case TYPE_FRGBA:
 		case TYPE_POINT4:
-			ParameterBlockValuesToSplice<Point4>(port, t, pblock, (ParamID)id, ivValid);
+			ParameterBlockValuesToSplice<Point4>(port, t, pblock, pid, ivValid);
 			break;
 		case TYPE_BOOL:
-			ParameterBlockValuesToSplice<int, bool>(port, t, pblock, (ParamID)id, ivValid);
+			ParameterBlockValuesToSplice<int, bool>(port, t, pblock, pid, ivValid);
 			break;
 		case TYPE_MATRIX3:
-			ParameterBlockValuesToSplice<Matrix3>(port, t, pblock, (ParamID)id, ivValid);
+			ParameterBlockValuesToSplice<Matrix3>(port, t, pblock, pid, ivValid);
 			break;
 		case TYPE_STRING:
 		case TYPE_FILENAME:
-			ParameterBlockValuesToSplice<const MCHAR*>(port, t, pblock, (ParamID)id, ivValid);
+			ParameterBlockValuesToSplice<const MCHAR*>(port, t, pblock, pid, ivValid);
 			break;
 		case TYPE_INODE:
 			{
-				MaxPtrToSplice(port, t, pblock, (ParamID)id, ivValid);
+				MaxPtrToSplice(port, t, pblock, pid, ivValid);
 				break;
 			}
 		case TYPE_REFTARG:
 			{
-				ReferenceTarget* pSrcContainer = pblock->GetReferenceTarget((ParamID)id);
+				ReferenceTarget* pSrcContainer = pblock->GetReferenceTarget(pid);
 				if (pSrcContainer == nullptr)
 					continue;
 

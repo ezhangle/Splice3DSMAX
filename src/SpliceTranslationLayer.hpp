@@ -1041,6 +1041,8 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(FabricS
 	{
 		if (pid >= 0)
 			DeleteMaxParameter((ParamID)pid);
+		// Set -1 as the param id so we no longer look for a max param for this port.
+		::SetPortParamID(aPort, -1);
 		return -1;
 	}
 

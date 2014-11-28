@@ -256,6 +256,9 @@ void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort
 
 	FabricCore::Variant uiMin = port.getOption("uiMin");
 	FabricCore::Variant uiMax = port.getOption("uiMax");
+	if(uiMin.isNull() || uiMax.isNull())
+		return;
+
 	switch((int)baseType)
 	{
 	case TYPE_FLOAT:	
@@ -263,15 +266,15 @@ void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort
 	case TYPE_PCNT_FRAC:	
 	case TYPE_WORLD:
 		{
-			float vMin = uiMin.isFloat32() ? uiMin.getFloat32() : 0.0f;
-			float vMax = uiMax.isFloat32() ? uiMax.getFloat32() : 100.0f;
+			float vMin = uiMin.isFloat32() ? uiMin.getFloat32() : -99999999.0f;
+			float vMax = uiMax.isFloat32() ? uiMax.getFloat32() : 99999999.0f;
 			pDesc->ParamOption(pid, p_range, vMin, vMax, p_end); 
 			break;
 		}
 	case TYPE_INT:
 		{
-			int vMin = uiMin.isSInt32() ? uiMin.getSInt32() : 0;
-			int vMax = uiMax.isSInt32() ? uiMax.getSInt32() : 100;
+			int vMin = uiMin.isSInt32() ? uiMin.getSInt32() : -99999999;
+			int vMax = uiMax.isSInt32() ? uiMax.getSInt32() : 99999999;
 			pDesc->ParamOption(pid, p_range,  vMin, vMax, p_end); 
 			break;
 		}

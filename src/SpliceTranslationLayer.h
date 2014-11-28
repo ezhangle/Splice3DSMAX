@@ -315,9 +315,9 @@ public:
 
 	// Get name of port
 	const char* GetPortName(int i);
-	bool SetPortName(int i, const char* name);
-	const char* GetPortType(int i);
-	bool IsPortArray(int i) { return (i < GetPortCount()) ? m_graph.getDGPort(i).isArray() : NULL; }
+	bool SetPortName(const char* oldName, const char* newName);
+	const char* GetPortType(const char* i);
+	bool IsPortArray(const char* i);
 
 	std::string GetAllPortSignature() { return (m_graph) ? m_graph.generateKLOperatorParameterList().getString_cstr() : NULL; }
 
@@ -342,17 +342,17 @@ public:
 
 	// Get the type of the max parameter connected to the splice in port (i)
 	// \param i The index of the splice port
-	virtual int GetMaxConnectedType(int i);
+	virtual int GetMaxConnectedType(const char* portName);
 	// Set the type of the Max parameter pushing data to the splice port
 	// \param i The index of the splice port
 	// \type The ParamType to set the matching Max parameter to.
 	int SetMaxConnectedType(FabricSplice::DGPort& aPort, int maxType);
-	virtual int SetMaxConnectedType(int i, int type);
+	virtual int SetMaxConnectedType(const char* portName, int type);
 	// Returns an array of the max types that can be used to drive
 	// data for splice port
 	// \param i The index of the splice port
 	// \return A BitArray, where each set bit indicates a legal ParamType for the given port
-	virtual BitArray GetLegalMaxTypes(int i) { return ::GetLegalMaxTypes(GetPortType(i)); }
+	virtual BitArray GetLegalMaxTypes(const char* portName) { return ::GetLegalMaxTypes(GetPortType(portName)); }
 
 	// Allow setting various options on ports 
 	// Set UI limits.  This will not actually limit the value, but for sliders etc it will limit what is presented to the user.

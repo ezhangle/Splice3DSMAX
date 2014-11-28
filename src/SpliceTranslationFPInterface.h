@@ -96,15 +96,15 @@ public:
 		FN_1(fn_removePortIdx, TYPE_bool, RemovePort, TYPE_INDEX);
 		FN_1(fn_removePortName, TYPE_bool, RemovePortMSTR, TYPE_TSTR_BV);
 		FN_1(fn_getPortName, TYPE_TSTR_BV, GetPortNameMSTR, TYPE_INT);
-		VFN_2(fn_setPortName, SetPortNameMSTR, TYPE_INT, TYPE_TSTR_BV);
-		FN_1(fn_getPortType, TYPE_TSTR_BV, GetPortTyeMSTR, TYPE_INT);
-		FN_1(fn_isPortArray, TYPE_bool, IsPortArray, TYPE_INT);
+		FN_2(fn_setPortName, TYPE_bool, SetPortNameMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
+		FN_1(fn_getPortType, TYPE_TSTR_BV, GetPortTyeMSTR, TYPE_TSTR_BV);
+		FN_1(fn_isPortArray, TYPE_bool, IsPortArrayMSTR, TYPE_TSTR_BV);
 
 		FN_4(fn_connectPorts, TYPE_bool, ConnectPortMSTR, TYPE_TSTR_BV, TYPE_REFTARG, TYPE_TSTR_BV, TYPE_INT);
 		
-		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxConnectedType, TYPE_INT);
-		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxConnectedType, TYPE_INT, TYPE_INT);
-		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypes, TYPE_INT);
+		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxConnectedTypeMSTR, TYPE_TSTR_BV);
+		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxConnectedTypeMSTR, TYPE_TSTR_BV, TYPE_INT);
+		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypesMSTR, TYPE_TSTR_BV);
 
 		FN_3(fn_setPortOption, TYPE_bool, SetPortOptionMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_FPVALUE);
 		FN_2(fn_setPortValue, TYPE_bool, SetPortValueMSTR, TYPE_TSTR_BV, TYPE_FPVALUE);
@@ -156,10 +156,10 @@ public:
 
 	// Get name of port
 	virtual const char* GetPortName(int i) = 0;
-	virtual bool SetPortName(int i, const char* name) = 0;
-	virtual const char* GetPortType(int i) = 0;
+	virtual bool SetPortName(const char* oldName, const char* newName) = 0;
+	virtual const char* GetPortType(const char* port) = 0;
 	// Returns if the in port is an array type or not
-	virtual bool IsPortArray(int i)=0;
+	virtual bool IsPortArray(const char* port)=0;
 
 	// Returns a string with all available ports on this graph
 	// This is helpful in the KL code editor to quickly add parameters
@@ -174,9 +174,9 @@ public:
 	// Set the index.  If idx == -1, set our out port to not be an array
 	virtual void SetOutPortArrayIdx(int idx) = 0;
 
-	virtual int GetMaxConnectedType(int i) = 0;
-	virtual int SetMaxConnectedType(int i, int type) = 0;
-	virtual BitArray GetLegalMaxTypes(int i) = 0;
+	virtual int GetMaxConnectedType(const char* portName) = 0;
+	virtual int SetMaxConnectedType(const char* portName, int type) = 0;
+	virtual BitArray GetLegalMaxTypes(const char* portName) = 0;
 
 	// Allow setting various options on our ports
 	virtual bool SetPortOption(const char* port, const char* option, FPValue* value)=0;
@@ -267,8 +267,12 @@ protected:
 
 	MSTR GetOperatorNameMSTR(int i) { return ToMSTR(GetOperatorName(i), 0); }
 	MSTR GetPortNameMSTR(int i)	{ return ToMSTR(GetPortName(i), 0); }
-	void SetPortNameMSTR(int i, MSTR name)	{ SetPortName(i, name.ToCStr()); }
-	MSTR GetPortTyeMSTR(int i)	{ return ToMSTR(GetPortType(i), 0); }
+	bool SetPortNameMSTR(const MSTR& oldName, const MSTR& newName)	{ return SetPortName(oldName.ToCStr(), newName.ToCStr()); }
+	MSTR GetPortTyeMSTR(const MSTR& port)	{ return ToMSTR(GetPortType(port.ToCStr()), 0); }
+	bool IsPortArrayMSTR(const MSTR& port) { return IsPortArray(port.ToCStr()); }
+	int GetMaxConnectedTypeMSTR(const MSTR& port) { return GetMaxConnectedType(port.ToCStr()); }
+	int SetMaxConnectedTypeMSTR(const MSTR& port, int type) { return SetMaxConnectedType(port.ToCStr(), type); }
+	BitArray GetLegalMaxTypesMSTR(const MSTR& port) { return GetLegalMaxTypes(port.ToCStr()); }
 
 	int AddInputPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
 	{
@@ -360,12 +364,12 @@ FPInterfaceDesc* GetDescriptor()
 			SpliceTranslationFPInterface::fn_getPortName, _T("GetPortName"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("portIndex"),	0,	TYPE_INDEX,
 			SpliceTranslationFPInterface::fn_setPortName, _T("SetPortName"), 0, TYPE_VOID, 0, 2,
-				_M("portIndex"),	0,	TYPE_INDEX,
-				_M("name"),			0,	TYPE_TSTR_BV,
+				_M("oldName"),			0,	TYPE_TSTR_BV,
+				_M("newName"),			0,	TYPE_TSTR_BV,
 			SpliceTranslationFPInterface::fn_getPortType, _T("GetPortType"), 0, TYPE_TSTR_BV, 0, 1,
-				_M("portIndex"),	0,	TYPE_INDEX,
+				_M("portName"),		0,	TYPE_TSTR_BV,
 			SpliceTranslationFPInterface::fn_isPortArray, _T("IsPortArray"), 0, TYPE_bool, 0, 1,
-				_M("portIndex"),	0,	TYPE_INDEX,
+				_M("portName"),		0,	TYPE_TSTR_BV,
 
 			SpliceTranslationFPInterface::fn_connectPorts, _T("ConnectPorts"), 0, TYPE_bool, 0, 4,
 				_M("myPortName"),	0,	TYPE_TSTR_BV,
@@ -374,12 +378,12 @@ FPInterfaceDesc* GetDescriptor()
 				_M("srcPortIndex"),	0,	TYPE_INT, f_keyArgDefault, -1,
 
 			SpliceTranslationFPInterface::fn_getMaxConnectedType, _T("GetMaxType"), 0, TYPE_INT, 0, 1,
-				_M("portIndex"),	0,	TYPE_INDEX,
+				_M("port"),		0,	TYPE_TSTR_BV, 
 			SpliceTranslationFPInterface::fn_setMaxConnectedType, _T("SetMaxType"), 0, TYPE_INT, 0, 2,
-				_M("portIndex"),	0,	TYPE_INDEX,
-				_M("maxType"),		0,	TYPE_INT,
+				_M("port"),		0,	TYPE_TSTR_BV, 
+				_M("maxType"),	0,	TYPE_INT,
 			SpliceTranslationFPInterface::fn_getLegalMaxTypes, _T("GetLegalMaxTypes"), 0, TYPE_BITARRAY, 0, 1,
-				_M("portIndex"),	0,	TYPE_INDEX, 
+				_M("port"),		0,	TYPE_TSTR_BV, 
 
 			SpliceTranslationFPInterface::fn_setPortOption, _T("SetPortOption"), 0, TYPE_bool, 0, 3,
 				_M("port"),		0,	TYPE_TSTR_BV, 

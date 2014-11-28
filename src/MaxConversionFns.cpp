@@ -317,7 +317,7 @@ FabricCore::RTVal ConvertToRTVal(const Mesh& param, FabricCore::RTVal rtMesh)
 		return rtMesh;
 	
 	UINT nbPolygons = rtMesh.callMethod("UInt32", "polygonCount", 0, 0).getUInt32();
-	bool rebuildMesh = nbPolygons != param.numFaces;
+	bool rebuildMesh = nbPolygons != (UINT)param.numFaces;
 	if(rebuildMesh){
 		rtMesh.callMethod("", "clear", 0, 0);
 	}

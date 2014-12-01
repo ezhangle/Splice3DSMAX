@@ -105,9 +105,6 @@ void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 	SpliceStaticFPInterface::GetInstance()->EnableLogging(SpliceStaticFPInterface::LOG_ALL);
 
 	// Pre-load a client
-	//static FabricCore::Client client = FabricSplice::ConstructClient();
-	//client.enableBackgroundTasks();
-
 	RegisterNotification(OnReset, NULL, NOTIFY_SYSTEM_POST_RESET);
 	RegisterNotification(OnReset, NULL, NOTIFY_SYSTEM_POST_NEW);
 	RegisterNotification(OnReset, NULL, NOTIFY_FILE_PRE_OPEN);

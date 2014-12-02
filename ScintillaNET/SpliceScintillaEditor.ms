@@ -74,7 +74,7 @@ struct spliceEditorStruct
 	fn evDelParam sender evt = (
 		local paramName = getName sender
 		local thisStruct = getStruct sender
-		success = thisStruct.mSpliceClass.RemovePortByMSTR paramName
+		success = thisStruct.mSpliceClass.RemovePort paramName
 		-- Remove newly deleted param from table
 		if success do (
 			thisStruct.UpdateParameterTab()

@@ -144,5 +144,7 @@ call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)"
   <PropertyGroup>
     <LocalDebuggerCommandArguments>-vo -p "$(ProjectDir)/build/Generated.Plugin.Splice.ini"</LocalDebuggerCommandArguments>
     <LocalDebuggerCommand>$(MaxPath)3dsmax.exe</LocalDebuggerCommand>
+    <LocalDebuggerEnvironment>SPLICE3DSMAXDIR=$(FABRIC_DIR)SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/
+$(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>
 </Project>

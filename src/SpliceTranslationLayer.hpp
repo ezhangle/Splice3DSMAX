@@ -1166,7 +1166,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetSpliceGraph(const Fabri
 				const char* sDataType = port.getDataType();
 				int type = SpliceTypeToMaxType(sDataType);
 				// Is this legal for us?  If so, connect our value port
-				if (type >= 0)
+				if (type == GetValueType())
 				{
 					SetOutPort(port);
 					bool isArray = port.isArray();

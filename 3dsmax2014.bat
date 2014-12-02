@@ -31,6 +31,6 @@ REM Save the Scintilla folder to an environment variable that will be accessed i
 set SCINTILLANETDIR=%SPLICE3DSMAXDIR%ScintillaNET\
 
 REM Launch Max
-call "%ADSK_3DSMAX_x64_2014%\3dsmax.exe" -vo -p %~dp0/Generated.Plugin.Splice.ini
+call "%ADSK_3DSMAX_x64_2014%\3dsmax.exe" -vo -p %SPLICE3DSMAXDIR%/Generated.Plugin.Splice.ini
 
 rem echo on

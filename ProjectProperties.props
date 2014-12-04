@@ -26,12 +26,12 @@
 		<!-- If no install of Max SDK is present, default to the fabric system build values  -->
 		<MaxSDKPath Condition="'$(MaxSDKPath)'==''">$(FABRIC_SCENE_GRAPH_DIR)\ThirdParty\PreBuilt\Windows\x86_64\Release\3dsmax\3ds Max $(MaxVersion) SDK\</MaxSDKPath>
 
-		<!-- Autodesc changed the folder structure for 2014 SDK -->
-		<MaxSDKLibPath Condition="'$(MaxVersion)' &lt; '2014'">$(MaxSDKPath)\x64\lib\</MaxSDKLibPath>
+		<!-- Autodesc changed the folder structure of the SDK from 2014 onwards -->
+		<MaxSDKLibPath>$(MaxSDKPath)\x64\lib\</MaxSDKLibPath>
 		<MaxSDKLibPath Condition="'$(MaxVersion)' &gt; '2013'">$(MaxSDKPath)\lib\x64\Release</MaxSDKLibPath>
 
 		<!-- switcher for unicode build -->
-		<IsUnicode Condition="'$(MaxVersion)' &lt; '2013'">false</IsUnicode>
+		<IsUnicode>false</IsUnicode>
 		<IsUnicode Condition="'$(MaxVersion)' &gt; '2012'">true</IsUnicode>
 
 	</PropertyGroup>
@@ -55,13 +55,17 @@
 	<PropertyGroup Condition="!'$(IsUnicode)'" Label="Configuration">
 		<CharacterSet>MultiByte</CharacterSet>
 	</PropertyGroup>
-	<!-- Set appropriate compiler version -->
+	<!-- Set appropriate compiler version 
 	<PropertyGroup Condition="'$(MaxVersion)' &lt; '2013'">
 		<PlatformToolset>v90</PlatformToolset>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(MaxVersion)' &gt; '2014'">
 		<PlatformToolset>v110</PlatformToolset>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(MaxVersion)' &gt; '2015'">
+		<PlatformToolset>v110</PlatformToolset>
+	</PropertyGroup>
+	-->
 
 	<ItemDefinitionGroup>
 		<!-- default values for compiler -->
@@ -79,9 +83,9 @@
 		<ClCompile Condition="'$(MaxVersion)' &gt; '2013'">
 			<AdditionalIncludeDirectories>$(MaxSDKPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ClCompile>
-    <ClCompile Condition="'$(MaxVersion)' &lt; '2014'">
-        <AdditionalIncludeDirectories>$(MaxSDKPath)\maxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
+	    <ClCompile>
+	        <AdditionalIncludeDirectories>$(MaxSDKPath)\maxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+	    </ClCompile>
         
 
 		<!-- Turn on E&C for Debug Win32 builds -->

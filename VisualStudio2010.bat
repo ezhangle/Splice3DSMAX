@@ -22,6 +22,5 @@ set SCINTILLANETDIR=%DISTDIR%ScintillaNET\
 echo Starting VS Launcher
 call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.exe" "%SLN%"
 
-pause.
 
 echo on

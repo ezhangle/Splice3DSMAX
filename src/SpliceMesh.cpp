@@ -56,9 +56,11 @@ public:
 	virtual Interval ObjectValidity(TimeValue t) { return m_valid; }
 
 	// Nitrous support
+#if MAX_VERSION_MAJOR < 15
 	virtual bool UpdateDisplay(
 		const MaxSDK::Graphics::MaxContext& maxContext, 
 		const MaxSDK::Graphics::UpdateDisplayContext& displayContext);
+#endif
 
 	// From GeomObject
 	virtual Mesh* GetRenderMesh(TimeValue t, INode *inode, View& view, BOOL& needDelete);
@@ -119,6 +121,8 @@ CreateMouseCallBack* SpliceMesh::GetCreateMouseCallBack()
 	return OneClickCreateCallBack::Instance();
 }
 
+// Nitrous has changed a lot for 2015
+#if MAX_VERSION_MAJOR < 15
 // Adding Nitrous support
 bool SpliceMesh::UpdateDisplay(
 	const MaxSDK::Graphics::MaxContext& maxContext, 
@@ -145,6 +149,7 @@ bool SpliceMesh::UpdateDisplay(
 
 	return true;
 }
+#endif
 
 bool IsNitrousGraphicsEnabled() {
 	MaxSDK::Graphics::IDisplayManager* pGraphicsManager = MaxSDK::Graphics::GetIDisplayManager();

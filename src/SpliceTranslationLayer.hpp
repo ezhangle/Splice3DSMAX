@@ -322,8 +322,13 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetReference(int i, RefTar
 }
 
 // Something has changed on our parameter block
+#if MAX_VERSION_MAJOR < 15
 template<typename TBaseClass, typename TResultType>
 RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged( Interval , RefTargetHandle , PartID&	, RefMessage message )
+#else
+template<typename TBaseClass, typename TResultType>
+RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate)
+#endif
 {
 	// set splices dirty flag.
 	if (message == REFMSG_CHANGE)

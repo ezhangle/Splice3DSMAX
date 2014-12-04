@@ -198,7 +198,13 @@ public:
 	int							NumRefs()							{ return 1;}
 	virtual RefTargetHandle		GetReference(int i)					{ return (i == 0) ? m_pblock : NULL; }
 	virtual void				SetReference(int i, RefTargetHandle rtarg);
+	
+#if MAX_VERSION_MAJOR < 15
 	RefResult					NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget, PartID& partID,  RefMessage message);
+#else
+	RefResult					NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate);
+#endif
+
 	// We use the RefDeleted callback to detect when we are 
 	// removed from the scene graph so we can take down the KLEditor
 	void						RefDeleted();

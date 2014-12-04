@@ -322,7 +322,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetReference(int i, RefTar
 }
 
 // Something has changed on our parameter block
-#if MAX_VERSION_MAJOR < 15
+#if MAX_VERSION_MAJOR < 17 // Max 2015 is ver 17
 template<typename TBaseClass, typename TResultType>
 RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged( Interval , RefTargetHandle , PartID&	, RefMessage message )
 #else

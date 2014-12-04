@@ -199,7 +199,7 @@ public:
 	virtual RefTargetHandle		GetReference(int i)					{ return (i == 0) ? m_pblock : NULL; }
 	virtual void				SetReference(int i, RefTargetHandle rtarg);
 	
-#if MAX_VERSION_MAJOR < 15
+#if MAX_VERSION_MAJOR < 17 // Max 2015 is ver 17
 	RefResult					NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget, PartID& partID,  RefMessage message);
 #else
 	RefResult					NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate);

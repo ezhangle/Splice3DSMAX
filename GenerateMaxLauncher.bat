@@ -45,7 +45,7 @@ REM Clear the contents of the file if it already exists.
 @echo set FABRIC_EXTS_PATH=%%FABRIC_EXTS_PATH%%;%%SPLICE3DSMAXDIR%%..\..\Exts>> "%TARGETDIR%3dsmax%MAXVERSION%.bat"
 @echo.>> "%TARGETDIR%3dsmax%MAXVERSION%.bat"
 @echo REM Enable the system to find the FabricCore and Scintilla dlls>> "%TARGETDIR%3dsmax%MAXVERSION%.bat"
-@echo set PATH=%%PATH%%;%%SPLICE3DSMAXDIR%%..\..\lib;%SPLICE3DSMAXDIR%ScintillaNET\>> "%TARGETDIR%3dsmax%MAXVERSION%.bat"
+@echo set PATH=%%PATH%%;%%SPLICE3DSMAXDIR%%..\..\lib;%%SPLICE3DSMAXDIR%%ScintillaNET\>> "%TARGETDIR%3dsmax%MAXVERSION%.bat"
 @echo.>> "%TARGETDIR%3dsmax%MAXVERSION%.bat"
 @echo REM Save the Scintilla folder to an environment variable that will be accessed in MaxScript>> "%TARGETDIR%3dsmax%MAXVERSION%.bat"
 @echo set SCINTILLANETDIR=%%SPLICE3DSMAXDIR%%ScintillaNET\>> "%TARGETDIR%3dsmax%MAXVERSION%.bat"

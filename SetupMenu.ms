@@ -44,7 +44,7 @@ category:"Fabric Splice"
 internalCategory:"FabricSplice"
 autoUndoEnabled:false
 (
-  shellLaunch "http://documentation.fabricengine.com/Splice/latest/HTML/" ""
+  shellLaunch "http://documentation.fabric-engine.com/FabricEngine/latest/HTML/Splice/" ""
 )
 __FE_MENU_NAME = "Splice"
 

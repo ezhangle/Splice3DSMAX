@@ -1,7 +1,9 @@
 resetMaxFile #noPrompt
-thisfile = getThisScriptFilename()
-witcherFbx =  (getFilenamePath thisfile) + "testfiles/Witcher_Creep.fbx"
 
+-- Get "%FABRIC_DIR%" Environment Variable, set by the launcher script
+Environment = dotNetClass "System.Environment"
+fabricDir = Environment.GetEnvironmentVariable "FABRIC_DIR"
+witcherFbx =  fabricDir + "resources/Witcher_Creep.fbx"
 
 m = SpliceMesh()
 m.AddInputPort "filePath" "String" -2

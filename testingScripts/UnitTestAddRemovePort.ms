@@ -1,6 +1,6 @@
 fn FindPort sm name = (
 	ret = 0
-	for i = 1 to sm.numPorts do (
+	for i = 1 to sm.portCount do (
 		if (sm.GetPortName i) == name do ret = i
 	)
 	ret
@@ -25,20 +25,31 @@ operator " + nodeName + "(io PolygonMesh " + sm.OutPort + ") {
 sm.SetKLCode nodeName klCode
 
 -- Test adding new ports
-sm.CreatePort "inSegments" "Size" 1
+sm.addInputPort "inSegments" "Size" 1
 assert ((FindPort sm "inSegments") != 0) message:"Failed Creating inSegments" options:#(#dialog)
 assert (hasProperty sm "inSegments") message:"Failed creading Max param for inSegments" options:#(#dialog)
 
 -- Create scalar with default type 
-sm.CreatePort "inRadius" "Scalar" -2
+sm.addInputPort "inRadius" "Scalar" -2
 assert ((FindPort sm "inRadius") != 0)message:"Failed Creating inRadius" options:#(#dialog)
-assert (hasProperty sm "inRadius") message: "Error: Created invalid max param inMesh" options:#(#dialog)
+assert (hasProperty sm "inRadius") message: "Error: Created invalid max param inRadius" options:#(#dialog)
 
 -- Create some more junk params
-sm.CreatePort "aParam" "Scalar" -1
-sm.CreatePort "aParam3" "PolygonMesh" -2
-sm.CreatePort "aParam4" "Integer" -2
+sm.addInputPort "aParam" "Scalar" -1
+sm.addInputPort "aParam3" "PolygonMesh" -2
+sm.addInputPort "aParam4" "Integer" -2
 
--- Remove one of the added ports
-firstPort = sm.getPortName 1
-sm.removePort firstPort
+-- Remove 3 of the added ports
+for i = 1 to 3 do (
+	existingPortCnt = sm.portCount
+	firstPort = sm.getPortName 2
+	sm.removePort firstPort
+	assert(sm.portCount == existingPortCnt - 1)message:"Invalid count after removal: " options:#(#dialog)
+	assert((FindPort sm firstPort) == 0)message:("Failed Removing " + firstPort) options:#(#dialog)
+)
+
+-- Test adding an output port 
+sm.addOutputPort "outScalar" "Scalar"
+assert ((FindPort sm "outScalar") != 0)message:"Failed Creating outScalar" options:#(#dialog)
+assert (!hasProperty sm "outScalar") message: "Error: Created invalid max param outScalar" options:#(#dialog)
+

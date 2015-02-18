@@ -22,7 +22,7 @@ function Float32 lerp(Float32 t, Float32 a, Float32 b)
 {
   return a + t * (b - a);
 }
-p
+
 function Float32 grad(SInt32 hash, Float32 x, Float32 y, Float32 z) 
 {
   SInt32 h = hash & 15;

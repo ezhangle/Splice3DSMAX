@@ -56,16 +56,16 @@ operator " + nodeName + "(io PolygonMesh " + sm.OutPort + ") {
 	" + sm.OutPort + ".addSphere(init, 32, 10, true, true);
 }"
 sm.SetKLCode nodeName klCode
+origMeshCounts = GetTriMeshFaceCount sm
 
 res = sm.saveToFile (tempDir + "\\sphere.splice")
 assert (res) message:"Could not set save splice file" options:#(#dialog)
 
 delete sm
 sm = DoLoadFile (tempDir + "\\sphere.splice");
-assert (CompArray (GetTriMeshFaceCount sm) #(576, 312)) message:"Did not restore output values in scene" options:#(#dialog)
-	
+assert (CompArray (GetTriMeshFaceCount sm) origMeshCounts) message:"Did not restore output values in scene" options:#(#dialog)
 	
 delete sm
 sm = SpliceMesh()
 sm.loadFromFile (tempDir + "\\sphere.splice") true
-assert (CompArray (GetTriMeshFaceCount sm) #(576, 312)) message:"Did not restore output values in object" options:#(#dialog)
+assert (CompArray (GetTriMeshFaceCount sm) origMeshCounts) message:"Did not restore output values in object" options:#(#dialog)

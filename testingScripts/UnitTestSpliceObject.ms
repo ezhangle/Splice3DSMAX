@@ -2,7 +2,7 @@ fn CompArray a b = (a as string == b as string)
 fn CompBB anode expSize = (
 	bb = (nodeLocalBoundingBox anode)
 	size = length (bb[1] - bb[2])
-	res =abs(size - expSize) < 0.001
+	res =abs(size - expSize) < 1
 )
 fn FindPort sm name = (
 	for i = 1 to sm.PortCount do (
@@ -15,6 +15,7 @@ sm = SpliceMesh()
 -- Init required params
 nodeName = sm.name
 sm.OutPort = nodeName + "Val"
+initTriCounts = #(506, 255)
 
 -- Init base compilation
 klCode =  "
@@ -28,7 +29,7 @@ operator " + nodeName + "(io PolygonMesh " + sm.OutPort + ") {
 	" + sm.OutPort + ".addSphere(init, 32, 10, true, true);
 }"
 sm.SetKLCode nodeName klCode
-assert (CompArray (GetTriMeshFaceCount sm) #(576, 312)) message:"Bad Init Tri Count" options:#(#dialog)
+assert (CompArray (GetTriMeshFaceCount sm) initTriCounts) message:"Bad Init Tri Count" options:#(#dialog)
 assert (CompBB sm 110.851) message:"Bad init size" options:#(#dialog)
 	
 -- Add segments parameter, test setting it
@@ -48,7 +49,7 @@ operator " + nodeName + "(io PolygonMesh " + sm.OutPort + ", in Size inSegments)
 }"
 sm.SetKLCode nodeName klCode
 sm.inSegments = 20
-assert (CompArray (GetTriMeshFaceCount sm) #(1936, 1012)) message:"Bad Tri Count on Set Segements" options:#(#dialog)
+assert (CompArray (GetTriMeshFaceCount sm) #(1806, 905)) message:"Bad Tri Count on Set Segements" options:#(#dialog)
 
 -- Create unsupported parameter.  This parameter has no matching Max data
 hasNewPort = false
@@ -79,8 +80,8 @@ assert (CompBB sm 0) message:"Bad 0 size" options:#(#dialog)
 sm.inRadius = 50
 assert (CompBB sm 173.205) message:"Bad 5 size" options:#(#dialog)
 
--- Assume for now all works as expected.
-sm.SetMaxType 2 17
+-- Change input type for PolyMesh from none to INode
+sm.SetMaxType "inMesh" 17
 assert (hasProperty sm "inMesh") message: "Error: Did not convert inMesh" options:#(#dialog)
 
 -- Pipe new in mesh
@@ -102,7 +103,7 @@ tp.radius = 50
 tp.position = Point3 10 10 0
 
 sm.inMesh = tp
-assert (CompArray (GetTriMeshFaceCount sm) #(1040, 542)) message:"Bad Tri Count on Set Mesh" options:#(#dialog)
+assert (CompArray (GetTriMeshFaceCount sm) #(2830, 1435)) message:"Bad Tri Count on Set Mesh" options:#(#dialog)
 assert (CompBB sm 228.915) message:"Bad 5 size" options:#(#dialog)
 	
 print "all tests passed!"

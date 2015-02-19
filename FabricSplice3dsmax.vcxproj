@@ -85,4 +85,23 @@
     <ClInclude Include="src\DynamicParamBlocks\DynPBUndo.h" />
     <ClInclude Include="src\SpliceTranslationLayer.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="SetupMenu.ms" />
+    <None Include="testingScripts\CharacterRendering.ms" />
+    <None Include="testingScripts\CharacterRenderingX1000.ms" />
+    <None Include="testingScripts\InlineDrawingTest.ms" />
+    <None Include="testingScripts\InlineDrawingTest_NoisyTorus.ms" />
+    <None Include="testingScripts\ManipulationTest.ms" />
+    <None Include="testingScripts\SampleMxSExtendKL.ms" />
+    <None Include="testingScripts\StartupMeshTimer.ms" />
+    <None Include="testingScripts\SurfaceAttrPaintManipulation.ms" />
+    <None Include="testingScripts\UnitTestAddRemovePort.ms" />
+    <None Include="testingScripts\UnitTestLoadSaveSpliceFile.ms" />
+    <None Include="testingScripts\UnitTestPortConnection.ms" />
+    <None Include="testingScripts\UnitTestPortOptions.ms" />
+    <None Include="testingScripts\UnitTestRegisterReloadExtns.ms" />
+    <None Include="testingScripts\UnitTestSpliceControllers.ms" />
+    <None Include="testingScripts\UnitTestSpliceModifier.ms" />
+    <None Include="testingScripts\UnitTestSpliceObject.ms" />
+  </ItemGroup>
 </Project>

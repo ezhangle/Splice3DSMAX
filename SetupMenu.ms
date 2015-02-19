@@ -116,6 +116,8 @@ fn DeRegisterFabricSpliceMenu = (
     if (spliceMenu != undefined) do ( menuMan.unRegisterMenu spliceMenu )
     menuMan.updateMenuBar()
   )
+  -- Force the release of any remaining splice happenings
+  Splice.DestroyClient force:true
 )
 
 -- When this script executes, we automatically add our menu
@@ -126,3 +128,12 @@ RegisterFabricSpliceMenu()
 -- We don't want them appearing in max when this
 -- script hasn't been executed
 callbacks.addScript #preSystemShutdown "DeRegisterSpliceMenu()" id:#SpliceRemoveMenu
+
+-- Our default initial state is Splice cleaned up and rendering on
+fn InitSpliceToDefault = (
+	Splice.DestroyClient force:true
+	Splice.Rendering = true
+)
+callbacks.addScript #systemPostReset "InitSpliceToDefault()" id:#SpliceDefaultVptRenderOn1
+callbacks.addScript #systemPostNew "InitSpliceToDefault()" id:#SpliceDefaultVptRenderOn2
+callbacks.addScript #postSystemStartup "InitSpliceToDefault()" id:#SpliceDefaultVptRenderOn

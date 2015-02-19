@@ -43,6 +43,9 @@ SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
 			SpliceStaticFPInterface::fn_disableLogging, _T("DisableLoggers"), 0, TYPE_INT, 0, 1,
 				_M("loggers"),	0,	TYPE_ENUM, SpliceStaticFPInterface::loggingEnums,
 
+			SpliceStaticFPInterface::fn_destroyClient, _T("DestroyClient"), 0, TYPE_INT, 0, 1,
+				_M("force"),	0,	TYPE_BOOL, f_keyArgDefault, false,
+
 
 		properties,
 			SpliceStaticFPInterface::prop_getSpliceRendering,SpliceStaticFPInterface::prop_setSpliceRendering, _T("Rendering"), 0,TYPE_bool,
@@ -249,6 +252,11 @@ int SpliceStaticFPInterface::DisableLogging(int loggers) {
 
 	m_FabrigLogging = m_FabrigLogging&~loggers;
 	return m_FabrigLogging;
+}
+
+void SpliceStaticFPInterface::DestroyClient(bool force) {
+	SpliceEvents::ReleaseInstance();
+	FabricSplice::DestroyClient(force);
 }
 
 bool SpliceStaticFPInterface::GetSpliceRendering()

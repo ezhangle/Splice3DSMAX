@@ -88,13 +88,6 @@ __declspec( dllexport ) ULONG CanAutoDefer()
 	return FALSE;
 }
 
-// Clean up all traces of Splice, and unhook vpt/mouse hooks
-void OnReset(void* /*param*/, NotifyInfo* /*info*/)
-{
-	SpliceEvents::ReleaseInstance();
-	FabricSplice::DestroyClient();
-}
-
 // Initialize things
 void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 {
@@ -104,12 +97,6 @@ void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 	InitLoggingTimer();
 	SpliceStaticFPInterface::GetInstance()->EnableLogging(SpliceStaticFPInterface::LOG_ALL);
 
-	// Pre-load a client
-	RegisterNotification(OnReset, NULL, NOTIFY_SYSTEM_POST_RESET);
-	RegisterNotification(OnReset, NULL, NOTIFY_SYSTEM_POST_NEW);
-	RegisterNotification(OnReset, NULL, NOTIFY_FILE_PRE_OPEN);
-
-	
 	// Magic initialization stuff for maxscript.
 	static bool menus_setup = false;
 	if (!menus_setup) {
@@ -126,14 +113,18 @@ void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 			free(mxsMenuSetup);
 		}
 	}
+
+	// Cleanup once callback is done.
+	UnRegisterNotification(OnStartup, nullptr);
 }
 
 // Clean up splice, and unhook all notifications.
 void OnShutdown(void* param, NotifyInfo* info)
 {
 	// On shutdown we release all info
-	OnReset(param, info);
-	UnRegisterNotification(OnReset, NULL);
+	SpliceStaticFPInterface::GetInstance()->DestroyClient(true);
+	UnRegisterNotification(OnShutdown, nullptr);
+	// Cleanup once callback is done.
 }
 
 __declspec( dllexport ) int LibInitialize(void)

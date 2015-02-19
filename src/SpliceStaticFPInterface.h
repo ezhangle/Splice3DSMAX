@@ -40,6 +40,8 @@ public:
 		fn_enableLogging,
 		fn_disableLogging,
 
+		fn_destroyClient,
+
 		prop_getSpliceRendering,
 		prop_setSpliceRendering,
 		prop_getSpliceManip,
@@ -58,9 +60,10 @@ public:
 		FN_3(fn_loadFabricExtension, TYPE_BOOL, LoadExtension, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_bool);
 		FN_6(fn_registerFabricExtension, TYPE_bool, RegisterExtension, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_TAB_BR, TYPE_bool, TYPE_bool);
 
-		
 		FN_1(fn_enableLogging, TYPE_INT, EnableLogging, TYPE_ENUM);
 		FN_1(fn_disableLogging, TYPE_INT, DisableLogging, TYPE_ENUM);
+
+		VFN_1(fn_destroyClient, DestroyClient, TYPE_bool);
 
 		PROP_FNS(prop_getSpliceRendering, GetSpliceRendering, prop_setSpliceRendering, SetSpliceRendering, TYPE_bool);
 		PROP_FNS(prop_getSpliceManip, GetSpliceManip, prop_setSpliceManip, SetSpliceManip, TYPE_bool);
@@ -85,6 +88,8 @@ public:
 	// Set the currently enabled/disabled logging
 	int EnableLogging(int v);
 	int DisableLogging(int v);
+
+	void DestroyClient(bool force/*=false*/);
 
 	bool GetSpliceRendering();
 	void SetSpliceRendering(bool isRendering);

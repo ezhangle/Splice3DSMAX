@@ -72,6 +72,7 @@ bool CopyValue(int type, ParamID newId, IParamBlock2* pNewBlock, ParamID oldId, 
 					pNewBlock->SetValue(newId, i, v);
 				}
 				break;
+			case TYPE_FRGBA:
 			case TYPE_POINT4:
 				{
 					Point4 v = pCopyBlock->GetPoint4(oldId);
@@ -266,15 +267,19 @@ void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort
 	case TYPE_PCNT_FRAC:	
 	case TYPE_WORLD:
 		{
-			float vMin = uiMin.isFloat32() ? uiMin.getFloat32() : -99999999.0f;
-			float vMax = uiMax.isFloat32() ? uiMax.getFloat32() : 99999999.0f;
+			float vMin;
+			float vMax;
+			SpliceToMaxValue(uiMax, vMax);
+			SpliceToMaxValue(uiMin, vMin);
 			pDesc->ParamOption(pid, p_range, vMin, vMax, p_end); 
 			break;
 		}
 	case TYPE_INT:
 		{
-			int vMin = uiMin.isSInt32() ? uiMin.getSInt32() : -99999999;
-			int vMax = uiMax.isSInt32() ? uiMax.getSInt32() : 99999999;
+			int vMin;
+			int vMax;
+			SpliceToMaxValue(uiMax, vMax);
+			SpliceToMaxValue(uiMin, vMin);
 			pDesc->ParamOption(pid, p_range,  vMin, vMax, p_end); 
 			break;
 		}
@@ -290,6 +295,71 @@ void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort
 	//case TYPE_MTL:		pDesc->ParamOption(pid, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
 	//case TYPE_TEXMAP:	pDesc->ParamOption(pid, p_ui, TYPE_TEXMAPBUTTON, 0, p_end); break;
 	//case TYPE_STRING:	pDesc->ParamOption(pid, p_ui, TYPE_EDITBOX, 0, p_end); break;
+	}
+}
+
+template<typename TType>
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::Variant& defaultVal) {
+	TType def;
+	SpliceToMaxValue(defaultVal, def);
+	pDesc->ParamOption(pid, p_default, def, p_end); 
+}
+
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort& port) {
+
+	FabricCore::Variant defaultVal = port.getDefault();
+	if(defaultVal.isNull())
+		return;
+
+	ParamDef& def = pDesc->GetParamDef(pid);
+	int baseType = base_type(def.type);
+	switch((int)baseType)
+	{
+	case TYPE_BOOL:
+	case TYPE_INT:
+		{
+			SetMaxParamDefault<int>(pDesc, pid, defaultVal);
+			break;
+		}
+	case TYPE_FLOAT:	
+	case TYPE_ANGLE:	
+	case TYPE_PCNT_FRAC:	
+	case TYPE_WORLD:
+		{
+			SetMaxParamDefault<float>(pDesc, pid, defaultVal);
+			break;
+		}
+	case TYPE_RGBA:
+		{
+			SetMaxParamDefault<Color>(pDesc, pid, defaultVal);
+			break;
+		}
+	case TYPE_POINT3:
+		{
+			SetMaxParamDefault<Point3>(pDesc, pid, defaultVal);
+			break;
+		}
+	case TYPE_FRGBA:
+	case TYPE_POINT4:
+		{
+			SetMaxParamDefault<Point4>(pDesc, pid, defaultVal);
+			break;
+		}
+	case TYPE_MATRIX3:
+		{
+			SetMaxParamDefault<Matrix3>(pDesc, pid, defaultVal);
+			break;
+		}
+	case TYPE_STRING:
+		{
+			SetMaxParamDefault<MSTR>(pDesc, pid, defaultVal);
+			break;
+		}
+	default:
+		DbgAssert(0 && "Implment me");
+		//case TYPE_INODE:	pDesc->ParamOption(pid, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
+		//case TYPE_MTL:		pDesc->ParamOption(pid, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
+		//case TYPE_TEXMAP:	pDesc->ParamOption(pid, p_ui, TYPE_TEXMAPBUTTON, 0, p_end); break;
 	}
 }
 
@@ -575,7 +645,7 @@ BitArray GetLegalMaxTypes(const char* cType)
 	{
 		res.Set(TYPE_POINT3);
 		res.Set(TYPE_POINT4);
-		res.Set(TYPE_FRGBA); // TODO: How we support this?
+		res.Set(TYPE_FRGBA);
 	}
 	else if (strcmp(cType, "Vec3") == 0)
 	{
@@ -928,6 +998,8 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplic
 			ParameterBlockValuesToSplice<Point3>(port, t, pblock, pid, ivValid);
 			break;
 		case TYPE_FRGBA:
+			ParameterBlockValuesToSplice<Point4>(port, t, pblock, pid, ivValid);
+			break;
 		case TYPE_POINT4:
 			ParameterBlockValuesToSplice<Point4>(port, t, pblock, pid, ivValid);
 			break;

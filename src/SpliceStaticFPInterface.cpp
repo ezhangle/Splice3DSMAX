@@ -78,32 +78,6 @@ BOOL SpliceStaticFPInterface::ShowSceneGraphEditor()
 	//}
 	return FALSE;
 }
-//
-//ClassDesc2* GetClassDesc(int paramType)
-//{
-//	// TODO: Only the TYPE_MESH makes sense in a traditional
-//	// import scenario.  
-//	switch(paramType)
-//	{
-//	case TYPE_FLOAT:
-//	case TYPE_INT:
-//	case TYPE_BOOL:
-//		return SpliceTranslationLayer<Control, float>::GetClassDesc();
-//	case TYPE_POINT3:
-//		return SpliceTranslationLayer<Control, Point3>::GetClassDesc();
-//	//case TYPE_FRGBA:
-//	//case TYPE_POINT4:
-//	//	return SpliceTranslationLayer<Control, Point4>::GetClassDesc();
-//	case TYPE_QUAT:
-//		return SpliceTranslationLayer<Control, Quat>::GetClassDesc();
-//	case TYPE_MATRIX3:
-//		return SpliceTranslationLayer<Control, Matrix3>::GetClassDesc();
-//	case TYPE_MESH:
-//		return SpliceTranslationLayer<GeomObject, Mesh>::GetClassDesc();
-//
-//	}
-//	return NULL;
-//}
 
 BOOL SpliceStaticFPInterface::ImportSpliceFile(const TSTR& file)
 {

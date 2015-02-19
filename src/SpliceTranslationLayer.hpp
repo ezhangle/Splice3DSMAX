@@ -121,6 +121,7 @@ ParamBlockDesc2* SpliceTranslationLayer<TBaseClass, TResultType>::CopyPBDescript
 			CStr portName = CStr::FromMCHAR(pbDef.int_name);
 			FabricSplice::DGPort port = GetPort(portName);
 			SetMaxParamLimits(pNewDesc, newPid, port);
+			SetMaxParamDefault(pNewDesc, newPid, port);
 		}
 	}
 	// Return the new descriptor. This object is now the
@@ -131,6 +132,10 @@ ParamBlockDesc2* SpliceTranslationLayer<TBaseClass, TResultType>::CopyPBDescript
 template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::DeleteMaxParameter(ParamID pid)
 {
+	// No block, nothing to delete
+	if (m_pblock == nullptr)
+		return true;
+
 	// Test this id is valid
 	if (m_pblock->IDtoIndex(pid) == -1)
 		return false;
@@ -1062,7 +1067,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(FabricS
 	}
 
 	// Do we have an existing Max parameter?
-	if (pid >= 0)
+	if (pid >= 0 && m_pblock != nullptr)
 	{
 		// Check that its not the correct type already
 		if (m_pblock->GetParamDef((ParamID)pid).type == maxType)
@@ -1076,6 +1081,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(FabricS
 	ParamBlockDesc2* pNewDesc = CopyPBDescriptor();
 	ParamID newId = AddMaxParameter(pNewDesc, maxType, ::GetPortName(aPort));
 	SetMaxParamLimits(pNewDesc, newId, aPort);
+	SetMaxParamDefault(pNewDesc, newId, aPort);
 	CreateParamBlock(pNewDesc);
 	::SetPortParamID(aPort, newId);
 	return newId;

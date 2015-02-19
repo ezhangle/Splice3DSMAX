@@ -24,7 +24,7 @@ extern FabricCore::Variant GetVariant(int param);
 extern FabricCore::Variant GetVariant(float param);
 extern FabricCore::Variant GetVariant(bool param);
 extern FabricCore::Variant GetVariant(const Point3& param);
-extern FabricCore::Variant GetVariant(const Point4& param);
+extern FabricCore::Variant GetVariant(const Point4& param, bool asColor=false);
 extern FabricCore::Variant GetVariant(const Color& param);
 extern FabricCore::Variant GetVariant(const Quat& param);
 extern FabricCore::Variant GetVariant(const Matrix3& param);
@@ -41,7 +41,7 @@ extern FabricCore::RTVal ConvertToRTVal(int param, FabricCore::RTVal val);
 extern FabricCore::RTVal ConvertToRTVal(float param, FabricCore::RTVal val);
 extern FabricCore::RTVal ConvertToRTVal(bool param, FabricCore::RTVal val);
 extern FabricCore::RTVal ConvertToRTVal(const Point3& param, FabricCore::RTVal val);
-extern FabricCore::RTVal ConvertToRTVal(const Point4& param, FabricCore::RTVal val);
+extern FabricCore::RTVal ConvertToRTVal(const Point4& param, FabricCore::RTVal val, bool asColor=false);
 extern FabricCore::RTVal ConvertToRTVal(const Color& param, FabricCore::RTVal val);
 extern FabricCore::RTVal ConvertToRTVal(const Quat& param, FabricCore::RTVal val);
 extern FabricCore::RTVal ConvertToRTVal(const Matrix3& param, FabricCore::RTVal val);
@@ -93,18 +93,46 @@ void MaxValueToSplice(FabricSplice::DGPort& dgPort, TimeValue t, Interval& ivVal
 //////////////////////////////////////////////////////////////////////////////////////
 // Splice->Max
 
-/** Get the value of the splice dgPort on the reference of param */
-template<typename TResultType>
-void SpliceToMaxValue(FabricCore::RTVal& spliceVal, TResultType& maxVal);
+/** Convert from Splice Variant to max type */
+extern void SpliceToMaxValue(const FabricCore::Variant& spliceVal, int& param);
+extern void SpliceToMaxValue(const FabricCore::Variant& spliceVal, float& param);
+extern void SpliceToMaxValue(const FabricCore::Variant& spliceVal, bool& param);
+extern void SpliceToMaxValue(const FabricCore::Variant& spliceVal, Point3& param);
+extern void SpliceToMaxValue(const FabricCore::Variant& spliceVal, Point4& param);
+extern void SpliceToMaxValue(const FabricCore::Variant& spliceVal, Color& param);
+extern void SpliceToMaxValue(const FabricCore::Variant& spliceVal, Quat& param);
+extern void SpliceToMaxValue(const FabricCore::Variant& spliceVal, Matrix3& param);
+extern void SpliceToMaxValue(const FabricCore::Variant& spliceVal, MSTR& param);
 
+// Annoyingly, if we don't have a conversion function for a type,
+// some types get silently promoted to bool, and we call the wrong fn
 template<typename TResultType>
-void SpliceToMaxValue(FabricSplice::DGPort& dgPort, TResultType& param, int index=-1)
+void SpliceToMaxValue(const FabricCore::Variant& spliceVal, TResultType& maxVal) { ThisShouldNotCompile }
+
+/** Get the value of the splice dgPort on the reference of param */
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point3& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Quat& param);
+void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param);
+	// Annoyingly, if we don't have a conversion function for a type,
+	// some types get silently promoted to bool, and we call the wrong fn
+template<typename TResultType>
+void SpliceToMaxValue(const FabricCore::RTVal& spliceVal, TResultType& maxVal)  { ThisShouldNotCompile }
+
+//////////////////////////////////////////////////////////////////////////
+template<typename TResultType>
+void SpliceToMaxValue(const FabricSplice::DGPort& dgPort, TResultType& param, int index=-1)
 {
-	FabricCore::RTVal rtVal = dgPort.getRTVal();
-	if (dgPort.isArray())
+	// De-const because some splice functions are not marked const
+	FabricSplice::DGPort& ncDGPort = const_cast<FabricSplice::DGPort&>(dgPort);
+	FabricCore::RTVal rtVal = ncDGPort.getRTVal();
+	if (ncDGPort.isArray())
 	{
 		DbgAssert(index >= 0);
-		int nValues = dgPort.getArrayCount();
+		int nValues = ncDGPort.getArrayCount();
 		if (index < nValues && index >= 0)
 		{
 			rtVal = rtVal.getArrayElement(index);

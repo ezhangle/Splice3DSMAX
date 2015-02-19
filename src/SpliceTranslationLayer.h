@@ -44,6 +44,7 @@ ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const MCHAR* sName, Pa
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName );
 void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name);
 void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort& port);
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort& port);
 
 /*! Generate a Win32 dialog for the passed pblok
 	\param pblock - The list of parameters to generate UI for

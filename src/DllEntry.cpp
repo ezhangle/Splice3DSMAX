@@ -64,13 +64,12 @@ __declspec( dllexport ) ClassDesc* LibClassDesc(int i)
 	case 1: return SpliceTranslationLayer<Control, Point3>::GetClassDesc();
 	case 2: return SpliceTranslationLayer<Control, Quat>::GetClassDesc();
 	case 3: return SpliceTranslationLayer<Control, Matrix3>::GetClassDesc();
-	case 8: return SpliceTranslationLayer<OSModifier, Mesh>::GetClassDesc();
+	case 7: return SpliceTranslationLayer<OSModifier, Mesh>::GetClassDesc();
+	case 8: return SpliceTranslationLayer<WSModifier, Mesh>::GetClassDesc();
 	case 9: return SpliceTranslationLayer<GeomObject, Mesh>::GetClassDesc();
 	case 10: return SpliceTranslationLayer<ReferenceTarget, int>::GetClassDesc();
-//	case 3: return GetDynPBlockClassDesc();
-		default: return 0;
+	default: return nullptr;
 	}
-	return NULL;
 }
 
 // This function returns a pre-defined constant indicating the version of 
@@ -135,6 +134,7 @@ __declspec( dllexport ) int LibInitialize(void)
 	SpliceTranslationLayer<Control, Quat>::InitMixinInterface();
 	SpliceTranslationLayer<Control, Matrix3>::InitMixinInterface();
 	SpliceTranslationLayer<OSModifier, Mesh>::InitMixinInterface();
+	SpliceTranslationLayer<WSModifier, Mesh>::InitMixinInterface();
 	SpliceTranslationLayer<GeomObject, Mesh>::InitMixinInterface();
 	SpliceTranslationLayer<ReferenceTarget, int>::InitMixinInterface();
 

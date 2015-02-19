@@ -76,10 +76,11 @@
     <ClInclude Include="src\SpliceTranslationLayer.hpp">
       <FileType>CppCode</FileType>
     </ClInclude>
+    <ClInclude Include="src\SpliceWSModifier.h" />
     <ClInclude Include="src\StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="src\DynamicParamBlocks\DynamicDialog\DynPBCustAttr.rc" />
+    <ResourceCompile Include="src\DynamicParamBlocks\DynamicDialog\FabricSplice3dsmax.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\DynamicDialogTemplate.h" />

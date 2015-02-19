@@ -100,6 +100,7 @@ BEGIN
     IDS_CLASS_NAME          "DynPBCustAttr"
     IDS_PARAMS              "Parameters"
     IDS_SPIN                "Spin"
+    IDS_SPLICE_WSMODIFIER_CLASS "Splice WSModifier"
     IDS_SPLICEMESH_CLASS_NAME "SpliceMesh"
     IDS_UNINITIALIZED_PORT  "__UnIntialized__"
     IDS_SpliceModifier_CLASS_NAME "SpliceModifier"

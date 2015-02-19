@@ -4,25 +4,38 @@
 //***************************************************************************/
 
 #include "StdAfx.h"
-#include "SpliceModifier.h"
+#include "SpliceWSModifier.h"
 
+class SpliceWSModifierClassDesc: public DynPBCustAttrClassDesc {
+public:
+	void *			Create(BOOL loading = FALSE) { return new SpliceWSModifier(loading); }
+	const MCHAR *	ClassName() { static MSTR className = GetString(IDS_SPLICE_WSMODIFIER_CLASS); return className.data(); }
+	SClass_ID		SuperClassID() { return WSM_CLASS_ID; }
+	Class_ID		ClassID() { return SpliceWSModifier_CLASS_ID; }
+	const TCHAR*	InternalName() {return _T("SpliceWSModifier");}
+};
 
+DynPBCustAttrClassDesc* SpliceWSModifier::ParentClass::GetClassDesc() 
+{ 
+	static SpliceWSModifierClassDesc SpliceModifierDesc;
+	return &SpliceModifierDesc; 
+}
 
 //--- SpliceModifier -------------------------------------------------------
 // Only initialize the splice graph if loading.  Else,
 // we initialize the class on every time the Modifier list
 // is dropped down in the UI.  If Splice is not initialized,
 // this takes about 4s (every drop down), which is just not polite.
-SpliceModifier::SpliceModifier(BOOL loading)
+SpliceWSModifier::SpliceWSModifier(BOOL loading)
 	: ParentClass(loading == TRUE)
 {
 }
 
-SpliceModifier::~SpliceModifier()
+SpliceWSModifier::~SpliceWSModifier()
 {
 }
 
-void SpliceModifier::RefAdded(RefMakerHandle rm)
+void SpliceWSModifier::RefAdded(RefMakerHandle rm)
 {
 	if (Init())
 	{
@@ -30,39 +43,52 @@ void SpliceModifier::RefAdded(RefMakerHandle rm)
 	}
 }
 
-Interval SpliceModifier::LocalValidity(TimeValue t)
+Interval SpliceWSModifier::LocalValidity(TimeValue t)
 {
 	return m_valid;
 }
 
-void SpliceModifier::NotifyInputChanged( const Interval &changeInt, PartID partID, RefMessage message, ModContext *mc )
+void SpliceWSModifier::NotifyInputChanged( const Interval &changeInt, PartID partID, RefMessage message, ModContext *mc )
 {
 	if (message == REFMSG_CHANGE)
 		Invalidate();
 }
 
 //////////////////////////////////////////////////////////////////////////
-void SpliceModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os, INode *node )
+void SpliceWSModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os, INode *node )
 {
 	if (!m_graph.isValid() || m_graph.getKLOperatorCount() == 0)
 		return;
 
 	TriObject* pTriObj = static_cast<TriObject*>(os->obj);
-	// If our cached value is valid, just use that and return
 	Interval ivValid = FOREVER;
+	Matrix3 tmNode = node->GetNodeTM(t, &ivValid);
+
+	// Check our node transform is valid.  If its not, 
+	// then we invalidate to force a recalculation.
+	if (!(tmNode == m_cachedNodeTM))
+		Invalidate();
+
+	// Here we pre-check the cache.  This optimization allows us to return
+	// the cache before sending the mesh to Splice - normally we would 
+	// need to post the mesh before calling Evaluate (which checks the cache)
 	if (m_valid.InInterval(t)) {
 		pTriObj->GetMesh() = m_value;
 		ivValid = m_valid;
 	}
 	else {
-		// Send our input to Max	
 		// A modifier is a special kind of mesh, in that we pipe our
 		// mesh into the output port as an IO port
 		MaxValuesToSplice<Object*, Mesh>(m_valuePort, t, ivValid, &os->obj, 1);
-	
+
+		// A WSModifier is a special kind of modifier that has access to its nodes transform
+		MaxValueToSplice(m_nodeTransformPort, t, ivValid, tmNode);
+
 		// Set our output.
-		pTriObj->GetMesh() = Evaluate(t, ivValid);;
+		TriObject* pTriObj = static_cast<TriObject*>(os->obj);
+		pTriObj->GetMesh() = Evaluate(t, ivValid);
 	}
+
 	// We may have changed any of these attributes.
 	// OPTIMIZE: We should not invalidate things we haven't changed
 	// Perhaps we should add the ability to set channels via MxS
@@ -72,7 +98,9 @@ void SpliceModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os,
 	pTriObj->UpdateValidity(VERT_COLOR_CHAN_NUM, ivValid);
 }
 
-int SpliceModifier::Display(TimeValue t, INode* inode, ViewExp* vpt, int flags)
+#pragma region Mesh management methods
+
+int SpliceWSModifier::Display(TimeValue t, INode* inode, ViewExp* vpt, int flags)
 {
 	// TODO: Nitrous support here
 	Interval ivDontCare;
@@ -82,8 +110,8 @@ int SpliceModifier::Display(TimeValue t, INode* inode, ViewExp* vpt, int flags)
 	return 0;
 }
 
-int SpliceModifier::HitTest(TimeValue t, INode* inode, int type, int crossing, 
-						int flags, IPoint2* p, ViewExp* vpt)
+int SpliceWSModifier::HitTest(TimeValue t, INode* inode, int type, int crossing, 
+							int flags, IPoint2* p, ViewExp* vpt)
 {
 	Interval ivDontCare;
 	const Mesh& mesh = Evaluate(t, ivDontCare);
@@ -97,7 +125,7 @@ int SpliceModifier::HitTest(TimeValue t, INode* inode, int type, int crossing,
 	return pMeshNoConst->select(gw, mtl, &hitRegion, flags & HIT_ABORTONHIT);
 }
 
-void SpliceModifier::Snap(TimeValue t, INode* inode, SnapInfo* snap, IPoint2* p, ViewExp* vpt)
+void SpliceWSModifier::Snap(TimeValue t, INode* inode, SnapInfo* snap, IPoint2* p, ViewExp* vpt)
 {
 	Interval ivDontCare;
 	const Mesh& mesh = Evaluate(t, ivDontCare);
@@ -106,7 +134,7 @@ void SpliceModifier::Snap(TimeValue t, INode* inode, SnapInfo* snap, IPoint2* p,
 	pMeshNoConst->snap(vpt->getGW(), snap, p, tm);
 }
 
-void SpliceModifier::GetWorldBoundBox(TimeValue t, INode* mat, ViewExp* /*vpt*/, Box3& box )
+void SpliceWSModifier::GetWorldBoundBox(TimeValue t, INode* mat, ViewExp* /*vpt*/, Box3& box )
 {
 	Interval ivDontCare;
 	const Mesh& mesh = Evaluate(t, ivDontCare);
@@ -114,7 +142,7 @@ void SpliceModifier::GetWorldBoundBox(TimeValue t, INode* mat, ViewExp* /*vpt*/,
 	box = pMeshNoConst->getBoundingBox(&mat->GetNodeTM(t));
 }
 
-void SpliceModifier::GetLocalBoundBox(TimeValue t, INode *mat, ViewExp * /*vpt*/, Box3& box )
+void SpliceWSModifier::GetLocalBoundBox(TimeValue t, INode *mat, ViewExp * /*vpt*/, Box3& box )
 {
 	Interval ivDontCare;
 	const Mesh& mesh = Evaluate(t, ivDontCare);
@@ -122,12 +150,12 @@ void SpliceModifier::GetLocalBoundBox(TimeValue t, INode *mat, ViewExp * /*vpt*/
 	box = pMeshNoConst->getBoundingBox();
 }
 
-void SpliceModifier::GetDeformBBox(TimeValue t, Box3& box, Matrix3* tm, BOOL useSel )
+void SpliceWSModifier::GetDeformBBox(TimeValue t, Box3& box, Matrix3* tm, BOOL useSel )
 {
 	//#pragma message(TODO("Compute the bounding box in the objects local coordinates or the optional space defined by tm."))
 }
 
-Object* SpliceModifier::ConvertToType(TimeValue t, Class_ID obtype)
+Object* SpliceWSModifier::ConvertToType(TimeValue t, Class_ID obtype)
 {
 	if (obtype==triObjectClassID) 
 	{
@@ -142,7 +170,7 @@ Object* SpliceModifier::ConvertToType(TimeValue t, Class_ID obtype)
 	return NULL;
 }
 
-int SpliceModifier::CanConvertToType(Class_ID obtype)
+int SpliceWSModifier::CanConvertToType(Class_ID obtype)
 {
 	if (obtype==triObjectClassID) 
 	{
@@ -152,7 +180,7 @@ int SpliceModifier::CanConvertToType(Class_ID obtype)
 }
 
 // From Object
-int SpliceModifier::IntersectRay(
+int SpliceWSModifier::IntersectRay(
 	TimeValue t, Ray& ray, float& at, Point3& norm)
 {
 	Interval ivDontCare;
@@ -161,8 +189,17 @@ int SpliceModifier::IntersectRay(
 	return pMeshNoConst->IntersectRay(ray,at,norm);
 }
 
-void SpliceModifier::GetCollapseTypes(Tab<Class_ID> &clist,Tab<TSTR*> &nlist)
+void SpliceWSModifier::GetCollapseTypes(Tab<Class_ID> &clist,Tab<TSTR*> &nlist)
 {
 	//BaseObject::GetCollapseTypes(clist, nlist);
 	//#pragma message(TODO("Append any any other collapse type the plugin supports"))
+}
+
+#pragma endregion
+
+void SpliceWSModifier::ResetPorts()
+{
+	// We add a transform value so that our Splice operator can evaluate relative to the input matrix
+	m_nodeTransformPort = AddSpliceParameter(m_graph, TYPE_MATRIX3, _M("nodeTransform"), FabricSplice::Port_Mode_IN);
+	ParentClass::ResetPorts();
 }

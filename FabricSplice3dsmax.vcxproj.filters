@@ -110,9 +110,9 @@
     <ClInclude Include="src\SpliceModifier.h">
       <Filter>MaxImplementations</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="src\DynamicParamBlocks\DynamicDialog\DynPBCustAttr.rc" />
+    <ClInclude Include="src\SpliceWSModifier.h">
+      <Filter>MaxImplementations</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MaxScript files">
@@ -186,5 +186,8 @@
     <None Include="testingScripts\UnitTestSpliceObject.ms">
       <Filter>MaxScript files\TestingScripts</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\DynamicParamBlocks\DynamicDialog\FabricSplice3dsmax.rc" />
   </ItemGroup>
 </Project>

@@ -1,15 +1,15 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-#define SpliceModifier_CLASS_ID	Class_ID(0x14f5108f, 0x1f3e182e)
+#define SpliceWSModifier_CLASS_ID	Class_ID(0x36cb2ec2, 0x5d196a8e)
 
 //////////////////////////////////////////////////////////////////////////
-class SpliceModifier : public SpliceTranslationLayer<OSModifier, Mesh>
+class SpliceWSModifier : public SpliceTranslationLayer<WSModifier, Mesh>
 {
 public:
 
 	//Constructor/Destructor
-	SpliceModifier(BOOL loading);
-	virtual ~SpliceModifier();	
+	SpliceWSModifier(BOOL loading);
+	virtual ~SpliceWSModifier();	
 
 	virtual void DeleteThis() { delete this; }	
 
@@ -19,9 +19,9 @@ public:
 	virtual ChannelMask ChannelsChanged() { return OBJ_CHANNELS; };
 	virtual Class_ID InputType() { return triObjectClassID; }
 	virtual Interval LocalValidity(TimeValue t);
-	virtual void NotifyInputChanged (const Interval &changeInt, PartID partID, RefMessage message, ModContext *mc);
 	// We do not know if we change topology or not, so we need to return TRUE here.
 	virtual BOOL ChangeTopology() { return TRUE; }
+	virtual void NotifyInputChanged (const Interval &changeInt, PartID partID, RefMessage message, ModContext *mc);
 
 	void ModifyObject(TimeValue t, ModContext &mc, ObjectState* os, INode *node);
 
@@ -31,7 +31,7 @@ public:
 	virtual void Snap(TimeValue t, INode* inode, SnapInfo *snap, IPoint2 *p, ViewExp *vpt);
 
 	// Return the name that will appear in the history browser (modifier stack)
-	virtual const TCHAR *GetObjectName() { return GetString(IDS_SpliceModifier_CLASS_NAME); }
+	virtual const TCHAR *GetObjectName() { return GetString(IDS_SPLICE_WSMODIFIER_CLASS); }
 	virtual void GetWorldBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box );
 	virtual void GetLocalBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box );
 	virtual void GetDeformBBox(TimeValue t, Box3& box, Matrix3 *tm, BOOL useSel );
@@ -45,8 +45,8 @@ public:
 	virtual CreateMouseCallBack* GetCreateMouseCallBack() { return NULL; }
 
 	//From Animatable
-	virtual Class_ID ClassID() {return SpliceModifier_CLASS_ID;}		
-	virtual void GetClassName(TSTR& s) {s = GetString(IDS_SpliceModifier_CLASS_NAME);}
+	virtual Class_ID ClassID() {return SpliceWSModifier_CLASS_ID;}		
+	virtual void GetClassName(TSTR& s) {s = GetString(IDS_SPLICE_WSMODIFIER_CLASS);}
 
 	// From ReferenceTarget
 	// Because we cannot initialize this class on creation,
@@ -56,22 +56,16 @@ public:
 	void RefAdded(RefMakerHandle rm);
 
 private:
+	void ResetPorts();
+
 	// From SpliceTranslationLayer
 	int GetValueType() { return TYPE_MESH; }
 	bool CloneSpliceData(ParentClass* pMyClone) { return true; }
-};
 
-class SpliceModifierClassDesc: public DynPBCustAttrClassDesc {
-public:
-	void *			Create(BOOL loading = FALSE) { return new SpliceModifier(loading); }
-	const MCHAR *	ClassName() { static MSTR className = GetString(IDS_SpliceModifier_CLASS_NAME); return className.data(); }
-	SClass_ID		SuperClassID() { return OSM_CLASS_ID; }
-	Class_ID		ClassID() { return SpliceModifier_CLASS_ID; }
-	const TCHAR*	InternalName() {return _T("SpliceModifier");}
-};
+	FabricSplice::DGPort m_nodeTransformPort;
 
-DynPBCustAttrClassDesc* SpliceModifier::ParentClass::GetClassDesc() 
-{ 
-	static SpliceModifierClassDesc SpliceModifierDesc;
-	return &SpliceModifierDesc; 
-}
+	// Our cache is only valid if the node transform has not changed.
+	// We cache the nodes transform, and invalidate our cache
+	// if it changes.
+	Matrix3 m_cachedNodeTM;
+};

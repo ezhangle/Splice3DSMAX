@@ -284,10 +284,10 @@ FabricCore::RTVal ConvertToRTVal(const Point4& param, FabricCore::RTVal val, boo
 	else {
 		if(!val.isValid())
 			val = FabricSplice::constructRTVal("Vec4");
-		val.setMember("r", FabricSplice::constructFloat32RTVal(param.x));
-		val.setMember("g", FabricSplice::constructFloat32RTVal(param.y));
-		val.setMember("b", FabricSplice::constructFloat32RTVal(param.z));
-		val.setMember("a", FabricSplice::constructFloat32RTVal(param.w));
+		val.setMember("x", FabricSplice::constructFloat32RTVal(param.x));
+		val.setMember("y", FabricSplice::constructFloat32RTVal(param.y));
+		val.setMember("z", FabricSplice::constructFloat32RTVal(param.z));
+		val.setMember("t", FabricSplice::constructFloat32RTVal(param.w));
 	}
 
 	return val;

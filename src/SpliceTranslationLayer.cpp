@@ -355,6 +355,11 @@ void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPor
 			SetMaxParamDefault<MSTR>(pDesc, pid, defaultVal);
 			break;
 		}
+	case TYPE_INODE:
+		{
+			// No default possible for this type.
+			break;
+		}
 	default:
 		DbgAssert(0 && "Implment me");
 		//case TYPE_INODE:	pDesc->ParamOption(pid, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;

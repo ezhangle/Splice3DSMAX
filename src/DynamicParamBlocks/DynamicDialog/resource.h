@@ -8,6 +8,7 @@
 #define IDS_PARAMS                      4
 #define IDS_SPIN                        5
 #define IDS_SPLICECTRL_CLASS_NAME       6
+#define IDS_SPLICE_WSMODIFIER_CLASS     6
 #define IDS_SPLICEDEFORMER_CLASS_NAME   7
 #define IDS_SPLICEMESH_CLASS_NAME       8
 #define IDS_UNINITIALIZED_PORT          9

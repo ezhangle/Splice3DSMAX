@@ -43,7 +43,7 @@ REM Clear the contents of the file if it already exists.
 @echo set FABRIC_DIR=%%SPLICE3DSMAXDIR%%..\..\>> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo REM Ensure that the Splice plugin will be able to find the extensions >> %LAUNCHER%
-@echo set FABRIC_EXTS_PATH=%%FABRIC_EXTS_PATH%%;%%FABRIC_DIR%%..\..\Exts>> %LAUNCHER%
+@echo set FABRIC_EXTS_PATH=%%FABRIC_EXTS_PATH%%;%%FABRIC_DIR%%Exts>> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo REM Enable the system to find the FabricCore and Scintilla dlls>> %LAUNCHER%
 @echo set PATH=%%PATH%%;%%SPLICE3DSMAXDIR%%..\..\lib;%%SPLICE3DSMAXDIR%%ScintillaNET\>> %LAUNCHER%

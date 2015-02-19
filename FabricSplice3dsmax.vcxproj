@@ -52,6 +52,7 @@
     <ClCompile Include="src\SpliceStaticFPInterface.cpp" />
     <ClCompile Include="src\SpliceTranslationFPInterface.cpp" />
     <ClCompile Include="src\SpliceTranslationLayer.cpp" />
+    <ClCompile Include="src\SpliceWSModifier.cpp" />
     <ClCompile Include="src\StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug 2013|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug 2014|x64'">Create</PrecompiledHeader>
@@ -68,6 +69,7 @@
     <ClInclude Include="src\Splice3dsmax.h" />
     <ClInclude Include="src\SpliceEvents.h" />
     <ClInclude Include="src\SpliceLogging.h" />
+    <ClInclude Include="src\SpliceModifier.h" />
     <ClInclude Include="src\SpliceRestoreObjects.h" />
     <ClInclude Include="src\SpliceStaticFPInterface.h" />
     <ClInclude Include="src\SpliceTranslationFPInterface.h" />

@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src/DllEntry.cpp" />
+    <ClCompile Include="src\StdAfx.cpp" />
+    <ClCompile Include="src\SpliceControlFloat.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceControlMatrix.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceControlPosition.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceControlRotation.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceModifier.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceMesh.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceReferenceTarget.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MouseCallbacks\SpliceCommandMode.cpp">
+      <Filter>SpliceCallbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceEvents.cpp">
+      <Filter>SpliceCallbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceLogging.cpp">
+      <Filter>SpliceCallbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MouseCallbacks\SpliceMouseCallback.cpp">
+      <Filter>SpliceCallbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceTranslationFPInterface.cpp">
+      <Filter>SpliceTranslation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceTranslationLayer.cpp">
+      <Filter>SpliceTranslation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.cpp">
+      <Filter>DynPB</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DynamicParamBlocks\DynPBUndo.cpp">
+      <Filter>DynPB</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MaxConversionFns.cpp">
+      <Filter>SpliceTranslation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceStaticFPInterface.cpp">
+      <Filter>SpliceTranslation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceRestoreObjects.cpp">
+      <Filter>SpliceTranslation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceWSModifier.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\resource.h" />
+    <ClInclude Include="src\Splice3dsmax.h" />
+    <ClInclude Include="src\StdAfx.h" />
+    <ClInclude Include="src\MouseCallbacks\KbdTranslation.h">
+      <Filter>SpliceCallbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MouseCallbacks\SpliceCommandMode.h">
+      <Filter>SpliceCallbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SpliceEvents.h">
+      <Filter>SpliceCallbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SpliceLogging.h">
+      <Filter>SpliceCallbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MouseCallbacks\SpliceMouseCallback.h">
+      <Filter>SpliceCallbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SpliceTranslationFPInterface.h">
+      <Filter>SpliceTranslation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SpliceTranslationLayer.h">
+      <Filter>SpliceTranslation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SpliceTranslationLayer.hpp">
+      <Filter>SpliceTranslation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.h">
+      <Filter>DynPB</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\DynamicDialogTemplate.h">
+      <Filter>DynPB</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DynamicParamBlocks\DynPBUndo.h">
+      <Filter>DynPB</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MaxConversionFns.h">
+      <Filter>SpliceTranslation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SpliceStaticFPInterface.h">
+      <Filter>SpliceTranslation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SpliceRestoreObjects.h">
+      <Filter>SpliceTranslation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SpliceModifier.h">
+      <Filter>MaxImplementations</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\DynamicParamBlocks\DynamicDialog\DynPBCustAttr.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="MaxScript files">
+      <UniqueIdentifier>{9ae255cb-73c2-4c66-b8d8-18722b47a112}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MaxScript files\TestingScripts">
+      <UniqueIdentifier>{474ee0e7-6c3c-4766-8ded-aebcfabdd882}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MaxImplementations">
+      <UniqueIdentifier>{ce0a263a-6d21-4212-a37f-7e7374e168a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SpliceCallbacks">
+      <UniqueIdentifier>{baf95174-c1ae-4f6c-a13e-dc1593cbe437}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DynPB">
+      <UniqueIdentifier>{664c627d-631b-4a9a-a225-e71e1f107ebf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SpliceTranslation">
+      <UniqueIdentifier>{eb571dd0-6f53-4b39-8436-a3fe36f08537}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SetupMenu.ms">
+      <Filter>MaxScript files</Filter>
+    </None>
+    <None Include="testingScripts\CharacterRendering.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\CharacterRenderingX1000.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\InlineDrawingTest.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\InlineDrawingTest_NoisyTorus.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\ManipulationTest.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\SampleMxSExtendKL.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\StartupMeshTimer.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\SurfaceAttrPaintManipulation.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestAddRemovePort.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestLoadSaveSpliceFile.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestPortConnection.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestPortOptions.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestRegisterReloadExtns.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestSpliceControllers.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestSpliceModifier.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestSpliceObject.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+  </ItemGroup>
+</Project>

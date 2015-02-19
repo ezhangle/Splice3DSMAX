@@ -1,11 +1,3 @@
-#include "StdAfx.h"
-#include <object.h>
-#include <ParticleFlow/OneClickCreateCallback.h>
-#include "mnmesh.h"
-#include "Graphics/IDisplayManager.h"
-
-#define SpliceMesh_CLASS_ID	Class_ID(0x2ebd61e9, 0x33da121d)
-
 //////////////////////////////////////////////////////////////////////////
 // The SpliceMesh allows Splice to generate procedural geometry and send it to Max.
 // This class has the very dubious design decision to inherit directly from
@@ -21,6 +13,15 @@
 // to SimpleObject2, and remove _only_ the mesh-related functions (ie Display/Hittest
 // Convert* etc).  Do NOT replace the *Reference/*ParamBlock functions, we require the Splice
 // implementations of these functions.
+
+#include "StdAfx.h"
+#include <object.h>
+#include <ParticleFlow/OneClickCreateCallback.h>
+#include "mnmesh.h"
+#include "Graphics/IDisplayManager.h"
+
+#define SpliceMesh_CLASS_ID	Class_ID(0x2ebd61e9, 0x33da121d)
+
 class SpliceMesh : public SpliceTranslationLayer<GeomObject, Mesh>
 {
 public:

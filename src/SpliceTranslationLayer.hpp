@@ -720,8 +720,16 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::RemovePort(int i)
 		DeleteMaxParameter((ParamID)pid);
 
 	// Release Splice data.
-	m_graph.removeDGPort(GetPortName(i));
-
+	std::string dgNodeName;
+	std::string portName;
+	{
+		FabricSplice::DGPort deadPort = GetPort(i);
+		dgNodeName = deadPort.getMember(); // Get DG member we are connected to
+		portName = deadPort.getName(); // Get port name
+	}
+	m_graph.removeDGPort(portName.data());
+	m_graph.removeDGNodeMember(dgNodeName.data());
+	
 	MAXSPLICE_CATCH_RETURN(false);
 	return true;
 }

@@ -48,8 +48,16 @@ for i = 1 to 3 do (
 	assert((FindPort sm firstPort) == 0)message:("Failed Removing " + firstPort) options:#(#dialog)
 )
 
+-- Add/Remove a port with the same
+sm.addInputPort "addRemoveParam" "Scalar" -2
+assert ((FindPort sm "addRemoveParam") != 0)message:"Failed Creating addRemoveParam" options:#(#dialog)
+sm.removePort "addRemoveParam"
+assert ((FindPort sm "addRemoveParam") == 0)message:"Failed Deleting addRemoveParam" options:#(#dialog)
+sm.addInputPort "addRemoveParam" "Integer" -2
+assert ((FindPort sm "addRemoveParam") != 0)message:"Failed ReCreating addRemoveParam" options:#(#dialog)
+
 -- Test adding an output port 
 sm.addOutputPort "outScalar" "Scalar"
 assert ((FindPort sm "outScalar") != 0)message:"Failed Creating outScalar" options:#(#dialog)
-assert (!hasProperty sm "outScalar") message: "Error: Created invalid max param outScalar" options:#(#dialog)
+assert (not (hasProperty sm "outScalar")) message: "Error: Created invalid max param outScalar" options:#(#dialog)
 

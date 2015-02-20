@@ -84,7 +84,7 @@ void MaxValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, Interval& ivVa
 			dgPort.setRTVal(ConvertToRTVal(convert, aVal));
 		}
 	}
-	MAXSPLICE_CATCH_END()
+	MAXSPLICE_CATCH_END
 }
 
 template<typename TResultType>

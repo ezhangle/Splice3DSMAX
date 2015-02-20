@@ -612,7 +612,7 @@ bool SetPortOption(FabricSplice::DGPort& aPort, const char* option, FPValue* val
 	// if (!variant.isNull()) Do we want to allow setting Null values (remove option?);
 		aPort.setOption(option, variant);
 	return true;
-	MAXSPLICE_CATCH_END()
+	MAXSPLICE_CATCH_END
 	return false;
 }
 
@@ -627,7 +627,7 @@ bool SetPortValue(FabricSplice::DGPort& aPort, FPValue* value)
 		aPort.setVariant(variant);
 		return true;
 	}
-	MAXSPLICE_CATCH_END()
+	MAXSPLICE_CATCH_END
 	return false;
 }
 
@@ -911,7 +911,7 @@ void ParameterBlockValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IPa
 	MaxValuesToSplice<TResultType, TConvertType>(dgPort, t, ivValid, pVals, nParams);
 	delete pVals;
 
-	MAXSPLICE_CATCH_END()
+	MAXSPLICE_CATCH_END
 }
 
 template<typename TResultType>

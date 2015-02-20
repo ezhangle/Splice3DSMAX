@@ -60,7 +60,7 @@ void doSpliceDrawing(void *data)
 			FabricSplice::SceneManagement::drawOpenGL(SpliceEvents::s_DrawContexts[id]);
 		}
 
-	MAXSPLICE_CATCH_END()
+	MAXSPLICE_CATCH_END
 }
 
 FabricCore::RTVal SpliceEvents::s_DrawContexts[MAX_VPTS];
@@ -112,7 +112,7 @@ public:
 			gw->processStrips(id, stripCt, &stab, doSpliceDrawing);
 		}
 
-		MAXSPLICE_CATCH_END();
+		MAXSPLICE_CATCH_END;
 	}
 
 	virtual void GetViewportRect( TimeValue t, ViewExp *vpt, Rect *rect )

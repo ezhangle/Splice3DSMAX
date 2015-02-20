@@ -267,7 +267,7 @@ void SpliceMouseCallback::EnterMode()
 	// Directly hook the keyboard proc, as Max doesn't seem to reliably pass on modifier keys.
 	m_kbHookHandle = SetWindowsHookEx(WH_KEYBOARD,(HOOKPROC)KeyboardHookProc, NULL, GetCurrentThreadId());
 
-	MAXSPLICE_CATCH_END()
+	MAXSPLICE_CATCH_END
 }
 
 void SpliceMouseCallback::ExitMode()
@@ -290,7 +290,7 @@ void SpliceMouseCallback::ExitMode()
 	UnhookWindowsHookEx(m_kbHookHandle);
 	m_kbHookHandle = NULL;
 
-	MAXSPLICE_CATCH_END()
+	MAXSPLICE_CATCH_END
 }
 
 LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)

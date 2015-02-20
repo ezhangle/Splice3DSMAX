@@ -398,7 +398,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::RefAdded(	RefMakerHandle 	
 		if(node)
 			evalContext.setMember("graph", FabricSplice::constructStringRTVal( TSTR(node->GetName()).ToCStr().data() ));
 
-		MAXSPLICE_CATCH_END();
+		MAXSPLICE_CATCH_END;
 	}
 }
 #pragma endregion
@@ -659,7 +659,7 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCode(const std
 			doGather.LogSomething("Unknown Error");
 		}
 
-	MAXSPLICE_CATCH_END();
+	MAXSPLICE_CATCH_END;
 	return doGather.GetGatheredResults();
 }
 
@@ -853,10 +853,6 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const char*
 {
 	MAXSPLICE_CATCH_BEGIN()
 
-	// Do not set an empty name (fabric will throw)
-	if (strcmp(name, "") == 0)
-		return false;
-
 	if (m_valuePort.isValid())
 	{
 		std::string oldName = m_valuePort.getName();
@@ -868,10 +864,16 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const char*
 			theHold.Put(new SplicePortChangeObject(this));
 
 		// We cannot rename, we must remove original and recreate
-		
 		m_graph.removeDGPort(oldName.data());
 		m_graph.removeDGNodeMember(oldName.data());
+		// Release handle to old port
+		m_valuePort = FabricSplice::DGPort();
 	}
+
+	// Do not set an empty name (fabric will throw)
+	if (strcmp(name, "") == 0)
+		return false;
+
 	// Create the connection to Fabric
 	m_valuePort = AddSpliceParameter(m_graph, GetValueType(), name, FabricSplice::Port_Mode_IO, GetOutPortArrayIdx() >= 0);
 	return m_valuePort.isValid();
@@ -915,7 +917,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortArrayIdx(int ind
 	}
 	m_valuePortIndex = index;
 
-	MAXSPLICE_CATCH_END()
+	MAXSPLICE_CATCH_END
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -940,7 +942,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetPortParamID(int i, Para
 		FabricSplice::DGPort aPort = m_graph.getDGPort(i);
 		SetPortParamID(aPort, id);
 	}
-	MAXSPLICE_CATCH_END()
+	MAXSPLICE_CATCH_END
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1267,7 +1269,7 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 		// Get our value back!
 		SpliceToMaxValue(m_valuePort, m_value, GetOutPortArrayIdx());
 		
-		MAXSPLICE_CATCH_END();
+		MAXSPLICE_CATCH_END;
 
 	}
 

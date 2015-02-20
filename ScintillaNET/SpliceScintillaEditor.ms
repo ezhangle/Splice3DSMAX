@@ -34,12 +34,12 @@ struct spliceEditorStruct
 	fn evDoCompile sender evt =
 	(
 		-- Find ptr to original splice class
-		thisStruct = sender.parent.tag.value
-		spliceClass = thisStruct.mSpliceClass
-		klCode = thisStruct.mKlEditor
-		entryPt = thisStruct.mEntryPt
-		resultsBox = thisStruct.mDispResults
-		outputName = thisStruct.mOutputName
+		local thisStruct = sender.parent.tag.value
+		local spliceClass = thisStruct.mSpliceClass
+		local klCode = thisStruct.mKlEditor
+		local entryPt = thisStruct.mEntryPt
+		local resultsBox = thisStruct.mDispResults
+		local outputName = thisStruct.mOutputName
 		if (spliceClass != undefined) do 
 		(
 			spliceClass.OutPort = outputName.text;
@@ -52,6 +52,14 @@ struct spliceEditorStruct
 		local thisStruct = getStruct sender
 		local spliceClass = thisStruct.mSpliceClass
 		if spliceClass.SetPortName paramName sender.Text do ( setName sender sender.Text )
+		thisStruct.UpdateKLCodeTab()
+	),
+	
+	fn evRenameOutPort sender evt = (
+		local paramName = sender.Text
+		local thisStruct = sender.parent.tag.value
+		local spliceClass = thisStruct.mSpliceClass
+		spliceClass.outPort = paramName
 		thisStruct.UpdateKLCodeTab()
 	),
 	
@@ -145,6 +153,7 @@ struct spliceEditorStruct
 		aLabel.TextAlign = aLabel.TextAlign.MiddleLeft
 		mOutputName = dotNetObject "System.Windows.Forms.TextBox"
 		mOutputName.anchor = dotnet.combineEnums mEntryPt.anchor.Top mEntryPt.anchor.Left mEntryPt.anchor.Right
+		dotNet.addEventHandler mOutputName "TextChanged" evRenameOutPort
 		
 		rowStyle = dotNetObject "system.windows.forms.rowstyle"
 		rowStyle.sizetype = rowStyle.sizetype.absolute

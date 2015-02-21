@@ -150,51 +150,6 @@ void SpliceWSModifier::GetLocalBoundBox(TimeValue t, INode *mat, ViewExp * /*vpt
 	box = pMeshNoConst->getBoundingBox();
 }
 
-void SpliceWSModifier::GetDeformBBox(TimeValue t, Box3& box, Matrix3* tm, BOOL useSel )
-{
-	//#pragma message(TODO("Compute the bounding box in the objects local coordinates or the optional space defined by tm."))
-}
-
-Object* SpliceWSModifier::ConvertToType(TimeValue t, Class_ID obtype)
-{
-	if (obtype==triObjectClassID) 
-	{
-		TriObject* pTriObj = reinterpret_cast<TriObject*>(CreateInstance(GEOMOBJECT_CLASS_ID, polyObjectClassID));
-		if (pTriObj != NULL)
-		{
-			Interval ivDontCare;
-			pTriObj->GetMesh() = Evaluate(t, ivDontCare);
-		}
-		return pTriObj;
-	}
-	return NULL;
-}
-
-int SpliceWSModifier::CanConvertToType(Class_ID obtype)
-{
-	if (obtype==triObjectClassID) 
-	{
-		return 1;
-	}
-	return 0;
-}
-
-// From Object
-int SpliceWSModifier::IntersectRay(
-	TimeValue t, Ray& ray, float& at, Point3& norm)
-{
-	Interval ivDontCare;
-	const Mesh& mesh = Evaluate(t, ivDontCare);
-	Mesh* pMeshNoConst = const_cast<Mesh*>(&mesh);
-	return pMeshNoConst->IntersectRay(ray,at,norm);
-}
-
-void SpliceWSModifier::GetCollapseTypes(Tab<Class_ID> &clist,Tab<TSTR*> &nlist)
-{
-	//BaseObject::GetCollapseTypes(clist, nlist);
-	//#pragma message(TODO("Append any any other collapse type the plugin supports"))
-}
-
 #pragma endregion
 
 void SpliceWSModifier::ResetPorts()

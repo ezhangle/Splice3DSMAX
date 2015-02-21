@@ -34,14 +34,7 @@ public:
 	virtual const TCHAR *GetObjectName() { return GetString(IDS_SPLICE_WSMODIFIER_CLASS); }
 	virtual void GetWorldBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box );
 	virtual void GetLocalBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box );
-	virtual void GetDeformBBox(TimeValue t, Box3& box, Matrix3 *tm, BOOL useSel );
-
-	// From Object
-	virtual int CanConvertToType(Class_ID obtype);
-	virtual Object* ConvertToType(TimeValue t, Class_ID obtype);
-	virtual void GetCollapseTypes(Tab<Class_ID> &clist,Tab<TSTR*> &nlist);
-	virtual int IntersectRay(TimeValue t, Ray& ray, float& at, Point3& norm);
-
+	
 	virtual CreateMouseCallBack* GetCreateMouseCallBack() { return NULL; }
 
 	//From Animatable

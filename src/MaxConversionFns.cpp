@@ -758,6 +758,8 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 			Face& f = param.faces[iFaceIdx];
 			MeshNormalFace& nf = pNFaces[iFaceIdx];
 
+			// Default to all edges visible
+			f.setEdgeVisFlags(EDGE_VIS, EDGE_VIS, EDGE_VIS);
 			if (triIdx > 0)
 			{
 				// For quads (and higher) hide edge between adjoining tri's

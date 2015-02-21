@@ -34,7 +34,7 @@ struct spliceEditorStruct
 	fn evDoCompile sender evt =
 	(
 		-- Find ptr to original splice class
-		local thisStruct = sender.parent.tag.value
+		local thisStruct = getStruct(sender)
 		local spliceClass = thisStruct.mSpliceClass
 		local klCode = thisStruct.mKlEditor
 		local entryPt = thisStruct.mEntryPt
@@ -47,6 +47,45 @@ struct spliceEditorStruct
 			resultsBox.text = res;
 		)
 	),
+	
+	fn evLoadPreset sender evt =
+	(
+		ldFile = getOpenFileName caption:"Splice Preset"  types:"Splice Preset(*.splice)|*.splice|All Files|*.*"
+		if (ldFile != undefined) do (
+			local thisStruct = getStruct(sender)
+			local spliceClass = thisStruct.mSpliceClass	
+			local resultsBox = thisStruct.mDispResults
+			local klCode = thisStruct.mKlEditor
+			res = spliceClass.LoadFromFile ldFile true
+			
+			thisStruct.UpdateParameterTab()
+			thisStruct.UpdateKLCodeTab()
+			
+			if (res) then (
+				resultsBox.text = ("Loaded: " + ldFile)
+			) else (
+				resultsBox.text = ("Load Failed: " + ldFile)
+			)
+		)
+	),
+	
+	fn evSavePreset sender evt =
+	(
+		svFile = getSaveFileName caption:"Splice Preset"  types:"Splice Preset(*.splice)|*.splice"
+		if (svFile != undefined) do (
+			local thisStruct = getStruct(sender)
+			local spliceClass = thisStruct.mSpliceClass	
+			local resultsBox = thisStruct.mDispResults
+			res = spliceClass.SaveToFile svFile
+			
+			if (res) then (
+				resultsBox.text = ("Saved to: " + svFile)
+			) else (
+				resultsBox.text = ("Save Failed: " + svFile)
+			)
+		)
+	),
+	
 	fn evRenameParam sender evt = (
 		local paramName = getName sender
 		local thisStruct = getStruct sender
@@ -224,18 +263,47 @@ struct spliceEditorStruct
 		
 		------------------------------------- Row 5 ----------------------------------------
 		row = row + 1
+		
+		global ctrBtnlLayout = dotNetObject "System.Windows.Forms.Panel"
+		--ctrBtnlLayout.FlowDirection = ctrBtnlLayout.FlowDirection.LeftToRight
+		--ctrBtnlLayout.WrapContents = false
+		ctrBtnlLayout.Dock = ctrBtnlLayout.Dock.Fill;
+		--ctrlBtnLayout.BackgroundColor = ctrlBtnLayout.BackgroundColor.red;
+		
 		mBtnCompile = dotNetObject "System.windows.forms.button"
 		mBtnCompile.text = "Compile"
-		mBtnCompile.Anchor = dotnet.combineEnums mBtnCompile.Anchor.Top mEntryPt.anchor.Right
+		mBtnCompile.Anchor = mBtnCompile.Anchor.None --mBtnCompile.Anchor.Right --dotnet.combineEnums mBtnCompile.Anchor.Top mEntryPt.anchor.Right
+		mBtnCompile.Dock = (dotNetClass "System.Windows.Forms.DockStyle").Right
+		
+		mBtnLoad = dotNetObject "System.windows.forms.button"
+		mBtnLoad.text = "Load"
+		mBtnLoad.Anchor = mBtnLoad.anchor.Left
+		mBtnLoad.Dock = (dotNetClass "System.Windows.Forms.DockStyle").Left
+
+		mBtnSave = dotNetObject "System.windows.forms.button"
+		mBtnSave.text = "Save"
+		mBtnSave.Anchor = mBtnSave.anchor.Left
+		mBtnSave.Dock = (dotNetClass "System.Windows.Forms.DockStyle").Left
+
+		ctrBtnlLayout.controls.Add mBtnCompile
+		ctrBtnlLayout.controls.Add mBtnLoad
+		ctrBtnlLayout.controls.Add mBtnSave
 
 		rowStyle = dotNetObject "system.windows.forms.rowstyle"
 		rowStyle.sizetype = rowStyle.sizetype.absolute
 		rowStyle.height = 30
 		layout.RowStyles.Add(rowStyle);
-		layout.controls.Add mBtnCompile 1 row
+		--layout.controls.Add mBtnCompile 1 row
+		layout.controls.Add ctrBtnlLayout 0 row
+		layout.SetColumnSpan ctrBtnlLayout row
+		
+		--layout.controls.Add mBtnLoad 1 row
+		--layout.controls.Add mBtnSave 1 row
 
 		-- Add event handlerse
 		dotNet.addEventHandler mBtnCompile "click" evDoCompile
+		dotNet.addEventHandler mBtnSave "click" evSavePreset
+		dotNet.addEventHandler mBtnLoad "click" evLoadPreset
 		
 		-- Return result
 		tabCodeEditor = dotNetObject "System.Windows.Forms.TabPage" "KL Editor"

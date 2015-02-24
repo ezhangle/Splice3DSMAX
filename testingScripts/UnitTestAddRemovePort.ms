@@ -60,4 +60,12 @@ assert ((FindPort sm "addRemoveParam") != 0)message:"Failed ReCreating addRemove
 sm.addOutputPort "outScalar" "Scalar"
 assert ((FindPort sm "outScalar") != 0)message:"Failed Creating outScalar" options:#(#dialog)
 assert (not (hasProperty sm "outScalar")) message: "Error: Created invalid max param outScalar" options:#(#dialog)
-
+	
+-- TODO Test creating one of every type of Max connection
+sm.addInputPort "aColor" "Color" -2
+	
+	
+-- Test Saving
+tmpFile = systemTools.getEnvVariable("TEMP") + "/portTest.max"
+saveMaxFile tmpFile useNewFile:false --[quiet:<bool>] 
+loadMaxFile tmpFile useFileUnits:true quiet:true

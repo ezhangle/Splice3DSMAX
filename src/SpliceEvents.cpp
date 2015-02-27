@@ -85,6 +85,12 @@ public:
 
 		if(!FabricSplice::SceneManagement::hasRenderableContent())
 			return;
+
+		// Force the whole window to update.
+		Rect rect;
+		GraphicsWindow* gw = vpt->getGW();
+		rect.top = 0; rect.bottom = gw->getWinSizeY(); rect.left = 0; rect.right = gw->getWinSizeX(); 
+		vpt->InvalidateRect(rect);
 		
 		if(ConfigureDrawContext(t, vpt)){
 			// Trigger the callback which allows us to continue processing on the render thread.

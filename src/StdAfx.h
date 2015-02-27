@@ -19,6 +19,7 @@
 #pragma warning(disable:4267) //  conversion from 'size_t' to 'uint32_t', possible loss of data
 #pragma warning(disable:4245) //  signed/unsigned mismatch
 #pragma warning(disable:4238) //  class rvalue used as lvalue
+#pragma warning(disable:4481) // nonstandard extenion used: override specifier override
 
 // Max includes
 #include "Max.h"

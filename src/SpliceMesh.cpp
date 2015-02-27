@@ -61,6 +61,14 @@ public:
 	virtual bool UpdateDisplay(
 		const MaxSDK::Graphics::MaxContext& maxContext, 
 		const MaxSDK::Graphics::UpdateDisplayContext& displayContext);
+#else
+	MaxSDK::Graphics::IMeshDisplay2* GetMeshDisplay(const MaxSDK::Graphics::UpdateDisplayContext& updateDisplayContext, MaxSDK::Graphics::GenerateMeshRenderItemsContext& GenerateMeshRenderItemsContext);
+	bool UpdatePerNodeItems(
+		const MaxSDK::Graphics::UpdateDisplayContext& updateDisplayContext,
+		MaxSDK::Graphics::UpdateNodeContext& nodeContext,
+		MaxSDK::Graphics::IRenderItemContainer& targetRenderItemContainer) override;
+	
+	bool PrepareDisplay(const MaxSDK::Graphics::UpdateDisplayContext& updateDisplayContext) override;
 #endif
 
 	// From GeomObject
@@ -150,6 +158,53 @@ bool SpliceMesh::UpdateDisplay(
 
 	return true;
 }
+#else
+
+MaxSDK::Graphics::IMeshDisplay2* SpliceMesh::GetMeshDisplay(const MaxSDK::Graphics::UpdateDisplayContext& updateDisplayContext, MaxSDK::Graphics::GenerateMeshRenderItemsContext& generateRenderItemsContext) {
+	using namespace MaxSDK::Graphics;
+	using namespace MaxGraphics;
+
+	TimeValue t = updateDisplayContext.GetDisplayTime();
+
+	Interval ivDontCare;
+	const Mesh& mesh = Evaluate(t, ivDontCare);
+	Mesh* pMeshNoConst = const_cast<Mesh*>(&mesh);
+	IMeshDisplay2* pMeshDisplay = static_cast<IMeshDisplay2*>(pMeshNoConst->GetInterface(IMesh_DISPLAY2_INTERFACE_ID));
+	if (NULL == pMeshDisplay)
+	{
+		return false;
+	}
+	generateRenderItemsContext.GenerateDefaultContext(updateDisplayContext);
+	return pMeshDisplay;
+}
+
+bool SpliceMesh::UpdatePerNodeItems(
+	const MaxSDK::Graphics::UpdateDisplayContext& updateDisplayContext,
+	MaxSDK::Graphics::UpdateNodeContext& nodeContext,
+	MaxSDK::Graphics::IRenderItemContainer& targetRenderItemContainer)
+{
+	using namespace MaxSDK::Graphics;
+	using namespace MaxGraphics;
+
+	GenerateMeshRenderItemsContext generateRenderItemsContext;
+	IMeshDisplay2* pMeshDisplay = GetMeshDisplay(updateDisplayContext, generateRenderItemsContext);
+	generateRenderItemsContext.RemoveInvisibleMeshElementDescriptions(nodeContext.GetRenderNode());
+
+	pMeshDisplay->GetRenderItems(generateRenderItemsContext,nodeContext,targetRenderItemContainer);
+	return true;
+}
+
+bool SpliceMesh::PrepareDisplay(const MaxSDK::Graphics::UpdateDisplayContext& updateDisplayContext)
+{
+	using namespace MaxSDK::Graphics;
+	using namespace MaxGraphics;
+
+	GenerateMeshRenderItemsContext generateRenderItemsContext;
+	IMeshDisplay2* pMeshDisplay = GetMeshDisplay(updateDisplayContext, generateRenderItemsContext);
+	pMeshDisplay->PrepareDisplay(generateRenderItemsContext);
+	return true;
+}
+
 #endif
 
 bool IsNitrousGraphicsEnabled() {

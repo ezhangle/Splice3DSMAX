@@ -95,4 +95,4 @@ operator returnValue(
 }
 ";
 spliceCtrl.setKLCode "returnValue" klCode
-spliceCtrl.ConnectPorts "inMtx"  dataContainer "ptTransforms" srcPortIndex:0
+spliceCtrl.ConnectPorts "inMtx"  dataContainer "ptTransforms" srcPortIndex:0 postUI:true

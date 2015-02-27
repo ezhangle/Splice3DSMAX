@@ -219,7 +219,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::MaybePostParamUI()
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::BeginEditParams(IObjParam *ip, ULONG UNUSED(flags), Animatable *UNUSED(prev))
+void SpliceTranslationLayer<TBaseClass, TResultType>::BeginEditParams(IObjParam *ip, ULONG flags, Animatable *UNUSED(prev))
 {
 	this->m_pInterface = ip;
 	m_hPanel = ip->AddRollupPage(
@@ -231,11 +231,59 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::BeginEditParams(IObjParam 
 
 	// Generate our Dialog, and assign an mParamMap
 	MaybePostParamUI();
+
+	// For each port, see if it wants to post a UI too
+	if (m_pblock != nullptr) 
+	{
+		int portCount = GetPortCount();
+		for (int i = 0; i < portCount; i++) 
+		{
+			FabricSplice::DGPort aPort = GetPort(i);
+			if (GetPortPostConnectionUI(aPort))
+			{
+				// UI Requested: what is the max connection for this parameter?
+				int pid = ::GetPortParamID(aPort);
+				if (pid != -1)
+				{
+					// Double check - we can only post UI for class types
+					if (reftarg_type(m_pblock->GetParameterType(ParamID(pid)))) 
+					{
+						ReferenceTarget* pSrcContainer = m_pblock->GetReferenceTarget(ParamID(pid));
+						if (pSrcContainer == nullptr)
+							continue;
+
+						//SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
+						//if (pSrcContInterface == nullptr)
+						//	continue;
+
+						// Everything checks out... go ahead and post a UI
+						pSrcContainer->BeginEditParams(ip, flags, nullptr);
+					}
+				}
+			}
+		}
+	}
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::EndEditParams(IObjParam *ip, ULONG UNUSED(flags), Animatable *UNUSED(next))
+void SpliceTranslationLayer<TBaseClass, TResultType>::EndEditParams(IObjParam *ip, ULONG flags, Animatable *UNUSED(next))
 {
+	if (m_pblock != nullptr) 
+	{
+		// First, remove any connections UI's
+		for (int i = 0; i < m_pblock->NumParams(); i++)
+		{
+			ParamID pid = m_pblock->IndextoID(i);
+			if (reftarg_type(m_pblock->GetParameterType(pid))) 
+			{
+				ReferenceTarget* pSrcContainer = m_pblock->GetReferenceTarget(pid);
+				if (pSrcContainer == nullptr)
+					continue;
+				pSrcContainer->EndEditParams(ip, flags, nullptr);
+			}
+		}
+	}
+	// Now delete my own UI
 	ip->DeleteRollupPage(m_hPanel);
 
 	MaybeRemoveParamUI();
@@ -955,7 +1003,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetPortParamID(int i, Para
 
 //////////////////////////////////////////////////////////////////////////
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectPort( const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex )
+bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectPort( const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex, bool postConnectionsUI )
 {
 	if (pSrcContainer == nullptr)
 		return false;
@@ -992,6 +1040,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectPort( const char* m
 	m_pblock->SetValue((ParamID)res, 0, pSrcContainer);
 	SetPortConnection(destPort, srcPortName);
 	SetPortConnectionIndex(destPort, srcPortIndex);
+	SetPortPostConnectionUI(destPort, postConnectionsUI);
 
 	// Ensure there are enough indices in the RTVal array
 	if (srcPortIndex >= 0) 
@@ -1254,13 +1303,16 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 	{
 		MAXSPLICE_CATCH_BEGIN();
 
-		if(true)//m_graph.usesEvalContext())
+		bool usesTime = m_graph.usesEvalContext();
+		if(usesTime)
 		{
-			// setup the context
+			// setup the context.  Perhaps we should do this regardless?
 			FabricCore::RTVal evalContext = m_graph.getEvalContext();
 			evalContext.setMember("time", FabricSplice::constructFloat32RTVal(TicksToSec(t)));
-			
 			m_valid.SetInstant(t);
+			// Force a re-evaluate (in case no other input parameters change)
+			m_graph.clearEvaluate();
+			m_graph.requireEvaluate();
 		}
 		else
 		{

@@ -356,6 +356,7 @@ void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPor
 			break;
 		}
 	case TYPE_INODE:
+	case TYPE_REFTARG:
 		{
 			// No default possible for this type.
 			break;
@@ -588,6 +589,25 @@ void SetPortConnectionIndex(FabricSplice::DGPort& aPort, int index)
 	if (aPort)
 	{
 		return aPort.setOption(MAX_SRC_IDX_OPT, GetVariant(index));
+	}
+}
+
+bool GetPortPostConnectionUI(FabricSplice::DGPort& aPort) 
+{
+	if (aPort)
+	{
+		FabricCore::Variant option = aPort.getOption(MAX_POST_UI_OPT);
+		if(option.isBoolean())
+			return option.getBoolean();
+	}
+	return false;
+}
+
+void SetPortPostConnectionUI(FabricSplice::DGPort& aPort, bool postUI) 
+{
+	if (aPort)
+	{
+		aPort.setOption(MAX_POST_UI_OPT, GetVariant(postUI));
 	}
 }
 

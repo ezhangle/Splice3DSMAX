@@ -100,7 +100,7 @@ public:
 		FN_1(fn_getPortType, TYPE_TSTR_BV, GetPortTyeMSTR, TYPE_TSTR_BV);
 		FN_1(fn_isPortArray, TYPE_bool, IsPortArrayMSTR, TYPE_TSTR_BV);
 
-		FN_4(fn_connectPorts, TYPE_bool, ConnectPortMSTR, TYPE_TSTR_BV, TYPE_REFTARG, TYPE_TSTR_BV, TYPE_INT);
+		FN_5(fn_connectPorts, TYPE_bool, ConnectPortMSTR, TYPE_TSTR_BV, TYPE_REFTARG, TYPE_TSTR_BV, TYPE_INT, TYPE_bool);
 		
 		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxConnectedTypeMSTR, TYPE_TSTR_BV);
 		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxConnectedTypeMSTR, TYPE_TSTR_BV, TYPE_INT);
@@ -190,7 +190,7 @@ public:
 	// Returns true if successfully connected, false if for any reason the
 	// port was not connected.  Once connected, each evaluation the output
 	// from srcPortName will be transferred into the in-port myPortName
-	virtual bool ConnectPort(const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex)=0;
+	virtual bool ConnectPort(const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex, bool postConnectionsUI )=0;
 	// Disconnect a previously connected port.  Returns true if the port was previously connected and
 	// has been successfully disconnected, false if disconnect failed or if no connection existed.
 	virtual bool DisconnectPort(const char* myPortName)=0;
@@ -288,7 +288,7 @@ protected:
 	}
 	bool RemovePortMSTR(const MSTR& name);
 
-	bool ConnectPortMSTR(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex);
+	bool ConnectPortMSTR(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI );
 	MSTR_SETTER(DisconnectPort);
 
 	bool SetPortOptionMSTR(const MSTR& port, const MSTR& option, FPValue* value)	{ return SetPortOption(port.ToCStr(), option.ToCStr(), value); }
@@ -371,11 +371,12 @@ FPInterfaceDesc* GetDescriptor()
 			SpliceTranslationFPInterface::fn_isPortArray, _T("IsPortArray"), 0, TYPE_bool, 0, 1,
 				_M("portName"),		0,	TYPE_TSTR_BV,
 
-			SpliceTranslationFPInterface::fn_connectPorts, _T("ConnectPorts"), 0, TYPE_bool, 0, 4,
+			SpliceTranslationFPInterface::fn_connectPorts, _T("ConnectPorts"), 0, TYPE_bool, 0, 5,
 				_M("myPortName"),	0,	TYPE_TSTR_BV,
 				_M("srcSpliceGraph"),	0,	TYPE_REFTARG,
 				_M("srcPortName"),	0,	TYPE_TSTR_BV,
 				_M("srcPortIndex"),	0,	TYPE_INT, f_keyArgDefault, -1,
+				_M("postUI"),		0,	TYPE_bool, f_keyArgDefault, true,
 
 			SpliceTranslationFPInterface::fn_getMaxConnectedType, _T("GetMaxType"), 0, TYPE_INT, 0, 1,
 				_M("port"),		0,	TYPE_TSTR_BV, 

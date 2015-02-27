@@ -31,6 +31,7 @@ class DynPBCustAttrClassDesc;
 #define MAX_PID_OPT "MaxPID"
 #define MAX_SRC_OPT "SrcPort"
 #define MAX_SRC_IDX_OPT "SrcIdx"
+#define MAX_POST_UI_OPT "SrcPostUI"
 //////////////////////////////////////////////////////////////////////////
 #pragma region Utility functions
 /** Add a new parameter definition to the given pblock descriptor
@@ -84,6 +85,8 @@ std::string GetPortConnection(FabricSplice::DGPort& aPort);
 void SetPortConnection(FabricSplice::DGPort& aPort, const char* name);
 int GetPortConnectionIndex(FabricSplice::DGPort& aPort);
 void SetPortConnectionIndex(FabricSplice::DGPort& aPort, int index);
+bool GetPortPostConnectionUI(FabricSplice::DGPort& aPort);
+void SetPortPostConnectionUI(FabricSplice::DGPort& aPort, bool postUi);
 const char* GetPortName(FabricSplice::DGPort& aPort);
 const char* GetPortType(FabricSplice::DGPort& aPort);
 
@@ -307,7 +310,7 @@ public:
 
 	// Get the number of ports on this graph
 	int GetPortCount() { return m_graph.getDGPortCount(); }
-	FabricSplice::DGPort GetPort(int i) { return (i < GetPortCount() && i > 0) ? m_graph.getDGPort(i) : FabricSplice::DGPort(); }
+	FabricSplice::DGPort GetPort(int i) { return (i < GetPortCount() && i >= 0) ? m_graph.getDGPort(i) : FabricSplice::DGPort(); }
 	FabricSplice::DGPort GetPort(const char* name) { return m_graph.getDGPort(name); }
 
 	// Splice port management
@@ -340,7 +343,7 @@ public:
 	void SetPortParamID(int index, ParamID id);
 
 	// Connect myPortName to the output port on pSrcContainer named srcPortName
-	bool ConnectPort(const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex);
+	bool ConnectPort(const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex, bool postConnectionsUI );
 	// Disconnect a previously connected port.
 	bool DisconnectPort(const char* myPortName);
 

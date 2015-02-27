@@ -40,14 +40,14 @@ bool SpliceTranslationFPInterface::RemovePortMSTR(const MSTR& name)
 	return false;
 }
 
-bool SpliceTranslationFPInterface::ConnectPortMSTR( const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex )
+bool SpliceTranslationFPInterface::ConnectPortMSTR( const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI  )
 {
 	if (pSrcContainer == NULL)
 		return false;
 
 	CStr cMyPortName = myPortName.ToCStr();
 	CStr cSrcPortName = srcPortName.ToCStr();
-	return ConnectPort(cMyPortName, pSrcContainer, cSrcPortName, srcPortIndex);
+	return ConnectPort(cMyPortName, pSrcContainer, cSrcPortName, srcPortIndex, postConnectionsUI);
 }
 
 void SpliceTranslationFPInterface::ShowKLEditor()

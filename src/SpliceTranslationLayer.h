@@ -96,7 +96,7 @@ bool SetPortValue(FabricSplice::DGPort& aPort, FPValue* value);
 /** Given a Max value, send it to the dgPort in the appropriate fashion */
 
 /** For each valid in the parameter block, send it to the appropriate Splice port in paramData */
-void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DGGraph& rGraph, Interval& ivValid);
+void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DGGraph& rGraph, std::vector<Interval>& paramValidities, Interval& ivValid);
 
 // DlgCallback for our static UI
 INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -162,6 +162,10 @@ protected:
 	// If we are not an array, this value will be -1.
 	int m_valuePortIndex;
 
+	// We store a vector recording the Max validity
+	// of each parameter.  We only reset data on Splice
+	// if the parameter has actually changed.
+	std::vector<Interval> m_portValidities;
 #pragma endregion
 
 public:

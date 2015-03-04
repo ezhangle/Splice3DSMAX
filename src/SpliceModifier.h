@@ -52,6 +52,8 @@ private:
 	// From SpliceTranslationLayer
 	int GetValueType() { return TYPE_MESH; }
 	bool CloneSpliceData(ParentClass* pMyClone) { return true; }
+
+	Interval m_inputValid;
 };
 
 class SpliceModifierClassDesc: public DynPBCustAttrClassDesc {

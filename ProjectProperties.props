@@ -34,6 +34,8 @@
 		<IsUnicode>false</IsUnicode>
 		<IsUnicode Condition="'$(MaxVersion)' &gt; '2012'">true</IsUnicode>
 
+		<SpliceOutDir>$(FABRIC_DIR)\SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/</SpliceOutDir>
+
 	</PropertyGroup>
 	
 	<!-- General properties for everyone -->
@@ -137,11 +139,11 @@
 
   <ItemDefinitionGroup>
     <PostBuildEvent>
-      <Command>call "$(ProjectDir)/GenerateMaxLauncher.bat" "$(FABRIC_DIR)\SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/" "$(MaxVersion)"
-copy "$(ProjectDir)SetupMenu.ms" "$(FABRIC_DIR)\SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/" /Y
-xcopy "$(ProjectDir)ScintillaNET" "$(FABRIC_DIR)\SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/ScintillaNET" /E /I /Y
-xcopy "$(ProjectDir)testingScripts" "$(FABRIC_DIR)\SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/samples" /E /I /Y
-call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)"
+      <Command>call "$(ProjectDir)/GenerateMaxLauncher.bat" "$(SpliceOutDir)/" "$(MaxVersion)"
+copy "$(ProjectDir)SetupMenu.ms" "$(SpliceOutDir)" /Y
+xcopy "$(ProjectDir)ScintillaNET" "$(SpliceOutDir)ScintillaNET" /E /I /Y
+xcopy "$(ProjectDir)testingScripts" "$(SpliceOutDir)samples" /E /I /Y
+call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
       </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -149,6 +151,8 @@ call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)"
     <LocalDebuggerCommandArguments>-vo -p "$(ProjectDir)/build/Generated.Plugin.Splice.ini"</LocalDebuggerCommandArguments>
     <LocalDebuggerCommand>$(MaxPath)3dsmax.exe</LocalDebuggerCommand>
     <LocalDebuggerEnvironment>SPLICE3DSMAXDIR=$(FABRIC_DIR)\SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/
+SCINTILLANETDIR=$(SPLICE3DSMAXDIR)ScintillaNET\
+PATH=$(PATH);$(SPLICE3DSMAXDIR)..\..\lib;$(SCINTILLANETDIR)
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>
 </Project>

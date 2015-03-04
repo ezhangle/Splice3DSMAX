@@ -977,7 +977,7 @@ void MaxPtrToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IParamBlock2* pbl
 	}
 }
 // Pblock conversion function
-void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DGGraph& graph, Interval& ivValid)
+void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DGGraph& graph, std::vector<Interval>& paramValids, Interval& ivValid)
 {
 	if (pblock == NULL)
 		return;
@@ -988,59 +988,72 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplic
 	{
 		FabricSplice::DGPort port = graph.getDGPort(i);
 		ParamID pid = ParamID(::GetPortParamID(port));
-		
-		if(pblock->IDtoIndex(pid) == -1){
+		// Its possible some params are not supported by Max.
+		if (pid == -1)
+			continue;
+
+		int pidx = pblock->IDtoIndex(pid);
+		if(pidx == -1){
 			// Some ports report a ParamID, but infact its invalid. 
 			// We now set the PID meta data to -1 on a port when its type set to '-None-' (-1).
 			continue;
 		}
-		// Its possible some params are not supported by Max.
-		if (pid == -1)
-			continue;
+
+		// Has this parameter already been translated?  Test 
+		// the validity of the value currently in Splice
+		if (pidx >= paramValids.size())
+			paramValids.resize(pidx + 1);
+		else
+		{
+			if (paramValids[pidx].InInterval(t))
+				continue;
+		}
+		paramValids[pidx].SetInfinite();
+
 		int type = pblock->GetParameterType(pid);
 		switch ((int)base_type(type))
 		{
 		case TYPE_INT:		
 		case TYPE_INDEX:
-			ParameterBlockValuesToSplice<int>(port, t, pblock, pid, ivValid);
+			ParameterBlockValuesToSplice<int>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_TIMEVALUE:
-			ParameterBlockValuesToSplice<TimeValue, float>(port, t, pblock, pid, ivValid);
+			ParameterBlockValuesToSplice<TimeValue, float>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_FLOAT:
 		case TYPE_ANGLE:
 		case TYPE_WORLD:
 		case TYPE_PCNT_FRAC:
-			ParameterBlockValuesToSplice<float>(port, t, pblock, pid, ivValid);
+			ParameterBlockValuesToSplice<float>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_RGBA:
-			ParameterBlockValuesToSplice<Color>(port, t, pblock, pid, ivValid);
+			ParameterBlockValuesToSplice<Color>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		//case TYPE_POINT2:
 		//	MaxValueToSplice(port, pblock->GetPoint3(id, t));
 		//	break;
 		case TYPE_POINT3:
-			ParameterBlockValuesToSplice<Point3>(port, t, pblock, pid, ivValid);
+			ParameterBlockValuesToSplice<Point3>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_FRGBA:
-			ParameterBlockValuesToSplice<Point4>(port, t, pblock, pid, ivValid);
+			ParameterBlockValuesToSplice<Point4>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_POINT4:
-			ParameterBlockValuesToSplice<Point4>(port, t, pblock, pid, ivValid);
+			ParameterBlockValuesToSplice<Point4>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_BOOL:
-			ParameterBlockValuesToSplice<int, bool>(port, t, pblock, pid, ivValid);
+			ParameterBlockValuesToSplice<int, bool>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_MATRIX3:
-			ParameterBlockValuesToSplice<Matrix3>(port, t, pblock, pid, ivValid);
+			ParameterBlockValuesToSplice<Matrix3>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_STRING:
 		case TYPE_FILENAME:
-			ParameterBlockValuesToSplice<const MCHAR*>(port, t, pblock, pid, ivValid);
+			ParameterBlockValuesToSplice<const MCHAR*>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_INODE:
 			{
-				MaxPtrToSplice(port, t, pblock, pid, ivValid);
+				MaxPtrToSplice(port, t, pblock, pid, paramValids[pidx]);
 				break;
 			}
 		case TYPE_REFTARG:
@@ -1057,7 +1070,7 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplic
 					if (pSrcContInterface == nullptr)
 						continue;
 
-					pSrcContInterface->TriggerEvaluate(t, ivValid);
+					pSrcContInterface->TriggerEvaluate(t, paramValids[pidx]);
 					FabricSplice::DGPort srcPort = pSrcContInterface->GetPort(portConnection.data());
 					if (srcPort)
 					{
@@ -1086,6 +1099,8 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplic
 			DbgAssert(false); // What do we have here?
 			break;
 		}
+
+		ivValid &= paramValids[pidx];
 	}
 }
 

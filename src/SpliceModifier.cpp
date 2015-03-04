@@ -38,7 +38,10 @@ Interval SpliceModifier::LocalValidity(TimeValue t)
 void SpliceModifier::NotifyInputChanged( const Interval &changeInt, PartID partID, RefMessage message, ModContext *mc )
 {
 	if (message == REFMSG_CHANGE)
+	{
+		m_inputValid.SetEmpty();
 		Invalidate();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -58,8 +61,13 @@ void SpliceModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os,
 		// Send our input to Max	
 		// A modifier is a special kind of mesh, in that we pipe our
 		// mesh into the output port as an IO port
-		MaxValuesToSplice<Object*, Mesh>(m_valuePort, t, ivValid, &os->obj, 1);
-	
+		if (!m_inputValid.InInterval(t)) 
+		{
+			m_inputValid.SetInfinite();
+			MaxValuesToSplice<Object*, Mesh>(m_valuePort, t, m_inputValid, &os->obj, 1);
+			ivValid &= m_inputValid;
+		}
+
 		// Set our output.
 		pTriObj->GetMesh() = Evaluate(t, ivValid);;
 	}

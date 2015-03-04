@@ -388,9 +388,17 @@ RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged(cons
 	{
 		m_valid = NEVER;
 		m_graph.clearEvaluate();
+
+		ParamID pid = m_pblock->LastNotifyParamID();
+		int pidx = m_pblock->IDtoIndex(pid);
+		if (pidx < m_portValidities.size())
+			m_portValidities[pidx].SetEmpty();
 	}
 	else if (message == REFMSG_SUBANIM_STRUCTURE_CHANGED)
 	{
+		// If our structure changes, then erase all validities
+		m_portValidities.clear();
+
 		// If we are here, we _must_ be in between BeginEditParams
 		// and EndEditParams.  Remove the current UI.
 		if (m_paramMap != NULL)
@@ -1321,7 +1329,7 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 		}
 
 		// Set  all Max values on their splice equivalents
-		TransferAllMaxValuesToSplice(t, m_pblock, m_graph, m_valid);
+		TransferAllMaxValuesToSplice(t, m_pblock, m_graph, m_portValidities, m_valid);
 
 		// Trigger graph evaluation
 		m_graph.evaluate();

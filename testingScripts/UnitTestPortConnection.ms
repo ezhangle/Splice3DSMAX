@@ -79,9 +79,9 @@ operator genTransforms(
 
 dataContainer.setKLCode "genTransforms" klCode
 
-p1 = point()
+--p1 = point()
 spliceCtrl = SpliceMatrixController()
-p1.transform.controller = spliceCtrl
+--p1.transform.controller = spliceCtrl
 spliceCtrl.OutPort = "returnedValue"
 spliceCtrl.addInputPort "inMtx" "Mat44" -1
 klCode = "
@@ -96,3 +96,19 @@ operator returnValue(
 ";
 spliceCtrl.setKLCode "returnValue" klCode
 spliceCtrl.ConnectPorts "inMtx"  dataContainer "ptTransforms" srcPortIndex:0 postUI:true
+sm2.transform.controller = spliceCtrl
+
+-- Release reference to dataContainer, otherwise
+-- MxS will hold a reference to dataContainer and prevent it from being deleted
+-- For some reason, objects are auto deleted, but these two need explicit release
+dataContainer = undefined
+spliceCtrl = undefined
+
+sliderTime = 0f
+assert (sm2.transform.position == Point3 0 0 0) message:"Bad transform at time:0" options:#(#dialog)
+
+sliderTime = 20f
+assert (sm2.transform.position as string == "[0,6.1837,0]") message:"Bad transform at time:20" options:#(#dialog)
+
+sliderTime = 100f
+assert (sm2.transform.position as string == "[0,-1.90568,0]") message:"Bad transform at time:100" options:#(#dialog)

@@ -75,7 +75,7 @@
 			<StringPooling>true</StringPooling>
       <PrecompiledHeader>Use</PrecompiledHeader>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-     	<PreprocessorDefinitions>FEC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+     	<PreprocessorDefinitions>FEC_SHARED;FECS_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
 		</ClCompile>
 

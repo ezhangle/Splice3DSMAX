@@ -481,10 +481,11 @@ namespace WTL
 // Windows version helper
 inline bool AtlIsOldWindows()
 {
-	OSVERSIONINFO ovi = { 0 };
-	ovi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	BOOL bRet = ::GetVersionEx(&ovi);
-	return (!bRet || !((ovi.dwMajorVersion >= 5) || (ovi.dwMajorVersion == 4 && ovi.dwMinorVersion >= 90)));
+	return false;
+	//OSVERSIONINFO ovi = { 0 };
+	//ovi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	//BOOL bRet = ::GetVersionEx(&ovi);
+	//return (!bRet || !((ovi.dwMajorVersion >= 5) || (ovi.dwMajorVersion == 4 && ovi.dwMinorVersion >= 90)));
 }
 
 // default GUI font helper
@@ -575,9 +576,10 @@ namespace RunTimeHelper
 
 	inline bool IsVista()
 	{
-		OSVERSIONINFO ovi = { sizeof(OSVERSIONINFO) };
-		BOOL bRet = ::GetVersionEx(&ovi);
-		return ((bRet != FALSE) && (ovi.dwMajorVersion >= 6));
+		return true; // We do not support older than vista
+		//OSVERSIONINFO ovi = { sizeof(OSVERSIONINFO) };
+		//BOOL bRet = ::GetVersionEx(&ovi);
+		//return ((bRet != FALSE) && (ovi.dwMajorVersion >= 6));
 	}
 #endif // !_WIN32_WCE
 

@@ -34,7 +34,7 @@
 		<IsUnicode>false</IsUnicode>
 		<IsUnicode Condition="'$(MaxVersion)' &gt; '2012'">true</IsUnicode>
 
-		<SpliceOutDir>$(FABRIC_DIR)\SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/</SpliceOutDir>
+		<SpliceOutDir>$(FABRIC_DIR)\SpliceIntegrations\FabricSplice3dsmax$(MaxVersion)\</SpliceOutDir>
 
 	</PropertyGroup>
 	
@@ -42,33 +42,30 @@
 	<PropertyGroup Label="Configuration">
 		<UseOfMfc>false</UseOfMfc>
 		<UseOfAtl>false</UseOfAtl>
-		<PlatformToolset>v100</PlatformToolset>
 		<IsUnicode>true</IsUnicode>
 		<CharacterSet>Unicode</CharacterSet>
 		<IntDir>build\FabricSplice3dsmax\obj\$(Configuration)\</IntDir>
-		<OutDir>$(FABRIC_DIR)\SpliceIntegrations\FabricSplice3dsmax$(MaxVersion)\plugin\</OutDir>
+		<OutDir>$(SpliceOutDir)plugin\</OutDir>
 		<TargetExt>.dlu</TargetExt>
 		<ConfigurationType>DynamicLibrary</ConfigurationType>
 		<UseDebugLibraries>false</UseDebugLibraries>
-    <PreprocessorDefinitions>FEC_STATIC;FECS_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 	</PropertyGroup>
 
 	<!-- Rest Unicode values -->
 	<PropertyGroup Condition="!'$(IsUnicode)'" Label="Configuration">
 		<CharacterSet>MultiByte</CharacterSet>
 	</PropertyGroup>
-	<!-- Set appropriate compiler version 
-	<PropertyGroup Condition="'$(MaxVersion)' &lt; '2013'">
+	<!-- Set appropriate compiler version -->
+	<PropertyGroup> <!-- Max 2010 thru 2012 -->
 		<PlatformToolset>v90</PlatformToolset>
-	</PropertyGroup>
+	</PropertyGroup> <!-- Max 2013 & 2014 -->
+	<PropertyGroup Condition="'$(MaxVersion)' &gt; '2012'">
+		<PlatformToolset>v100</PlatformToolset>
+	</PropertyGroup> <!-- Max 2015 & 2016 -->
 	<PropertyGroup Condition="'$(MaxVersion)' &gt; '2014'">
 		<PlatformToolset>v110</PlatformToolset>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(MaxVersion)' &gt; '2015'">
-		<PlatformToolset>v110</PlatformToolset>
-	</PropertyGroup>
-	-->
-
+	
 	<ItemDefinitionGroup>
 		<!-- default values for compiler -->
 		<ClCompile>
@@ -76,28 +73,28 @@
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<StringPooling>true</StringPooling>
-      		<PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-     		<PreprocessorDefinitions>FEC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+     	<PreprocessorDefinitions>FEC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
 		</ClCompile>
 
 		<!-- 2014 very helpfully changed the installed path -->
+    <ClCompile>
+        <AdditionalIncludeDirectories>$(MaxSDKPath)\maxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
 		<ClCompile Condition="'$(MaxVersion)' &gt; '2013'">
 			<AdditionalIncludeDirectories>$(MaxSDKPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ClCompile>
-	    <ClCompile>
-	        <AdditionalIncludeDirectories>$(MaxSDKPath)\maxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-	    </ClCompile>
         
 
 		<!-- Turn on E&C for Debug Win32 builds -->
 		<ClCompile Condition="'$(IsDebug)'">
-			<DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+			<DebugInformationFormat Condition="'$(Platform)'=='win32'">EditAndContinue</DebugInformationFormat>
 			<WholeProgramOptimization>false</WholeProgramOptimization>
 			<SDLCheck>true</SDLCheck>
 			<Optimization>Disabled</Optimization>
-			<PreprocessorDefinitions>_DEBUG;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+			<PreprocessorDefinitions>DEBUG;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ClCompile>
 		
 		<!-- Release specific compiler settings -->
@@ -108,7 +105,6 @@
 			<PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<FunctionLevelLinking>true</FunctionLevelLinking>
 			<WholeProgramOptimization>true</WholeProgramOptimization>
-			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
 		</ClCompile>
 		
 		<!-- Linker Common Settings -->
@@ -116,7 +112,7 @@
 			<LinkIncremental>true</LinkIncremental>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<SubSystem>Windows</SubSystem>
-			<AdditionalDependencies>FabricCore-1.15.lib;FabricSplice-1.15_s.lib;assetmanagement.lib;atscore.lib;biped.lib;bmm.lib;core.lib;crowd.lib;custdlg.lib;databridge.lib;edmodel.lib;expr.lib;flt.lib;geom.lib;gfx.lib;GraphicsDriver.lib;gup.lib;igame.lib;imageviewers.lib;manipsys.lib;maxnet.lib;maxscrpt.lib;maxutil.lib;menuman.lib;menus.lib;mesh.lib;mnmath.lib;paramblk2.lib;particle.lib;particleflow.lib;physique.lib;poly.lib;polypaint.lib;renderutil.lib;rtmax.lib;tessint.lib;viewfile.lib;zlibdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>FabricCore-2.0.lib;FabricSplice-2.0.lib;assetmanagement.lib;atscore.lib;biped.lib;bmm.lib;core.lib;crowd.lib;custdlg.lib;databridge.lib;edmodel.lib;expr.lib;flt.lib;geom.lib;gfx.lib;GraphicsDriver.lib;gup.lib;igame.lib;imageviewers.lib;manipsys.lib;maxnet.lib;maxscrpt.lib;maxutil.lib;menuman.lib;menus.lib;mesh.lib;mnmath.lib;paramblk2.lib;particle.lib;particleflow.lib;physique.lib;poly.lib;polypaint.lib;renderutil.lib;rtmax.lib;tessint.lib;viewfile.lib;zlibdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies Condition="'$(MaxVersion)'!='2012'">GraphicsUtility.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalLibraryDirectories>$(FABRIC_DIR)\lib;$(BOOST_DIR);$(MaxSDKPath)\maxsdk\lib\x64\Release\</AdditionalLibraryDirectories>
 		</Link>
@@ -150,9 +146,9 @@ call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
   <PropertyGroup>
     <LocalDebuggerCommandArguments>-vo -p "$(ProjectDir)/build/Generated.Plugin.Splice.ini"</LocalDebuggerCommandArguments>
     <LocalDebuggerCommand>$(MaxPath)3dsmax.exe</LocalDebuggerCommand>
-    <LocalDebuggerEnvironment>SPLICE3DSMAXDIR=$(FABRIC_DIR)\SpliceIntegrations/FabricSplice3dsmax$(MaxVersion)/
-SCINTILLANETDIR=$(SPLICE3DSMAXDIR)ScintillaNET\
-PATH=$(PATH);$(SPLICE3DSMAXDIR)..\..\lib;$(SCINTILLANETDIR)
+    <LocalDebuggerEnvironment>SPLICE3DSMAXDIR=$(SpliceOutDir)
+SCINTILLANETDIR=$(SpliceOutDir)\ScintillaNET\
+PATH=$(PATH);$(FABRIC_DIR)\lib;$(SCINTILLANETDIR)
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>
 </Project>

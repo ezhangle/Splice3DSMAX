@@ -102,9 +102,9 @@ public:
 
 		FN_5(fn_connectPorts, TYPE_bool, ConnectPortMSTR, TYPE_TSTR_BV, TYPE_REFTARG, TYPE_TSTR_BV, TYPE_INT, TYPE_bool);
 		
-		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxConnectedTypeMSTR, TYPE_TSTR_BV);
-		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxConnectedTypeMSTR, TYPE_TSTR_BV, TYPE_INT);
-		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypesMSTR, TYPE_TSTR_BV);
+//		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxConnectedTypeMSTR, TYPE_TSTR_BV);
+//		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxConnectedTypeMSTR, TYPE_TSTR_BV, TYPE_INT);
+//		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypesMSTR, TYPE_TSTR_BV);
 
 		FN_3(fn_setPortOption, TYPE_bool, SetPortOptionMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_FPVALUE);
 		FN_2(fn_setPortValue, TYPE_bool, SetPortValueMSTR, TYPE_TSTR_BV, TYPE_FPVALUE);
@@ -138,8 +138,8 @@ public:
 
 	// Get the number of ports on this graph
 	virtual int GetPortCount() = 0;
-	virtual FabricSplice::DGPort GetPort(int i)=0;
-	virtual FabricSplice::DGPort GetPort(const char* name)=0;
+	virtual DFGWrapper::PortPtr GetPort(int i)=0;
+	virtual DFGWrapper::PortPtr GetPort(const char* name)=0;
 
 	// Splice port management
 	// Create a new port.  A matching Max parameter 
@@ -174,9 +174,9 @@ public:
 	// Set the index.  If idx == -1, set our out port to not be an array
 	virtual void SetOutPortArrayIdx(int idx) = 0;
 
-	virtual int GetMaxConnectedType(const char* portName) = 0;
-	virtual int SetMaxConnectedType(const char* portName, int type) = 0;
-	virtual BitArray GetLegalMaxTypes(const char* portName) = 0;
+	//virtual int GetMaxConnectedType(const char* portName) = 0;
+	//virtual int SetMaxConnectedType(const char* portName, int type) = 0;
+	//virtual BitArray GetLegalMaxTypes(const char* portName) = 0;
 
 	// Allow setting various options on our ports
 	virtual bool SetPortOption(const char* port, const char* option, FPValue* value)=0;
@@ -199,7 +199,7 @@ public:
 	virtual void TriggerEvaluate(TimeValue t, Interval& ivValid)=0;
 
 	// Get the fabric graph driving this max class.
-	virtual const FabricSplice::DGGraph& GetSpliceGraph() = 0;
+//	virtual const DFGWrapper::Binding& GetSpliceGraph() = 0;
 	
 	// Set this instance to use the splice graph on the rtarg instance
 	// This can be useful when setting a group of Splice instances to
@@ -209,8 +209,8 @@ public:
 	// Allow others to set the splice graph etc we are using.
 	// These functions are not called directly from MaxScript, instead
 	// they are used by the static interface
-	virtual void SetSpliceGraph(const FabricSplice::DGGraph& graph, bool createMaxParams) = 0;
-	virtual void SetOutPort(const FabricSplice::DGPort& port) = 0;
+//	virtual void SetSpliceGraph(const DFGWrapper::Binding& graph, bool createMaxParams) = 0;
+//	virtual void SetOutPort(const DFGWrapper::PortPtr& port) = 0;
 
 	// Load the splice graph for this entity from the given filename
 	virtual bool LoadFromFile(const MCHAR* filename, bool createMaxParams)=0;
@@ -270,9 +270,9 @@ protected:
 	bool SetPortNameMSTR(const MSTR& oldName, const MSTR& newName)	{ return SetPortName(oldName.ToCStr(), newName.ToCStr()); }
 	MSTR GetPortTyeMSTR(const MSTR& port)	{ return ToMSTR(GetPortType(port.ToCStr()), 0); }
 	bool IsPortArrayMSTR(const MSTR& port) { return IsPortArray(port.ToCStr()); }
-	int GetMaxConnectedTypeMSTR(const MSTR& port) { return GetMaxConnectedType(port.ToCStr()); }
-	int SetMaxConnectedTypeMSTR(const MSTR& port, int type) { return SetMaxConnectedType(port.ToCStr(), type); }
-	BitArray GetLegalMaxTypesMSTR(const MSTR& port) { return GetLegalMaxTypes(port.ToCStr()); }
+	//int GetMaxConnectedTypeMSTR(const MSTR& port) { return GetMaxConnectedType(port.ToCStr()); }
+	//int SetMaxConnectedTypeMSTR(const MSTR& port, int type) { return SetMaxConnectedType(port.ToCStr(), type); }
+	//BitArray GetLegalMaxTypesMSTR(const MSTR& port) { return GetLegalMaxTypes(port.ToCStr()); }
 
 	int AddInputPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
 	{

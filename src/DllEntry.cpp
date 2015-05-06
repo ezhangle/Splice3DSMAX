@@ -90,8 +90,6 @@ __declspec( dllexport ) ULONG CanAutoDefer()
 // Initialize things
 void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 {
-	FabricSplice::Initialize();
-
 	// setup the callback functions
 	InitLoggingTimer();
 	SpliceStaticFPInterface::GetInstance()->EnableLogging(SpliceStaticFPInterface::LOG_ALL);
@@ -150,13 +148,13 @@ __declspec( dllexport ) int LibInitialize(void)
 __declspec( dllexport ) int LibShutdown(void)
 {
 	// Disable logging, the MaxScript system has already exit
-	FabricSplice::Logging::setLogFunc(nullptr);
-	FabricSplice::Logging::setLogErrorFunc(nullptr);
-	FabricSplice::Logging::setCompilerErrorFunc(nullptr);
-	FabricSplice::Logging::setKLReportFunc(nullptr);
-	FabricSplice::Logging::setKLStatusFunc(nullptr);
+	//FabricSplice::Logging::setLogFunc(nullptr);
+	//FabricSplice::Logging::setLogErrorFunc(nullptr);
+	//FabricSplice::Logging::setCompilerErrorFunc(nullptr);
+	//FabricSplice::Logging::setKLReportFunc(nullptr);
+	//FabricSplice::Logging::setKLStatusFunc(nullptr);
 
-    FabricSplice::Finalize();
+    //FabricSplice::Finalize();
 	return TRUE;
 }
 

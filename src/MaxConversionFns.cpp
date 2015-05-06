@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "MaxConversionFns.h"
 #include "MeshNormalSpec.h"
+#include "FabricSplice.h"
 
 #pragma region Convert functions allow modifying a value just before it is sent to Splice
 
@@ -228,198 +229,175 @@ extern FabricCore::Variant GetVariant(const FPValue& value)
 #pragma endregion // GetVariants
 
 #pragma region Get RTVals
-FabricCore::RTVal ConvertToRTVal(int param, FabricCore::RTVal val)
+void ConvertToRTVal(int param, FabricCore::RTVal& val)
 {
+	// TODO: Remove all traces to FabricSplice
 	val = FabricSplice::constructSInt32RTVal(param);
-	return val;
 }
 
-FabricCore::RTVal ConvertToRTVal(float param, FabricCore::RTVal val)
+void ConvertToRTVal(float param, FabricCore::RTVal& val)
 {
-	val = FabricSplice::constructFloat32RTVal(param);
-	return val;
+	val.setFloat32(param);
 }
 
-FabricCore::RTVal ConvertToRTVal(bool param, FabricCore::RTVal val)
+void ConvertToRTVal(bool param, FabricCore::RTVal& val)
 {
 	val = FabricSplice::constructBooleanRTVal(param);
-	return val;
 }
 
-FabricCore::RTVal ConvertToRTVal(const Point3& param, FabricCore::RTVal val)
+void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val)
 {
-	if(!val.isValid())
-		val = FabricSplice::constructRTVal("Vec3");
-	val.setMember("x", FabricSplice::constructFloat32RTVal(param.x));
-	val.setMember("y", FabricSplice::constructFloat32RTVal(param.y));
-	val.setMember("z", FabricSplice::constructFloat32RTVal(param.z));
-	return val;
+	val.maybeGetMemberRef("x").setFloat32(param.x);
+	val.maybeGetMemberRef("y").setFloat32(param.y);
+	val.maybeGetMemberRef("z").setFloat32(param.z);
 }
 
-FabricCore::RTVal ConvertToRTVal(const Color& param, FabricCore::RTVal val)
+void ConvertToRTVal(const Color& param, FabricCore::RTVal& val)
 {
-	if(!val.isValid())
-		val = FabricSplice::constructRTVal("Color");
-	val.setMember("a", FabricSplice::constructUInt16RTVal(128));
-	val.setMember("r", FabricSplice::constructUInt16RTVal(uint16_t(param.r * 128)));
-	val.setMember("g", FabricSplice::constructUInt16RTVal(uint16_t(param.g * 128)));
-	val.setMember("b", FabricSplice::constructUInt16RTVal(uint16_t(param.b * 128)));
-	return val;
+	val.maybeGetMemberRef("a").setFloat32(128);
+	val.maybeGetMemberRef("r").setFloat32(uint16_t(param.r * 128));
+	val.maybeGetMemberRef("g").setFloat32(uint16_t(param.g * 128));
+	val.maybeGetMemberRef("b").setFloat32(uint16_t(param.b * 128));
 }
 
-FabricCore::RTVal ConvertToRTVal(const Point4& param, FabricCore::RTVal val, bool asColor/*=false*/)
+void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
 {
-	// Should we force this to color?
-	if(val.isValid())
-		asColor = strcmp(val.getTypeName().getStringCString(), "Color") == 0;
-
-	if (asColor) {
-		if(!val.isValid())
-			val = FabricSplice::constructRTVal("Color");
-		val.setMember("r", FabricSplice::constructFloat32RTVal(param.x));
-		val.setMember("g", FabricSplice::constructFloat32RTVal(param.y));
-		val.setMember("b", FabricSplice::constructFloat32RTVal(param.z));
-		val.setMember("a", FabricSplice::constructFloat32RTVal(param.w));
+	if (strcmp(val.getTypeName().getStringCString(), "Color") == 0)
+	{
+		val.maybeGetMemberRef("r").setFloat32(param.x);
+		val.maybeGetMemberRef("g").setFloat32(param.y);
+		val.maybeGetMemberRef("b").setFloat32(param.z);
+		val.maybeGetMemberRef("a").setFloat32(param.w);
 	}
 	else {
-		if(!val.isValid())
-			val = FabricSplice::constructRTVal("Vec4");
-		val.setMember("x", FabricSplice::constructFloat32RTVal(param.x));
-		val.setMember("y", FabricSplice::constructFloat32RTVal(param.y));
-		val.setMember("z", FabricSplice::constructFloat32RTVal(param.z));
-		val.setMember("t", FabricSplice::constructFloat32RTVal(param.w));
+		val.maybeGetMemberRef("x").setFloat32(param.x);
+		val.maybeGetMemberRef("y").setFloat32(param.y);
+		val.maybeGetMemberRef("z").setFloat32(param.z);
+		val.maybeGetMemberRef("t").setFloat32(param.w);
 	}
-
-	return val;
 }
 
-FabricCore::RTVal ConvertToRTVal(const Quat& param, FabricCore::RTVal val)
+void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val)
 {
-    if(!val.isValid())
-		val = FabricSplice::constructRTVal("Quat");
-
-	val.setMember("v", ConvertToRTVal(Point3(param.x, param.y, param.z), val.maybeGetMember("v")));
-	val.setMember("w", FabricSplice::constructFloat32RTVal(param.w));
-	return val;
+	FabricCore::RTVal v = val.maybeGetMember("v");
+	ConvertToRTVal(Point3(param.x, param.y, param.z), v);
+	val.maybeGetMember("w").setFloat32(param.w);
 }
 
-FabricCore::RTVal ConvertToRTVal(const Matrix3& param, FabricCore::RTVal val)
+void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val)
 {
-    if(!val.isValid())
-		val = FabricSplice::constructRTVal("Mat44");
+	//const MRow* pInMtx = param.GetAddr();
 
-	const MRow* pInMtx = param.GetAddr();
-
-	val.setMember("row0", ConvertToRTVal(Point4(pInMtx[0][0], pInMtx[1][0], pInMtx[2][0], pInMtx[3][0]), val.maybeGetMember("row0")));
-	val.setMember("row1", ConvertToRTVal(Point4(pInMtx[0][1], pInMtx[1][1], pInMtx[2][1], pInMtx[3][1]), val.maybeGetMember("row1")));
-	val.setMember("row2", ConvertToRTVal(Point4(pInMtx[0][2], pInMtx[1][2], pInMtx[2][2], pInMtx[3][2]), val.maybeGetMember("row2")));
-	val.setMember("row3", ConvertToRTVal(Point4(0, 0, 0, 1), val.maybeGetMember("row3")));
-	return val;
+	//val.setMember("row0", ConvertToRTVal(client, Point4(pInMtx[0][0], pInMtx[1][0], pInMtx[2][0], pInMtx[3][0]), val.maybeGetMember("row0")));
+	//val.setMember("row1", ConvertToRTVal(client, Point4(pInMtx[0][1], pInMtx[1][1], pInMtx[2][1], pInMtx[3][1]), val.maybeGetMember("row1")));
+	//val.setMember("row2", ConvertToRTVal(client, Point4(pInMtx[0][2], pInMtx[1][2], pInMtx[2][2], pInMtx[3][2]), val.maybeGetMember("row2")));
+	//val.setMember("row3", ConvertToRTVal(client, Point4(0, 0, 0, 1), val.maybeGetMember("row3")));
+	//return val;
 }
 
 
-FabricCore::RTVal ConvertToRTVal(const MSTR& param, FabricCore::RTVal val)
+void ConvertToRTVal(const MSTR& param, FabricCore::RTVal& val)
 {
-	CStr cStr = param.ToCStr();
-	val = FabricSplice::constructStringRTVal(cStr.data());
-	return val;
+	//CStr cStr = param.ToCStr();
+	//val = FabricCore::RTVal::ConstructString(client, cStr.data());
+	//return val;
 }
 
-FabricCore::RTVal ConvertToRTVal(const MCHAR* param, FabricCore::RTVal val)
+void ConvertToRTVal(const MCHAR* param, FabricCore::RTVal& val)
 {
-	CStr cStr = CStr::FromMCHAR(param);
-	val = FabricSplice::constructStringRTVal(cStr.data());
-	return val;
+	//CStr cStr = CStr::FromMCHAR(param);
+	//val = FabricCore::RTVal::ConstructString(client, cStr.data());
+	//return val;
 }
 
-FabricCore::RTVal ConvertToRTVal(const Mesh& param, FabricCore::RTVal rtMesh)
+void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 {
-    if(!rtMesh.isValid())
-		rtMesh = FabricSplice::constructRTVal("PolygonMesh");
-	
-	if(!rtMesh.isValid() || rtMesh.isNullObject())
-		return rtMesh;
-	
-	UINT nbPolygons = rtMesh.callMethod("UInt32", "polygonCount", 0, 0).getUInt32();
-	bool rebuildMesh = nbPolygons != (UINT)param.numFaces;
-	if(rebuildMesh){
-		rtMesh.callMethod("", "clear", 0, 0);
-	}
-
-	// Send all vertices to Splice
-	std::vector<FabricCore::RTVal> args(2);
-	args[0] = FabricSplice::constructExternalArrayRTVal("Float32", param.numVerts * 3, param.verts);
-	args[1] = FabricSplice::constructUInt32RTVal(3); // components
-	rtMesh.callMethod("", "setPointsFromExternalArray", 2, &args[0]);
-
-	if(rebuildMesh){
-		// Send all indices to Splice
-		// First, construct an array of polygon sizes
-		// We only support triangles, so all sizes are 3
-		std::vector<unsigned int> dPolyCounts;
-		dPolyCounts.assign(param.numFaces, 3);
-
-		// Construct array of indices
-		std::vector<unsigned int> dVertIndex;
-		dPolyCounts.reserve(param.numFaces * 3);
-		Face* pFaces = param.faces;
-		for (int f = 0; f < param.numFaces; f++)
-		{
-			for (int i = 0; i < 3; i++)
-				dVertIndex.push_back(pFaces[f].getVert(i));
-		}
-	
-
-		args[0] = FabricSplice::constructExternalArrayRTVal("UInt32", dPolyCounts.size(), &dPolyCounts[0]);
-		args[1] = FabricSplice::constructExternalArrayRTVal("UInt32", dVertIndex.size(), &dVertIndex[0]);
-		rtMesh.callMethod("", "setTopologyFromCountsIndicesExternalArrays", 2, &args[0]);
-	}
-
-	// Set normals
-	// Do we have specified normals?
-	Mesh* pNonConstMesh = const_cast<Mesh*>(&param);
-	MeshNormalSpec* pNormalSpec = pNonConstMesh->GetSpecifiedNormals();
-#pragma message("TODO: Fix this!")
-	if (false && pNormalSpec != NULL && pNormalSpec->GetNumNormals() > 0)
-	{
-		std::vector<FabricCore::RTVal> args(3);
-		args[0] = FabricSplice::constructStringRTVal("normals");
-
-		// 1 normal per index
-		int nNormals = pNormalSpec->GetNumNormals();
-		Point3* pNormalData = pNormalSpec->GetNormalArray();
-		std::vector<double> dNormalsDbls(nNormals * 3);
-		for (int i = 0; i < nNormals; i++)
-		{
-			for (int j = 0; j < 3; j++)
-				dNormalsDbls[(i * 3) + j] = pNormalData[i][j];
-		}
-		args[1] = FabricSplice::constructExternalArrayRTVal("Vec3", nNormals, &dNormalsDbls[0]);
-
-		std::vector<UINT64> dNormalIndices;
-		int nFaces = pNormalSpec->GetNumFaces();
-		dNormalIndices.resize(nFaces * 3);
-		MeshNormalFace* pFaces = pNormalSpec->GetFaceArray();
-		for (int f = 0; f < nFaces; f++)
-		{
-			for (int j = 0; j < 3; j++)
-				dNormalIndices[f* 3 + j] = pFaces[f].GetNormalID(j);
-			//			memcpy(&dNormalIndices[f*3], pFaces[f].GetNormalIDArray(), sizeof(int) * 3);
-		}
-		args[2] = FabricSplice::constructExternalArrayRTVal("UInt64", nFaces * 3, &dNormalIndices[0]);
-		rtMesh.callMethod("", "setAttributeFromPolygonPackedData", 3, &args[0]);
-	}
-	else
-	{
-		rtMesh.callMethod("", "recomputePointNormals", 0, NULL);
-
-		std::vector<Point3> dNormals;
-		dNormals.resize(param.numFaces);
-		for (int i = 0; i < param.numFaces; i++)
-			dNormals[i] = pNonConstMesh->getFaceNormal(i);
-	}
-
-	return rtMesh;
+//    if(!rtMesh.isValid())
+//		rtMesh = FabricCore::RTVal::Create(client, "PolygonMesh", 0, nullptr);
+//	
+//	if(!rtMesh.isValid() || rtMesh.isNullObject())
+//		return rtMesh;
+//	
+//	UINT nbPolygons = rtMesh.callMethod("UInt32", "polygonCount", 0, 0).getUInt32();
+//	bool rebuildMesh = nbPolygons != (UINT)param.numFaces;
+//	if(rebuildMesh){
+//		rtMesh.callMethod("", "clear", 0, 0);
+//	}
+//
+//	// Send all vertices to Splice
+//	std::vector<FabricCore::RTVal> args(2);
+//	args[0] = FabricCore::RTVal::ConstructExternalArray(client, "Float32", param.numVerts * 3, param.verts);
+//	args[1] = FabricCore::RTVal::ConstructUInt32(client, 3); // components
+//	rtMesh.callMethod("", "setPointsFromExternalArray", 2, &args[0]);
+//
+//	if(rebuildMesh){
+//		// Send all indices to Splice
+//		// First, construct an array of polygon sizes
+//		// We only support triangles, so all sizes are 3
+//		std::vector<unsigned int> dPolyCounts;
+//		dPolyCounts.assign(param.numFaces, 3);
+//
+//		// Construct array of indices
+//		std::vector<unsigned int> dVertIndex;
+//		dPolyCounts.reserve(param.numFaces * 3);
+//		Face* pFaces = param.faces;
+//		for (int f = 0; f < param.numFaces; f++)
+//		{
+//			for (int i = 0; i < 3; i++)
+//				dVertIndex.push_back(pFaces[f].getVert(i));
+//		}
+//	
+//
+//		args[0] = FabricCore::RTVal::ConstructExternalArray(client, "UInt32", dPolyCounts.size(), &dPolyCounts[0]);
+//		args[1] = FabricCore::RTVal::ConstructExternalArray(client, "UInt32", dVertIndex.size(), &dVertIndex[0]);
+//		rtMesh.callMethod("", "setTopologyFromCountsIndicesExternalArrays", 2, &args[0]);
+//	}
+//
+//	// Set normals
+//	// Do we have specified normals?
+//	Mesh* pNonConstMesh = const_cast<Mesh*>(&param);
+//	MeshNormalSpec* pNormalSpec = pNonConstMesh->GetSpecifiedNormals();
+//#pragma message("TODO: Fix this!")
+//	if (false && pNormalSpec != NULL && pNormalSpec->GetNumNormals() > 0)
+//	{
+//		std::vector<FabricCore::RTVal> args(3);
+//		args[0] = FabricCore::RTVal::ConstructString(client, "normals");
+//
+//		// 1 normal per index
+//		int nNormals = pNormalSpec->GetNumNormals();
+//		Point3* pNormalData = pNormalSpec->GetNormalArray();
+//		std::vector<double> dNormalsDbls(nNormals * 3);
+//		for (int i = 0; i < nNormals; i++)
+//		{
+//			for (int j = 0; j < 3; j++)
+//				dNormalsDbls[(i * 3) + j] = pNormalData[i][j];
+//		}
+//		args[1] = FabricCore::RTVal::ConstructExternalArray(client, "Vec3", nNormals, &dNormalsDbls[0]);
+//
+//		std::vector<UINT64> dNormalIndices;
+//		int nFaces = pNormalSpec->GetNumFaces();
+//		dNormalIndices.resize(nFaces * 3);
+//		MeshNormalFace* pFaces = pNormalSpec->GetFaceArray();
+//		for (int f = 0; f < nFaces; f++)
+//		{
+//			for (int j = 0; j < 3; j++)
+//				dNormalIndices[f* 3 + j] = pFaces[f].GetNormalID(j);
+//			//			memcpy(&dNormalIndices[f*3], pFaces[f].GetNormalIDArray(), sizeof(int) * 3);
+//		}
+//		args[2] = FabricCore::RTVal::ConstructExternalArray(client, "UInt64", nFaces * 3, &dNormalIndices[0]);
+//		rtMesh.callMethod("", "setAttributeFromPolygonPackedData", 3, &args[0]);
+//	}
+//	else
+//	{
+//		rtMesh.callMethod("", "recomputePointNormals", 0, NULL);
+//
+//		std::vector<Point3> dNormals;
+//		dNormals.resize(param.numFaces);
+//		for (int i = 0; i < param.numFaces; i++)
+//			dNormals[i] = pNonConstMesh->getFaceNormal(i);
+//	}
+//
+//	return rtMesh;
 }
 
 #pragma endregion // GetVariants
@@ -604,12 +582,19 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param)
 		param[2] = ncVal.maybeGetMemberRef("z").getFloat32();
 		param[3] = ncVal.maybeGetMemberRef("t").getFloat32();
 	}
-	else {
-		param[0] = ncVal.maybeGetMemberRef("x").getFloat32();
-		param[1] = ncVal.maybeGetMemberRef("y").getFloat32();
-		param[2] = ncVal.maybeGetMemberRef("z").getFloat32();
-		param[3] = ncVal.maybeGetMemberRef("t").getFloat32();
+	else if (strcmp(ncVal.getTypeName().getStringCString(), "Color") == 0) {
+		param[0] = ncVal.maybeGetMemberRef("r").getFloat32();
+		param[1] = ncVal.maybeGetMemberRef("g").getFloat32();
+		param[2] = ncVal.maybeGetMemberRef("b").getFloat32();
+		param[3] = ncVal.maybeGetMemberRef("a").getFloat32();
 	}
+}
+
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Color& param)
+{
+	param.r = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("r").getFloat32();
+	param.g = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("g").getFloat32();
+	param.b = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("b").getFloat32();
 }
 
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Quat& param)
@@ -653,6 +638,8 @@ void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param)
 
 void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 {
+	FabricCore::Client client;
+
 	// Cache version number, compare for purposes of caching.
 	// this line was causing asserts. 
 	//UINT32 version = rtMesh.maybeGetMemberRef("version").getUInt32();
@@ -677,8 +664,8 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 	// Get vertices from rtMesh
 	{
 		std::vector<FabricCore::RTVal> args(2);
-		args[0] = FabricSplice::constructExternalArrayRTVal("Float32", nbPoints * 3, param.verts);
-		args[1] = FabricSplice::constructUInt32RTVal(3); // components
+		args[0] = FabricCore::RTVal::ConstructExternalArray(client, "Float32", nbPoints * 3, param.verts);
+		args[1] = FabricCore::RTVal::ConstructUInt32(client, 3); // components
 		rtMesh.callMethod("", "getPointsAsExternalArray", 2, &args[0]);
 	}
 
@@ -689,7 +676,7 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 	rtNormals.SetCount(nbIndices);
 	{
 		std::vector<FabricCore::RTVal> args(1);
-		args[0] = FabricSplice::constructExternalArrayRTVal("Float32", nbIndices * 3, rtNormals.Addr(0));
+		args[0] = FabricCore::RTVal::ConstructExternalArray(client, "Float32", nbIndices * 3, rtNormals.Addr(0));
 		rtMesh.callMethod("", "getNormalsAsExternalArray", 1, &args[0]);
 	}
 
@@ -702,8 +689,8 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 		Tab<Point2> uvs;
 		uvs.SetCount(nbIndices);
 		std::vector<FabricCore::RTVal> args(2);
-		args[0] = FabricSplice::constructExternalArrayRTVal("Float32", uvs.Count() * 2, uvs.Addr(0));
-		args[1] = FabricSplice::constructUInt32RTVal(2); // components
+		args[0] = FabricCore::RTVal::ConstructExternalArray(client, "Float32", uvs.Count() * 2, uvs.Addr(0));
+		args[1] = FabricCore::RTVal::ConstructUInt32(client, 2); // components
 		rtMesh.callMethod("", "getUVsAsExternalArray", 2, &args[0]);
 
 		param.setNumTVerts(nbIndices);
@@ -718,8 +705,8 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 	indices.SetCount(nbIndices);
 	{
 		std::vector<FabricCore::RTVal> args(2);
-		args[0] = FabricSplice::constructExternalArrayRTVal("UInt32", nbPolygons, faceVtxCount.Addr(0));
-		args[1] = FabricSplice::constructExternalArrayRTVal("UInt32", nbIndices, indices.Addr(0));
+		args[0] = FabricCore::RTVal::ConstructExternalArray(client, "UInt32", nbPolygons, faceVtxCount.Addr(0));
+		args[1] = FabricCore::RTVal::ConstructExternalArray(client, "UInt32", nbIndices, indices.Addr(0));
 		rtMesh.callMethod("", "getTopologyAsCountsIndicesExternalArrays", 2, &args[0]);
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -825,8 +812,8 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 	//	Tab<Point4> colors;
 	//	colors.SetCount(nbIndices);
 	//	std::vector<FabricCore::RTVal> args(2);
-	//	args[0] = FabricSplice::constructExternalArrayRTVal("Float32", nbIndices * 4, colors.Addr(0));
-	//	args[1] = FabricSplice::constructUInt32RTVal(4); // components
+	//	args[0] = FabricCore::RTVal::ConstructExternalArrayRTVal("Float32", nbIndices * 4, colors.Addr(0));
+	//	args[1] = FabricCore::RTVal::ConstructUInt32RTVal(4); // components
 	//	rtMesh.callMethod("", "getVertexColorsAsExternalArray", 2, &args[0]);
 
 	//	// how do color verts work on MNMesh?
@@ -847,6 +834,11 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 	param.InvalidateGeomCache();
 	param.InvalidateTopologyCache();
 
+}
+
+void SpliceToMaxValue(const FabricCore::RTVal& rtv, MSTR& param) {
+	FabricCore::RTVal& ncval = const_cast<FabricCore::RTVal&>(rtv);
+	param = MSTR::FromACP(ncval.getStringCString(), ncval.getStringLength());
 }
 
 #pragma endregion // RTVals

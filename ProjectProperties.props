@@ -18,10 +18,10 @@
 		<MaxPath Condition="'$(MaxVersion)'=='2014' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2014)</MaxPath>
 		<MaxPath Condition="'$(MaxVersion)'=='2015' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2015)</MaxPath>
 
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2012'">$(ADSK_3DSMAX_SDK_2012)</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2013'">$(ADSK_3DSMAX_SDK_2013)</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2014'">$(ADSK_3DSMAX_SDK_2014)</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2015'">$(ADSK_3DSMAX_SDK_2015)</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2012'">$(ADSK_3DSMAX_SDK_2012)\maxsdk\</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2013'">$(ADSK_3DSMAX_SDK_2013)\maxsdk\</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2014'">$(ADSK_3DSMAX_SDK_2014)\</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2015'">$(ADSK_3DSMAX_SDK_2015)\</MaxSDKPath>
 
 		<!-- If no install of Max SDK is present, default to the fabric system build values  -->
 		<MaxSDKPath Condition="'$(MaxSDKPath)'==''">$(FABRIC_SCENE_GRAPH_DIR)\ThirdParty\PreBuilt\Windows\x86_64\Release\3dsmax\3ds Max $(MaxVersion) SDK\</MaxSDKPath>
@@ -35,6 +35,11 @@
 		<IsUnicode Condition="'$(MaxVersion)' &gt; '2012'">true</IsUnicode>
 
 		<SpliceOutDir>$(FABRIC_DIR)\SpliceIntegrations\FabricSplice3dsmax$(MaxVersion)\</SpliceOutDir>
+
+		<FabricUIDir>$(FABRIC_UI_DIR)</FabricUIDir>
+		<!-- If no install of SpliceUI is present, default to the fabric system build values  -->
+		<FabricUIDir Condition="'$(FabricUIDir)'==''">$(ProjectDir)..\FabricUI\</FabricUIDir>
+
 
 	</PropertyGroup>
 	
@@ -65,11 +70,14 @@
 	<PropertyGroup Condition="'$(MaxVersion)' &gt; '2014'">
 		<PlatformToolset>v110</PlatformToolset>
 	</PropertyGroup>
+	<PropertyGroup><!-- Tmp overwrite VS version, until FE supplies libraries we can link vs earlier VS versions-->
+		<PlatformToolset>v120</PlatformToolset>
+	</PropertyGroup>
 	
 	<ItemDefinitionGroup>
 		<!-- default values for compiler -->
 		<ClCompile>
-			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(FabricUIDir);$(FABRIC_DIR)\include;$(QT_DIR)\include;$(MaxSDKPath)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<StringPooling>true</StringPooling>
@@ -77,16 +85,7 @@
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
      	<PreprocessorDefinitions>FEC_SHARED;FECS_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-		</ClCompile>
-
-		<!-- 2014 very helpfully changed the installed path -->
-    <ClCompile>
-        <AdditionalIncludeDirectories>$(MaxSDKPath)\maxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-		<ClCompile Condition="'$(MaxVersion)' &gt; '2013'">
-			<AdditionalIncludeDirectories>$(MaxSDKPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-		</ClCompile>
-        
+		</ClCompile>        
 
 		<!-- Turn on E&C for Debug Win32 builds -->
 		<ClCompile Condition="'$(IsDebug)'">
@@ -112,14 +111,9 @@
 			<LinkIncremental>true</LinkIncremental>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<SubSystem>Windows</SubSystem>
-			<AdditionalDependencies>FabricCore-2.0.lib;FabricSplice-2.0.lib;assetmanagement.lib;atscore.lib;biped.lib;bmm.lib;core.lib;crowd.lib;custdlg.lib;databridge.lib;edmodel.lib;expr.lib;flt.lib;geom.lib;gfx.lib;GraphicsDriver.lib;gup.lib;igame.lib;imageviewers.lib;manipsys.lib;maxnet.lib;maxscrpt.lib;maxutil.lib;menuman.lib;menus.lib;mesh.lib;mnmath.lib;paramblk2.lib;particle.lib;particleflow.lib;physique.lib;poly.lib;polypaint.lib;renderutil.lib;rtmax.lib;tessint.lib;viewfile.lib;zlibdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>FabricCore-2.0.lib;FabricServices-MSVC-12.0.lib;FabricSplice-2.0.lib;assetmanagement.lib;atscore.lib;biped.lib;bmm.lib;core.lib;crowd.lib;custdlg.lib;databridge.lib;edmodel.lib;expr.lib;flt.lib;geom.lib;gfx.lib;GraphicsDriver.lib;gup.lib;igame.lib;imageviewers.lib;manipsys.lib;maxnet.lib;maxscrpt.lib;maxutil.lib;menuman.lib;menus.lib;mesh.lib;mnmath.lib;paramblk2.lib;particle.lib;particleflow.lib;physique.lib;poly.lib;polypaint.lib;renderutil.lib;rtmax.lib;tessint.lib;viewfile.lib;zlibdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies Condition="'$(MaxVersion)'!='2012'">GraphicsUtility.lib;%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalLibraryDirectories>$(FABRIC_DIR)\lib;$(BOOST_DIR);$(MaxSDKPath)\maxsdk\lib\x64\Release\</AdditionalLibraryDirectories>
-		</Link>
-
-		<!-- 2014 very helpfully changed the installed path -->
-		<Link Condition="'$(MaxVersion)' &gt; '2013'">
-			<AdditionalLibraryDirectories>$(MaxSDKPath)\lib\x64\Release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalLibraryDirectories>$(FABRIC_DIR)\lib;$(BOOST_DIR);$(MaxSDKLibPath)</AdditionalLibraryDirectories>
 		</Link>
 	</ItemDefinitionGroup>
 	<ImportGroup Label="PropertySheets">

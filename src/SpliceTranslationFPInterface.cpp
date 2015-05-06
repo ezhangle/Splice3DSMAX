@@ -23,8 +23,8 @@ BOOL SpliceTranslationFPInterface::SetSpliceGraph(ReferenceTarget* rtarg)
 	if (pTargetInterface != nullptr)
 	{
 		// We are going to share the graph of the target interface
-		SetSpliceGraph(pTargetInterface->GetSpliceGraph(), rtarg->GetParamBlock(0));
-		return TRUE;
+		//SetSpliceGraph(pTargetInterface->GetSpliceGraph(), rtarg->GetParamBlock(0));
+		//return TRUE;
 	}
 	return FALSE;
 }

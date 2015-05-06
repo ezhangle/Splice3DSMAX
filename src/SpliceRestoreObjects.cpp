@@ -42,9 +42,9 @@ void CustomKLUndoRedoCommandObject::Redo()
 SplicePortChangeObject::SplicePortChangeObject(SpliceTranslationFPInterface* maxOwner)
 	: m_maxOwner(maxOwner)
 {
-	FabricSplice::DGGraph graph = maxOwner->GetSpliceGraph();
-	m_prePortLayout = graph.getPersistenceDataDict();
-	m_outPortName = maxOwner->GetOutPortName();
+	//DFGWrapper::Binding graph = maxOwner->GetSpliceGraph();
+	//m_prePortLayout = graph.getPersistenceDataDict();
+	//m_outPortName = maxOwner->GetOutPortName();
 }
 
 SplicePortChangeObject::~SplicePortChangeObject()
@@ -54,28 +54,28 @@ SplicePortChangeObject::~SplicePortChangeObject()
 
 void SplicePortChangeObject::EndHold()
 {
-	FabricSplice::DGGraph graph = m_maxOwner->GetSpliceGraph();
-	m_postPortLayout = graph.getPersistenceDataDict();
+	//DFGWrapper::Binding graph = m_maxOwner->GetSpliceGraph();
+	//m_postPortLayout = graph.getPersistenceDataDict();
 }
 
 void SplicePortChangeObject::Restore( int isUndo )
 {
-	FabricSplice::DGGraph graph = m_maxOwner->GetSpliceGraph();
-	graph.setFromPersistenceDataDict(m_prePortLayout);
-	m_maxOwner->UpdateKLEditor();
-	// Re-connect the outport (TODO: Parent ports?)
-	m_maxOwner->ResetPorts();
-	m_maxOwner->SetOutPortName(m_outPortName.data());
+	//DFGWrapper::Binding graph = m_maxOwner->GetSpliceGraph();
+	//graph.setFromPersistenceDataDict(m_prePortLayout);
+	//m_maxOwner->UpdateKLEditor();
+	//// Re-connect the outport (TODO: Parent ports?)
+	//m_maxOwner->ResetPorts();
+	//m_maxOwner->SetOutPortName(m_outPortName.data());
 }
 
 void SplicePortChangeObject::Redo()
 {
-	FabricSplice::DGGraph graph = m_maxOwner->GetSpliceGraph();
-	graph.setFromPersistenceDataDict(m_postPortLayout);
-	m_maxOwner->UpdateKLEditor();
-	// Re-connect the outport (TODO: Parent ports?)
-	m_maxOwner->ResetPorts();
-	m_maxOwner->SetOutPortName(m_outPortName.data());
+	//DFGWrapper::Binding graph = m_maxOwner->GetSpliceGraph();
+	//graph.setFromPersistenceDataDict(m_postPortLayout);
+	//m_maxOwner->UpdateKLEditor();
+	//// Re-connect the outport (TODO: Parent ports?)
+	//m_maxOwner->ResetPorts();
+	//m_maxOwner->SetOutPortName(m_outPortName.data());
 }
 
 #pragma endregion

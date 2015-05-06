@@ -47,7 +47,7 @@ void SpliceModifier::NotifyInputChanged( const Interval &changeInt, PartID partI
 //////////////////////////////////////////////////////////////////////////
 void SpliceModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os, INode *node )
 {
-	if (!m_graph.isValid() || m_graph.getKLOperatorCount() == 0)
+	if (!m_binding.isValid())
 		return;
 
 	TriObject* pTriObj = static_cast<TriObject*>(os->obj);

@@ -60,6 +60,9 @@
     <ClCompile Include="src\SpliceWSModifier.cpp">
       <Filter>MaxImplementations</Filter>
     </ClCompile>
+    <ClCompile Include="src\DFGWidget.cpp">
+      <Filter>DFGWidget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\resource.h" />
@@ -113,6 +116,9 @@
     <ClInclude Include="src\SpliceWSModifier.h">
       <Filter>MaxImplementations</Filter>
     </ClInclude>
+    <ClInclude Include="src\DFGWidget.h">
+      <Filter>DFGWidget</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MaxScript files">
@@ -132,6 +138,9 @@
     </Filter>
     <Filter Include="SpliceTranslation">
       <UniqueIdentifier>{eb571dd0-6f53-4b39-8436-a3fe36f08537}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DFGWidget">
+      <UniqueIdentifier>{3c16cf14-eb20-4a24-b03e-944679a9f2a7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

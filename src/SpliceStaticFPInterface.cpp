@@ -118,44 +118,45 @@ BOOL SpliceStaticFPInterface::ExportSpliceFile(const MSTR& file, ReferenceTarget
 		return FALSE;
 
 	CStr cFile = file.ToCStr();
-	FabricSplice::DGGraph* pGraph = const_cast<FabricSplice::DGGraph*>(&pSpliceInterface->GetSpliceGraph());
-	return pGraph->saveToFile(cFile.data());
+	//DFGWrapper::Binding* pGraph = const_cast<DFGWrapper::Binding*>(&pSpliceInterface->GetSpliceGraph());
+	return false ; //pGraph->saveToFile(cFile.data());
 }
 
 int SpliceStaticFPInterface::GetGlobalKLOperatorCount()
 {
-	return FabricSplice::DGGraph::getGlobalKLOperatorCount();
+	return 0; //DFGWrapper::Binding::getGlobalKLOperatorCount();
 }
 
 MSTR SpliceStaticFPInterface::GetGlobalKLOperatorName(int index)
 {
-	const char* opName = FabricSplice::DGGraph::getGlobalKLOperatorName(index);
-	MSTR rval;
-	rval.FromACP(opName);
-	return rval;
+	//const char* opName = DFGWrapper::Binding::getGlobalKLOperatorName(index);
+	//MSTR rval;
+	//rval.FromACP(opName);
+	//return rval;
+	return _M("");
 }
 
 BOOL SpliceStaticFPInterface::LoadExtension( const MSTR& extension, const MSTR& version, bool reload)
 {
-	const FabricCore::Client* pClient = NULL;
-	FECS_DGGraph_getClient(&pClient);
+	//const FabricCore::Client* pClient = NULL;
+	//FECS_DGGraph_getClient(&pClient);
 
-	// No client, nothing to do (the extension will be loaded when requested
-	if(pClient == nullptr)
-		return FALSE;
+	//// No client, nothing to do (the extension will be loaded when requested
+	//if(pClient == nullptr)
+	//	return FALSE;
 
-	CStr cExtension = extension.ToCStr();
-	CStr cVersion = version.ToCStr();
-	FEC_ClientLoadExtension(pClient->getFECClientRef(), cExtension.data(), cVersion.data(), reload);
+	//CStr cExtension = extension.ToCStr();
+	//CStr cVersion = version.ToCStr();
+	//FEC_ClientLoadExtension(pClient->getFECClientRef(), cExtension.data(), cVersion.data(), reload);
 
-	// If the call failed for any reason, we need to clear the exception status from Fabric
-	uint32_t length = FEC_GetLastExceptionLength();
-	if ( length > 0 )
-	{
-		MSTR message = MSTR::FromACP(FEC_GetLastExceptionCString(), length);
-		FEC_ClearLastException();
-		throw UserThrownError(message.data(), FALSE);
-	}
+	//// If the call failed for any reason, we need to clear the exception status from Fabric
+	//uint32_t length = FEC_GetLastExceptionLength();
+	//if ( length > 0 )
+	//{
+	//	MSTR message = MSTR::FromACP(FEC_GetLastExceptionCString(), length);
+	//	FEC_ClearLastException();
+	//	throw UserThrownError(message.data(), FALSE);
+	//}
 	return TRUE;
 }
 
@@ -180,44 +181,44 @@ bool ReadFileIntoString(const char* file, std::string& outcontents) {
 
 bool SpliceStaticFPInterface::RegisterExtension( const MSTR& extension, const MSTR& version, const MSTR& override, const Tab<MSTR*>& files, bool load, bool reload )
 {
-	const FabricCore::Client* pClient = NULL;
-	FECS_DGGraph_getClient(&pClient);
+	//const FabricCore::Client* pClient = NULL;
+	//FECS_DGGraph_getClient(&pClient);
 
-	// No client, nothing to do (the extension will be loaded when requested
-	if(pClient == nullptr)
-		return FALSE;
+	//// No client, nothing to do (the extension will be loaded when requested
+	//if(pClient == nullptr)
+	//	return FALSE;
 
-	CStr cExtension = extension.ToCStr();
-	CStr cVersion = version.ToCStr();
-	CStr cOverride = version.ToCStr();
-	std::vector<std::string> fileNames;
-	std::vector<std::string> fileContents;
-	std::vector<FEC_KLSourceFile> fileHolder;
+	//CStr cExtension = extension.ToCStr();
+	//CStr cVersion = version.ToCStr();
+	//CStr cOverride = version.ToCStr();
+	//std::vector<std::string> fileNames;
+	//std::vector<std::string> fileContents;
+	//std::vector<FEC_KLSourceFile> fileHolder;
 
-	// Read file contents into the buffers
-	int numFiles = files.Count();
-	fileNames.resize(numFiles);
-	fileContents.resize(numFiles);
-	fileHolder.resize(numFiles);
-	for (int i = 0; i < numFiles; i++) {
-		fileNames[i] = files[i]->ToACP();
-		if (!ReadFileIntoString(fileNames[i].data(), fileContents[i]))
-			return false;
+	//// Read file contents into the buffers
+	//int numFiles = files.Count();
+	//fileNames.resize(numFiles);
+	//fileContents.resize(numFiles);
+	//fileHolder.resize(numFiles);
+	//for (int i = 0; i < numFiles; i++) {
+	//	fileNames[i] = files[i]->ToACP();
+	//	if (!ReadFileIntoString(fileNames[i].data(), fileContents[i]))
+	//		return false;
 
-		fileHolder[i].filenameCStr = fileNames[i].data();
-		fileHolder[i].sourceCodeCStr = fileContents[i].data();
-	}
+	//	fileHolder[i].filenameCStr = fileNames[i].data();
+	//	fileHolder[i].sourceCodeCStr = fileContents[i].data();
+	//}
 
-	FEC_RegisterKLExtension(pClient->getFECClientRef(), cExtension, cVersion, cOverride, numFiles, &fileHolder[0], load, reload);
+	//FEC_RegisterKLExtension(pClient->getFECClientRef(), cExtension, cVersion, cOverride, numFiles, &fileHolder[0], load, reload);
 
-	// If the call failed for any reason, we need to clear the exception status from Fabric
-	uint32_t length = FEC_GetLastExceptionLength();
-	if ( length > 0 )
-	{
-		MSTR message = MSTR::FromACP(FEC_GetLastExceptionCString(), length);
-		FEC_ClearLastException();
-		throw UserThrownError(message.data(), FALSE);
-	}
+	//// If the call failed for any reason, we need to clear the exception status from Fabric
+	//uint32_t length = FEC_GetLastExceptionLength();
+	//if ( length > 0 )
+	//{
+	//	MSTR message = MSTR::FromACP(FEC_GetLastExceptionCString(), length);
+	//	FEC_ClearLastException();
+	//	throw UserThrownError(message.data(), FALSE);
+	//}
 	return true;
 }
 

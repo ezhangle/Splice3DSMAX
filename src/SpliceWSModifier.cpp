@@ -57,7 +57,7 @@ void SpliceWSModifier::NotifyInputChanged( const Interval &changeInt, PartID par
 //////////////////////////////////////////////////////////////////////////
 void SpliceWSModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os, INode *node )
 {
-	if (!m_graph.isValid() || m_graph.getKLOperatorCount() == 0)
+	if (!m_binding.isValid())
 		return;
 
 	TriObject* pTriObj = static_cast<TriObject*>(os->obj);
@@ -155,6 +155,6 @@ void SpliceWSModifier::GetLocalBoundBox(TimeValue t, INode *mat, ViewExp * /*vpt
 void SpliceWSModifier::ResetPorts()
 {
 	// We add a transform value so that our Splice operator can evaluate relative to the input matrix
-	m_nodeTransformPort = AddSpliceParameter(m_graph, TYPE_MATRIX3, _M("nodeTransform"), FabricSplice::Port_Mode_IN);
+	m_nodeTransformPort = AddSpliceParameter(m_binding, TYPE_MATRIX3, _M("nodeTransform"), FabricCore::DFGPortType_In);
 	ParentClass::ResetPorts();
 }

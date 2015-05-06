@@ -27,7 +27,7 @@ class IParamBlock2;
 class DynPBCustAttrClassDesc;
 
 // Stores a connection between Max data (ParamID) and Splice data (DGPort)
-//typedef std::pair<ParamID, FabricSplice::DGPort> ConnData;
+//typedef std::pair<ParamID, DFGWrapper::PortPtr> ConnData;
 #define MAX_PID_OPT "MaxPID"
 #define MAX_SRC_OPT "SrcPort"
 #define MAX_SRC_IDX_OPT "SrcIdx"
@@ -44,8 +44,8 @@ class DynPBCustAttrClassDesc;
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const MCHAR* sName, ParamID desiredId=-1 );
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName );
 void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name);
-void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort& port);
-void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort& port);
+void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::PortPtr& port);
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::PortPtr& port);
 
 /*! Generate a Win32 dialog for the passed pblok
 	\param pblock - The list of parameters to generate UI for
@@ -74,29 +74,29 @@ int SpliceTypeToDefaultMaxType(const char* cType);
 	\type - The Max type that will be set 
 	\pName - The name of the parameter
 	\mode - whether this is a read/write variable */
-const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, const char* type, const char* cName, FabricSplice::Port_Mode mode, bool isArray = false, const char* inExtension="");
-const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, int type, const MCHAR* pName, FabricSplice::Port_Mode mode);
-const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, int type, const char* pName, FabricSplice::Port_Mode mode, bool isArray = false, const char* inExtension="");
+const DFGWrapper::PortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, const char* type, const char* cName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension="");
+const DFGWrapper::PortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, int type, const MCHAR* pName, FabricCore::DFGPortType mode);
+const DFGWrapper::PortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, int type, const char* pName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension="");
 
 /** Get various useful info's from fabric Ports */
-int GetPortParamID(FabricSplice::DGPort& aPort);
-void SetPortParamID(FabricSplice::DGPort& aPort, ParamID id);
-std::string GetPortConnection(FabricSplice::DGPort& aPort);
-void SetPortConnection(FabricSplice::DGPort& aPort, const char* name);
-int GetPortConnectionIndex(FabricSplice::DGPort& aPort);
-void SetPortConnectionIndex(FabricSplice::DGPort& aPort, int index);
-bool GetPortPostConnectionUI(FabricSplice::DGPort& aPort);
-void SetPortPostConnectionUI(FabricSplice::DGPort& aPort, bool postUi);
-const char* GetPortName(FabricSplice::DGPort& aPort);
-const char* GetPortType(FabricSplice::DGPort& aPort);
+int GetPortParamID(DFGWrapper::PortPtr& aPort);
+void SetPortParamID(DFGWrapper::PortPtr& aPort, ParamID id);
+std::string GetPortConnection(DFGWrapper::PortPtr& aPort);
+void SetPortConnection(DFGWrapper::PortPtr& aPort, const char* name);
+//int GetPortConnectionIndex(DFGWrapper::PortPtr& aPort);
+//void SetPortConnectionIndex(DFGWrapper::PortPtr& aPort, int index);
+//bool GetPortPostConnectionUI(DFGWrapper::PortPtr& aPort);
+//void SetPortPostConnectionUI(DFGWrapper::PortPtr& aPort, bool postUi);
+//const char* GetPortName(DFGWrapper::PortPtr& aPort);
+//const char* GetPortType(DFGWrapper::PortPtr& aPort);
 
-bool SetPortOption(FabricSplice::DGPort& aPort, const char* option, FPValue* value);
-bool SetPortValue(FabricSplice::DGPort& aPort, FPValue* value);
+bool SetPortOption(DFGWrapper::PortPtr& aPort, const char* option, FPValue* value);
+bool SetPortValue(DFGWrapper::PortPtr& aPort, FPValue* value);
 
 /** Given a Max value, send it to the dgPort in the appropriate fashion */
 
 /** For each valid in the parameter block, send it to the appropriate Splice port in paramData */
-void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DGGraph& rGraph, std::vector<Interval>& paramValidities, Interval& ivValid);
+void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, DFGWrapper::Binding& rBinding, std::vector<Interval>& paramValidities, Interval& ivValid);
 
 // DlgCallback for our static UI
 INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -105,7 +105,7 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 //////////////////////////////////////////////////////////////////////////
 template<typename TBaseClass, typename TResultType>
-class SpliceTranslationLayer : public TBaseClass, public SpliceTranslationFPInterface
+class SpliceTranslationLayer : public TBaseClass, public SpliceTranslationFPInterface, public FabricServices::DFGWrapper::View
 {
 public:
 	// Use this typedef within a derivation to refer to the parent class (eg CloneSpliceData)
@@ -150,18 +150,11 @@ protected:
 
 #pragma region Splice Connections
 
-	// For now, till I figure out exactly how we go in->out of KL, restrict to 1 operator
-	std::string m_operator;
-
-	// The evaluation graph is the brains of the KL system. (I think)
-	FabricSplice::DGGraph m_graph;
-	// Every splice class generates a result
-	FabricSplice::DGPort m_valuePort;
-	// If our valuePort is an array port, this value specifies
-	// which index in the array is our particular value
-	// If we are not an array, this value will be -1.
-	int m_valuePortIndex;
-
+	// Binding to a DFG
+	FabricServices::DFGWrapper::Binding m_binding;
+	FabricCore::Client m_client;
+	FabricServices::DFGWrapper::Host* m_host;
+	DFGWrapper::PortPtr	m_valuePort;
 	// We store a vector recording the Max validity
 	// of each parameter.  We only reset data on Splice
 	// if the parameter has actually changed.
@@ -313,9 +306,9 @@ public:
 	// Port creation/management
 
 	// Get the number of ports on this graph
-	int GetPortCount() { return m_graph.getDGPortCount(); }
-	FabricSplice::DGPort GetPort(int i) { return (i < GetPortCount() && i >= 0) ? m_graph.getDGPort(i) : FabricSplice::DGPort(); }
-	FabricSplice::DGPort GetPort(const char* name) { return m_graph.getDGPort(name); }
+	int GetPortCount() { return 0; }//return getGraph().getDGPortCount(); }
+	DFGWrapper::PortPtr GetPort(int i) { return (i < GetPortCount() && i >= 0) ? m_binding.getExecutable()->getPort(i) : DFGWrapper::PortPtr(); }
+	DFGWrapper::PortPtr GetPort(const char* name) { return m_binding.getExecutable()->getPort(name); }
 
 	// Splice port management
 	// Create a new port.  A matching Max parameter 
@@ -333,10 +326,10 @@ public:
 	const char* GetPortType(const char* i);
 	bool IsPortArray(const char* i);
 
-	std::string GetAllPortSignature() { return (m_graph) ? m_graph.generateKLOperatorParameterList().getString_cstr() : NULL; }
+	std::string GetAllPortSignature() { return 0; } //(getGraph()) ? getGraph().generateKLOperatorParameterList().getString_cstr() : NULL; }
 
 	// Get the name of the port we our value from
-	const char* GetOutPortName() { return m_valuePort.isValid() ? m_valuePort.getName() : ""; }
+	const char* GetOutPortName() { return ""; }// m_valuePort.isValid() ? m_valuePort.getName() : ""; }
 	bool SetOutPortName(const char* name);
 
 	int GetOutPortArrayIdx();
@@ -360,8 +353,8 @@ public:
 	// Set the type of the Max parameter pushing data to the splice port
 	// \param i The index of the splice port
 	// \type The ParamType to set the matching Max parameter to.
-	int SetMaxConnectedType(FabricSplice::DGPort& aPort, int maxType);
-	virtual int SetMaxConnectedType(const char* portName, int type);
+	//int SetMaxConnectedType(DFGWrapper::PortPtr& aPort, int maxType);
+	//virtual int SetMaxConnectedType(const char* portName, int type);
 	// Returns an array of the max types that can be used to drive
 	// data for splice port
 	// \param i The index of the splice port
@@ -375,9 +368,9 @@ public:
 	bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax);
 
 	// Set splice values
-	const FabricSplice::DGGraph& GetSpliceGraph() { return m_graph; }
-	void SetSpliceGraph(const FabricSplice::DGGraph& graph, bool createMaxParams);
-	void SetOutPort(const FabricSplice::DGPort& port) { m_valuePort = port; };
+//	const DFGWrapper::Binding& GetSpliceGraph() { return getGraph(); }
+//	void SetSpliceGraph(const DFGWrapper::Binding& graph, bool createMaxParams);
+//	void SetOutPort(const DFGWrapper::PortPtr& port) { m_valuePort = port; };
 
 	// Load from a saved JSON file spec
 	bool LoadFromFile(const MCHAR* filename, bool createMaxParams);
@@ -386,6 +379,38 @@ public:
 	virtual void ResetPorts();
 
 #pragma endregion
+
+#pragma region DFG-derived functions
+
+	  // notifications
+  // for now we only implement onPortInserted and onPortRemoved
+  virtual void onNotification(char const * json) {}
+  virtual void onNodeInserted(FabricServices::DFGWrapper::NodePtr node) {}
+  virtual void onNodeRemoved(FabricServices::DFGWrapper::NodePtr node) {}
+  virtual void onPinInserted(FabricServices::DFGWrapper::PinPtr pin) {}
+  virtual void onPinRemoved(FabricServices::DFGWrapper::PinPtr pin) {}
+  virtual void onPortInserted(FabricServices::DFGWrapper::PortPtr port) {}
+  virtual void onPortRemoved(FabricServices::DFGWrapper::PortPtr port) {}
+  virtual void onEndPointsConnected(FabricServices::DFGWrapper::EndPointPtr src, FabricServices::DFGWrapper::EndPointPtr dst) {}
+  virtual void onEndPointsDisconnected(FabricServices::DFGWrapper::EndPointPtr src, FabricServices::DFGWrapper::EndPointPtr dst) {}
+  virtual void onNodeMetadataChanged(FabricServices::DFGWrapper::NodePtr node, const char * key, const char * metadata) {}
+  virtual void onNodeTitleChanged(FabricServices::DFGWrapper::NodePtr node, const char * title) {}
+  virtual void onPortRenamed(FabricServices::DFGWrapper::PortPtr port, const char * oldName) {}
+  virtual void onPinRenamed(FabricServices::DFGWrapper::PinPtr pin, const char * oldName) {}
+  virtual void onExecMetadataChanged(FabricServices::DFGWrapper::ExecutablePtr exec, const char * key, const char * metadata) {}
+  virtual void onExtDepAdded(const char * extension, const char * version) {}
+  virtual void onExtDepRemoved(const char * extension, const char * version) {}
+  virtual void onNodeCacheRuleChanged(const char * path, const char * rule) {}
+  virtual void onExecCacheRuleChanged(const char * path, const char * rule) {}
+  virtual void onPortResolvedTypeChanged(FabricServices::DFGWrapper::PortPtr port, const char * resolvedType) {}
+  virtual void onPortTypeSpecChanged(FabricServices::DFGWrapper::PortPtr port, const char * typeSpec) {}
+  virtual void onPinResolvedTypeChanged(FabricServices::DFGWrapper::PinPtr pin, const char * resolvedType) {}
+  virtual void onPortMetadataChanged(FabricServices::DFGWrapper::PortPtr port, const char * key, const char * metadata) {}
+  virtual void onPinMetadataChanged(FabricServices::DFGWrapper::PinPtr pin, const char * key, const char * metadata) {}
+
+  static void bindingNotificationCallback(void * userData, char const *jsonCString, uint32_t jsonLength) {}
+#pragma endregion
+  //////////////////////////////////////////////////////////////////////////
 
 	/// Invalidate our cached values, will cause a re-evalaute of the graph next evaluation
 	void Invalidate() { m_valid.SetEmpty(); }

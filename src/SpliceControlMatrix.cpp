@@ -33,7 +33,7 @@ private:
 
 	bool CloneSpliceData(SpliceTranslationLayer<Control, Matrix3>* pMyClone) { return true; } ; // No cloning for me...
 
-	FabricSplice::DGPort m_parentValuePort;
+	//DFGWrapper::PortPtr m_parentValuePort;
 
 	// Our cache is only valid if the parent has not changed.
 	// We cache the parents transform, and invalidate our cache
@@ -73,7 +73,7 @@ void SpliceControlMatrix::ResetPorts()
 {
 	// We add a parent value to, so that our Splice operator can evaluate relative to the input matrix
 	// This is similar to how standard 3ds Max transforms plugins work
-	m_parentValuePort = AddSpliceParameter(m_graph, TYPE_MATRIX3, _M("parentValue"), FabricSplice::Port_Mode_IN);
+	AddSpliceParameter(m_binding, TYPE_MATRIX3, _M("parentValue"), FabricCore::DFGPortType_In);
 	ParentClass::ResetPorts();
 }
 
@@ -90,14 +90,14 @@ void SpliceControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, G
 	Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
 	if(method == CTRL_ABSOLUTE)
 	{
-		MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3::Identity);
+		//MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3::Identity);
 	}
 	else
 	{
 		// if our parents value has changed, invalidate our cache
 		if (!(m_cachedParentVal == *pInVal))
 			Invalidate();
-		MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
+		//MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
 		// Cache parent transform for next eval
 		m_cachedParentVal = *pInVal;
 	}

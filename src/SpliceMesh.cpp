@@ -71,8 +71,10 @@ public:
 	bool PrepareDisplay(const MaxSDK::Graphics::UpdateDisplayContext& updateDisplayContext) override;
 #endif
 
+#if MAX_VERSION_MAJOR < 17
 	// From GeomObject
 	virtual Mesh* GetRenderMesh(TimeValue t, INode *inode, View& view, BOOL& needDelete) override;
+#endif
 
 	//From Animatable
 	virtual Class_ID ClassID() override {return SpliceMesh_CLASS_ID;}		
@@ -274,6 +276,7 @@ void SpliceMesh::GetDeformBBox(TimeValue t, Box3& box, Matrix3* tm, BOOL useSel 
 		box = box * *tm;
 }
 
+#if MAX_VERSION_MAJOR < 17
 Mesh* SpliceMesh::GetRenderMesh(TimeValue t, 
 						INode *inode, View& view, BOOL& needDelete)
 {
@@ -282,7 +285,7 @@ Mesh* SpliceMesh::GetRenderMesh(TimeValue t,
 	const Mesh& mesh = Evaluate(t, ivDontCare);
 	return const_cast<Mesh*>(&mesh);
 }
-
+#endif
 
 Object* SpliceMesh::ConvertToType(TimeValue t, Class_ID obtype)
 {

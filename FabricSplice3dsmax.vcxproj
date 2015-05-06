@@ -31,8 +31,15 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CP3dsmaxIntegration</RootNamespace>
   </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug 2015|x64'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
   <Import Project="ProjectProperties.props" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2015|x64'">
+    <ClCompile />
+  </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\DFGWidget.cpp" />
     <ClCompile Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.cpp" />
     <ClCompile Include="src\DynamicParamBlocks\DynPBUndo.cpp" />
     <ClCompile Include="src\MaxConversionFns.cpp" />
@@ -61,6 +68,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClInclude Include="src\DFGWidget.h" />
     <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\resource.h" />
     <ClInclude Include="src\MaxConversionFns.h" />
     <ClInclude Include="src\MouseCallbacks\KbdTranslation.h" />

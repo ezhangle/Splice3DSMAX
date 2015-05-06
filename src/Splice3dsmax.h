@@ -7,9 +7,6 @@
 
 #define MAXSPLICE_CATCH_END \
     } \
-	catch (FabricSplice::Exception e) { \
-		logMessage(e.what()); \
-    } \
 	catch (FabricCore::Exception e) { \
 		logMessage(e.getDesc_cstr()); \
     } \
@@ -20,10 +17,6 @@
 
 #define MAXSPLICE_CATCH_RETURN(value) \
 	    } \
-	catch (FabricSplice::Exception e) { \
-		logMessage(e.what()); \
-		return value; \
-	} \
 	catch (FabricCore::Exception e) { \
 		logMessage(e.getDesc_cstr()); \
 		return value; \

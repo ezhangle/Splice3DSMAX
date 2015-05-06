@@ -41,7 +41,9 @@ extern HINSTANCE hInstance;
 extern TCHAR *GetString(int id);
 
 // Fabric includes
-#include <FabricSplice.h>
+#include <DFGWrapper/DFGWrapper.h>
+#include <DFGWrapper/Port.h>
+using namespace FabricServices;
 
 // Local includes
 #include "DynamicParamBlocks\DynamicDialog\resource.h"

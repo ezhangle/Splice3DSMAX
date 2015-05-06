@@ -68,8 +68,8 @@ void gatherLogErrorFunc(const char * message, unsigned int length)
 GatherCompilerResults::GatherCompilerResults()
 {
 	s_CompilerStack.push_back(this);
-	FabricSplice::Logging::setCompilerErrorFunc(gatherCompilerErrorFunc);
-	FabricSplice::Logging::setLogErrorFunc(gatherLogErrorFunc);
+	//FabricSplice::Logging::setCompilerErrorFunc(gatherCompilerErrorFunc);
+	//FabricSplice::Logging::setLogErrorFunc(gatherLogErrorFunc);
 }
 
 GatherCompilerResults::~GatherCompilerResults()
@@ -135,7 +135,7 @@ void postLogMessages()
 	s_Messages.clear();
 }
 
-void myLogFunc(const char * message, unsigned int length)
+void myLogFunc(void* pCallbackData, const char * message, unsigned int length)
 {
 	CStr cstr;
 	cstr.printf("[Splice] %s\n", message);
@@ -201,25 +201,25 @@ void InitLoggingTimer()
 
 extern void SetGenericLoggerEnabled( bool enable )
 {
-	FabricSplice::Logging::setLogFunc((enable) ? myLogFunc : NULL);
+//	FabricSplice::Logging::setLogFunc((enable) ? myLogFunc : NULL);
 }
 
 extern void SetErrorLoggerEnabled( bool enable )
 {
-	FabricSplice::Logging::setLogErrorFunc((enable) ? myLogErrorFunc : NULL);
+//	FabricSplice::Logging::setLogErrorFunc((enable) ? myLogErrorFunc : NULL);
 }
 
 extern void SetCompilerLoggerEnabled( bool enable )
 {
-	FabricSplice::Logging::setCompilerErrorFunc((enable) ? myCompilerErrorFunc : NULL);
+//	FabricSplice::Logging::setCompilerErrorFunc((enable) ? myCompilerErrorFunc : NULL);
 }
 
 extern void SetKLReportLoggerEnabled( bool enable )
 {
-	FabricSplice::Logging::setKLReportFunc((enable) ? myKLReportFunc : NULL);
+//	FabricSplice::Logging::setKLReportFunc((enable) ? myKLReportFunc : NULL);
 }
 
 extern void SetKLStatusLoggerEnabled( bool enable )
 {
-	FabricSplice::Logging::setKLStatusFunc((enable) ? myKLStatusFunc : NULL);
+//	FabricSplice::Logging::setKLStatusFunc((enable) ? myKLStatusFunc : NULL);
 }

@@ -250,13 +250,13 @@ ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName )
 	return AddMaxParameter(pDesc, type, sName.data());
 }
 
-void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort& port)
+void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::PortPtr& port)
 {
 	ParamDef& def = pDesc->GetParamDef(pid);
 	int baseType = base_type(def.type);
 
-	FabricCore::Variant uiMin = port.getOption("uiMin");
-	FabricCore::Variant uiMax = port.getOption("uiMax");
+	FabricCore::Variant uiMin = port->getOption("uiMin");
+	FabricCore::Variant uiMax = port->getOption("uiMax");
 	if(uiMin.isNull() || uiMax.isNull())
 		return;
 
@@ -305,10 +305,20 @@ void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::Variant
 	pDesc->ParamOption(pid, p_default, def, p_end); 
 }
 
-void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricSplice::DGPort& port) {
+template<typename TType>
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::RTVal& defaultVal) {
+	TType def;
+	SpliceToMaxValue(defaultVal, def);
+	pDesc->ParamOption(pid, p_default, def, p_end);
+}
 
-	FabricCore::Variant defaultVal = port.getDefault();
-	if(defaultVal.isNull())
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::PortPtr& port) {
+
+	if (!port->isValid())
+		return;
+
+	FabricCore::RTVal defaultVal = port->getDefaultValue();
+	if(!defaultVal.isValid())
 		return;
 
 	ParamDef& def = pDesc->GetParamDef(pid);
@@ -529,100 +539,102 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 }
 
 // Add a parameter to the splice graph
-const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, int type, const MCHAR* pName, FabricSplice::Port_Mode mode)
+const DFGWrapper::PortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, int type, const MCHAR* pName, FabricCore::DFGPortType mode)
 {
-	return AddSpliceParameter(rGraph, type, CStr::FromMCHAR(pName).data(), mode);
+	
+	return AddSpliceParameter(rBinding, type, CStr::FromMCHAR(pName).data(), mode);
 }
 
 //////////////////////////////////////////////////////////////////////////
 // Helper functions for accessing options
-int GetPortParamID(FabricSplice::DGPort& aPort)
+int GetPortParamID(DFGWrapper::PortPtr& aPort)
 {
 	if (aPort)
 	{
-		FabricCore::Variant option = aPort.getOption(MAX_PID_OPT);
+		FabricCore::Variant option = aPort->getOption(MAX_PID_OPT);
 		if(option.isSInt32())
 			return (int)option.getSInt32();
 	}
 	return -1;
 }
 
-void SetPortParamID(FabricSplice::DGPort& aPort, ParamID id) 
+void SetPortParamID(DFGWrapper::PortPtr& aPort, ParamID id) 
 {
-	aPort.setOption(MAX_PID_OPT, GetVariant((int)id));
+	FabricCore::Variant var = GetVariant((int)id);
+	aPort->setOption(MAX_PID_OPT, &var);
 }
 
-std::string GetPortConnection(FabricSplice::DGPort& aPort) 
+std::string GetPortConnection(DFGWrapper::PortPtr& aPort) 
 {
 	std::string res;
-	if (aPort)
+	if (aPort->isValid())
 	{
-		FabricCore::Variant option = aPort.getOption(MAX_SRC_OPT);
+		FabricCore::Variant option = aPort->getOption(MAX_SRC_OPT);
 		if(option.isString())
 			res = option.getStringData();
 	}
 	return res;
 }
 
-void SetPortConnection(FabricSplice::DGPort& aPort, const char* name) 
+void SetPortConnection(DFGWrapper::PortPtr& aPort, const char* name) 
 {
-	if (aPort)
+	if (aPort->isValid())
 	{
 		FabricCore::Variant variant = GetVariant(name);
-		aPort.setOption(MAX_SRC_OPT, variant);
+		aPort->setOption(MAX_SRC_OPT, &variant);
 	}
 }
 
-int GetPortConnectionIndex(FabricSplice::DGPort& aPort) 
-{
-	if (aPort)
-	{
-		FabricCore::Variant option = aPort.getOption(MAX_SRC_IDX_OPT);
-		if(option.isSInt32())
-			return (int)option.getSInt32();
-	}
-	return -1;
-}
+//int GetPortConnectionIndex(DFGWrapper::PortPtr& aPort) 
+//{
+//	if (aPort)
+//	{
+//		FabricCore::Variant option = aPort.getOption(MAX_SRC_IDX_OPT);
+//		if(option.isSInt32())
+//			return (int)option.getSInt32();
+//	}
+//	return -1;
+//}
+//
+//void SetPortConnectionIndex(DFGWrapper::PortPtr& aPort, int index) 
+//{
+//	if (aPort)
+//	{
+//		return aPort.setOption(MAX_SRC_IDX_OPT, GetVariant(index));
+//	}
+//}
+//
+//bool GetPortPostConnectionUI(DFGWrapper::PortPtr& aPort) 
+//{
+//	if (aPort)
+//	{
+//		FabricCore::Variant option = aPort.getOption(MAX_POST_UI_OPT);
+//		if(option.isBoolean())
+//			return option.getBoolean();
+//	}
+//	return false;
+//}
+//
+//void SetPortPostConnectionUI(DFGWrapper::PortPtr& aPort, bool postUI) 
+//{
+//	if (aPort)
+//	{
+//		aPort.setOption(MAX_POST_UI_OPT, GetVariant(postUI));
+//	}
+//}
+//
+//const char* GetPortName( DFGWrapper::PortPtr& aPort )
+//{
+//	return aPort.getName();
+//}
+//
+//const char* GetPortType( DFGWrapper::PortPtr& aPort )
+//{
+//	return aPort.getDataType();
+//}
 
-void SetPortConnectionIndex(FabricSplice::DGPort& aPort, int index) 
-{
-	if (aPort)
-	{
-		return aPort.setOption(MAX_SRC_IDX_OPT, GetVariant(index));
-	}
-}
 
-bool GetPortPostConnectionUI(FabricSplice::DGPort& aPort) 
-{
-	if (aPort)
-	{
-		FabricCore::Variant option = aPort.getOption(MAX_POST_UI_OPT);
-		if(option.isBoolean())
-			return option.getBoolean();
-	}
-	return false;
-}
-
-void SetPortPostConnectionUI(FabricSplice::DGPort& aPort, bool postUI) 
-{
-	if (aPort)
-	{
-		aPort.setOption(MAX_POST_UI_OPT, GetVariant(postUI));
-	}
-}
-
-const char* GetPortName( FabricSplice::DGPort& aPort )
-{
-	return aPort.getName();
-}
-
-const char* GetPortType( FabricSplice::DGPort& aPort )
-{
-	return aPort.getDataType();
-}
-
-
-bool SetPortOption(FabricSplice::DGPort& aPort, const char* option, FPValue* value)
+bool SetPortOption(DFGWrapper::PortPtr& aPort, const char* option, FPValue* value)
 {
 	MAXSPLICE_CATCH_BEGIN()
 
@@ -630,13 +642,13 @@ bool SetPortOption(FabricSplice::DGPort& aPort, const char* option, FPValue* val
 		return false;
 	FabricCore::Variant variant = GetVariant(*value);
 	// if (!variant.isNull()) Do we want to allow setting Null values (remove option?);
-		aPort.setOption(option, variant);
+		aPort->setOption(option, &variant);
 	return true;
 	MAXSPLICE_CATCH_END
 	return false;
 }
 
-bool SetPortValue(FabricSplice::DGPort& aPort, FPValue* value)
+bool SetPortValue(DFGWrapper::PortPtr& aPort, FPValue* value)
 {
 	MAXSPLICE_CATCH_BEGIN()
 	if (value == nullptr)
@@ -644,8 +656,11 @@ bool SetPortValue(FabricSplice::DGPort& aPort, FPValue* value)
 	FabricCore::Variant variant = GetVariant(*value);
 	if (!variant.isNull())
 	{
-		aPort.setVariant(variant);
-		return true;
+		//aPort->setVariant(variant);
+		FabricCore::RTVal rtVal = aPort->getArgValue();
+		//ConvertToRTVal(*value, rtVal);
+		//aPort->setArgValue();
+		//return true;
 	}
 	MAXSPLICE_CATCH_END
 	return false;
@@ -755,22 +770,22 @@ int SpliceTypeToDefaultMaxType(const char* cType)
 	return SpliceTypeToMaxType(cType);
 }
 
-bool IsPortPersistable(FabricSplice::DGPort& port) {
-	if (!port)
+bool IsPortPersistable(DFGWrapper::Port& port) {
+	if (!port.isValid())
 		return false;
 
-	FabricCore::RTVal rtVal = port.getRTVal();
+	FabricCore::RTVal rtVal = port.getArgValue();
 	if(rtVal.isValid())
 	{
 		if(rtVal.isObject())
 		{
 			if(!rtVal.isNullObject())
 			{
-				FabricCore::RTVal objectRtVal = FabricSplice::constructRTVal("Object", 1, &rtVal);
-				if(objectRtVal.isValid())
+				//FabricCore::RTVal objectRtVal = FabricCore::RTVal::Create(port.getWrappedCoreBinding(), "Object", 1, &rtVal);
+				if(rtVal.isValid())
 				{
-					FabricCore::RTVal persistable = FabricSplice::constructInterfaceRTVal("Persistable", objectRtVal);
-					if(!persistable.isNullObject())
+					//FabricCore::RTVal persistable = FabricCore::RTVal::Construct(port.getWrappedCoreExec()., "Persistable", objectRtVal);
+					//if(!persistable.isNullObject())
 						return true;
 				}
 			}
@@ -779,35 +794,35 @@ bool IsPortPersistable(FabricSplice::DGPort& port) {
 	return false;
 }
 
-const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, const char* type, const char* cName, FabricSplice::Port_Mode mode, bool isArray/*=false*/, const char* inExtension)
+const DFGWrapper::PortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, const char* type, const char* cName, FabricCore::DFGPortType mode, bool isArray/*=false*/, const char* inExtension)
 {
 	std::string spliceType(type);
 	if (isArray)
 		spliceType = spliceType + "[]";
 
-	try {
-		if (!rGraph.hasDGNodeMember(cName)) {
-			rGraph.addDGNodeMember(cName, spliceType.data(), FabricCore::Variant(), "", inExtension);
-			FabricSplice::DGPort port = rGraph.addDGPort(cName, cName, mode);
+	//try {
+	//	if (!rGraph.hasDGNodeMember(cName)) {
+	//		rGraph.addDGNodeMember(cName, spliceType.data(), FabricCore::Variant(), "", inExtension);
+	//		DFGWrapper::PortPtr port = rGraph.addDGPort(cName, cName, mode);
 
-			// Does this port support custom persistence?  If so, mark it as persisted
-			if (IsPortPersistable(port))
-				rGraph.setMemberPersistence(cName, true);
-			return port;
-		}
+	//		// Does this port support custom persistence?  If so, mark it as persisted
+	//		if (IsPortPersistable(port))
+	//			rGraph.setMemberPersistence(cName, true);
+	//		return port;
+	//	}
 
-		// Port already exists
-		return rGraph.getDGPort(cName);
-	}
-	catch(FabricSplice::Exception e) 
+	//	// Port already exists
+	//	return rGraph.getDGPort(cName);
+	//}
+	//catch(FabricSplice::Exception e) 
 	{
-		CStr message = "ERROR on AddPort to Splice: ";
-		logMessage(message + e.what());
-		return FabricSplice::DGPort();
+//		CStr message = "ERROR on AddPort to Splice: ";
+//		logMessage(message + e.what());
+		return DFGWrapper::PortPtr();
 	}
 }
 
-const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, int type, const char* cName, FabricSplice::Port_Mode mode, bool isArray/*=false*/, const char* inExtension)
+const DFGWrapper::PortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, int type, const char* cName, FabricCore::DFGPortType mode, bool isArray/*=false*/, const char* inExtension)
 {
 	std::string strType;
 	switch ((int)type)
@@ -861,7 +876,7 @@ const FabricSplice::DGPort AddSpliceParameter(FabricSplice::DGGraph& rGraph, int
 		break;
 	}
 
-	return AddSpliceParameter(rGraph, strType.data(), cName, mode, isArray);
+	return AddSpliceParameter(rBinding, strType.data(), cName, mode, isArray);
 }
 
 #pragma endregion
@@ -914,7 +929,7 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 //////////////////////////////////////////////////////////////////////////
 template<typename TResultType, typename TConvertType>
-void ParameterBlockValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
+void ParameterBlockValuesToSplice(DFGWrapper::PortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
 {
 	MAXSPLICE_CATCH_BEGIN()
 
@@ -922,54 +937,54 @@ void ParameterBlockValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IPa
 	int nParams = 1;
 	if (is_tab(type)){
 		nParams = pblock->Count(pid);
-		DbgAssert(dgPort.isArray());
+		//DbgAssert(port->getPortType() isArray());
 	}
 
 	TResultType* pVals = new TResultType[nParams];
 	for (int i = 0; i < nParams; i++)
 		pblock->GetValue(pid, t, pVals[i], ivValid, i);
-	MaxValuesToSplice<TResultType, TConvertType>(dgPort, t, ivValid, pVals, nParams);
+	MaxValuesToSplice<TResultType, TConvertType>(port, t, ivValid, pVals, nParams);
 	delete pVals;
 
 	MAXSPLICE_CATCH_END
 }
 
 template<typename TResultType>
-void ParameterBlockValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
+void ParameterBlockValuesToSplice(DFGWrapper::PortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
 {
-	ParameterBlockValuesToSplice<TResultType, TResultType>(dgPort, t, pblock, pid, ivValid);
+	ParameterBlockValuesToSplice<TResultType, TResultType>(port, t, pblock, pid, ivValid);
 }
 
 // This helper function converts from INode to the appropriate Splice type
-void MaxPtrToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IParamBlock2* pblock, ParamID id, Interval& ivValid)
+void MaxPtrToSplice(DFGWrapper::PortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID id, Interval& ivValid)
 {
-	if (!dgPort)
+	if (!port->isValid())
 		return;
 
 	// There is no "INode" type in splice, so try to figure out a conversion
-	const char* cType = dgPort.getDataType();
+	const char* cType = port->getResolvedType();
 	int maxTypeRequired = SpliceTypeToMaxType(cType);
 	switch(maxTypeRequired)
 	{
 	case TYPE_POINT3:
 		{
-			ParameterBlockValuesToSplice<INode*, Point3>(dgPort, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<INode*, Point3>(port, t, pblock, id, ivValid);
 			break;
 		}
 	case TYPE_QUAT:
 		{
-			ParameterBlockValuesToSplice<INode*, Quat>(dgPort, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<INode*, Quat>(port, t, pblock, id, ivValid);
 			break;
 		}
 	case TYPE_MATRIX3:
 		{
-			ParameterBlockValuesToSplice<INode*, Matrix3>(dgPort, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<INode*, Matrix3>(port, t, pblock, id, ivValid);
 			break;
 		}
 	case TYPE_MESH:
 		{
 			// Convert to mesh if possible
-			ParameterBlockValuesToSplice<INode*, Mesh>(dgPort, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<INode*, Mesh>(port, t, pblock, id, ivValid);
 			break;
 		}
 	default:
@@ -977,16 +992,17 @@ void MaxPtrToSplice(FabricSplice::DGPort& dgPort, TimeValue t, IParamBlock2* pbl
 	}
 }
 // Pblock conversion function
-void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplice::DGGraph& graph, std::vector<Interval>& paramValids, Interval& ivValid)
+void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, DFGWrapper::Binding& graph, std::vector<Interval>& paramValids, Interval& ivValid)
 {
 	if (pblock == NULL)
 		return;
 
 	// Iterate over all PB2 parameters, send to associated splice port
-	size_t nPorts = graph.getDGPortCount();
-	for (size_t i = 0; i < nPorts; i++)
+	DFGWrapper::ExecutablePtr pExecutable = graph.getExecutable();
+	DFGWrapper::PortList allPorts = pExecutable->getPorts();
+	for (size_t i = 0; i < allPorts.size(); i++)
 	{
-		FabricSplice::DGPort port = graph.getDGPort(i);
+		DFGWrapper::PortPtr& port = allPorts[i];
 		ParamID pid = ParamID(::GetPortParamID(port));
 		// Its possible some params are not supported by Max.
 		if (pid == -1)
@@ -1071,19 +1087,19 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricSplic
 						continue;
 
 					pSrcContInterface->TriggerEvaluate(t, paramValids[pidx]);
-					FabricSplice::DGPort srcPort = pSrcContInterface->GetPort(portConnection.data());
+					DFGWrapper::PortPtr srcPort = pSrcContInterface->GetPort(portConnection.data());
 					if (srcPort)
 					{
-						FabricCore::RTVal srcVal = srcPort.getRTVal();
-						int srcIndex = GetPortConnectionIndex(port);
+						FabricCore::RTVal srcVal = srcPort->getArgValue();
+						//int srcIndex = GetPortConnectionIndex(port);
 						// If we are connected to an array, take only a single element
-						if (srcIndex >= 0 && srcVal.isArray()) {
-							// Check for OOR
-							if ((uint32_t)srcIndex >= srcVal.getArraySize())
-								continue;
-							srcVal = srcVal.getArrayElement(srcIndex);
-						}
-						port.setRTVal(srcVal);
+						//if (srcIndex >= 0 && srcVal.isArray()) {
+						//	// Check for OOR
+						//	if ((uint32_t)srcIndex >= srcVal.getArraySize())
+						//		continue;
+						//	srcVal = srcVal.getArrayElement(srcIndex);
+						//}
+						port->setArgValue(srcVal);
 					}
 				}
 				else 

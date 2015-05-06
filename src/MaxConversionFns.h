@@ -37,24 +37,23 @@ extern FabricCore::Variant GetVariant(const FPValue& value);
 template<typename T>
 FabricCore::Variant GetVariant(const T& param) { ThisShouldNotCompile }
 
-extern FabricCore::RTVal ConvertToRTVal(int param, FabricCore::RTVal val);
-extern FabricCore::RTVal ConvertToRTVal(float param, FabricCore::RTVal val);
-extern FabricCore::RTVal ConvertToRTVal(bool param, FabricCore::RTVal val);
-extern FabricCore::RTVal ConvertToRTVal(const Point3& param, FabricCore::RTVal val);
-extern FabricCore::RTVal ConvertToRTVal(const Point4& param, FabricCore::RTVal val, bool asColor=false);
-extern FabricCore::RTVal ConvertToRTVal(const Color& param, FabricCore::RTVal val);
-extern FabricCore::RTVal ConvertToRTVal(const Quat& param, FabricCore::RTVal val);
-extern FabricCore::RTVal ConvertToRTVal(const Matrix3& param, FabricCore::RTVal val);
-extern FabricCore::RTVal ConvertToRTVal(const MCHAR* param, FabricCore::RTVal val);
-extern FabricCore::RTVal ConvertToRTVal(const MSTR& param, FabricCore::RTVal val);
-extern FabricCore::RTVal ConvertToRTVal(const Mesh& param, FabricCore::RTVal val);
+extern void ConvertToRTVal(int param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(float param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(bool param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const Color& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const MCHAR* param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const MSTR& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& val);
 
 // Entry point to the Max->Splice value translation
 template<typename TResultType, typename TConvertType>
-void MaxValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, Interval& ivValid, const TResultType* params, int nParams)
+void MaxValuesToSplice(DFGWrapper::PortPtr& port, TimeValue t, Interval& ivValid, const TResultType* params, int nParams)
 {
-
-	if (!dgPort.isValid())
+	if (!port->isValid())
 		return;
 
 	MAXSPLICE_CATCH_BEGIN()
@@ -62,8 +61,8 @@ void MaxValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, Interval& ivVa
 	// Initialize handle to splice values
 	//FabricCore::Variant spliceVal;
 	TConvertType convert;
-	if (dgPort.isArray())
-	{
+	//if (dgPort.isArray())
+	/*{
 		FabricCore::RTVal spliceVal = dgPort.getRTVal();
 		spliceVal.setArraySize(nParams);
 		for (int i = 0; i < nParams; i++)
@@ -74,21 +73,24 @@ void MaxValuesToSplice(FabricSplice::DGPort& dgPort, TimeValue t, Interval& ivVa
 			spliceVal.setArrayElement(i, aVal);
 		}
 	}
-	else
+	else*/
 	{
 		DbgAssert(nParams == 1);
-		if (nParams > 0)
+		//if (nParams > 0)
 		{
 			Convert(*params, t, ivValid, convert);
-			FabricCore::RTVal aVal = dgPort.getRTVal();
-			dgPort.setRTVal(ConvertToRTVal(convert, aVal));
+			FabricCore::RTVal aVal = port->getArgValue();
+			ConvertToRTVal(convert, aVal);
+			// Is resetting the value necessary?
+			port->setArgValue(aVal);
+			//dgPort.setRTVal(ConvertToRTVal(convert, aVal));
 		}
 	}
 	MAXSPLICE_CATCH_END
 }
 
 template<typename TResultType>
-void MaxValueToSplice(FabricSplice::DGPort& dgPort, TimeValue t, Interval& ivValid, const TResultType& param) { MaxValuesToSplice<TResultType, TResultType>(dgPort, t, ivValid, &param, 1); }
+void MaxValueToSplice(DFGWrapper::PortPtr& port, TimeValue t, Interval& ivValid, const TResultType& param) { MaxValuesToSplice<TResultType, TResultType>(port, t, ivValid, &param, 1); }
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Splice->Max
@@ -114,9 +116,11 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param);
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param);
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point3& param);
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Color& param);
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Quat& param);
 void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param);
 void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtv, MSTR& param);
 	// Annoyingly, if we don't have a conversion function for a type,
 	// some types get silently promoted to bool, and we call the wrong fn
 template<typename TResultType>
@@ -124,20 +128,20 @@ void SpliceToMaxValue(const FabricCore::RTVal& spliceVal, TResultType& maxVal)  
 
 //////////////////////////////////////////////////////////////////////////
 template<typename TResultType>
-void SpliceToMaxValue(const FabricSplice::DGPort& dgPort, TResultType& param, int index=-1)
+void SpliceToMaxValue(DFGWrapper::Binding* binding, const char* port, TResultType& param, int index=-1)
 {
 	// De-const because some splice functions are not marked const
-	FabricSplice::DGPort& ncDGPort = const_cast<FabricSplice::DGPort&>(dgPort);
-	FabricCore::RTVal rtVal = ncDGPort.getRTVal();
-	if (ncDGPort.isArray())
-	{
-		DbgAssert(index >= 0);
-		int nValues = ncDGPort.getArrayCount();
-		if (index < nValues && index >= 0)
-		{
-			rtVal = rtVal.getArrayElement(index);
-		}
-	}
+	//DFGWrapper::PortPtr& ncDGPort = const_cast<DFGWrapper::PortPtr&>(dgPort);
+	FabricCore::RTVal rtVal;// = ncDGPort.getRTVal();
+	//if (ncDGPort.isArray())
+	//{
+	//	DbgAssert(index >= 0);
+	//	int nValues = ncDGPort.getArrayCount();
+	//	if (index < nValues && index >= 0)
+	//	{
+	//		rtVal = rtVal.getArrayElement(index);
+	//	}
+	//}
 	if (rtVal.isValid())
 		SpliceToMaxValue(rtVal, param);
 }

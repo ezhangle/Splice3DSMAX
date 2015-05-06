@@ -31,7 +31,7 @@ private:
 
 	bool CloneSpliceData(SpliceTranslationLayer<Control, Quat>* pMyClone) { return true; } ; // No cloning for me...
 
-	FabricSplice::DGPort m_parentValuePort;
+	DFGWrapper::PortPtr m_parentValuePort;
 };
 
 class SpliceControlRotationClassDesc : public DynPBCustAttrClassDesc {
@@ -64,7 +64,7 @@ SpliceControlRotation::~SpliceControlRotation()
 
 void SpliceControlRotation::ResetPorts()
 {
-	m_parentValuePort = AddSpliceParameter(m_graph, TYPE_MATRIX3, _M("parentValue"), FabricSplice::Port_Mode_IN);
+	m_parentValuePort = AddSpliceParameter(m_binding, TYPE_MATRIX3, _M("parentValue"), FabricCore::DFGPortType_In);
 	ParentClass::ResetPorts();
 }
 

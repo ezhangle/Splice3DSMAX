@@ -30,8 +30,8 @@ DFGWidget::DFGWidget(QWidget * parent, FabricCore::Client& client, FabricService
 
 		ASTWrapper::KLASTManager* manager = ASTWrapper::KLASTManager::retainGlobalManager(&client);
 		DFGWrapper::GraphExecutablePtr graph = DFGWrapper::GraphExecutablePtr::StaticCast(binding.getExecutable());
-
-		init(&client, manager, host, binding, graph, nullptr, false);
+		static FabricServices::Commands::CommandStack stack;
+		init(&client, manager, host, binding, graph, &stack, false);
 	}
 }
 

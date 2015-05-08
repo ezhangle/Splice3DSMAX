@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "DockableWidget.h"
 #include <QtGui/qwidget.h>
+#include "QApplication"
 
 DockableWindow::DockableWindow(HWND hwndCuiFrame) : h(hwndCuiFrame), w(NULL), frame(NULL)
 {
@@ -31,6 +32,21 @@ void DockableWindow::ResizeContentToFrame()
 	int width = r.right - r.left;
 	int height = r.bottom - r.top;
 	w->resize(width, height);
+
+	// Our QWinWidget does not appear to be handling resizing its children - lets
+	// manually pass-through the resize until we have a more elegant method
+	QObjectList contentChildren = w->children();
+	DbgAssert(contentChildren.size() == 1);
+	if (contentChildren.size() > 0)
+	{
+		QWidget* pChildWidget = dynamic_cast<QWidget*>(contentChildren[0]);
+		if (pChildWidget != nullptr)
+		{
+			QRect childSpace = w->childrenRect();
+			pChildWidget->resize(width - (childSpace.x() * 2), height - (childSpace.y() * 2));
+		}
+	}
+		
 }
 
 int DockableWindow::GetWidth(int sizeType, int orient)
@@ -69,6 +85,14 @@ DockableWindow* DockableWindow::Create(MCHAR* name, DockFlags pos /*= All*/, DWO
 int DockableWindow::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
+	case WM_ACTIVATE:
+		// If our window is activated, then disable
+		// Max's accelerators, we don't want keyboard events going to Max
+		if (LOWORD(wParam) == WA_ACTIVE)
+			DisableAccelerators();
+		else
+			EnableAccelerators();
+		break;
 	case CUI_POSDATA_MSG: {
 		CUIPosData **cpd = (CUIPosData **)lParam;
 		cpd[0] = this;
@@ -77,7 +101,11 @@ int DockableWindow::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_SIZING:
 		ResizeContentToFrame();
 		return FALSE;
+	case WM_KEYDOWN:
+	case WM_KEYUP:
+		return TRUE;
 	}
+	//QApplication::processEvents();
 	return FALSE;
 }
 

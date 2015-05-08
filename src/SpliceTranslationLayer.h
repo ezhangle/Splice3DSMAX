@@ -87,8 +87,8 @@ void SetPortConnection(DFGWrapper::PortPtr& aPort, const char* name);
 //void SetPortConnectionIndex(DFGWrapper::PortPtr& aPort, int index);
 //bool GetPortPostConnectionUI(DFGWrapper::PortPtr& aPort);
 //void SetPortPostConnectionUI(DFGWrapper::PortPtr& aPort, bool postUi);
-//const char* GetPortName(DFGWrapper::PortPtr& aPort);
-//const char* GetPortType(DFGWrapper::PortPtr& aPort);
+const char* GetPortName(DFGWrapper::PortPtr& aPort);
+const char* GetPortType(DFGWrapper::PortPtr& aPort);
 
 bool SetPortOption(DFGWrapper::PortPtr& aPort, const char* option, FPValue* value);
 bool SetPortValue(DFGWrapper::PortPtr& aPort, FPValue* value);
@@ -296,6 +296,10 @@ public:
 
 	ReferenceTarget* CastToRefTarg() { return this; }
 
+	DFGWrapper::Binding& GetBinding()	{ return m_binding; }
+	FabricCore::Client& GetClient()		{ return m_client; }
+	DFGWrapper::Host* GetHost()			{ return m_host; }
+
 	int GetOperatorCount();
 	std::string GetOperatorName(int i);
 
@@ -353,8 +357,8 @@ public:
 	// Set the type of the Max parameter pushing data to the splice port
 	// \param i The index of the splice port
 	// \type The ParamType to set the matching Max parameter to.
-	//int SetMaxConnectedType(DFGWrapper::PortPtr& aPort, int maxType);
-	//virtual int SetMaxConnectedType(const char* portName, int type);
+	int SetMaxConnectedType(DFGWrapper::PortPtr& aPort, int maxType);
+	virtual int SetMaxConnectedType(const char* portName, int type);
 	// Returns an array of the max types that can be used to drive
 	// data for splice port
 	// \param i The index of the splice port

@@ -8,17 +8,14 @@
 using namespace FabricServices;
 using namespace FabricUI;
 
-class FabricDFGBaseInterface;
 
-class FabricDFGWidget : public DFG::DFGCombinedWidget {
-
-  Q_OBJECT
+class DFGWidget : public DFG::DFGCombinedWidget {
   
 public:
-  FabricDFGWidget(QWidget * parent);
-  ~FabricDFGWidget();
+	DFGWidget(QWidget * parent, FabricCore::Client& client, FabricServices::DFGWrapper::Binding& binding, FabricServices::DFGWrapper::Host* host);
+	~DFGWidget();
 
-  static QWidget * creator(QWidget * parent, const QString & name);
+  //static QWidget * creator(QWidget * parent, const QString & name);
   
   //static void setCurrentUINodeName(const char * node);
   //static void mayaLog(const char * message);
@@ -30,10 +27,5 @@ public slots:
 
 private:
 
-  FabricCore::Client m_mayaClient;
-  std::string m_baseInterfaceName;
-  static std::string s_currentUINodeName;
-  static std::map<FabricDFGWidget*, FabricDFGBaseInterface*> s_widgets;
+  FabricServices::DFGWrapper::Host* m_host;
 };
-
-#endif 

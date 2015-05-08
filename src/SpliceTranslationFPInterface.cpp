@@ -4,7 +4,11 @@
 #include <MaxScript/MaxScript.h>
 #include <maxscript\foundation\functions.h>
 #include <maxscript\maxwrapper\mxsobjects.h>
+#include "DFGWidget.h"
+#include "DockableWidget.h"
 
+#include "../qt-solutions/qtwinmigrate/src/qwinwidget.h"
+#include "../qt-solutions/qtwinmigrate/src/QMfcApp"
 
 SpliceTranslationFPInterface::SpliceTranslationFPInterface()
 	: m_klEditor(nullptr)
@@ -15,6 +19,26 @@ SpliceTranslationFPInterface::SpliceTranslationFPInterface()
 SpliceTranslationFPInterface::~SpliceTranslationFPInterface()
 {
 	CloseKLEditor();
+}
+
+BOOL SpliceTranslationFPInterface::ShowDFGGraphEditor()
+{
+	//qApp;
+	//QApplication::exec();
+	bool ownApplication = QMfcApp::pluginInstance(hInstance);
+	QApplication* pApp = qApp; // QApplication::instance();
+	//QApplication appliCation();
+
+	DockableWindow* dock = DockableWindow::Create(_T("My QT Demo"));
+	HWND h = dock->GetHWND();
+	QWinWidget* dlg = new QWinWidget(h);
+	DFGWidget* pWidget = new DFGWidget(dlg, GetClient(), GetBinding(), GetHost());
+
+	dock->SetWidget(dlg);
+
+	//DockableWindow* pDockableWindow = DockableWindow::Create(_M("FuckYeah"));
+	//pDockableWindow->SetWidget(pWidget);
+	return TRUE;
 }
 
 BOOL SpliceTranslationFPInterface::SetSpliceGraph(ReferenceTarget* rtarg)

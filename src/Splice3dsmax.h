@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef _DEBUG
+#ifndef DEBUG
 
 #define MAXSPLICE_CATCH_BEGIN() \
 	try {

@@ -32,7 +32,7 @@ private:
 
 	bool CloneSpliceData(SpliceTranslationLayer<Control, float>* pMyClone) { return true; } ; // No cloning for me...
 
-	//DFGWrapper::PortPtr m_parentValuePort;
+	DFGWrapper::PortPtr m_parentValuePort;
 };
 
 class SpliceControlFloatClassDesc : public DynPBCustAttrClassDesc {
@@ -65,7 +65,7 @@ SpliceControlFloat::~SpliceControlFloat()
 
 void SpliceControlFloat::ResetPorts()
 {
-	//m_parentValuePort = AddSpliceParameter(m_graph, TYPE_FLOAT, _M("parentValue"), FabricCore::DFGPortType_In);
+	m_parentValuePort = AddSpliceParameter(GetBinding(), TYPE_FLOAT, _M("parentValue"), FabricCore::DFGPortType_In);
 	ParentClass::ResetPorts();
 }
 
@@ -81,11 +81,11 @@ void SpliceControlFloat::GetValue(TimeValue t, void *val, Interval &interval, Ge
 	if(method == CTRL_RELATIVE)
 	{
 		Invalidate(); // Evaluate every time in case parent changes too
-	//	MaxValueToSplice(m_parentValuePort, 0, interval, *pVal);
+		MaxValueToSplice(m_parentValuePort, 0, interval, *pVal);
 	}
 	else
 	{
-	//	MaxValueToSplice(m_parentValuePort, 0, interval, float(0));
+		MaxValueToSplice(m_parentValuePort, 0, interval, float(0));
 	}
 
 	// Evaluate value from splice

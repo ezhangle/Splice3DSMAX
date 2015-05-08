@@ -623,15 +623,15 @@ void SetPortConnection(DFGWrapper::PortPtr& aPort, const char* name)
 //	}
 //}
 //
-//const char* GetPortName( DFGWrapper::PortPtr& aPort )
-//{
-//	return aPort.getName();
-//}
-//
-//const char* GetPortType( DFGWrapper::PortPtr& aPort )
-//{
-//	return aPort.getDataType();
-//}
+const char* GetPortName( DFGWrapper::PortPtr& aPort )
+{
+	return aPort->getName();
+}
+
+const char* GetPortType( DFGWrapper::PortPtr& aPort )
+{
+	return aPort->getResolvedType();
+}
 
 
 bool SetPortOption(DFGWrapper::PortPtr& aPort, const char* option, FPValue* value)
@@ -644,8 +644,7 @@ bool SetPortOption(DFGWrapper::PortPtr& aPort, const char* option, FPValue* valu
 	// if (!variant.isNull()) Do we want to allow setting Null values (remove option?);
 		aPort->setOption(option, &variant);
 	return true;
-	MAXSPLICE_CATCH_END
-	return false;
+	MAXSPLICE_CATCH_RETURN(false);
 }
 
 bool SetPortValue(DFGWrapper::PortPtr& aPort, FPValue* value)
@@ -659,7 +658,7 @@ bool SetPortValue(DFGWrapper::PortPtr& aPort, FPValue* value)
 		//aPort->setVariant(variant);
 		FabricCore::RTVal rtVal = aPort->getArgValue();
 		//ConvertToRTVal(*value, rtVal);
-		//aPort->setArgValue();
+		//aPort->setArgValue(rtVal);
 		//return true;
 	}
 	MAXSPLICE_CATCH_END
@@ -800,24 +799,25 @@ const DFGWrapper::PortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, cons
 	if (isArray)
 		spliceType = spliceType + "[]";
 
-	//try {
-	//	if (!rGraph.hasDGNodeMember(cName)) {
-	//		rGraph.addDGNodeMember(cName, spliceType.data(), FabricCore::Variant(), "", inExtension);
-	//		DFGWrapper::PortPtr port = rGraph.addDGPort(cName, cName, mode);
+	DFGWrapper::GraphExecutablePtr graph = DFGWrapper::GraphExecutablePtr::StaticCast(rBinding.getExecutable());
 
-	//		// Does this port support custom persistence?  If so, mark it as persisted
-	//		if (IsPortPersistable(port))
-	//			rGraph.setMemberPersistence(cName, true);
-	//		return port;
-	//	}
+	DFGWrapper::PortPtr port;// = graph->getPort(cName);
+	// How can I test if this port is valid?
+	//if (port->isValid() && port->isPort())
+	//	return port;
 
-	//	// Port already exists
-	//	return rGraph.getDGPort(cName);
-	//}
-	//catch(FabricSplice::Exception e) 
+	try {
+		port = graph->addPort(cName, mode, type);
+
+		// Does this port support custom persistence?  If so, mark it as persisted
+		//if (IsPortPersistable(port)) 
+		//	rGraph.setMemberPersistence(cName, true);
+		return port;
+	}
+	catch(FabricCore::Exception e) 
 	{
-//		CStr message = "ERROR on AddPort to Splice: ";
-//		logMessage(message + e.what());
+		CStr message = "ERROR on AddPort to Splice: ";
+		logMessage(message + e.getDesc_cstr());
 		return DFGWrapper::PortPtr();
 	}
 }

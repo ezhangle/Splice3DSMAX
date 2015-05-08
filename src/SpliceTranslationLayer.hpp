@@ -8,6 +8,7 @@
 #include "MaxConversionFns.h"
 #include "Splice3dsmax.h"
 #include "SpliceRestoreObjects.h"
+#include "DFGWrapper/FuncExecutable.h"
 
 //////////////////////////////////////////////////////////////////////////
 //--- SpliceTranslationLayer -------------------------------------------------------
@@ -70,7 +71,6 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init()
 
 		// set the graph on the view
 		setGraph(DFGWrapper::GraphExecutablePtr::StaticCast(m_binding.getExecutable()));
-
 
 		//// create a graph to hold our dependency graph nodes.
 		//m_graph = DFGWrapper::Binding("3dsMaxGraph");
@@ -706,7 +706,42 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCode(const std
 	MAXSPLICE_CATCH_BEGIN()
 
 		// Try initializing 
-		//bool success = false;
+		bool success = false;
+
+		DFGWrapper::GraphExecutablePtr graph = DFGWrapper::GraphExecutablePtr::StaticCast(GetBinding().getExecutable());
+
+		// add a report node
+		DFGWrapper::NodePtr reportNode = graph->addNodeFromPreset("Fabric.Core.Func.Report");
+		//m_binding.getExecutable()
+		//FabricCore::DFGExec& coreExec = m_binding.getExecutable()->getWrappedCoreExec();
+
+		//const char* cnode = coreExec.addNodeWithNewFunc(entry.data());
+		//cnode;
+		int nNodes = graph->getNodes().size();
+		if (nNodes == 1)
+		{
+			DFGWrapper::NodePtr funcNode = graph->addNodeWithNewFunc("DummyFunc");
+			bool wtf = funcNode->isFunc();
+		}
+		nNodes = graph->getNodes().size();
+
+		
+
+		DFGWrapper::FuncExecutablePtr realFunc = DFGWrapper::FuncExecutable::Create(GetBinding().getWrappedCoreBinding(), GetBinding().getWrappedCoreBinding().getExec(), entry.c_str());
+		nNodes = graph->getNodes().size();
+		realFunc->setCode(script.c_str());
+
+		// add a report node
+		//const char* crnode = coreExec.addNodeFromPreset("Fabric.Core.Func.Report");
+		//crnode;
+		//DFGWrapper::NodePtr reportNode = coreExec.addNodeFromPreset("Fabric.Core.Func.Report");
+
+		//nNodes = coreExec.getNodeCount();
+
+		//FabricCore::DFGExec& fnExec = coreExec.getNo(0);
+
+		//coreExec.setCode()
+
 		// Are we renaming?  In that case, remove the old operator
 		//if (!m_operator.empty() && m_operator != entry)
 		//{
@@ -722,19 +757,19 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCode(const std
 		//{
 		//	success = m_graph.constructKLOperator(entry.c_str(), script.c_str());
 		//}
-		//if (success)
-		//{
-		//	m_operator = entry;
-		//	// Tell max, we might have changed here.
-		//	NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
-		//	m_valid = NEVER;
-		//	doGather.LogSomething("OK");
-		//}                                                                                                                                                                                                                                                           
-		//else
-		//{
-		//	// Theoretically, we should never actually reach this code.  Fabric will throw if somethins outta whack
-		//	doGather.LogSomething("Unknown Error");
-		//}
+		if (success)
+		{
+			//m_operator = entry;
+			// Tell max, we might have changed here.
+			NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
+			m_valid = NEVER;
+			doGather.LogSomething("OK");
+		}                                                                                                                                                                                                                                                           
+		else
+		{
+			// Theoretically, we should never actually reach this code.  Fabric will throw if somethins outta whack
+			doGather.LogSomething("Unknown Error");
+		}
 
 	MAXSPLICE_CATCH_END;
 	return doGather.GetGatheredResults();
@@ -750,10 +785,9 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* na
 	if (theHold.Holding())
 		theHold.Put(new SplicePortChangeObject(this));
 
-	AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_In, isArray, inExtension);
+	DFGWrapper::PortPtr aPort = AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_In, isArray, inExtension);
 	// Can/Should we create a matching max type for this?
-	//return SetMaxConnectedType(aPort, maxType);
-	return -1;
+	return SetMaxConnectedType(aPort, maxType);
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -763,8 +797,8 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::AddOutputPort(const char* n
 	if (theHold.Holding())
 		theHold.Put(new SplicePortChangeObject(this));
 	// Create the port
-	AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_Out, isArray, inExtension);
-	return -1;
+	DFGWrapper::PortPtr aPort = AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_Out, isArray, inExtension);
+	return aPort->isPort() ? 1 : -1;
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -775,11 +809,10 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::AddIOPort(const char* name,
 		theHold.Put(new SplicePortChangeObject(this));
 
 	// Create the port
-	AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_IO, isArray, inExtension);
+	DFGWrapper::PortPtr aPort = AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_IO, isArray, inExtension);
 
 	// Can/Should we create a matching max type for this?
-	//return SetMaxConnectedType(aPort, maxType);
-	return -1;
+	return SetMaxConnectedType(aPort, maxType);
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -1113,82 +1146,82 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::DisconnectPort(const char*
 template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::GetMaxConnectedType( const char* portName )
 {
-	//DFGWrapper::PortPtr aPort = GetPort(portName);
-	//if (aPort) {
-	//	int pid = ::GetPortParamID(aPort);
-	//	if (pid >= 0)
-	//	{
-	//		return m_pblock->GetParameterType((ParamID)pid);
-	//	}
-	//}
+	DFGWrapper::PortPtr aPort = GetPort(portName);
+	if (aPort) {
+		int pid = ::GetPortParamID(aPort);
+		if (pid >= 0)
+		{
+			return m_pblock->GetParameterType((ParamID)pid);
+		}
+	}
 	return -1;
 }
 
-//template<typename TBaseClass, typename TResultType>
-//int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(DFGWrapper::PortPtr& aPort, int maxType)
-//{
-//	if (!aPort.isValid())
-//		return -1;
-//
-//	// The user has requested the default type (-2)
-//	const char* spliceType = ::GetPortType(aPort);
-//	if (maxType == -2)
-//		maxType = SpliceTypeToDefaultMaxType(spliceType);
-//	else if (maxType == -1) 
-//	{ 
-//		/* do nothing here, delete was requested */ 
-//	}
-//	else
-//	{
-//		// Figure out what kind of parameter
-//		// we can/will create on the max side
-//		BitArray legalTypes = ::GetLegalMaxTypes(spliceType);
-//		// The requested max type is not legal for this splice type
-//		if (!legalTypes[maxType])
-//			maxType = SpliceTypeToDefaultMaxType(spliceType); // Reset to default
-//	}
-//
-//	// -1 means no max connection, remove one if exists
-//	int pid = ::GetPortParamID(aPort);
-//	if (maxType == -1) 
-//	{
-//		if (pid >= 0)
-//			DeleteMaxParameter((ParamID)pid);
-//		// Set -1 as the param id so we no longer look for a max param for this port.
-//		::SetPortParamID(aPort, -1);
-//		return -1;
-//	}
-//
-//	// Do we have an existing Max parameter?
-//	if (pid >= 0 && m_pblock != nullptr)
-//	{
-//		// Check that its not the correct type already
-//		if (m_pblock->GetParamDef((ParamID)pid).type == maxType)
-//			return pid;
-//
-//		// Wrong type, remove original
-//		DeleteMaxParameter((ParamID)pid);
-//	}
-//
-//	// If this is a legal type for this parameter, then go ahead
-//	ParamBlockDesc2* pNewDesc = CopyPBDescriptor();
-//	ParamID newId = AddMaxParameter(pNewDesc, maxType, ::GetPortName(aPort));
-//	SetMaxParamLimits(pNewDesc, newId, aPort);
-//	SetMaxParamDefault(pNewDesc, newId, aPort);
-//	CreateParamBlock(pNewDesc);
-//	::SetPortParamID(aPort, newId);
-//	return newId;
-//}
+template<typename TBaseClass, typename TResultType>
+int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(DFGWrapper::PortPtr& aPort, int maxType)
+{
+	if (!aPort->isValid() || !aPort->isPort())
+		return -1;
 
-//template<typename TBaseClass, typename TResultType>
-//int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(const char* portName, int maxType)
-//{
-//	DFGWrapper::PortPtr aPort = m_graph.getDGPort(portName);
-//	if (aPort)
-//		return SetMaxConnectedType(aPort, maxType);
-//	return -1;
-//}
-//
+	// The user has requested the default type (-2)
+	const char* spliceType = ::GetPortType(aPort);
+	if (maxType == -2)
+		maxType = SpliceTypeToDefaultMaxType(spliceType);
+	else if (maxType == -1) 
+	{ 
+		/* do nothing here, delete was requested */ 
+	}
+	else
+	{
+		// Figure out what kind of parameter
+		// we can/will create on the max side
+		BitArray legalTypes = ::GetLegalMaxTypes(spliceType);
+		// The requested max type is not legal for this splice type
+		if (!legalTypes[maxType])
+			maxType = SpliceTypeToDefaultMaxType(spliceType); // Reset to default
+	}
+
+	// -1 means no max connection, remove one if exists
+	int pid = ::GetPortParamID(aPort);
+	if (maxType == -1) 
+	{
+		if (pid >= 0)
+			DeleteMaxParameter((ParamID)pid);
+		// Set -1 as the param id so we no longer look for a max param for this port.
+		::SetPortParamID(aPort, -1);
+		return -1;
+	}
+
+	// Do we have an existing Max parameter?
+	if (pid >= 0 && m_pblock != nullptr)
+	{
+		// Check that its not the correct type already
+		if (m_pblock->GetParamDef((ParamID)pid).type == maxType)
+			return pid;
+
+		// Wrong type, remove original
+		DeleteMaxParameter((ParamID)pid);
+	}
+
+	// If this is a legal type for this parameter, then go ahead
+	ParamBlockDesc2* pNewDesc = CopyPBDescriptor();
+	ParamID newId = AddMaxParameter(pNewDesc, maxType, ::GetPortName(aPort));
+	SetMaxParamLimits(pNewDesc, newId, aPort);
+	SetMaxParamDefault(pNewDesc, newId, aPort);
+	CreateParamBlock(pNewDesc);
+	::SetPortParamID(aPort, newId);
+	return newId;
+}
+
+template<typename TBaseClass, typename TResultType>
+int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(const char* portName, int maxType)
+{
+	DFGWrapper::PortPtr aPort = GetPort(portName);
+	if (aPort)
+		return SetMaxConnectedType(aPort, maxType);
+	return -1;
+}
+
 template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortOption(const char* portname, const char* option, FPValue* value)
 {
@@ -1318,7 +1351,7 @@ template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
 {
 	// Setup any necessary ports for the current graph
-	//m_valuePort = DFGWrapper::PortPtr();
+	m_valuePort = AddSpliceParameter(GetBinding(), GetValueType(), "outputValue", FabricCore::DFGPortType_Out);
 }
 
 #pragma endregion
@@ -1330,6 +1363,10 @@ template<typename TBaseClass, typename TResultType>
 const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(TimeValue t, Interval& ivValid)
 {
 	if (!m_binding.isValid())
+		return m_value;
+	
+	// If we aren't able to receive a value, abort
+	if (m_valuePort.isNull() || !m_valuePort->isValid() || !m_valuePort->isConnectedToAny())
 		return m_value;
 
 	// If our value is valid, do not re-evaluate
@@ -1362,7 +1399,7 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 
 
 		// Get our value back!
-		//SpliceToMaxValue(m_valuePort, m_value, GetOutPortArrayIdx());
+		SpliceToMaxValue(m_valuePort->getArgValue(), m_value/*, GetOutPortArrayIdx()*/);
 		
 		MAXSPLICE_CATCH_END;
 

@@ -26,6 +26,7 @@ public:
 	enum FN_IDS {
 		// System management callbacks
 		fn_showSceneGraphEditor,
+		fn_showDFGGraphEditor,
 
 		fn_setSpliceGraph,
 		fn_loadFromFile,
@@ -77,6 +78,7 @@ public:
 
 	BEGIN_FUNCTION_MAP	
 		FN_0(fn_showSceneGraphEditor, TYPE_BOOL, ShowSceneGraphEditor);
+		FN_0(fn_showDFGGraphEditor, TYPE_BOOL, ShowDFGGraphEditor);
 
 		FN_1(fn_setSpliceGraph, TYPE_BOOL, SetSpliceGraph, TYPE_REFTARG);
 		FN_2(fn_loadFromFile, TYPE_bool, LoadFromFile, TYPE_FILENAME, TYPE_bool);
@@ -102,9 +104,9 @@ public:
 
 		FN_5(fn_connectPorts, TYPE_bool, ConnectPortMSTR, TYPE_TSTR_BV, TYPE_REFTARG, TYPE_TSTR_BV, TYPE_INT, TYPE_bool);
 		
-//		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxConnectedTypeMSTR, TYPE_TSTR_BV);
-//		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxConnectedTypeMSTR, TYPE_TSTR_BV, TYPE_INT);
-//		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypesMSTR, TYPE_TSTR_BV);
+		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxConnectedTypeMSTR, TYPE_TSTR_BV);
+		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxConnectedTypeMSTR, TYPE_TSTR_BV, TYPE_INT);
+		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypesMSTR, TYPE_TSTR_BV);
 
 		FN_3(fn_setPortOption, TYPE_bool, SetPortOptionMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_FPVALUE);
 		FN_2(fn_setPortValue, TYPE_bool, SetPortValueMSTR, TYPE_TSTR_BV, TYPE_FPVALUE);
@@ -124,9 +126,14 @@ public:
 
 	// Implement the functions exposed above
 	BOOL ShowSceneGraphEditor() { /* TODO */ return FALSE; };
+	BOOL ShowDFGGraphEditor();
+
+	// Get the fabric graph driving this max class.
+	virtual DFGWrapper::Binding& GetBinding() = 0;
+	virtual FabricCore::Client& GetClient() = 0;
+	virtual DFGWrapper::Host* GetHost() = 0;
 
 	// Graph management functions
-
 	virtual int GetOperatorCount() = 0;
 	virtual std::string GetOperatorName(int i) = 0;
 
@@ -174,9 +181,9 @@ public:
 	// Set the index.  If idx == -1, set our out port to not be an array
 	virtual void SetOutPortArrayIdx(int idx) = 0;
 
-	//virtual int GetMaxConnectedType(const char* portName) = 0;
-	//virtual int SetMaxConnectedType(const char* portName, int type) = 0;
-	//virtual BitArray GetLegalMaxTypes(const char* portName) = 0;
+	virtual int GetMaxConnectedType(const char* portName) = 0;
+	virtual int SetMaxConnectedType(const char* portName, int type) = 0;
+	virtual BitArray GetLegalMaxTypes(const char* portName) = 0;
 
 	// Allow setting various options on our ports
 	virtual bool SetPortOption(const char* port, const char* option, FPValue* value)=0;
@@ -197,9 +204,6 @@ public:
 
 	// Allow external classes to trigger evaluations on us
 	virtual void TriggerEvaluate(TimeValue t, Interval& ivValid)=0;
-
-	// Get the fabric graph driving this max class.
-//	virtual const DFGWrapper::Binding& GetSpliceGraph() = 0;
 	
 	// Set this instance to use the splice graph on the rtarg instance
 	// This can be useful when setting a group of Splice instances to
@@ -270,9 +274,9 @@ protected:
 	bool SetPortNameMSTR(const MSTR& oldName, const MSTR& newName)	{ return SetPortName(oldName.ToCStr(), newName.ToCStr()); }
 	MSTR GetPortTyeMSTR(const MSTR& port)	{ return ToMSTR(GetPortType(port.ToCStr()), 0); }
 	bool IsPortArrayMSTR(const MSTR& port) { return IsPortArray(port.ToCStr()); }
-	//int GetMaxConnectedTypeMSTR(const MSTR& port) { return GetMaxConnectedType(port.ToCStr()); }
-	//int SetMaxConnectedTypeMSTR(const MSTR& port, int type) { return SetMaxConnectedType(port.ToCStr(), type); }
-	//BitArray GetLegalMaxTypesMSTR(const MSTR& port) { return GetLegalMaxTypes(port.ToCStr()); }
+	int GetMaxConnectedTypeMSTR(const MSTR& port) { return GetMaxConnectedType(port.ToCStr()); }
+	int SetMaxConnectedTypeMSTR(const MSTR& port, int type) { return SetMaxConnectedType(port.ToCStr(), type); }
+	BitArray GetLegalMaxTypesMSTR(const MSTR& port) { return GetLegalMaxTypes(port.ToCStr()); }
 
 	int AddInputPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
 	{
@@ -318,6 +322,8 @@ FPInterfaceDesc* GetDescriptor()
 		0,
 		// Describe our function(s)
 			SpliceTranslationFPInterface::fn_showSceneGraphEditor, _T("ShowSceneGraphEditor"), 0, TYPE_BOOL, 0, 0, 
+			SpliceTranslationFPInterface::fn_showDFGGraphEditor, _T("ShowDFGGraphEditor"), 0, TYPE_BOOL, 0, 0,
+
 			SpliceTranslationFPInterface::fn_loadFromFile, _T("LoadFromFile"), 0, TYPE_bool, 0, 2, 
 				_M("filename"),	0,	TYPE_FILENAME,
 				_M("createMaxParams"),	0,	TYPE_bool,

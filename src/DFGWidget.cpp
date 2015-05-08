@@ -7,36 +7,42 @@
 //std::string DFGWidget::s_currentUINodeName;
 //std::map<DFGWidget*, FabricDFGBaseInterface*> DFGWidget::s_widgets;
 
-DFGWidget::DFGWidget(QWidget * parent) 
+DFGWidget::DFGWidget(QWidget * parent, FabricCore::Client& client, FabricServices::DFGWrapper::Binding& binding, FabricServices::DFGWrapper::Host* host)
 	: DFG::DFGCombinedWidget(parent)
+	, m_host(host)
 {
-  m_baseInterfaceName = s_currentUINodeName;
-  
-  //FabricDFGBaseInterface * interf = FabricDFGBaseInterface::getInstanceByName(m_baseInterfaceName.c_str());
+	//m_baseInterfaceName = s_currentUINodeName;
 
-  //if(interf)
-  {
-    //s_widgets.insert(std::pair<DFGWidget*, FabricDFGBaseInterface*>(this, interf));
+	//FabricDFGBaseInterface * interf = FabricDFGBaseInterface::getInstanceByName(m_baseInterfaceName.c_str());
 
-    //m_mayaClient = interf->getCoreClient();
-    FabricServices::ASTWrapper::KLASTManager * manager = interf->getASTManager();
-    FabricServices::DFGWrapper::Host * host = interf->getDFGHost();
+	//if(interf)
+	{
+		//s_widgets.insert(std::pair<DFGWidget*, FabricDFGBaseInterface*>(this, interf));
 
-    DFGWrapper::Binding binding = interf->getDFGBinding();
-    DFGWrapper::GraphExecutablePtr graph = DFGWrapper::GraphExecutablePtr::StaticCast(binding.getExecutable());
+		//m_mayaClient = interf->getCoreClient();
+		// create a host for Canvas
+		//m_host = new DFGWrapper::Host(m_client);
 
-    init(&m_mayaClient, manager, host, binding, graph, FabricDFGCommandStack::getStack(), false);
-  }
+		//FabricServices::ASTWrapper::KLASTManager * manager = pOwner->getASTManager();
+		//FabricServices::DFGWrapper::Host * host = pOwner->getDFGHost();
+
+		//DFGWrapper::Binding binding = interf->getDFGBinding();
+
+		ASTWrapper::KLASTManager* manager = ASTWrapper::KLASTManager::retainGlobalManager(&client);
+		DFGWrapper::GraphExecutablePtr graph = DFGWrapper::GraphExecutablePtr::StaticCast(binding.getExecutable());
+
+		init(&client, manager, host, binding, graph, nullptr, false);
+	}
 }
 
 DFGWidget::~DFGWidget()
 {
 }
 
-QWidget * DFGWidget::creator(QWidget * parent, const QString & name)
-{
-  return new DFGWidget(parent);
-}
+//QWidget * DFGWidget::creator(QWidget * parent, const QString & name)
+//{
+//	return new DFGWidget(parent);
+//}
 
 //void DFGWidget::setCurrentUINodeName(const char * node)
 //{
@@ -75,32 +81,32 @@ QWidget * DFGWidget::creator(QWidget * parent, const QString & name)
 
 void DFGWidget::onRecompilation()
 {
-  //FabricDFGBaseInterface * interf = FabricDFGBaseInterface::getInstanceByName(m_baseInterfaceName.c_str());
-  //if(interf)
-  //{
-  //  interf->invalidateNode();
-  //}
+	//FabricDFGBaseInterface * interf = FabricDFGBaseInterface::getInstanceByName(m_baseInterfaceName.c_str());
+	//if(interf)
+	//{
+	//  interf->invalidateNode();
+	//}
 }
 
 void DFGWidget::onPortRenamed(QString path, QString newName)
 {
-  // ignore ports which are not args
-  if(path.indexOf('.') > 0)
-    return;
+	// ignore ports which are not args
+	if (path.indexOf('.') > 0)
+		return;
 
-  //FabricDFGBaseInterface * interf = FabricDFGBaseInterface::getInstanceByName(m_baseInterfaceName.c_str());
-  //if(!interf)
-  //  return;
+	//FabricDFGBaseInterface * interf = FabricDFGBaseInterface::getInstanceByName(m_baseInterfaceName.c_str());
+	//if(!interf)
+	//  return;
 
-  //MFnDependencyNode thisNode(interf->getThisMObject());
-  //MPlug plug = thisNode.findPlug(path.toUtf8().constData());
-  //if(plug.isNull())
-  //  return;
+	//MFnDependencyNode thisNode(interf->getThisMObject());
+	//MPlug plug = thisNode.findPlug(path.toUtf8().constData());
+	//if(plug.isNull())
+	//  return;
 
-  //MString cmdStr = "renameAttr \"";
-  //cmdStr += thisNode.name() + "." + MString(path.toUtf8().constData());
-  //cmdStr += "\" \"" + MString(newName.toUtf8().constData()) + "\";";
-  //MGlobal::executeCommandOnIdle(cmdStr, false);
+	//MString cmdStr = "renameAttr \"";
+	//cmdStr += thisNode.name() + "." + MString(path.toUtf8().constData());
+	//cmdStr += "\" \"" + MString(newName.toUtf8().constData()) + "\";";
+	//MGlobal::executeCommandOnIdle(cmdStr, false);
 }
 
 //void DFGWidget::mayaLog(const char * message)

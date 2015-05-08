@@ -20,6 +20,8 @@ SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
 		ISPLICE_STATIC_INTERFACE , _T("Splice"), 0, NULL, FP_CORE,
 		// Describe our function(s)
 			SpliceStaticFPInterface::fn_showSceneGraphEditor, _T("ShowSceneGraphEditor"), 0, TYPE_BOOL, 0, 0, 
+			SpliceStaticFPInterface::fn_showDFGGraphEditor, _T("ShowSceneGraphEditor"), 0, TYPE_BOOL, 0, 0,
+
 			SpliceStaticFPInterface::fn_importSpliceFile, _T("LoadFromFile"), 0, TYPE_BOOL, 0, 1,
 				_M("file"),	0,	TYPE_TSTR_BV,
 			
@@ -79,6 +81,12 @@ BOOL SpliceStaticFPInterface::ShowSceneGraphEditor()
 	//	widget.show((long)mainWindowId);
 	//	return TRUE;
 	//}
+	return FALSE;
+}
+
+// Implement the functions exposed above
+BOOL SpliceStaticFPInterface::ShowDFGGraphEditor()
+{
 	return FALSE;
 }
 

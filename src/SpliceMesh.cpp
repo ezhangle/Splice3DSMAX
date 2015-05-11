@@ -110,6 +110,7 @@ DynPBCustAttrClassDesc* SpliceMesh::ParentClass::GetClassDesc()
 
 SpliceMesh::SpliceMesh(BOOL loading)
 {
+	ResetPorts();
 }
 
 SpliceMesh::~SpliceMesh()

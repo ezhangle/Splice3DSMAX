@@ -29,6 +29,7 @@ DynPBCustAttrClassDesc* SpliceWSModifier::ParentClass::GetClassDesc()
 SpliceWSModifier::SpliceWSModifier(BOOL loading)
 	: ParentClass(loading == TRUE)
 {
+	ResetPorts();
 }
 
 SpliceWSModifier::~SpliceWSModifier()
@@ -39,7 +40,7 @@ void SpliceWSModifier::RefAdded(RefMakerHandle rm)
 {
 	if (Init())
 	{
-		SetOutPortName("modifierMesh");
+		SetPortName("outputValue", "modifierMesh");
 	}
 }
 
@@ -79,10 +80,10 @@ void SpliceWSModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* o
 	else {
 		// A modifier is a special kind of mesh, in that we pipe our
 		// mesh into the output port as an IO port
-		MaxValuesToSplice<Object*, Mesh>(m_valuePort, t, ivValid, &os->obj, 1);
+		MaxValuesToSplice<Object*, Mesh>(m_client, m_valuePort, t, ivValid, &os->obj, 1);
 
 		// A WSModifier is a special kind of modifier that has access to its nodes transform
-		MaxValueToSplice(m_nodeTransformPort, t, ivValid, tmNode);
+		MaxValueToSplice(m_client, m_nodeTransformPort, t, ivValid, tmNode);
 
 		// Set our output.
 		TriObject* pTriObj = static_cast<TriObject*>(os->obj);

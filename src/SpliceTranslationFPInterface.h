@@ -32,8 +32,8 @@ public:
 		fn_loadFromFile,
 		fn_saveToFile,
 		
-		fn_getOpCount,
-		fn_getOpName,
+		//fn_getOpCount,
+		//fn_getOpName,
 
 		fn_getKLCode,
 		fn_getKLOpName,
@@ -60,16 +60,21 @@ public:
 		fn_setPortMinMax,
 		fn_setPortValue,
 
+		// DFG-Specific functionality
+		fn_newEmptyGraph,
+		fn_newEmptyFunc,
+		fn_addNodeFromPreset,
+
 		prop_getPortCount,
 		prop_portNames,
 
 		prop_getOutPortName,
-		prop_setOutPortName,
+		prop_SetOutPort,
 
-		prop_getOutPortArrayIdx,
-		prop_setOutPortArrayIdx,
+		//prop_getOutPortArrayIdx,
+		//prop_setOutPortArrayIdx,
 
-		prop_getAllPortSignature,
+		//prop_getAllPortSignature,
 
 		prop_klEditor,
 
@@ -83,9 +88,6 @@ public:
 		FN_1(fn_setSpliceGraph, TYPE_BOOL, SetSpliceGraph, TYPE_REFTARG);
 		FN_2(fn_loadFromFile, TYPE_bool, LoadFromFile, TYPE_FILENAME, TYPE_bool);
 		FN_1(fn_saveToFile, TYPE_bool, SaveToFile, TYPE_FILENAME);
-
-		FN_0(fn_getOpCount, TYPE_INT, GetOperatorCount);
-		FN_1(fn_getOpName, TYPE_TSTR_BV, GetOperatorNameMSTR, TYPE_INT);
 
 		FN_2(fn_setKLCode, TYPE_TSTR_BV, SetKLCodeMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
 		FN_0(fn_getKLCode, TYPE_TSTR_BV, GetKLCodeMSTR);
@@ -111,14 +113,18 @@ public:
 		FN_3(fn_setPortOption, TYPE_bool, SetPortOptionMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_FPVALUE);
 		FN_2(fn_setPortValue, TYPE_bool, SetPortValueMSTR, TYPE_TSTR_BV, TYPE_FPVALUE);
 
+		FN_1(fn_newEmptyGraph, TYPE_bool, AddNewEmptyGraphMSTR, TYPE_TSTR_BV);
+		FN_1(fn_newEmptyFunc, TYPE_bool, AddNewEmptyFuncMSTR, TYPE_TSTR_BV);
+		FN_2(fn_addNodeFromPreset, TYPE_bool, AddNodeFromPresetMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
+
 		FN_3(fn_setPortMinMax, TYPE_bool, SetPortUIMinMaxMSTR, TYPE_TSTR_BV, TYPE_FPVALUE, TYPE_FPVALUE);
 
 		// Properties 
 
 		RO_PROP_FN(prop_getPortCount, GetPortCount, TYPE_INT)
-		PROP_FNS(prop_getOutPortName, GetOutPortNameMSTR, prop_setOutPortName, SetOutPortNameMSTR, TYPE_TSTR_BV)
-		PROP_FNS(prop_getOutPortArrayIdx, GetOutPortArrayIdx, prop_setOutPortArrayIdx, SetOutPortArrayIdx, TYPE_INT)
-		RO_PROP_FN(prop_getAllPortSignature, GetAllPortSignatureMSTR, TYPE_TSTR_BV)
+		PROP_FNS(prop_getOutPortName, GetOutPortNameMSTR, prop_SetOutPort, SetOutPortMSTR, TYPE_TSTR_BV)
+		//PROP_FNS(prop_getOutPortArrayIdx, GetOutPortArrayIdx, prop_setOutPortArrayIdx, SetOutPortArrayIdx, TYPE_INT)
+		//RO_PROP_FN(prop_getAllPortSignature, GetAllPortSignatureMSTR, TYPE_TSTR_BV)
 
 		RO_PROP_FN(prop_klEditor, GetKLEditor, TYPE_VALUE)
 		
@@ -132,10 +138,6 @@ public:
 	virtual DFGWrapper::Binding& GetBinding() = 0;
 	virtual FabricCore::Client& GetClient() = 0;
 	virtual DFGWrapper::Host* GetHost() = 0;
-
-	// Graph management functions
-	virtual int GetOperatorCount() = 0;
-	virtual std::string GetOperatorName(int i) = 0;
 
 	virtual std::string GetKLCode() = 0;
 	virtual std::string GetKLOperatorName() = 0;
@@ -168,18 +170,8 @@ public:
 	// Returns if the in port is an array type or not
 	virtual bool IsPortArray(const char* port)=0;
 
-	// Returns a string with all available ports on this graph
-	// This is helpful in the KL code editor to quickly add parameters
-	// to the entry operator signature
-	virtual std::string GetAllPortSignature()=0;
-
 	virtual const char* GetOutPortName() = 0;
-	virtual bool SetOutPortName(const char* name) = 0;
-
-	// If our out-port references a splice Array Type, return the index we fetch
-	virtual int GetOutPortArrayIdx() = 0;
-	// Set the index.  If idx == -1, set our out port to not be an array
-	virtual void SetOutPortArrayIdx(int idx) = 0;
+	virtual bool SetOutPort(const char* name) = 0;
 
 	virtual int GetMaxConnectedType(const char* portName) = 0;
 	virtual int SetMaxConnectedType(const char* portName, int type) = 0;
@@ -192,6 +184,10 @@ public:
 
 	// Convenience functions
 	virtual bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax)=0;
+
+	virtual bool AddNewEmptyGraph(const char* name) = 0;
+	virtual bool AddNewEmptyFunc(const char* name) = 0;
+	virtual bool AddNodeFromPreset(const char* name, const char* path) = 0;
 
 	// Connect myPortName to the output port on pSrcContainer named srcPortName
 	// Returns true if successfully connected, false if for any reason the
@@ -260,16 +256,16 @@ protected:
 	MSTR_GETTER(GetKLOperatorName, 0);
 
 	MSTR_GETTER(GetOutPortName, 0);
-	MSTR_SETTER(SetOutPortName);
+	MSTR_SETTER(SetOutPort);
 
-	MSTR_GETTER(GetAllPortSignature, 0);
+	//MSTR_SETTER(AddNewEmptyGraph);
+	//MSTR_SETTER(AddNewEmptyFunc);
 	
 	MSTR GetKLCodeMSTR() { return ToMSTR(GetKLCode().data(), 0); }
 	MSTR SetKLCodeMSTR(MSTR name, MSTR script) { 
 		return ToMSTR(SetKLCode(name.ToCStr().data(), script.ToCStr().data()).data(), 0); 
 	}
 
-	MSTR GetOperatorNameMSTR(int i) { return ToMSTR(GetOperatorName(i), 0); }
 	MSTR GetPortNameMSTR(int i)	{ return ToMSTR(GetPortName(i), 0); }
 	bool SetPortNameMSTR(const MSTR& oldName, const MSTR& newName)	{ return SetPortName(oldName.ToCStr(), newName.ToCStr()); }
 	MSTR GetPortTyeMSTR(const MSTR& port)	{ return ToMSTR(GetPortType(port.ToCStr()), 0); }
@@ -298,6 +294,10 @@ protected:
 	bool SetPortOptionMSTR(const MSTR& port, const MSTR& option, FPValue* value)	{ return SetPortOption(port.ToCStr(), option.ToCStr(), value); }
 	bool SetPortValueMSTR(const MSTR& port, FPValue* value)	{ return SetPortValue(port.ToCStr(), value); }
 	bool SetPortUIMinMaxMSTR(const MSTR& port, FPValue* uiMin, FPValue* uiMax)	{ return SetPortUIMinMax(port.ToCStr(), uiMin, uiMax); }
+
+	bool AddNewEmptyGraphMSTR(const MSTR& name) { return AddNewEmptyGraph(name.ToCStr()); }
+	bool AddNewEmptyFuncMSTR(const MSTR& name) { return AddNewEmptyFunc(name.ToCStr()); }
+	bool AddNodeFromPresetMSTR(const MSTR& name, const MSTR& path) { return AddNodeFromPreset(name.ToCStr(), path.ToCStr()); }
 
 #pragma endregion
 };
@@ -333,10 +333,6 @@ FPInterfaceDesc* GetDescriptor()
 
 			SpliceTranslationFPInterface::fn_setSpliceGraph, _T("SetSpliceGraph"), 0, TYPE_BOOL, 0, 1,
 				_M("source"),	0,	TYPE_REFTARG,
-
-			SpliceTranslationFPInterface::fn_getOpCount, _T("GetOperatorCount"), 0, TYPE_INT, 0, 0, 
-			SpliceTranslationFPInterface::fn_getOpName, _T("GetOperatorName"), 0, TYPE_TSTR_BV, 0, 1, 
-				_M("index"),	0,	TYPE_INDEX,
 
 			SpliceTranslationFPInterface::fn_getKLCode, _T("GetKLCode"), 0, TYPE_TSTR_BV, 0, 0, 
 			SpliceTranslationFPInterface::fn_getKLOpName, _T("GetKLOperatorName"), 0, TYPE_TSTR_BV, 0, 0, 
@@ -406,11 +402,18 @@ FPInterfaceDesc* GetDescriptor()
 				_M("uiMin"),	0,	TYPE_FPVALUE, 
 				_M("uiMax"),	0,	TYPE_FPVALUE, 
 
+			SpliceTranslationFPInterface::fn_newEmptyFunc, _T("AddNewEmptyFunc"), 0, TYPE_bool, 0, 1,
+				_M("name"), 0, TYPE_TSTR_BV,
+			SpliceTranslationFPInterface::fn_newEmptyGraph, _T("AddNewEmptyGraph"), 0, TYPE_bool, 0, 1,
+				_M("name"), 0, TYPE_TSTR_BV,
+			SpliceTranslationFPInterface::fn_addNodeFromPreset, _T("AddNodeFromPreset"), 0, TYPE_bool, 0, 2,
+				_M("name"), 0, TYPE_TSTR_BV,
+				_M("presetPath"), 0, TYPE_TSTR_BV,
+
+
 		properties,
 			SpliceTranslationFPInterface::prop_getPortCount, FP_NO_FUNCTION, _T("PortCount"), 0, TYPE_INT,
-			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_setOutPortName, _T("OutPort"), 0, TYPE_TSTR_BV,
-			SpliceTranslationFPInterface::prop_getOutPortArrayIdx, SpliceTranslationFPInterface::prop_setOutPortArrayIdx, _T("OutPortIndex"), 0, TYPE_INT,
-			SpliceTranslationFPInterface::prop_getAllPortSignature, FP_NO_FUNCTION, _T("AllPortsSignature"), 0, TYPE_TSTR_BV,
+			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_SetOutPort, _T("OutPort"), 0, TYPE_TSTR_BV,
 			SpliceTranslationFPInterface::prop_klEditor,	FP_NO_FUNCTION,		_T("KLEditor"),		0,	TYPE_VALUE,
 		p_end
 		);

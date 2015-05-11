@@ -65,7 +65,7 @@ void SplicePortChangeObject::Restore( int isUndo )
 	//m_maxOwner->UpdateKLEditor();
 	//// Re-connect the outport (TODO: Parent ports?)
 	//m_maxOwner->ResetPorts();
-	//m_maxOwner->SetOutPortName(m_outPortName.data());
+	//m_maxOwner->SetOutPort(m_outPortName.data());
 }
 
 void SplicePortChangeObject::Redo()
@@ -75,7 +75,7 @@ void SplicePortChangeObject::Redo()
 	//m_maxOwner->UpdateKLEditor();
 	//// Re-connect the outport (TODO: Parent ports?)
 	//m_maxOwner->ResetPorts();
-	//m_maxOwner->SetOutPortName(m_outPortName.data());
+	//m_maxOwner->SetOutPort(m_outPortName.data());
 }
 
 #pragma endregion

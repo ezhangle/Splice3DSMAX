@@ -16,6 +16,7 @@
 SpliceModifier::SpliceModifier(BOOL loading)
 	: ParentClass(loading == TRUE)
 {
+	ResetPorts();
 }
 
 SpliceModifier::~SpliceModifier()
@@ -26,7 +27,7 @@ void SpliceModifier::RefAdded(RefMakerHandle rm)
 {
 	if (Init())
 	{
-		SetOutPortName("modifierMesh");
+		SetPortName("outputValue", "modifierMesh");
 	}
 }
 
@@ -64,7 +65,7 @@ void SpliceModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os,
 		if (!m_inputValid.InInterval(t)) 
 		{
 			m_inputValid.SetInfinite();
-			MaxValuesToSplice<Object*, Mesh>(m_valuePort, t, m_inputValid, &os->obj, 1);
+			MaxValuesToSplice<Object*, Mesh>(m_client, m_valuePort, t, m_inputValid, &os->obj, 1);
 			ivValid &= m_inputValid;
 		}
 

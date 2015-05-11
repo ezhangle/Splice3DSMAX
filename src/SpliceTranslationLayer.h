@@ -96,7 +96,7 @@ bool SetPortValue(DFGWrapper::PortPtr& aPort, FPValue* value);
 /** Given a Max value, send it to the dgPort in the appropriate fashion */
 
 /** For each valid in the parameter block, send it to the appropriate Splice port in paramData */
-void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, DFGWrapper::Binding& rBinding, std::vector<Interval>& paramValidities, Interval& ivValid);
+void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore::Client& client, DFGWrapper::Binding& rBinding, std::vector<Interval>& paramValidities, Interval& ivValid);
 
 // DlgCallback for our static UI
 INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -155,6 +155,7 @@ protected:
 	FabricCore::Client m_client;
 	FabricServices::DFGWrapper::Host* m_host;
 	DFGWrapper::PortPtr	m_valuePort;
+
 	// We store a vector recording the Max validity
 	// of each parameter.  We only reset data on Splice
 	// if the parameter has actually changed.
@@ -300,9 +301,6 @@ public:
 	FabricCore::Client& GetClient()		{ return m_client; }
 	DFGWrapper::Host* GetHost()			{ return m_host; }
 
-	int GetOperatorCount();
-	std::string GetOperatorName(int i);
-
 	std::string GetKLCode();
 	std::string GetKLOperatorName();
 	std::string SetKLCode(const std::string& name, const std::string& script);
@@ -310,7 +308,7 @@ public:
 	// Port creation/management
 
 	// Get the number of ports on this graph
-	int GetPortCount() { return 0; }//return getGraph().getDGPortCount(); }
+	int GetPortCount() { return m_binding.getExecutable()->getPorts().size(); }
 	DFGWrapper::PortPtr GetPort(int i) { return (i < GetPortCount() && i >= 0) ? m_binding.getExecutable()->getPort(i) : DFGWrapper::PortPtr(); }
 	DFGWrapper::PortPtr GetPort(const char* name) { return m_binding.getExecutable()->getPort(name); }
 
@@ -330,18 +328,9 @@ public:
 	const char* GetPortType(const char* i);
 	bool IsPortArray(const char* i);
 
-	std::string GetAllPortSignature() { return 0; } //(getGraph()) ? getGraph().generateKLOperatorParameterList().getString_cstr() : NULL; }
-
 	// Get the name of the port we our value from
-	const char* GetOutPortName() { return ""; }// m_valuePort.isValid() ? m_valuePort.getName() : ""; }
-	bool SetOutPortName(const char* name);
-
-	int GetOutPortArrayIdx();
-	void SetOutPortArrayIdx(int index);
-
-	// Return the ID of port in our paramblock, or -1 if not connected
-	int GetPortParamID(int index);
-	void SetPortParamID(int index, ParamID id);
+	const char* GetOutPortName() { return !m_valuePort.isNull() && m_valuePort->isValid() ? m_valuePort->getName() : "INVALIDPORT"; }
+	bool SetOutPort(const char* name);
 
 	// Connect myPortName to the output port on pSrcContainer named srcPortName
 	bool ConnectPort(const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex, bool postConnectionsUI );
@@ -371,6 +360,11 @@ public:
 	bool SetPortValue(const char* name, FPValue* value);
 	bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax);
 
+	// Add DFG Entities
+	bool AddNewEmptyGraph(const char* name);
+	bool AddNewEmptyFunc(const char* name);
+	bool AddNodeFromPreset(const char* name, const char* path);
+
 	// Set splice values
 //	const DFGWrapper::Binding& GetSpliceGraph() { return getGraph(); }
 //	void SetSpliceGraph(const DFGWrapper::Binding& graph, bool createMaxParams);
@@ -393,20 +387,20 @@ public:
   virtual void onNodeRemoved(FabricServices::DFGWrapper::NodePtr node) {}
   virtual void onPinInserted(FabricServices::DFGWrapper::PinPtr pin) {}
   virtual void onPinRemoved(FabricServices::DFGWrapper::PinPtr pin) {}
-  virtual void onPortInserted(FabricServices::DFGWrapper::PortPtr port) {}
-  virtual void onPortRemoved(FabricServices::DFGWrapper::PortPtr port) {}
-  virtual void onEndPointsConnected(FabricServices::DFGWrapper::EndPointPtr src, FabricServices::DFGWrapper::EndPointPtr dst) {}
+  virtual void onPortInserted(FabricServices::DFGWrapper::PortPtr port);
+  virtual void onPortRemoved(FabricServices::DFGWrapper::PortPtr port);
+  virtual void onEndPointsConnected(FabricServices::DFGWrapper::EndPointPtr src, FabricServices::DFGWrapper::EndPointPtr dst);
   virtual void onEndPointsDisconnected(FabricServices::DFGWrapper::EndPointPtr src, FabricServices::DFGWrapper::EndPointPtr dst) {}
   virtual void onNodeMetadataChanged(FabricServices::DFGWrapper::NodePtr node, const char * key, const char * metadata) {}
   virtual void onNodeTitleChanged(FabricServices::DFGWrapper::NodePtr node, const char * title) {}
-  virtual void onPortRenamed(FabricServices::DFGWrapper::PortPtr port, const char * oldName) {}
+  virtual void onPortRenamed(FabricServices::DFGWrapper::PortPtr port, const char * oldName);
   virtual void onPinRenamed(FabricServices::DFGWrapper::PinPtr pin, const char * oldName) {}
   virtual void onExecMetadataChanged(FabricServices::DFGWrapper::ExecutablePtr exec, const char * key, const char * metadata) {}
   virtual void onExtDepAdded(const char * extension, const char * version) {}
   virtual void onExtDepRemoved(const char * extension, const char * version) {}
   virtual void onNodeCacheRuleChanged(const char * path, const char * rule) {}
   virtual void onExecCacheRuleChanged(const char * path, const char * rule) {}
-  virtual void onPortResolvedTypeChanged(FabricServices::DFGWrapper::PortPtr port, const char * resolvedType) {}
+  virtual void onPortResolvedTypeChanged(FabricServices::DFGWrapper::PortPtr port, const char * resolvedType);
   virtual void onPortTypeSpecChanged(FabricServices::DFGWrapper::PortPtr port, const char * typeSpec) {}
   virtual void onPinResolvedTypeChanged(FabricServices::DFGWrapper::PinPtr pin, const char * resolvedType) {}
   virtual void onPortMetadataChanged(FabricServices::DFGWrapper::PortPtr port, const char * key, const char * metadata) {}

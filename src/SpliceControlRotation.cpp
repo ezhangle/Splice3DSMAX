@@ -80,7 +80,7 @@ void SpliceControlRotation::GetValue(TimeValue t, void *val, Interval &interval,
 		Invalidate(); // Evaluate every time in case parent changes too
 		Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
 		Point3 pos = pInVal->GetTrans();
-		MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
+		MaxValueToSplice(m_client, m_parentValuePort, 0, interval, *pInVal);
 		const Quat& res = Evaluate(t, interval);
 		// To apply the value relatively, we pre-rotate by the result
 		Matrix3 tmRot;
@@ -91,7 +91,7 @@ void SpliceControlRotation::GetValue(TimeValue t, void *val, Interval &interval,
 	else
 	{
 		Quat* pOutVal = reinterpret_cast<Quat*>(val);
-		MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3(1));
+		MaxValueToSplice(m_client, m_parentValuePort, 0, interval, Matrix3(1));
 		*pOutVal = Evaluate(t, interval);
 	}
 

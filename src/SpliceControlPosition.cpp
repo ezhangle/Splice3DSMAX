@@ -80,13 +80,13 @@ void SpliceControlPosition::GetValue(TimeValue t, void *val, Interval &interval,
 	{
 		Invalidate(); // Evaluate every time in case parent changes too
 		Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
-		MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
+		MaxValueToSplice(m_client, m_parentValuePort, 0, interval, *pInVal);
 		pInVal->SetTrans(Evaluate(t, interval));
 	}
 	else
 	{
 		Point3* pOutVal = reinterpret_cast<Point3*>(val);
-		MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3::Identity);
+		MaxValueToSplice(m_client, m_parentValuePort, 0, interval, Matrix3::Identity);
 		*pOutVal = Evaluate(t, interval);
 	}
 }

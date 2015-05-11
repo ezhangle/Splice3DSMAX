@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "MaxConversionFns.h"
 #include "MeshNormalSpec.h"
-#include "FabricSplice.h"
 
 #pragma region Convert functions allow modifying a value just before it is sent to Splice
 
@@ -229,30 +228,32 @@ extern FabricCore::Variant GetVariant(const FPValue& value)
 #pragma endregion // GetVariants
 
 #pragma region Get RTVals
-void ConvertToRTVal(int param, FabricCore::RTVal& val)
+void ConvertToRTVal(int param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
 	// TODO: Remove all traces to FabricSplice
-	val = FabricSplice::constructSInt32RTVal(param);
+	val = FabricCore::RTVal::ConstructSInt32(client, param);
+	//val.setData() = FabricCore.RTVal.ConstructSInt32 (param);
 }
 
-void ConvertToRTVal(float param, FabricCore::RTVal& val)
+void ConvertToRTVal(float param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
 	val.setFloat32(param);
 }
 
-void ConvertToRTVal(bool param, FabricCore::RTVal& val)
+void ConvertToRTVal(bool param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
-	val = FabricSplice::constructBooleanRTVal(param);
+	val = FabricCore::RTVal::ConstructBoolean(client, param);
+	//val = FabricSplice::constructBooleanRTVal(param);
 }
 
-void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val)
+void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
 	val.maybeGetMemberRef("x").setFloat32(param.x);
 	val.maybeGetMemberRef("y").setFloat32(param.y);
 	val.maybeGetMemberRef("z").setFloat32(param.z);
 }
 
-void ConvertToRTVal(const Color& param, FabricCore::RTVal& val)
+void ConvertToRTVal(const Color& param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
 	val.maybeGetMemberRef("a").setFloat32(128);
 	val.maybeGetMemberRef("r").setFloat32(uint16_t(param.r * 128));
@@ -260,7 +261,7 @@ void ConvertToRTVal(const Color& param, FabricCore::RTVal& val)
 	val.maybeGetMemberRef("b").setFloat32(uint16_t(param.b * 128));
 }
 
-void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
+void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
 	if (strcmp(val.getTypeName().getStringCString(), "Color") == 0)
 	{
@@ -277,127 +278,125 @@ void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
 	}
 }
 
-void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val)
+void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
 	FabricCore::RTVal v = val.maybeGetMember("v");
-	ConvertToRTVal(Point3(param.x, param.y, param.z), v);
+	ConvertToRTVal(Point3(param.x, param.y, param.z), v, client);
 	val.maybeGetMember("w").setFloat32(param.w);
 }
 
-void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val)
+void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
-	//const MRow* pInMtx = param.GetAddr();
+	const MRow* pInMtx = param.GetAddr();
+	FabricCore::RTVal row0 = val.maybeGetMember("row0");
+	FabricCore::RTVal row1 = val.maybeGetMember("row1");
+	FabricCore::RTVal row2 = val.maybeGetMember("row2");
+	FabricCore::RTVal row3 = val.maybeGetMember("row3");
 
-	//val.setMember("row0", ConvertToRTVal(client, Point4(pInMtx[0][0], pInMtx[1][0], pInMtx[2][0], pInMtx[3][0]), val.maybeGetMember("row0")));
-	//val.setMember("row1", ConvertToRTVal(client, Point4(pInMtx[0][1], pInMtx[1][1], pInMtx[2][1], pInMtx[3][1]), val.maybeGetMember("row1")));
-	//val.setMember("row2", ConvertToRTVal(client, Point4(pInMtx[0][2], pInMtx[1][2], pInMtx[2][2], pInMtx[3][2]), val.maybeGetMember("row2")));
-	//val.setMember("row3", ConvertToRTVal(client, Point4(0, 0, 0, 1), val.maybeGetMember("row3")));
-	//return val;
+	ConvertToRTVal(Point4(pInMtx[0][0], pInMtx[1][0], pInMtx[2][0], pInMtx[3][0]), row0, client);
+	ConvertToRTVal(Point4(pInMtx[0][1], pInMtx[1][1], pInMtx[2][1], pInMtx[3][1]), row1, client);
+	ConvertToRTVal(Point4(pInMtx[0][2], pInMtx[1][2], pInMtx[2][2], pInMtx[3][2]), row2, client);
+	ConvertToRTVal(Point4(0, 0, 0, 1), row3, client);
 }
 
 
-void ConvertToRTVal(const MSTR& param, FabricCore::RTVal& val)
+void ConvertToRTVal(const MSTR& param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
-	//CStr cStr = param.ToCStr();
-	//val = FabricCore::RTVal::ConstructString(client, cStr.data());
-	//return val;
+	CStr cStr = param.ToCStr();
+	val = FabricCore::RTVal::ConstructString(client, cStr.data());
 }
 
-void ConvertToRTVal(const MCHAR* param, FabricCore::RTVal& val)
+void ConvertToRTVal(const MCHAR* param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
-	//CStr cStr = CStr::FromMCHAR(param);
-	//val = FabricCore::RTVal::ConstructString(client, cStr.data());
-	//return val;
+	CStr cStr = CStr::FromMCHAR(param);
+	val = FabricCore::RTVal::ConstructString(client, cStr.data());
 }
 
-void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
+void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh, FabricCore::Client& client)
 {
-//    if(!rtMesh.isValid())
-//		rtMesh = FabricCore::RTVal::Create(client, "PolygonMesh", 0, nullptr);
-//	
-//	if(!rtMesh.isValid() || rtMesh.isNullObject())
-//		return rtMesh;
-//	
-//	UINT nbPolygons = rtMesh.callMethod("UInt32", "polygonCount", 0, 0).getUInt32();
-//	bool rebuildMesh = nbPolygons != (UINT)param.numFaces;
-//	if(rebuildMesh){
-//		rtMesh.callMethod("", "clear", 0, 0);
-//	}
-//
-//	// Send all vertices to Splice
-//	std::vector<FabricCore::RTVal> args(2);
-//	args[0] = FabricCore::RTVal::ConstructExternalArray(client, "Float32", param.numVerts * 3, param.verts);
-//	args[1] = FabricCore::RTVal::ConstructUInt32(client, 3); // components
-//	rtMesh.callMethod("", "setPointsFromExternalArray", 2, &args[0]);
-//
-//	if(rebuildMesh){
-//		// Send all indices to Splice
-//		// First, construct an array of polygon sizes
-//		// We only support triangles, so all sizes are 3
-//		std::vector<unsigned int> dPolyCounts;
-//		dPolyCounts.assign(param.numFaces, 3);
-//
-//		// Construct array of indices
-//		std::vector<unsigned int> dVertIndex;
-//		dPolyCounts.reserve(param.numFaces * 3);
-//		Face* pFaces = param.faces;
-//		for (int f = 0; f < param.numFaces; f++)
-//		{
-//			for (int i = 0; i < 3; i++)
-//				dVertIndex.push_back(pFaces[f].getVert(i));
-//		}
-//	
-//
-//		args[0] = FabricCore::RTVal::ConstructExternalArray(client, "UInt32", dPolyCounts.size(), &dPolyCounts[0]);
-//		args[1] = FabricCore::RTVal::ConstructExternalArray(client, "UInt32", dVertIndex.size(), &dVertIndex[0]);
-//		rtMesh.callMethod("", "setTopologyFromCountsIndicesExternalArrays", 2, &args[0]);
-//	}
-//
-//	// Set normals
-//	// Do we have specified normals?
-//	Mesh* pNonConstMesh = const_cast<Mesh*>(&param);
-//	MeshNormalSpec* pNormalSpec = pNonConstMesh->GetSpecifiedNormals();
-//#pragma message("TODO: Fix this!")
-//	if (false && pNormalSpec != NULL && pNormalSpec->GetNumNormals() > 0)
-//	{
-//		std::vector<FabricCore::RTVal> args(3);
-//		args[0] = FabricCore::RTVal::ConstructString(client, "normals");
-//
-//		// 1 normal per index
-//		int nNormals = pNormalSpec->GetNumNormals();
-//		Point3* pNormalData = pNormalSpec->GetNormalArray();
-//		std::vector<double> dNormalsDbls(nNormals * 3);
-//		for (int i = 0; i < nNormals; i++)
-//		{
-//			for (int j = 0; j < 3; j++)
-//				dNormalsDbls[(i * 3) + j] = pNormalData[i][j];
-//		}
-//		args[1] = FabricCore::RTVal::ConstructExternalArray(client, "Vec3", nNormals, &dNormalsDbls[0]);
-//
-//		std::vector<UINT64> dNormalIndices;
-//		int nFaces = pNormalSpec->GetNumFaces();
-//		dNormalIndices.resize(nFaces * 3);
-//		MeshNormalFace* pFaces = pNormalSpec->GetFaceArray();
-//		for (int f = 0; f < nFaces; f++)
-//		{
-//			for (int j = 0; j < 3; j++)
-//				dNormalIndices[f* 3 + j] = pFaces[f].GetNormalID(j);
-//			//			memcpy(&dNormalIndices[f*3], pFaces[f].GetNormalIDArray(), sizeof(int) * 3);
-//		}
-//		args[2] = FabricCore::RTVal::ConstructExternalArray(client, "UInt64", nFaces * 3, &dNormalIndices[0]);
-//		rtMesh.callMethod("", "setAttributeFromPolygonPackedData", 3, &args[0]);
-//	}
-//	else
-//	{
-//		rtMesh.callMethod("", "recomputePointNormals", 0, NULL);
-//
-//		std::vector<Point3> dNormals;
-//		dNormals.resize(param.numFaces);
-//		for (int i = 0; i < param.numFaces; i++)
-//			dNormals[i] = pNonConstMesh->getFaceNormal(i);
-//	}
-//
-//	return rtMesh;
+	if(!rtMesh.isValid() || rtMesh.isNullObject())
+		return;
+	
+	UINT nbPolygons = rtMesh.callMethod("UInt32", "polygonCount", 0, 0).getUInt32();
+	bool rebuildMesh = nbPolygons != (UINT)param.numFaces;
+	if(rebuildMesh){
+		rtMesh.callMethod("", "clear", 0, 0);
+	}
+
+	// Send all vertices to Splice
+	std::vector<FabricCore::RTVal> args(2);
+	args[0] = FabricCore::RTVal::ConstructExternalArray(client, "Float32", param.numVerts * 3, param.verts);
+	args[1] = FabricCore::RTVal::ConstructUInt32(client, 3); // components
+	rtMesh.callMethod("", "setPointsFromExternalArray", 2, &args[0]);
+
+	if(rebuildMesh){
+		// Send all indices to Splice
+		// First, construct an array of polygon sizes
+		// We only support triangles, so all sizes are 3
+		std::vector<unsigned int> dPolyCounts;
+		dPolyCounts.assign(param.numFaces, 3);
+
+		// Construct array of indices
+		std::vector<unsigned int> dVertIndex;
+		dPolyCounts.reserve(param.numFaces * 3);
+		Face* pFaces = param.faces;
+		for (int f = 0; f < param.numFaces; f++)
+		{
+			for (int i = 0; i < 3; i++)
+				dVertIndex.push_back(pFaces[f].getVert(i));
+		}
+	
+
+		args[0] = FabricCore::RTVal::ConstructExternalArray(client, "UInt32", dPolyCounts.size(), &dPolyCounts[0]);
+		args[1] = FabricCore::RTVal::ConstructExternalArray(client, "UInt32", dVertIndex.size(), &dVertIndex[0]);
+		rtMesh.callMethod("", "setTopologyFromCountsIndicesExternalArrays", 2, &args[0]);
+	}
+
+	// Set normals
+	// Do we have specified normals?
+	Mesh* pNonConstMesh = const_cast<Mesh*>(&param);
+	MeshNormalSpec* pNormalSpec = pNonConstMesh->GetSpecifiedNormals();
+#pragma message("TODO: Fix this!")
+	if (false && pNormalSpec != NULL && pNormalSpec->GetNumNormals() > 0)
+	{
+		std::vector<FabricCore::RTVal> args(3);
+		args[0] = FabricCore::RTVal::ConstructString(client, "normals");
+
+		// 1 normal per index
+		int nNormals = pNormalSpec->GetNumNormals();
+		Point3* pNormalData = pNormalSpec->GetNormalArray();
+		std::vector<double> dNormalsDbls(nNormals * 3);
+		for (int i = 0; i < nNormals; i++)
+		{
+			for (int j = 0; j < 3; j++)
+				dNormalsDbls[(i * 3) + j] = pNormalData[i][j];
+		}
+		args[1] = FabricCore::RTVal::ConstructExternalArray(client, "Vec3", nNormals, &dNormalsDbls[0]);
+
+		std::vector<UINT64> dNormalIndices;
+		int nFaces = pNormalSpec->GetNumFaces();
+		dNormalIndices.resize(nFaces * 3);
+		MeshNormalFace* pFaces = pNormalSpec->GetFaceArray();
+		for (int f = 0; f < nFaces; f++)
+		{
+			for (int j = 0; j < 3; j++)
+				dNormalIndices[f* 3 + j] = pFaces[f].GetNormalID(j);
+			//			memcpy(&dNormalIndices[f*3], pFaces[f].GetNormalIDArray(), sizeof(int) * 3);
+		}
+		args[2] = FabricCore::RTVal::ConstructExternalArray(client, "UInt64", nFaces * 3, &dNormalIndices[0]);
+		rtMesh.callMethod("", "setAttributeFromPolygonPackedData", 3, &args[0]);
+	}
+	else
+	{
+		rtMesh.callMethod("", "recomputePointNormals", 0, NULL);
+
+		std::vector<Point3> dNormals;
+		dNormals.resize(param.numFaces);
+		for (int i = 0; i < param.numFaces; i++)
+			dNormals[i] = pNonConstMesh->getFaceNormal(i);
+	}
+
+	return;
 }
 
 #pragma endregion // GetVariants
@@ -556,24 +555,24 @@ void SpliceToMaxValue(const FabricCore::Variant& var, MSTR& param)
 #pragma region Splice RTVal -> Max
 //////////////////////////////////////////////////////////////////////////
 // Convert from RTVal to Max value
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param)
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param, FabricCore::Client& client)
 {
 	param = const_cast<FabricCore::RTVal&>(rtVal).getSInt32();
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param)
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param, FabricCore::Client& client)
 {
 	param = static_cast<float>(const_cast<FabricCore::RTVal&>(rtVal).getFloat32());
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point3& param)
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point3& param, FabricCore::Client& client)
 {
 	param[0] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("x").getFloat32();
 	param[1] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("y").getFloat32();
 	param[2] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("z").getFloat32();
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param)
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param, FabricCore::Client& client)
 {
 	FabricCore::RTVal& ncVal = const_cast<FabricCore::RTVal&>(rtVal);
 	if (strcmp(ncVal.getTypeName().getStringCString(), "Vec4") == 0) {
@@ -590,19 +589,19 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param)
 	}
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Color& param)
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Color& param, FabricCore::Client& client)
 {
 	param.r = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("r").getFloat32();
 	param.g = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("g").getFloat32();
 	param.b = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("b").getFloat32();
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Quat& param)
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Quat& param, FabricCore::Client& client)
 {
 	// Fabric Quats are structured ( Vec3 v; Scalar w; )
 	FabricCore::RTVal rtV = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("v");
 	Point3 maxV;
-	SpliceToMaxValue(rtV, maxV);
+	SpliceToMaxValue(rtV, maxV, client);
 	float w = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("w").getFloat32();
 	param.Set(maxV, w);
 	// When converting from Splices Y up to Max's Z up, our
@@ -611,7 +610,7 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Quat& param)
 	param.Invert();
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param)
+void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param, FabricCore::Client& client)
 {
 	FabricCore::RTVal pRow0 = dgPort.maybeGetMemberRef("row0");
 	FabricCore::RTVal pRow1 = dgPort.maybeGetMemberRef("row1");
@@ -625,9 +624,9 @@ void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param)
 	}
 
 	Point4 columns[3];
-	SpliceToMaxValue(pRow0, columns[0]);
-	SpliceToMaxValue(pRow1, columns[1]);
-	SpliceToMaxValue(pRow2, columns[2]);
+	SpliceToMaxValue(pRow0, columns[0], client);
+	SpliceToMaxValue(pRow1, columns[1], client);
+	SpliceToMaxValue(pRow2, columns[2], client);
 
 	param.SetColumn(0, columns[0]);
 	param.SetColumn(1, columns[1]);
@@ -636,9 +635,10 @@ void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param)
 	param.ValidateFlags();
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
+void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param, FabricCore::Client& client)
 {
-	FabricCore::Client client;
+	if (rtv.isNullObject())
+		return;
 
 	// Cache version number, compare for purposes of caching.
 	// this line was causing asserts. 
@@ -742,6 +742,8 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 		// every 3 + i verts in the poly
 		for (UINT triIdx = 0; triIdx < nVerts - 2; triIdx++)
 		{
+			DbgAssert(triIdx < nTriFaces);
+
 			Face& f = param.faces[iFaceIdx];
 			MeshNormalFace& nf = pNFaces[iFaceIdx];
 
@@ -753,6 +755,8 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 				param.faces[iFaceIdx - 1].setEdgeVis(2, EDGE_INVIS);
 				f.setEdgeVis(2, EDGE_INVIS);
 			}
+
+			DbgAssert(zeroIdxForFace + (triIdx + 2) < nbIndices);
 			if (triIdx % 2 == 0)
 			{
 				// For even tri's, triangulate A - B - C

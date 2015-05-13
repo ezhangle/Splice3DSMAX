@@ -56,6 +56,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
 		FabricCore::Client::CreateOptions options;
 		memset(&options, 0, sizeof(options));
 		options.optimizationType = FabricCore::ClientOptimizationType_Background;
+		options.guarded = 1;
 		FabricCore::Client::ReportCallback pCallback = &myLogFunc;
 		m_client = FabricCore::Client(pCallback, this, &options);
 

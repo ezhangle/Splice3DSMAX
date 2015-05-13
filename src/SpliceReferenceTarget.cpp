@@ -23,7 +23,7 @@ class SpliceReferenceTarget : public SpliceTranslationLayer<ReferenceTarget, int
 	bool CloneSpliceData(SpliceTranslationLayer* pMyClone) { return true; }
 
 public:
-	SpliceReferenceTarget();
+	SpliceReferenceTarget(BOOL loading);
 	~SpliceReferenceTarget();
 };
 
@@ -32,7 +32,7 @@ public:
 	SpliceReferenceTargetClassDesc()
 	{
 	}
-	void *			Create(BOOL /*loading*/ = FALSE) { return new SpliceReferenceTarget; }
+	void *			Create(BOOL loading) { return new SpliceReferenceTarget(loading); }
 	const MCHAR *	ClassName() { static MSTR s = GetString(IDS_SPLICE_REFTARG_CLASS_NAME); return s.data(); }
 	SClass_ID		SuperClassID() { return REF_TARGET_CLASS_ID; }
 	Class_ID		ClassID() { return SpliceReferenceTarget_CLASS_ID; }
@@ -45,5 +45,5 @@ DynPBCustAttrClassDesc* SpliceTranslationLayer<ReferenceTarget, int>::GetClassDe
 	return &spliceControllerDesc; 
 }
 
-SpliceReferenceTarget::SpliceReferenceTarget() {}
+SpliceReferenceTarget::SpliceReferenceTarget(BOOL loading) : ParentClass(loading) { }
 SpliceReferenceTarget::~SpliceReferenceTarget() {}

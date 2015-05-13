@@ -22,7 +22,7 @@ public:
 	void SetValue(TimeValue,void *,int,GetSetMethod);
 
 	//Constructor/Destructor
-	SpliceControlMatrix();
+	SpliceControlMatrix(BOOL loading);
 	~SpliceControlMatrix();	
 
 private:
@@ -46,7 +46,7 @@ public:
 	SpliceControlMatrixClassDesc()
 	{
 	}
-	void *			Create(BOOL /*loading*/ = FALSE) { return new SpliceControlMatrix; }
+	void *			Create(BOOL loading) { return new SpliceControlMatrix(loading); }
 	const MCHAR *	ClassName() { static MSTR s = GetString(IDS_SPLICE_MAT_CTRL_CLASS_NAME); return s.data(); }
 	SClass_ID		SuperClassID() { return CTRL_MATRIX3_CLASS_ID; }
 	Class_ID		ClassID() { return SpliceControlMatrix_CLASS_ID; }
@@ -59,9 +59,11 @@ DynPBCustAttrClassDesc* SpliceTranslationLayer<Control, Matrix3>::GetClassDesc()
 	return &spliceControllerDesc; 
 }
 
-SpliceControlMatrix::SpliceControlMatrix()
+SpliceControlMatrix::SpliceControlMatrix(BOOL loading)
+	: ParentClass(loading)
 {
-	ResetPorts();
+	if (!loading)
+		ResetPorts();
 }
 
 

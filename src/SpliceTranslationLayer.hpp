@@ -18,7 +18,7 @@
 //---------------------------------------------------------------------------------------------------------------
 #pragma region//Constructor/Destructor
 template<typename TBaseClass, typename TResultType>
-SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(bool init/*=true*/)
+SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(BOOL loading)
 	:	m_hPanel(NULL)
 	,	m_pInterface(NULL)
 	,	m_pMtlInterface(NULL)
@@ -28,8 +28,7 @@ SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(bool ini
 	,	m_valid(NEVER)
 //	,	m_valuePortIndex(-1)
 {
-	if (init)
-		Init();
+	Init(loading);
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -47,24 +46,25 @@ SpliceTranslationLayer<TBaseClass, TResultType>::~SpliceTranslationLayer()
 }
 
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::Init()
+bool SpliceTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
 {
+	MAXSPLICE_CATCH_BEGIN();
+
 	if (!m_client.isValid())
 	{
-
-		MAXSPLICE_CATCH_BEGIN();
-		//printf("Constructing client...\n");
-
 		// create a client
 		FabricCore::Client::CreateOptions options;
-		memset( &options, 0, sizeof( options ) );
+		memset(&options, 0, sizeof(options));
 		options.optimizationType = FabricCore::ClientOptimizationType_Background;
 		FabricCore::Client::ReportCallback pCallback = &myLogFunc;
 		m_client = FabricCore::Client(pCallback, this, &options);
 
 		// create a host for Canvas
 		m_host = new DFGWrapper::Host(m_client);
+	}
 
+	//if (!loading)
+	{
 		// create an empty binding
 		m_binding = m_host->createBindingToNewGraph();
 		m_binding.setNotificationCallback(bindingNotificationCallback, this);
@@ -91,12 +91,11 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init()
 		//	evalContext.setMember("graph", FabricSplice::constructStringRTVal(m_graph.getName()));
 
 		//evalContext.setMember("currentFilePath", FabricSplice::constructStringRTVal(filepath.ToCStr().data()));
-
-		MAXSPLICE_CATCH_RETURN(false);
-
-		return true;
 	}
-	return false;
+
+	MAXSPLICE_CATCH_RETURN(false);
+
+	return true;
 }
 #pragma endregion
 
@@ -431,13 +430,13 @@ RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged(cons
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::RefDeleted() {
 	// If we have no nodes referencing this class, then kill our UI
-	if (GetKLEditor() != nullptr)
-	{
+	//if (GetKLEditor() != nullptr)
+	//{
 		ULONG handle = 0;
 		NotifyDependents(FOREVER, (PartID)&handle, REFMSG_GET_NODE_HANDLE);
 		if (handle == 0)
 			CloseKLEditor();
-	}
+	//}
 }
 
 
@@ -516,22 +515,17 @@ ReferenceTarget *SpliceTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir
 template<typename TBaseClass, typename TResultType>
 IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
 {	
-	//FabricSplice::PersistenceInfo info;
- //   info.hostAppName = FabricCore::Variant::CreateString("Splice 3dsmax");
- //   info.hostAppVersion = FabricCore::Variant::CreateString("2014");
-	//info.filePath = FabricCore::Variant::CreateString(WStr(isave->FileName()).ToCStr());
-
 	//// Save out all the data needed to recreate parameters
-	//isave->BeginChunk(PARAM_SPLICE_DATA);
-	//std::string data = m_graph.getPersistenceDataJSON(&info);
-	//isave->WriteCString(data.data());
-	//isave->EndChunk();
+	isave->BeginChunk(PARAM_SPLICE_DATA);
+	std::string json = m_binding.exportJSON();
+	isave->WriteCString(json.data());
+	isave->EndChunk();
 
-	//// Save the value port.
-	//isave->BeginChunk(PARAM_VALUE_NAME);
-	//const char* outName = m_valuePort.getName();
-	//isave->WriteCString(outName);
-	//isave->EndChunk();
+	// Save the value port.
+	isave->BeginChunk(PARAM_VALUE_NAME);
+	const char* outName = GetOutPortName();
+	isave->WriteCString(outName);
+	isave->EndChunk();
 
 	return IO_OK;
 }
@@ -550,44 +544,44 @@ public:
 template<typename TBaseClass, typename TResultType>
 IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 {
-	//IOResult result = IO_OK;
-	//std::string outName;
-	//while( IO_OK == (result = iload->OpenChunk()) )
-	//{
-	//	switch (iload->CurChunkID())
-	//	{
-	//	case PARAM_SPLICE_DATA:
-	//		{
-	//			FabricSplice::PersistenceInfo info;
-	//			info.hostAppName = FabricCore::Variant::CreateString("Splice 3dsmax");
-	//			info.hostAppVersion = FabricCore::Variant::CreateString("2014");
-	//			info.filePath = FabricCore::Variant::CreateString(WStr(iload->FileName()).ToCStr());
+	IOResult result = IO_OK;
+	std::string outName;
+	while( IO_OK == (result = iload->OpenChunk()) )
+	{
+		switch (iload->CurChunkID())
+		{
+		case PARAM_SPLICE_DATA:
+			{
+				// First, read the size of the string.
+				char *buff = nullptr;
+				if (IO_OK == iload->ReadCStringChunk(&buff))
+				{
+					m_binding = m_host->createBindingFromJSON(buff);
+					m_binding.setNotificationCallback(bindingNotificationCallback, this);
+					// set the graph on the view
+					setGraph(DFGWrapper::GraphExecutablePtr::StaticCast(m_binding.getExecutable()));
+				}
 
-	//			// First, read the size of the string.
-	//			char *buff = nullptr;
-	//			iload->ReadCStringChunk(&buff);
-	//			m_graph.setFromPersistenceDataJSON(buff, &info);
-	//			break;
-	//		}
-	//	case PARAM_VALUE_NAME:
-	//		{
-	//			// First, read the size of the string.
-	//			char *buff = nullptr;
-	//			iload->ReadCStringChunk(&buff);
-	//			outName = buff;
-	//			break;
-	//		}
-	//	}
+				break;
+			}
+		case PARAM_VALUE_NAME:
+			{
+				// First, read the size of the string.
+				char *buff = nullptr;
+				if (IO_OK == iload->ReadCStringChunk(&buff))
+					outName = buff;
+				
+				break;
+			}
+		}
+		iload->CloseChunk();
+	}
 
-	//	iload->CloseChunk();
-	//}
-
-	//iload->RegisterPostLoadCallback(new RenameMaxParamsCallback(this));
-	//// Reset/reconnect our time/parent ports
+	iload->RegisterPostLoadCallback(new RenameMaxParamsCallback(this));
+	// Reset/reconnect our time/parent ports
 	//ResetPorts();
-	//// Get our output port
-	//if (!outName.empty())
-	//	m_valuePort = m_graph.getDGPort(outName.data());
+	// Get our output port
+	SetOutPort(outName.data());
 
 	return IO_OK;
 }
@@ -795,34 +789,9 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::AddIOPort(const char* name,
 }
 
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::RemovePort(int i)
+bool SpliceTranslationLayer<TBaseClass, TResultType>::RemovePort(const char* portName)
 {
-	//if (i < 0 || i >= GetPortCount())
-	//	return false;
-
-	//MAXSPLICE_CATCH_BEGIN()
-
-	//HoldActions hold(_M("Remove Port"));
-	//if (theHold.Holding())
-	//	theHold.Put(new SplicePortChangeObject(this));
-
-	//// Ensure the max data is released
-	//int pid = GetPortParamID(i);
-	//if (pid >= 0)
-	//	DeleteMaxParameter((ParamID)pid);
-
-	//// Release Splice data.
-	//std::string dgNodeName;
-	//std::string portName;
-	//{
-	//	DFGWrapper::PortPtr deadPort = GetPort(i);
-	//	dgNodeName = deadPort.getMember(); // Get DG member we are connected to
-	//	portName = deadPort.getName(); // Get port name
-	//}
-	//m_graph.removeDGPort(portName.data());
-	//m_graph.removeDGNodeMember(dgNodeName.data());
-	//
-	//MAXSPLICE_CATCH_RETURN(false);
+	m_binding.getExecutable()->removePort(portName);
 	return true;
 }
 
@@ -889,7 +858,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPort(const char* por
 		return false;
 
 	// The port is valid, but can it be translated to our out-type?
-	BitArray legalTypes = GetLegalMaxTypes(::GetPortType(aPort));
+	BitArray legalTypes = SpliceTypeToMaxTypes(::GetPortType(aPort));
 	if (!legalTypes[GetValueType()])
 		return false;
 
@@ -1009,7 +978,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(DFGWrap
 	{
 		// Figure out what kind of parameter
 		// we can/will create on the max side
-		BitArray legalTypes = ::GetLegalMaxTypes(spliceType);
+		BitArray legalTypes = SpliceTypeToMaxTypes(spliceType);
 		// The requested max type is not legal for this splice type
 		if (!legalTypes[maxType])
 			maxType = SpliceTypeToDefaultMaxType(spliceType); // Reset to default
@@ -1176,13 +1145,30 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::AddNodeFromPreset(const ch
 template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::LoadFromFile(const MCHAR* filename, bool createMaxParams) 
 { 
-	//CStr cFilename = CStr::FromMCHAR(filename);
-	//DFGWrapper::Binding graph("newGraph");
-	//bool res = graph.loadFromFile(cFilename);
-	//if (!res)
-	//	return false;
+	
+	FILE * file = nullptr;
+	errno_t erno = _tfopen_s(&file, filename, _T("rb"));
+	if (!file)
+	{
+		erno;
+		//log()
+		// TODO - Fix logging!
+	}
 
-	//SetSpliceGraph(graph, true);
+	fseek(file, 0, SEEK_END);
+	int fileSize = ftell(file);
+	rewind(file);
+
+	char * buffer = (char*)malloc(fileSize + 1);
+	buffer[fileSize] = '\0';
+
+	size_t readBytes = fread(buffer, 1, fileSize, file);
+	assert(readBytes == fileSize);
+
+	fclose(file);
+
+	RestoreFromJSON(buffer);
+	free(buffer);
 	return true;
 };
 
@@ -1195,6 +1181,46 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SaveToFile(const MCHAR* fi
 	//CStr cFile = CStr::FromMCHAR(filename);
 	//return m_graph.saveToFile(cFile.data());
 };
+
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const char* json)
+{
+	// The KL Editor has pointers to the current graph
+	CloseKLEditor();
+
+	m_binding = m_host->createBindingFromJSON(json);
+	m_binding.setNotificationCallback(bindingNotificationCallback, this);
+	// set the graph on the view
+	setGraph(DFGWrapper::GraphExecutablePtr::StaticCast(m_binding.getExecutable()));
+
+	// Setup port connections
+	DFGWrapper::PortList allPorts = m_binding.getExecutable()->getPorts();
+
+	for (auto pitr = allPorts.begin(); pitr != allPorts.end(); pitr++)
+	{
+		// If this could be our out port?
+		if ((*pitr)->getPortType() == FabricCore::DFGPortType_Out)
+		{
+			BitArray compatibleTypes = SpliceTypeToMaxTypes(::GetPortType(*pitr));
+			// If this splice type is compatible with this classes output,
+			// set this port as our outport
+			if (compatibleTypes[GetValueType()])
+				m_valuePort = *pitr;
+		}
+		else
+		{
+			// for input ports, we should trigger Max type creation
+			onPortInserted(*pitr);
+		}
+	}
+	return true;
+}
+
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::ExportToJSON(std::string &outJson)
+{
+	outJson = m_binding.exportJSON();
+}
 
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
@@ -1300,7 +1326,7 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 		m_binding.execute();
 
 		// Get our value back!
-		SpliceToMaxValue(m_valuePort->getArgValue(), m_value, m_client /*, GetOutPortArrayIdx()*/);
+		SpliceToMaxValue(m_valuePort->getArgValue(), m_value, m_client);
 		
 		MAXSPLICE_CATCH_END;
 

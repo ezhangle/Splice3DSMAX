@@ -6,6 +6,7 @@
 DockableWindow::DockableWindow(HWND hwndCuiFrame) : h(hwndCuiFrame), w(NULL), frame(NULL)
 {
 	frame = ::GetICUIFrame(h);
+	frame->SetContentType(CUI_HWND);
 	frame->InstallMsgHandler(this);
 }
 
@@ -13,6 +14,8 @@ DockableWindow::~DockableWindow()
 {
 	::ReleaseICUIFrame(frame);
 	delete w;
+
+	DestroyWindow(h);
 }
 
 

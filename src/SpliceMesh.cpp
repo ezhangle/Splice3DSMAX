@@ -71,10 +71,10 @@ public:
 	bool PrepareDisplay(const MaxSDK::Graphics::UpdateDisplayContext& updateDisplayContext) override;
 #endif
 
-#if MAX_VERSION_MAJOR < 17
 	// From GeomObject
-	virtual Mesh* GetRenderMesh(TimeValue t, INode *inode, View& view, BOOL& needDelete) override;
-#endif
+	// For some incredibly strange reason, View is resolving to FabricServices::DFGWrapper::View, instead
+	// of the Max View class. Very strange, as we are 'using' FabricServices, but not DFGWrapper...
+	virtual Mesh* GetRenderMesh(TimeValue t, INode *inode, ::View& view, BOOL& needDelete) override;
 
 	//From Animatable
 	virtual Class_ID ClassID() override {return SpliceMesh_CLASS_ID;}		
@@ -109,8 +109,10 @@ DynPBCustAttrClassDesc* SpliceMesh::ParentClass::GetClassDesc()
 //--- SpliceMesh -------------------------------------------------------
 
 SpliceMesh::SpliceMesh(BOOL loading)
+	: ParentClass(loading)
 {
-	ResetPorts();
+	if (!loading)
+		ResetPorts();
 }
 
 SpliceMesh::~SpliceMesh()
@@ -277,16 +279,16 @@ void SpliceMesh::GetDeformBBox(TimeValue t, Box3& box, Matrix3* tm, BOOL useSel 
 		box = box * *tm;
 }
 
-#if MAX_VERSION_MAJOR < 17
+//#if MAX_VERSION_MAJOR < 17
 Mesh* SpliceMesh::GetRenderMesh(TimeValue t, 
-						INode *inode, View& view, BOOL& needDelete)
+						INode *inode, ::View& view, BOOL& needDelete)
 {
 	needDelete = FALSE;
 	Interval ivDontCare;
 	const Mesh& mesh = Evaluate(t, ivDontCare);
 	return const_cast<Mesh*>(&mesh);
 }
-#endif
+//#endif
 
 Object* SpliceMesh::ConvertToType(TimeValue t, Class_ID obtype)
 {

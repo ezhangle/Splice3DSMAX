@@ -57,7 +57,7 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock);
 IParamBlock2* CreateParamBlock(ParamBlockDesc2* pDesc, IParamBlock2* pCopyThis, ReferenceTarget* pOwner);
 
 /** Get all Max types that can be converted to the given Splice type */
-BitArray GetLegalMaxTypes(const char* spliceType);
+BitArray SpliceTypeToMaxTypes(const char* spliceType);
 
 /** Returns the Max ParamType2 that matches the named Splice type (NOTE - may not be legal for PB2) */
 int SpliceTypeToMaxType(const char* cType, bool isArray=false);
@@ -97,6 +97,9 @@ bool SetPortValue(DFGWrapper::PortPtr& aPort, FPValue* value);
 
 /** For each valid in the parameter block, send it to the appropriate Splice port in paramData */
 void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore::Client& client, DFGWrapper::Binding& rBinding, std::vector<Interval>& paramValidities, Interval& ivValid);
+
+/** Callback from DFG actions */
+void bindingNotificationCallback(void * userData, char const *jsonCString, uint32_t jsonLength);
 
 // DlgCallback for our static UI
 INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -164,14 +167,14 @@ protected:
 
 public:
 
-	SpliceTranslationLayer(bool init = true);
+	SpliceTranslationLayer(BOOL loading);
 	~SpliceTranslationLayer();
 
 	// Call this function to initialize splice graph
 	// Returns true if work was performed (initialization was
 	// necessary) or false if no work was performed
 	// (was already initialized).
-	bool Init();
+	bool Init(BOOL loading);
 
 #pragma region Max-required functions
 	// These functions allow a uniform exposure of our
@@ -320,7 +323,7 @@ public:
 	int AddIOPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=false);
 
 	// Remove specified port and matching max parameter
-	bool RemovePort(int i);
+	bool RemovePort(const char* name);
 
 	// Get name of port
 	const char* GetPortName(int i);
@@ -352,7 +355,7 @@ public:
 	// data for splice port
 	// \param i The index of the splice port
 	// \return A BitArray, where each set bit indicates a legal ParamType for the given port
-	virtual BitArray GetLegalMaxTypes(const char* portName) { return ::GetLegalMaxTypes(GetPortType(portName)); }
+	virtual BitArray GetLegalMaxTypes(const char* portName) { return SpliceTypeToMaxTypes(GetPortType(portName)); }
 
 	// Allow setting various options on ports 
 	// Set UI limits.  This will not actually limit the value, but for sliders etc it will limit what is presented to the user.
@@ -373,6 +376,10 @@ public:
 	// Load from a saved JSON file spec
 	bool LoadFromFile(const MCHAR* filename, bool createMaxParams);
 	bool SaveToFile(const MCHAR* filename);
+
+	bool RestoreFromJSON(const char* json);
+	void ExportToJSON(std::string &outJson);
+
 	
 	virtual void ResetPorts();
 
@@ -406,7 +413,6 @@ public:
   virtual void onPortMetadataChanged(FabricServices::DFGWrapper::PortPtr port, const char * key, const char * metadata) {}
   virtual void onPinMetadataChanged(FabricServices::DFGWrapper::PinPtr pin, const char * key, const char * metadata) {}
 
-  static void bindingNotificationCallback(void * userData, char const *jsonCString, uint32_t jsonLength) {}
 #pragma endregion
   //////////////////////////////////////////////////////////////////////////
 

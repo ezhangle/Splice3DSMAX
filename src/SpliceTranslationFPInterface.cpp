@@ -12,6 +12,7 @@
 
 SpliceTranslationFPInterface::SpliceTranslationFPInterface()
 	: m_klEditor(nullptr)
+	, m_pDFGWidgetWindow(nullptr)
 {
 
 }
@@ -23,21 +24,15 @@ SpliceTranslationFPInterface::~SpliceTranslationFPInterface()
 
 BOOL SpliceTranslationFPInterface::ShowDFGGraphEditor()
 {
-	//qApp;
-	//QApplication::exec();
-	bool ownApplication = QMfcApp::pluginInstance(hInstance);
-	QApplication* pApp = qApp; // QApplication::instance();
-	//QApplication appliCation();
+	SAFE_DELETE(m_pDFGWidgetWindow);
 
-	DockableWindow* dock = DockableWindow::Create(_T("My QT Demo"));
-	HWND h = dock->GetHWND();
+	bool ownApplication = QMfcApp::pluginInstance(hInstance);	
+	m_pDFGWidgetWindow = DockableWindow::Create(_T("Fabric DFG"));
+	HWND h = m_pDFGWidgetWindow->GetHWND();
 	QWinWidget* dlg = new QWinWidget(h);
 	DFGWidget* pWidget = new DFGWidget(dlg, GetClient(), GetBinding(), GetHost());
 
-	dock->SetWidget(dlg);
-
-	//DockableWindow* pDockableWindow = DockableWindow::Create(_M("FuckYeah"));
-	//pDockableWindow->SetWidget(pWidget);
+	m_pDFGWidgetWindow->SetWidget(dlg);
 	return TRUE;
 }
 
@@ -53,16 +48,16 @@ BOOL SpliceTranslationFPInterface::SetSpliceGraph(ReferenceTarget* rtarg)
 	return FALSE;
 }
 
-bool SpliceTranslationFPInterface::RemovePortMSTR(const MSTR& name) 
-{
-	CStr cName = name.ToCStr();
-	for (int i = 0; i < GetPortCount(); i++)
-	{
-		if (strcmp(GetPortName(i), cName.data()) == 0)
-			return RemovePort(i);
-	}
-	return false;
-}
+//bool SpliceTranslationFPInterface::RemovePortMSTR(const MSTR& name) 
+//{
+//	CStr cName = name.ToCStr();
+//	for (int i = 0; i < GetPortCount(); i++)
+//	{
+//		if (strcmp(GetPortName(i), cName.data()) == 0)
+//			return RemovePort(i);
+//	}
+//	return false;
+//}
 
 bool SpliceTranslationFPInterface::ConnectPortMSTR( const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI  )
 {
@@ -94,6 +89,8 @@ void SpliceTranslationFPInterface::CloseKLEditor()
 		m_klEditor->make_collectable();
 		m_klEditor = nullptr;
 	}
+
+	SAFE_DELETE(m_pDFGWidgetWindow);
 }
 
 void SpliceTranslationFPInterface::UpdateKLEditor()

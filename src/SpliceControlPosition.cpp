@@ -54,8 +54,10 @@ DynPBCustAttrClassDesc* SpliceTranslationLayer<Control, Point3>::GetClassDesc()
 }
 
 SpliceControlPosition::SpliceControlPosition(BOOL loading)
+	: ParentClass(loading)
 {
-	ResetPorts();
+	if (!loading)
+		ResetPorts();
 }
 
 

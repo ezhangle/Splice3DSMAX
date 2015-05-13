@@ -21,7 +21,7 @@ public:
 	void SetValue(TimeValue,void *,int,GetSetMethod);
 
 	//Constructor/Destructor
-	SpliceControlFloat();
+	SpliceControlFloat(BOOL loading);
 	~SpliceControlFloat();	
 
 private:
@@ -40,7 +40,7 @@ public:
 	SpliceControlFloatClassDesc()
 	{
 	}
-	void *			Create(BOOL /*loading*/ = FALSE) { return new SpliceControlFloat; }
+	void *			Create(BOOL loading) { return new SpliceControlFloat(loading); }
 	const MCHAR *	ClassName() { static MSTR s = GetString(IDS_SPLICE_FLT_CTRL_CLASS_NAME); return s.data(); }
 	SClass_ID		SuperClassID() { return CTRL_FLOAT_CLASS_ID; }
 	Class_ID		ClassID() { return SpliceControlFloat_CLASS_ID; }
@@ -53,9 +53,11 @@ DynPBCustAttrClassDesc* SpliceTranslationLayer<Control, float>::GetClassDesc()
 	return &spliceControllerDesc; 
 }
 
-SpliceControlFloat::SpliceControlFloat()
+SpliceControlFloat::SpliceControlFloat(BOOL loading)
+	: ParentClass(loading)
 {
-	ResetPorts();
+	if (!loading)
+		ResetPorts();
 }
 
 

@@ -16,7 +16,8 @@
 SpliceModifier::SpliceModifier(BOOL loading)
 	: ParentClass(loading == TRUE)
 {
-	ResetPorts();
+	if (!loading)
+		ResetPorts();
 }
 
 SpliceModifier::~SpliceModifier()
@@ -25,10 +26,10 @@ SpliceModifier::~SpliceModifier()
 
 void SpliceModifier::RefAdded(RefMakerHandle rm)
 {
-	if (Init())
-	{
-		SetPortName("outputValue", "modifierMesh");
-	}
+	//if (Init(FALSE))
+	//{
+	//	SetPortName("outputValue", "modifierMesh");
+	//}
 }
 
 Interval SpliceModifier::LocalValidity(TimeValue t)

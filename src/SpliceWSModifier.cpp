@@ -29,7 +29,8 @@ DynPBCustAttrClassDesc* SpliceWSModifier::ParentClass::GetClassDesc()
 SpliceWSModifier::SpliceWSModifier(BOOL loading)
 	: ParentClass(loading == TRUE)
 {
-	ResetPorts();
+	if (!loading)
+		ResetPorts();
 }
 
 SpliceWSModifier::~SpliceWSModifier()
@@ -38,10 +39,10 @@ SpliceWSModifier::~SpliceWSModifier()
 
 void SpliceWSModifier::RefAdded(RefMakerHandle rm)
 {
-	if (Init())
-	{
-		SetPortName("outputValue", "modifierMesh");
-	}
+	//if (Init())
+	//{
+	//	SetPortName("outputValue", "modifierMesh");
+	//}
 }
 
 Interval SpliceWSModifier::LocalValidity(TimeValue t)

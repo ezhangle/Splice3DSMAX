@@ -667,7 +667,7 @@ bool SetPortValue(DFGWrapper::PortPtr& aPort, FPValue* value)
 
 //////////////////////////////////////////////////////////////////////////
 // Converting types to/from Fabric
-BitArray GetLegalMaxTypes(const char* cType)
+BitArray SpliceTypeToMaxTypes(const char* cType)
 {
 	BitArray res(TYPE_DOUBLE);
 	if (strcmp(cType, "Integer") == 0 ||
@@ -706,6 +706,7 @@ BitArray GetLegalMaxTypes(const char* cType)
 		res.Set(TYPE_INODE); // devolves to rotation
 		res.Set(TYPE_POINT4);
 		res.Set(TYPE_REFTARG); // Can only be type Rotation Controller.
+		res.Set(TYPE_QUAT);
 	}
 	else if (strcmp(cType, "String") == 0)
 	{
@@ -716,6 +717,7 @@ BitArray GetLegalMaxTypes(const char* cType)
 	{
 		res.Set(TYPE_INODE);
 		res.Set(TYPE_REFTARG); // Can only be type Object
+		res.Set(TYPE_MESH);
 	}
 	// All param types can be set to a reference target when connecting ports.
 	res.Set(TYPE_REFTARG);
@@ -1134,3 +1136,20 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 }
 
 #pragma endregion
+
+void bindingNotificationCallback(void * userData, char const *jsonCString, uint32_t jsonLength)
+{
+	if (!jsonCString)
+		return;
+	//BaseInterface * interf = (BaseInterface *)userData;
+
+	FabricCore::Variant notificationVar = FabricCore::Variant::CreateFromJSON(jsonCString, jsonLength);
+
+	const FabricCore::Variant * descVar = notificationVar.getDictValue("desc");
+	std::string descStr = descVar->getStringData();
+
+	if (descStr == "argTypeChanged")
+	{
+		printf("an argument type has changed. you might want to create a DCC port now.\n");
+	}
+}

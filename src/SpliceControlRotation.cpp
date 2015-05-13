@@ -21,7 +21,7 @@ public:
 	void SetValue(TimeValue,void *,int,GetSetMethod);
 
 	//Constructor/Destructor
-	SpliceControlRotation();
+	SpliceControlRotation(BOOL loading);
 	~SpliceControlRotation();	
 
 private:
@@ -39,7 +39,7 @@ public:
 	SpliceControlRotationClassDesc()
 	{
 	}
-	void *			Create(BOOL /*loading*/ = FALSE) { return new SpliceControlRotation; }
+	void *			Create(BOOL loading) { return new SpliceControlRotation(loading); }
 	const MCHAR *	ClassName() { static MSTR s = GetString(IDS_SPLICE_ROT_CTRL_CLASS_NAME); return s.data(); }
 	SClass_ID		SuperClassID() { return CTRL_ROTATION_CLASS_ID; }
 	Class_ID		ClassID() { return SpliceControlRotation_CLASS_ID; }
@@ -52,7 +52,8 @@ DynPBCustAttrClassDesc* SpliceTranslationLayer<Control, Quat>::GetClassDesc()
 	return &spliceControllerDesc; 
 }
 
-SpliceControlRotation::SpliceControlRotation()
+SpliceControlRotation::SpliceControlRotation(BOOL loading)
+	: ParentClass(loading)
 {
 	ResetPorts();
 }

@@ -4,6 +4,8 @@
 
 #define ISPLICE__INTERFACE Interface_ID(0x5a5f19c9, 0x25881449)
 
+class DockableWindow;
+
 // Call the given function name, passing a single argument pTarger, and optionally returning it's result
 extern Value* CallMaxScriptFunction(MCHAR* function, ReferenceTarget* fnArgument, bool returnResult);
 extern Value* CallMaxScriptFunction(MCHAR* function, Value* fnArgument, bool returnResult);
@@ -16,6 +18,8 @@ extern Value* CallMaxScriptFunction(MCHAR* function, Value* fnArgument, bool ret
 class SpliceTranslationFPInterface : public FPMixinInterface {
 private:
 	Value* m_klEditor;
+
+	DockableWindow* m_pDFGWidgetWindow;
 
 public:
 
@@ -31,6 +35,9 @@ public:
 		fn_setSpliceGraph,
 		fn_loadFromFile,
 		fn_saveToFile,
+
+		fn_restoreFromJson,
+		fn_exportToJson,
 		
 		//fn_getOpCount,
 		//fn_getOpName,
@@ -43,7 +50,7 @@ public:
 		fn_addOutputPort,
 		fn_addIOPort,
 
-		fn_removePortIdx,
+		//fn_removePortIdx,
 		fn_removePortName,
 		fn_getPortName,
 		fn_setPortName,
@@ -89,6 +96,9 @@ public:
 		FN_2(fn_loadFromFile, TYPE_bool, LoadFromFile, TYPE_FILENAME, TYPE_bool);
 		FN_1(fn_saveToFile, TYPE_bool, SaveToFile, TYPE_FILENAME);
 
+		FN_1(fn_restoreFromJson, TYPE_bool, RestoreFromJSONMSTR, TYPE_TSTR_BV);
+		FN_0(fn_exportToJson, TYPE_TSTR_BV, ExportToJSONMSTR);
+
 		FN_2(fn_setKLCode, TYPE_TSTR_BV, SetKLCodeMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
 		FN_0(fn_getKLCode, TYPE_TSTR_BV, GetKLCodeMSTR);
 		FN_0(fn_getKLOpName, TYPE_TSTR_BV, GetKLOperatorNameMSTR);
@@ -97,7 +107,7 @@ public:
 		FN_4(fn_addOutputPort, TYPE_INT, AddOutputPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_BOOL, TYPE_TSTR_BV);
 		FN_5(fn_addIOPort, TYPE_INT, AddIOPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_INT, TYPE_BOOL, TYPE_TSTR_BV);
 
-		FN_1(fn_removePortIdx, TYPE_bool, RemovePort, TYPE_INDEX);
+		//FN_1(fn_removePortIdx, TYPE_bool, RemovePort, TYPE_INDEX);
 		FN_1(fn_removePortName, TYPE_bool, RemovePortMSTR, TYPE_TSTR_BV);
 		FN_1(fn_getPortName, TYPE_TSTR_BV, GetPortNameMSTR, TYPE_INT);
 		FN_2(fn_setPortName, TYPE_bool, SetPortNameMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
@@ -158,7 +168,7 @@ public:
 	virtual int AddIOPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=nullptr) = 0;
 
 	// Remove specified port and matching max parameter
-	virtual bool RemovePort(int i) = 0;
+	virtual bool RemovePort(const char* portName) = 0;
 
 	// Reset any auto-generated ports.
 	virtual void ResetPorts()=0;
@@ -216,6 +226,9 @@ public:
 	virtual bool LoadFromFile(const MCHAR* filename, bool createMaxParams)=0;
 	virtual bool SaveToFile(const MCHAR* filename)=0;
 
+	virtual bool RestoreFromJSON(const char* json) = 0;
+	virtual void ExportToJSON(std::string& outString) = 0;
+
 	// Show the MaxScript-based editor
 	Value* GetKLEditor() { return m_klEditor; }
 	void ShowKLEditor();
@@ -243,23 +256,20 @@ protected:
 	}
 	inline MSTR ToMSTR(std::string v, int defValue) { return ToMSTR(v.data(), defValue); }
 
-#define MSTR_GETTER(fnName, defValue) \
+#define MSTR_OUTVAL(fnName, defValue) \
 	MSTR fnName##MSTR() { \
 		return ToMSTR(fnName(), defValue); \
 	}
-#define MSTR_SETTER(fnName) \
-	void fnName##MSTR(const MSTR& inVal) { \
-		CStr inValCStr = inVal.ToCStr(); \
-		fnName(inValCStr); }
+#define MSTR_INVAL(retType, fnName) \
+	retType fnName##MSTR(const MSTR& inVal) { \
+		return fnName(inVal.ToACP()); \
+	}
 
 	// TODO: Add default vals for these
-	MSTR_GETTER(GetKLOperatorName, 0);
+	MSTR_OUTVAL(GetKLOperatorName, 0);
+	MSTR_OUTVAL(GetOutPortName, 0);
 
-	MSTR_GETTER(GetOutPortName, 0);
-	MSTR_SETTER(SetOutPort);
-
-	//MSTR_SETTER(AddNewEmptyGraph);
-	//MSTR_SETTER(AddNewEmptyFunc);
+	MSTR_INVAL(bool, SetOutPort);
 	
 	MSTR GetKLCodeMSTR() { return ToMSTR(GetKLCode().data(), 0); }
 	MSTR SetKLCodeMSTR(MSTR name, MSTR script) { 
@@ -269,10 +279,14 @@ protected:
 	MSTR GetPortNameMSTR(int i)	{ return ToMSTR(GetPortName(i), 0); }
 	bool SetPortNameMSTR(const MSTR& oldName, const MSTR& newName)	{ return SetPortName(oldName.ToCStr(), newName.ToCStr()); }
 	MSTR GetPortTyeMSTR(const MSTR& port)	{ return ToMSTR(GetPortType(port.ToCStr()), 0); }
-	bool IsPortArrayMSTR(const MSTR& port) { return IsPortArray(port.ToCStr()); }
-	int GetMaxConnectedTypeMSTR(const MSTR& port) { return GetMaxConnectedType(port.ToCStr()); }
+	MSTR_INVAL(bool, IsPortArray);
+	//bool IsPortArrayMSTR(const MSTR& port) { return IsPortArray(port.ToCStr()); }
+	MSTR_INVAL(bool, GetMaxConnectedType);
+	//int GetMaxConnectedTypeMSTR(const MSTR& port) { return GetMaxConnectedType(port.ToCStr()); }
 	int SetMaxConnectedTypeMSTR(const MSTR& port, int type) { return SetMaxConnectedType(port.ToCStr(), type); }
-	BitArray GetLegalMaxTypesMSTR(const MSTR& port) { return GetLegalMaxTypes(port.ToCStr()); }
+	//BitArray GetLegalMaxTypesMSTR(const MSTR& port) { return GetLegalMaxTypes(port.ToCStr()); }
+	MSTR_INVAL(BitArray, GetLegalMaxTypes);
+
 
 	int AddInputPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
 	{
@@ -286,18 +300,25 @@ protected:
 	{
 		return AddIOPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data());
 	}
-	bool RemovePortMSTR(const MSTR& name);
+	MSTR_INVAL(bool, RemovePort);
 
 	bool ConnectPortMSTR(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI );
-	MSTR_SETTER(DisconnectPort);
+	MSTR_INVAL(bool, DisconnectPort);
 
 	bool SetPortOptionMSTR(const MSTR& port, const MSTR& option, FPValue* value)	{ return SetPortOption(port.ToCStr(), option.ToCStr(), value); }
 	bool SetPortValueMSTR(const MSTR& port, FPValue* value)	{ return SetPortValue(port.ToCStr(), value); }
 	bool SetPortUIMinMaxMSTR(const MSTR& port, FPValue* uiMin, FPValue* uiMax)	{ return SetPortUIMinMax(port.ToCStr(), uiMin, uiMax); }
 
-	bool AddNewEmptyGraphMSTR(const MSTR& name) { return AddNewEmptyGraph(name.ToCStr()); }
-	bool AddNewEmptyFuncMSTR(const MSTR& name) { return AddNewEmptyFunc(name.ToCStr()); }
+	MSTR_INVAL(bool, AddNewEmptyGraph);
+	MSTR_INVAL(bool, AddNewEmptyFunc);
 	bool AddNodeFromPresetMSTR(const MSTR& name, const MSTR& path) { return AddNodeFromPreset(name.ToCStr(), path.ToCStr()); }
+
+	MSTR_INVAL(bool, RestoreFromJSON);
+	MSTR ExportToJSONMSTR() {
+		std::string jsonData;
+		ExportToJSON(jsonData);
+		return MSTR::FromACP(jsonData.data(), jsonData.length());
+	}
 
 #pragma endregion
 };
@@ -327,12 +348,17 @@ FPInterfaceDesc* GetDescriptor()
 			SpliceTranslationFPInterface::fn_loadFromFile, _T("LoadFromFile"), 0, TYPE_bool, 0, 2, 
 				_M("filename"),	0,	TYPE_FILENAME,
 				_M("createMaxParams"),	0,	TYPE_bool,
-
 			SpliceTranslationFPInterface::fn_saveToFile, _T("SaveToFile"), 0, TYPE_bool, 0, 1, 
 				_M("filename"),	0,	TYPE_FILENAME,
 
+			SpliceTranslationFPInterface::fn_exportToJson, _T("ExportToJSON"), 0, TYPE_TSTR_BV, 0, 0,
+			SpliceTranslationFPInterface::fn_restoreFromJson, _T("RestoreFromJSON"), 0, TYPE_bool, 0, 1,
+				_M("json"), 0, TYPE_TSTR_BV,
+
 			SpliceTranslationFPInterface::fn_setSpliceGraph, _T("SetSpliceGraph"), 0, TYPE_BOOL, 0, 1,
 				_M("source"),	0,	TYPE_REFTARG,
+
+
 
 			SpliceTranslationFPInterface::fn_getKLCode, _T("GetKLCode"), 0, TYPE_TSTR_BV, 0, 0, 
 			SpliceTranslationFPInterface::fn_getKLOpName, _T("GetKLOperatorName"), 0, TYPE_TSTR_BV, 0, 0, 
@@ -358,8 +384,8 @@ FPInterfaceDesc* GetDescriptor()
 				_M("isArray"),		0,	TYPE_bool, f_keyArgDefault, false,
 				_M("Extension"),	0,	TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
 
-			SpliceTranslationFPInterface::fn_removePortIdx,	 _T("RemovePortByIndex"), 0, TYPE_bool, 0, 1,
-				_M("portIndex"),	0,	TYPE_INDEX,
+			//SpliceTranslationFPInterface::fn_removePortIdx,	 _T("RemovePortByIndex"), 0, TYPE_bool, 0, 1,
+			//	_M("portIndex"),	0,	TYPE_INDEX,
 			SpliceTranslationFPInterface::fn_removePortName, _T("RemovePort"), 0, TYPE_bool, 0, 1,
 				_M("portName"),		0,	TYPE_TSTR_BV,
 

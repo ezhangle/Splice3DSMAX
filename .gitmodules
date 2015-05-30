@@ -1,3 +1,6 @@
 [submodule "qt-solutions"]
 	path = qt-solutions
 	url = https://gitorious.org/qt-solutions/qt-solutions.git
+[submodule "FabricUI"]
+	path = FabricUI
+	url = git@github.com:fabric-engine/FabricUI

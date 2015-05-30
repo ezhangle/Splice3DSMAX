@@ -157,8 +157,8 @@ public:
 
 	// Get the number of ports on this graph
 	virtual int GetPortCount() = 0;
-	virtual DFGWrapper::PortPtr GetPort(int i)=0;
-	virtual DFGWrapper::PortPtr GetPort(const char* name)=0;
+	virtual DFGWrapper::ExecPortPtr GetPort(int i)=0;
+	virtual DFGWrapper::ExecPortPtr GetPort(const char* name)=0;
 
 	// Splice port management
 	// Create a new port.  A matching Max parameter 

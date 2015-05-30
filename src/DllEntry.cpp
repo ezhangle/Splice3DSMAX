@@ -5,8 +5,7 @@ FILE: DllEntry.cpp
 DESCRIPTION:	Returns the ClassDesc (factory pattern) classes 
 				to allow Max to create our plugins
 
-CREATED BY:		Ingenuity Engine
-				Coded by Stephen Taylor, T&A Development
+CREATED BY:		Stephen Taylor, T&A Development
 
 *>
 **********************************************************************/

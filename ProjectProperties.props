@@ -37,7 +37,7 @@
 
 		<FabricUIDir>$(FABRIC_UI_DIR)</FabricUIDir>
 		<!-- If no install of SpliceUI is present, default to the fabric system build values  -->
-		<FabricUIDir Condition="'$(FabricUIDir)'==''">$(ProjectDir)..\FabricUI\</FabricUIDir>
+		<FabricUIDir Condition="'$(FabricUIDir)'==''">$(SolutionDir)FabricUI\</FabricUIDir>
 
 		<QtSuffix>4</QtSuffix>
 
@@ -77,14 +77,14 @@
 	<ItemDefinitionGroup>
 		<!-- default values for compiler -->
 		<ClCompile>
-			<AdditionalIncludeDirectories>$(FabricUIDir)include\FabricUI;$(FABRIC_DIR)include;$(FABRIC_DIR)include\FabricServices;$(QT_DIR)include;$(QT_DIR)include/QtGui;$(MaxSDKPath)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(FabricUIDir)stage\include\FabricUI;$(FABRIC_DIR)include;$(FABRIC_DIR)include\FabricServices;$(QT_DIR)include;$(QT_DIR)include/QtGui;$(MaxSDKPath)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<StringPooling>true</StringPooling>
       <PrecompiledHeader>Use</PrecompiledHeader>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
      	<PreprocessorDefinitions>FEC_SHARED;FECS_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
 		</ClCompile>        
 
 		<!-- Turn on E&C for Debug Win32 builds -->
@@ -113,9 +113,9 @@
 			<SubSystem>Windows</SubSystem>
 			<AdditionalDependencies>assetmanagement.lib;atscore.lib;biped.lib;bmm.lib;core.lib;crowd.lib;custdlg.lib;databridge.lib;edmodel.lib;expr.lib;flt.lib;geom.lib;gfx.lib;GraphicsDriver.lib;gup.lib;igame.lib;imageviewers.lib;manipsys.lib;maxnet.lib;maxscrpt.lib;maxutil.lib;menuman.lib;menus.lib;mesh.lib;mnmath.lib;paramblk2.lib;particle.lib;particleflow.lib;physique.lib;poly.lib;polypaint.lib;renderutil.lib;rtmax.lib;tessint.lib;viewfile.lib;zlibdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies Condition="'$(MaxVersion)'!='2012'">GraphicsUtility.lib;%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalDependencies>FabricSplitSearch.lib;FabricCore-2.0.lib;FabricServices-MSVC-12.0.lib;FabricSplice-2.0.lib;FabricUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>FabricSplitSearch.lib;FabricCore-2.0.lib;FabricServices-MSVC-12.0-md.lib;FabricSplice-2.0.lib;FabricUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies>QtCore$(QtSuffix).lib;QtGui$(QtSuffix).lib;QtOpenGL$(QtSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalLibraryDirectories>$(QT_DIR)lib;$(FabricUIDir)lib;$(FABRIC_DIR)\lib;$(BOOST_DIR);$(MaxSDKLibPath)</AdditionalLibraryDirectories>
+			<AdditionalLibraryDirectories>$(QT_DIR)lib;$(FabricUIDir)stage\lib;$(FABRIC_DIR)\lib;$(BOOST_DIR);$(MaxSDKLibPath);$(SolutionDir)qt-solutions\qtwinmigrate\lib</AdditionalLibraryDirectories>
 		</Link>
 	</ItemDefinitionGroup>
 	<ImportGroup Label="PropertySheets">
@@ -135,6 +135,7 @@
 copy "$(ProjectDir)SetupMenu.ms" "$(SpliceOutDir)" /Y
 xcopy "$(ProjectDir)ScintillaNET" "$(SpliceOutDir)ScintillaNET" /E /I /Y
 xcopy "$(ProjectDir)testingScripts" "$(SpliceOutDir)samples" /E /I /Y
+xcopy "$(ProjectDir)qt-solutions\qtwinmigrate\lib\QtSolutions_MFCMigrationFramework-head.dll" "$(FABRIC_DIR)\lib" /E /I /Y
 call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
       </Command>
     </PostBuildEvent>
@@ -143,7 +144,7 @@ call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
     <LocalDebuggerCommandArguments>-vo -p "$(ProjectDir)/build/Generated.Plugin.Splice.ini"</LocalDebuggerCommandArguments>
     <LocalDebuggerCommand>$(MaxPath)3dsmax.exe</LocalDebuggerCommand>
     <LocalDebuggerEnvironment>SPLICE3DSMAXDIR=$(SpliceOutDir)
-SCINTILLANETDIR=$(SpliceOutDir)\ScintillaNET\
+SCINTILLANETDIR=$(SpliceOutDir)ScintillaNET\
 PATH=$(PATH);$(FABRIC_DIR)\lib;$(SCINTILLANETDIR)
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>

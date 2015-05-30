@@ -840,7 +840,7 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param, FabricCore::Cli
 
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtv, MSTR& param) {
+void SpliceToMaxValue(const FabricCore::RTVal& rtv, MSTR& param, FabricCore::Client& client) {
 	FabricCore::RTVal& ncval = const_cast<FabricCore::RTVal&>(rtv);
 	param = MSTR::FromACP(ncval.getStringCString(), ncval.getStringLength());
 }

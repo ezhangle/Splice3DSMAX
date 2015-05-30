@@ -32,7 +32,7 @@ private:
 
 	bool CloneSpliceData(SpliceTranslationLayer<Control, float>* pMyClone) { return true; } ; // No cloning for me...
 
-	DFGWrapper::PortPtr m_parentValuePort;
+	DFGWrapper::ExecPortPtr m_parentValuePort;
 };
 
 class SpliceControlFloatClassDesc : public DynPBCustAttrClassDesc {

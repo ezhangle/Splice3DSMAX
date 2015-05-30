@@ -250,7 +250,7 @@ ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName )
 	return AddMaxParameter(pDesc, type, sName.data());
 }
 
-void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::PortPtr& port)
+void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPortPtr& port)
 {
 	ParamDef& def = pDesc->GetParamDef(pid);
 	int baseType = base_type(def.type);
@@ -306,77 +306,77 @@ void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::Variant
 }
 
 template<typename TType>
-void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::RTVal& defaultVal) {
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::RTVal& defaultVal, FabricCore::Client& client) {
 	TType def;
-	SpliceToMaxValue(defaultVal, def);
+	SpliceToMaxValue(defaultVal, def, client);
 	pDesc->ParamOption(pid, p_default, def, p_end);
 }
 
-void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::PortPtr& port) {
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPortPtr& port, FabricCore::Client& client) {
 
 	//if (!port->isValid())
-	//	return;
+		return;
 
-	//FabricCore::RTVal defaultVal = port->getDefaultValue();
-	//if(!defaultVal.isValid())
-	//	return;
+	FabricCore::RTVal defaultVal = port->getDefaultValue();
+	if(!defaultVal.isValid())
+		return;
 
-	//ParamDef& def = pDesc->GetParamDef(pid);
-	//int baseType = base_type(def.type);
-	//switch((int)baseType)
-	//{
-	//case TYPE_BOOL:
-	//case TYPE_INT:
-	//	{
-	//		SetMaxParamDefault<int>(pDesc, pid, defaultVal);
-	//		break;
-	//	}
-	//case TYPE_FLOAT:	
-	//case TYPE_ANGLE:	
-	//case TYPE_PCNT_FRAC:	
-	//case TYPE_WORLD:
-	//	{
-	//		SetMaxParamDefault<float>(pDesc, pid, defaultVal);
-	//		break;
-	//	}
-	//case TYPE_RGBA:
-	//	{
-	//		SetMaxParamDefault<Color>(pDesc, pid, defaultVal);
-	//		break;
-	//	}
-	//case TYPE_POINT3:
-	//	{
-	//		SetMaxParamDefault<Point3>(pDesc, pid, defaultVal);
-	//		break;
-	//	}
-	//case TYPE_FRGBA:
-	//case TYPE_POINT4:
-	//	{
-	//		SetMaxParamDefault<Point4>(pDesc, pid, defaultVal);
-	//		break;
-	//	}
-	//case TYPE_MATRIX3:
-	//	{
-	//		SetMaxParamDefault<Matrix3>(pDesc, pid, defaultVal);
-	//		break;
-	//	}
-	//case TYPE_STRING:
-	//	{
-	//		SetMaxParamDefault<MSTR>(pDesc, pid, defaultVal);
-	//		break;
-	//	}
-	//case TYPE_INODE:
-	//case TYPE_REFTARG:
-	//	{
-	//		// No default possible for this type.
-	//		break;
-	//	}
-	//default:
-	//	DbgAssert(0 && "Implment me");
-	//	//case TYPE_INODE:	pDesc->ParamOption(pid, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
-	//	//case TYPE_MTL:		pDesc->ParamOption(pid, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
-	//	//case TYPE_TEXMAP:	pDesc->ParamOption(pid, p_ui, TYPE_TEXMAPBUTTON, 0, p_end); break;
-	//}
+	ParamDef& def = pDesc->GetParamDef(pid);
+	int baseType = base_type(def.type);
+	switch((int)baseType)
+	{
+	case TYPE_BOOL:
+	case TYPE_INT:
+		{
+			SetMaxParamDefault<int>(pDesc, pid, defaultVal, client);
+			break;
+		}
+	case TYPE_FLOAT:	
+	case TYPE_ANGLE:	
+	case TYPE_PCNT_FRAC:	
+	case TYPE_WORLD:
+		{
+			SetMaxParamDefault<float>(pDesc, pid, defaultVal, client);
+			break;
+		}
+	case TYPE_RGBA:
+		{
+			SetMaxParamDefault<Color>(pDesc, pid, defaultVal, client);
+			break;
+		}
+	case TYPE_POINT3:
+		{
+			SetMaxParamDefault<Point3>(pDesc, pid, defaultVal, client);
+			break;
+		}
+	case TYPE_FRGBA:
+	case TYPE_POINT4:
+		{
+			SetMaxParamDefault<Point4>(pDesc, pid, defaultVal, client);
+			break;
+		}
+	case TYPE_MATRIX3:
+		{
+			SetMaxParamDefault<Matrix3>(pDesc, pid, defaultVal, client);
+			break;
+		}
+	case TYPE_STRING:
+		{
+			SetMaxParamDefault<MSTR>(pDesc, pid, defaultVal, client);
+			break;
+		}
+	case TYPE_INODE:
+	case TYPE_REFTARG:
+		{
+			// No default possible for this type.
+			break;
+		}
+	default:
+		DbgAssert(0 && "Implment me");
+		//case TYPE_INODE:	pDesc->ParamOption(pid, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
+		//case TYPE_MTL:		pDesc->ParamOption(pid, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
+		//case TYPE_TEXMAP:	pDesc->ParamOption(pid, p_ui, TYPE_TEXMAPBUTTON, 0, p_end); break;
+	}
 }
 
 void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name)
@@ -394,6 +394,73 @@ void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name)
 			newDef.int_name = _tcsdup(name);
 		else
 			newDef.int_name = NULL;
+	}
+}
+
+template<typename TType>
+void SetMaxParamValue(IParamBlock2* pblock, TimeValue t, ParamID pid, FabricCore::RTVal& value, FabricCore::Client& client) {
+	// Check for existence!
+	if (pblock->IDtoIndex(pid) < 0)
+		return;
+	TType def;
+	SpliceToMaxValue(value, def, client);
+	pblock->SetValue(pid, t, def);
+}
+
+void SetMaxParamFromSplice(IParamBlock2* pblock, ParamID pid, DFGWrapper::ExecPortPtr& port, FabricCore::Client& client)
+{
+	if (!port->isValid() || pblock == nullptr)
+		return;
+
+	FabricCore::RTVal currentVal = port->getArgValue();
+	if (!currentVal.isValid())
+		return;
+
+	TimeValue t = GetCOREInterface()->GetTime();
+	ParamDef& def = pblock->GetParamDef(pid);
+	int baseType = base_type(def.type);
+	switch ((int)baseType)
+	{
+	case TYPE_BOOL:
+	case TYPE_INT:
+	{
+		SetMaxParamValue<int>(pblock, t, pid, currentVal, client);
+		break;
+	}
+	case TYPE_FLOAT:
+	case TYPE_ANGLE:
+	case TYPE_PCNT_FRAC:
+	case TYPE_WORLD:
+	{
+		SetMaxParamValue<float>(pblock, t, pid, currentVal, client);
+		break;
+	}
+	case TYPE_RGBA:
+	{
+		SetMaxParamValue<Color>(pblock, t, pid, currentVal, client);
+		break;
+	}
+	case TYPE_POINT3:
+	{
+		SetMaxParamValue<Point3>(pblock, t, pid, currentVal, client);
+		break;
+	}
+	case TYPE_FRGBA:
+	case TYPE_POINT4:
+	{
+		SetMaxParamValue<Point4>(pblock, t, pid, currentVal, client);
+		break;
+	}
+	case TYPE_MATRIX3:
+	{
+		SetMaxParamValue<Matrix3>(pblock, t, pid, currentVal, client);
+		break;
+	}
+	case TYPE_STRING:
+	{
+		SetMaxParamValue<MSTR>(pblock, t, pid, currentVal, client);
+		break;
+	}
 	}
 }
 
@@ -539,15 +606,14 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 }
 
 // Add a parameter to the splice graph
-const DFGWrapper::PortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, int type, const MCHAR* pName, FabricCore::DFGPortType mode)
+const DFGWrapper::ExecPortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, int type, const MCHAR* pName, FabricCore::DFGPortType mode)
 {
-	
 	return AddSpliceParameter(rBinding, type, CStr::FromMCHAR(pName).data(), mode);
 }
 
 //////////////////////////////////////////////////////////////////////////
 // Helper functions for accessing options
-int GetPortParamID(DFGWrapper::PortPtr& aPort)
+int GetPortParamID(DFGWrapper::ExecPortPtr& aPort)
 {
 	if (aPort)
 	{
@@ -558,13 +624,13 @@ int GetPortParamID(DFGWrapper::PortPtr& aPort)
 	return -1;
 }
 
-void SetPortParamID(DFGWrapper::PortPtr& aPort, ParamID id) 
+void SetPortParamID(DFGWrapper::ExecPortPtr& aPort, ParamID id) 
 {
 	FabricCore::Variant var = GetVariant((int)id);
 	aPort->setOption(MAX_PID_OPT, &var);
 }
 
-std::string GetPortConnection(DFGWrapper::PortPtr& aPort) 
+std::string GetPortConnection(DFGWrapper::ExecPortPtr& aPort) 
 {
 	std::string res;
 	if (aPort->isValid())
@@ -576,7 +642,7 @@ std::string GetPortConnection(DFGWrapper::PortPtr& aPort)
 	return res;
 }
 
-void SetPortConnection(DFGWrapper::PortPtr& aPort, const char* name) 
+void SetPortConnection(DFGWrapper::ExecPortPtr& aPort, const char* name) 
 {
 	if (aPort->isValid())
 	{
@@ -585,7 +651,7 @@ void SetPortConnection(DFGWrapper::PortPtr& aPort, const char* name)
 	}
 }
 
-//int GetPortConnectionIndex(DFGWrapper::PortPtr& aPort) 
+//int GetPortConnectionIndex(DFGWrapper::ExecPortPtr& aPort) 
 //{
 //	if (aPort)
 //	{
@@ -596,7 +662,7 @@ void SetPortConnection(DFGWrapper::PortPtr& aPort, const char* name)
 //	return -1;
 //}
 //
-//void SetPortConnectionIndex(DFGWrapper::PortPtr& aPort, int index) 
+//void SetPortConnectionIndex(DFGWrapper::ExecPortPtr& aPort, int index) 
 //{
 //	if (aPort)
 //	{
@@ -604,7 +670,7 @@ void SetPortConnection(DFGWrapper::PortPtr& aPort, const char* name)
 //	}
 //}
 //
-//bool GetPortPostConnectionUI(DFGWrapper::PortPtr& aPort) 
+//bool GetPortPostConnectionUI(DFGWrapper::ExecPortPtr& aPort) 
 //{
 //	if (aPort)
 //	{
@@ -615,7 +681,7 @@ void SetPortConnection(DFGWrapper::PortPtr& aPort, const char* name)
 //	return false;
 //}
 //
-//void SetPortPostConnectionUI(DFGWrapper::PortPtr& aPort, bool postUI) 
+//void SetPortPostConnectionUI(DFGWrapper::ExecPortPtr& aPort, bool postUI) 
 //{
 //	if (aPort)
 //	{
@@ -623,18 +689,34 @@ void SetPortConnection(DFGWrapper::PortPtr& aPort, const char* name)
 //	}
 //}
 //
-const char* GetPortName( DFGWrapper::PortPtr& aPort )
+const char* GetPortName( DFGWrapper::ExecPortPtr& aPort )
 {
 	return aPort->getName();
 }
 
-const char* GetPortType( DFGWrapper::PortPtr& aPort )
+const char* GetPortType( DFGWrapper::ExecPortPtr& aPort )
 {
 	return aPort->getResolvedType();
 }
 
+int GetPortMaxType(DFGWrapper::ExecPortPtr& aPort)
+{
+	if (aPort)
+	{
+		FabricCore::Variant option = aPort->getOption(MAX_PARM_TYPE_OPT);
+		if (option.isSInt32())
+			return (int)option.getSInt32();
+	}
+	return -2;
+}
 
-bool SetPortOption(DFGWrapper::PortPtr& aPort, const char* option, FPValue* value)
+void SetPortMaxType(DFGWrapper::ExecPortPtr& aPort, int type)
+{
+	FabricCore::Variant var = GetVariant(type);
+	aPort->setOption(MAX_PARM_TYPE_OPT, &var);
+}
+
+bool SetPortOption(DFGWrapper::ExecPortPtr& aPort, const char* option, FPValue* value)
 {
 	MAXSPLICE_CATCH_BEGIN()
 
@@ -647,7 +729,7 @@ bool SetPortOption(DFGWrapper::PortPtr& aPort, const char* option, FPValue* valu
 	MAXSPLICE_CATCH_RETURN(false);
 }
 
-bool SetPortValue(DFGWrapper::PortPtr& aPort, FPValue* value)
+bool SetPortValue(DFGWrapper::ExecPortPtr& aPort, FPValue* value)
 {
 	MAXSPLICE_CATCH_BEGIN()
 	if (value == nullptr)
@@ -783,7 +865,7 @@ int SpliceTypeToDefaultMaxType(const char* cType)
 	return SpliceTypeToMaxType(cType);
 }
 
-bool IsPortPersistable(DFGWrapper::Port& port) {
+bool IsPortPersistable(DFGWrapper::ExecPort& port) {
 	if (!port.isValid())
 		return false;
 
@@ -807,7 +889,7 @@ bool IsPortPersistable(DFGWrapper::Port& port) {
 	return false;
 }
 
-const DFGWrapper::PortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, const char* type, const char* cName, FabricCore::DFGPortType mode, bool isArray/*=false*/, const char* inExtension)
+const DFGWrapper::ExecPortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, const char* type, const char* cName, FabricCore::DFGPortType mode, bool isArray/*=false*/, const char* inExtension)
 {
 	std::string spliceType(type);
 	if (isArray)
@@ -815,7 +897,7 @@ const DFGWrapper::PortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, cons
 
 	DFGWrapper::GraphExecutablePtr graph = DFGWrapper::GraphExecutablePtr::StaticCast(rBinding.getExecutable());
 
-	DFGWrapper::PortPtr port;// = graph->getPort(cName);
+	DFGWrapper::ExecPortPtr port;// = graph->getPort(cName);
 	// How can I test if this port is valid?
 	//if (port->isValid() && port->isPort())
 	//	return port;
@@ -832,11 +914,11 @@ const DFGWrapper::PortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, cons
 	{
 		CStr message = "ERROR on AddPort to Splice: ";
 		logMessage(message + e.getDesc_cstr());
-		return DFGWrapper::PortPtr();
+		return DFGWrapper::ExecPortPtr();
 	}
 }
 
-const DFGWrapper::PortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, int type, const char* cName, FabricCore::DFGPortType mode, bool isArray/*=false*/, const char* inExtension)
+const DFGWrapper::ExecPortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, int type, const char* cName, FabricCore::DFGPortType mode, bool isArray/*=false*/, const char* inExtension)
 {
 	std::string strType;
 	switch ((int)type)
@@ -944,7 +1026,7 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 //////////////////////////////////////////////////////////////////////////
 template<typename TResultType, typename TConvertType>
-void ParameterBlockValuesToSplice(FabricCore::Client& client, DFGWrapper::PortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
+void ParameterBlockValuesToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
 {
 	MAXSPLICE_CATCH_BEGIN()
 
@@ -965,13 +1047,13 @@ void ParameterBlockValuesToSplice(FabricCore::Client& client, DFGWrapper::PortPt
 }
 
 template<typename TResultType>
-void ParameterBlockValuesToSplice(FabricCore::Client& client, DFGWrapper::PortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
+void ParameterBlockValuesToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
 {
 	ParameterBlockValuesToSplice<TResultType, TResultType>(client, port, t, pblock, pid, ivValid);
 }
 
 // This helper function converts from INode to the appropriate Splice type
-void MaxPtrToSplice(FabricCore::Client& client, DFGWrapper::PortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID id, Interval& ivValid)
+void MaxPtrToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID id, Interval& ivValid)
 {
 	if (!port->isValid())
 		return;
@@ -1014,10 +1096,10 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 
 	// Iterate over all PB2 parameters, send to associated splice port
 	DFGWrapper::ExecutablePtr pExecutable = graph.getExecutable();
-	DFGWrapper::PortList allPorts = pExecutable->getPorts();
+	DFGWrapper::ExecPortList allPorts = pExecutable->getPorts();
 	for (size_t i = 0; i < allPorts.size(); i++)
 	{
-		DFGWrapper::PortPtr& port = allPorts[i];
+		DFGWrapper::ExecPortPtr& port = allPorts[i];
 		ParamID pid = ParamID(::GetPortParamID(port));
 		// Its possible some params are not supported by Max.
 		if (pid == -1)
@@ -1102,7 +1184,7 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 						continue;
 
 					pSrcContInterface->TriggerEvaluate(t, paramValids[pidx]);
-					DFGWrapper::PortPtr srcPort = pSrcContInterface->GetPort(portConnection.data());
+					DFGWrapper::ExecPortPtr srcPort = pSrcContInterface->GetPort(portConnection.data());
 					if (srcPort)
 					{
 						FabricCore::RTVal srcVal = srcPort->getArgValue();

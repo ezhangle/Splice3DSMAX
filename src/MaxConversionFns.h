@@ -51,7 +51,7 @@ extern void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& val, FabricCore
 
 // Entry point to the Max->Splice value translation
 template<typename TResultType, typename TConvertType>
-void MaxValuesToSplice(FabricCore::Client& client, DFGWrapper::PortPtr& port, TimeValue t, Interval& ivValid, const TResultType* params, int nParams)
+void MaxValuesToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port, TimeValue t, Interval& ivValid, const TResultType* params, int nParams)
 {
 	if (!port->isValid())
 		return;
@@ -90,7 +90,7 @@ void MaxValuesToSplice(FabricCore::Client& client, DFGWrapper::PortPtr& port, Ti
 }
 
 template<typename TResultType>
-void MaxValueToSplice(FabricCore::Client& client, DFGWrapper::PortPtr& port, TimeValue t, Interval& ivValid, const TResultType& param) { MaxValuesToSplice<TResultType, TResultType>(client, port, t, ivValid, &param, 1); }
+void MaxValueToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port, TimeValue t, Interval& ivValid, const TResultType& param) { MaxValuesToSplice<TResultType, TResultType>(client, port, t, ivValid, &param, 1); }
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Splice->Max

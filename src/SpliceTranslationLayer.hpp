@@ -1255,8 +1255,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
 #pragma region DFG-Derived functions
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::onExecPortInserted(FabricServices::DFGWrapper::ExecPortPtr port)
-{
+void SpliceTranslationLayer<TBaseClass, TResultType>::onExecPortInserted(FabricServices::DFGWrapper::ExecPortPtr port) {
 	// By default, hook up a Max param for each new port.
 //	if (port->getOutsidePortType() == FabricCore::DFGPortType_In)
 //		SetMaxConnectedType(port, GetPortMaxType(port));
@@ -1275,6 +1274,14 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::onExecPortRemoved(FabricSe
 
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::onPortsConnected(FabricServices::DFGWrapper::PortPtr src, FabricServices::DFGWrapper::PortPtr dst)
+{
+	InvalidateAll();
+}
+
+
+
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::onPortsDisconnected(FabricServices::DFGWrapper::PortPtr src, FabricServices::DFGWrapper::PortPtr dst)
 {
 	InvalidateAll();
 }

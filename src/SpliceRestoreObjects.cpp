@@ -1,5 +1,32 @@
 #include "StdAfx.h"
 #include "SpliceRestoreObjects.h"
+#include "Commands\CommandStack.h"
+
+#pragma region CommandStack implementation
+// Singleton command stack holds the DFG undo objects
+class MaxCommandStack : public FabricServices::Commands::CommandStack 
+{
+	virtual bool add(FabricServices::Commands::Command * command) override
+	{
+		// TODO: Super-begin/Super Accept!
+		if (!theHold.Holding())
+			theHold.Begin();
+
+		// For every command added to the command stack, add a matching
+		// 3ds Max undo object.  The Max undo object will trigger the undo
+		if (theHold.Holding())
+			theHold.Put(new DFGCommandRestoreObj(command->getID()));
+		return __super::add(command);
+	}
+
+};
+FabricServices::Commands::CommandStack* GetCommandStack()
+{
+	static MaxCommandStack stack;
+	return &stack;
+}
+
+#pragma endregion
 
 #pragma region CustomKLUndoRedoCommandObject
 
@@ -42,9 +69,7 @@ void CustomKLUndoRedoCommandObject::Redo()
 SplicePortChangeObject::SplicePortChangeObject(SpliceTranslationFPInterface* maxOwner)
 	: m_maxOwner(maxOwner)
 {
-	//DFGWrapper::Binding graph = maxOwner->GetSpliceGraph();
-	//m_prePortLayout = graph.getPersistenceDataDict();
-	//m_outPortName = maxOwner->GetOutPortName();
+	m_outPrePortName = maxOwner->GetOutPortName();
 }
 
 SplicePortChangeObject::~SplicePortChangeObject()
@@ -54,28 +79,50 @@ SplicePortChangeObject::~SplicePortChangeObject()
 
 void SplicePortChangeObject::EndHold()
 {
-	//DFGWrapper::Binding graph = m_maxOwner->GetSpliceGraph();
-	//m_postPortLayout = graph.getPersistenceDataDict();
+	m_outPostPortName = m_maxOwner->GetOutPortName();
 }
 
 void SplicePortChangeObject::Restore( int isUndo )
 {
+	GetCommandStack()->undo();
 	//DFGWrapper::Binding graph = m_maxOwner->GetSpliceGraph();
 	//graph.setFromPersistenceDataDict(m_prePortLayout);
 	//m_maxOwner->UpdateKLEditor();
 	//// Re-connect the outport (TODO: Parent ports?)
 	//m_maxOwner->ResetPorts();
-	//m_maxOwner->SetOutPort(m_outPortName.data());
+	m_maxOwner->SetOutPort(m_outPrePortName.data());
 }
 
 void SplicePortChangeObject::Redo()
 {
+	GetCommandStack()->redo();
 	//DFGWrapper::Binding graph = m_maxOwner->GetSpliceGraph();
 	//graph.setFromPersistenceDataDict(m_postPortLayout);
 	//m_maxOwner->UpdateKLEditor();
 	//// Re-connect the outport (TODO: Parent ports?)
 	//m_maxOwner->ResetPorts();
-	//m_maxOwner->SetOutPort(m_outPortName.data());
+	; m_maxOwner->SetOutPort(m_outPostPortName.data());
 }
 
 #pragma endregion
+
+//////////////////////////////////////////////////////////////////////////
+DFGCommandRestoreObj::DFGCommandRestoreObj(int id)
+	: m_commandId(id)
+{
+}
+
+DFGCommandRestoreObj::~DFGCommandRestoreObj()
+{
+}
+
+void DFGCommandRestoreObj::Restore(int isUndo)
+{
+	GetCommandStack()->undo(m_commandId);
+}
+
+void DFGCommandRestoreObj::Redo()
+{
+	GetCommandStack()->redo(m_commandId);
+}
+

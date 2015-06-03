@@ -407,11 +407,14 @@ RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged(cons
 		// Invalidate our cached output value
 		Invalidate();
 
-		// Invalidate the input value for the param that changed
-		ParamID pid = m_pblock->LastNotifyParamID();
-		int pidx = m_pblock->IDtoIndex(pid);
-		if (pidx < m_portValidities.size())
-			m_portValidities[pidx].SetEmpty();
+		if (m_pblock != nullptr)
+		{
+			// Invalidate the input value for the param that changed
+			ParamID pid = m_pblock->LastNotifyParamID();
+			int pidx = m_pblock->IDtoIndex(pid);
+			if (pidx < m_portValidities.size())
+				m_portValidities[pidx].SetEmpty();
+		}
 	}
 	else if (message == REFMSG_SUBANIM_STRUCTURE_CHANGED)
 	{
@@ -751,10 +754,10 @@ std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCode(const std
 template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
 {
-	HoldActions hold(_M("Add Input Port"));
+	//HoldActions hold(_M("Add Input Port"));
 
-	if (theHold.Holding())
-		theHold.Put(new SplicePortChangeObject(this));
+	//if (theHold.Holding())
+	//	theHold.Put(new SplicePortChangeObject(this));
 
 	DFGWrapper::PortPtr aPort = AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_In, isArray, inExtension);
 	// Can/Should we create a matching max type for this?
@@ -767,9 +770,9 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* na
 template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::AddOutputPort(const char* name, const char* spliceType, bool isArray/*=false*/, const char* inExtension)
 {
-	HoldActions hold(_M("Add Output Port"));
-	if (theHold.Holding())
-		theHold.Put(new SplicePortChangeObject(this));
+	//HoldActions hold(_M("Add Output Port"));
+	//if (theHold.Holding())
+	//	theHold.Put(new SplicePortChangeObject(this));
 	// Create the port
 	DFGWrapper::PortPtr aPort = AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_Out, isArray, inExtension);
 	return aPort->isPort() ? 1 : -1;
@@ -1238,6 +1241,13 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::onPortInserted(FabricServices::DFGWrapper::PortPtr port)
 {
+	if (theHold.RestoreOrRedoing())
+		return;
+
+//	HoldActions hold(_M("Splice Add Port"));
+//	if (theHold.Holding())
+//		theHold.Put(new SplicePortChangeObject(this));
+
 	// By default, hook up a Max param for each new port.
 	if (port->getPortType() == FabricCore::DFGPortType_In)
 		SetMaxConnectedType(port, -2);
@@ -1246,6 +1256,13 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::onPortInserted(FabricServi
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::onPortRemoved(FabricServices::DFGWrapper::PortPtr port)
 {
+	if (theHold.RestoreOrRedoing())
+		return;
+
+//	HoldActions hold(_M("Splice Remove Port"));
+//	if (theHold.Holding())
+//		theHold.Put(new SplicePortChangeObject(this));
+
 	// Ensure the max data is released
 	int pid = GetPortParamID(port);
 	if (pid >= 0)
@@ -1255,6 +1272,13 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::onPortRemoved(FabricServic
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::onPortRenamed(FabricServices::DFGWrapper::PortPtr port, const char * oldName)
 {
+	if (theHold.RestoreOrRedoing())
+		return;
+
+//	HoldActions hold(_M("Splice Rename Port"));
+//	if (theHold.Holding())
+//		theHold.Put(new SplicePortChangeObject(this));
+
 	int pid = GetPortParamID(port);
 	if (pid >= 0)
 	{
@@ -1274,6 +1298,10 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::onPortRenamed(FabricServic
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::onPortResolvedTypeChanged(FabricServices::DFGWrapper::PortPtr port, const char * resolvedType)
 {
+//	HoldActions hold(_M("Splice Port Type Changed"));
+	if (theHold.RestoreOrRedoing())
+		return;
+
 	if (port->getPortType() != FabricCore::DFGPortType_Out)
 		SetMaxConnectedType(port, -2);
 }

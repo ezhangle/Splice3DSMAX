@@ -465,7 +465,7 @@ void SpliceToMaxValue(const FabricCore::Variant& var, float& param)
 void SpliceToMaxValue(const FabricCore::Variant& var, Point3& param)
 {
 	if (!var.isDict())
-		throw;
+		return;
 	SpliceToMaxValue(*var.getDictValue("x"), param.x);
 	SpliceToMaxValue(*var.getDictValue("y"), param.y);
 	SpliceToMaxValue(*var.getDictValue("z"), param.z);
@@ -474,7 +474,7 @@ void SpliceToMaxValue(const FabricCore::Variant& var, Point3& param)
 void SpliceToMaxValue(const FabricCore::Variant& var, Color& param)
 {
 	if (!var.isDict())
-		throw;
+		return;
 	SpliceToMaxValue(*var.getDictValue("r"), param.r);
 	SpliceToMaxValue(*var.getDictValue("g"), param.g);
 	SpliceToMaxValue(*var.getDictValue("b"), param.b);
@@ -484,7 +484,7 @@ void SpliceToMaxValue(const FabricCore::Variant& var, Color& param)
 void SpliceToMaxValue(const FabricCore::Variant& var, Point4& param)
 {
 	if (!var.isDict())
-		throw;
+		return;
 	// A variant could be either a XYZT or a RGBA,
 	if (var.getDictValue("x") != NULL) {
 		SpliceToMaxValue(*var.getDictValue("x"), param.x);
@@ -503,7 +503,7 @@ void SpliceToMaxValue(const FabricCore::Variant& var, Point4& param)
 void SpliceToMaxValue(const FabricCore::Variant& var, Quat& param)
 {
 	if (!var.isDict())
-		throw;
+		return;
 	const FabricCore::Variant* axis = var.getDictValue("v");
 	SpliceToMaxValue(*axis->getDictValue("x"), param.x);
 	SpliceToMaxValue(*axis->getDictValue("y"), param.y);
@@ -514,7 +514,7 @@ void SpliceToMaxValue(const FabricCore::Variant& var, Quat& param)
 void SpliceToMaxValue(const FabricCore::Variant& var, Matrix3& param)
 {
 	if (!var.isDict())
-		throw;
+		return;
 
 	MRow* pInMtx = param.GetAddr();
 	FabricCore::Variant spliceMat = FabricCore::Variant::CreateDict();
@@ -547,6 +547,9 @@ void SpliceToMaxValue(const FabricCore::Variant& var, Matrix3& param)
 
 void SpliceToMaxValue(const FabricCore::Variant& var, MSTR& param)
 {
+	if (!var.isString())
+		return;
+
 	const char* val = var.getString_cstr();
 	param = MSTR::FromACP(val);
 }

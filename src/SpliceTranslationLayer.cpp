@@ -255,10 +255,14 @@ void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPort
 	ParamDef& def = pDesc->GetParamDef(pid);
 	int baseType = base_type(def.type);
 
-	FabricCore::Variant uiMin = port->getOption("uiMin");
-	FabricCore::Variant uiMax = port->getOption("uiMax");
-	if(uiMin.isNull() || uiMax.isNull())
-		return;
+	FabricCore::Variant uiMin;
+	if (port->hasOption("uiMin"))
+		uiMin = port->getOption("uiMin");
+	FabricCore::Variant uiMax;
+	if (port->hasOption("uiMax"))
+		uiMax = port->getOption("uiMax");
+	//if(uiMin.isNull() || uiMax.isNull())
+	//	return;
 
 	switch((int)baseType)
 	{
@@ -267,8 +271,8 @@ void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPort
 	case TYPE_PCNT_FRAC:	
 	case TYPE_WORLD:
 		{
-			float vMin;
-			float vMax;
+			float vMin = FLT_MIN;
+			float vMax = FLT_MAX;
 			SpliceToMaxValue(uiMax, vMax);
 			SpliceToMaxValue(uiMin, vMin);
 			pDesc->ParamOption(pid, p_range, vMin, vMax, p_end); 
@@ -276,8 +280,8 @@ void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPort
 		}
 	case TYPE_INT:
 		{
-			int vMin;
-			int vMax;
+			int vMin = INT_MIN;
+			int vMax = INT_MAX;
 			SpliceToMaxValue(uiMax, vMax);
 			SpliceToMaxValue(uiMin, vMin);
 			pDesc->ParamOption(pid, p_range,  vMin, vMax, p_end); 
@@ -314,10 +318,14 @@ void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::RTVal& 
 
 void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPortPtr& port, FabricCore::Client& client) {
 
-	//if (!port->isValid())
+	if (!port->isValid())
 		return;
 
-	FabricCore::RTVal defaultVal = port->getDefaultValue();
+	char const *resolvedType = port->getResolvedType();
+	if (!resolvedType)
+		return;
+
+	FabricCore::RTVal defaultVal = port->getDefaultValue(resolvedType);
 	if(!defaultVal.isValid())
 		return;
 

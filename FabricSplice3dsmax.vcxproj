@@ -46,6 +46,8 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MaxCommandStack.cpp" />
+    <ClCompile Include="MaxDFGController.cpp" />
     <ClCompile Include="src\DFGWidget.cpp" />
     <ClCompile Include="src\DockableWidget.cpp" />
     <ClCompile Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.cpp" />
@@ -71,6 +73,8 @@
     <ClCompile Include="src\StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClInclude Include="MaxCommandStack.h" />
+    <ClInclude Include="MaxDFGController.h" />
     <ClInclude Include="src\DFGWidget.h" />
     <ClInclude Include="src\DockableWidget.h" />
     <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\resource.h" />

@@ -88,25 +88,9 @@ void DFGWidget::onRecompilation()
 	//}
 }
 
-void DFGWidget::onPortRenamed(QString path, QString newName)
+void DFGWidget::onStructureChanged()
 {
-	// ignore ports which are not args
-	if (path.indexOf('.') > 0)
-		return;
 
-	//FabricDFGBaseInterface * interf = FabricDFGBaseInterface::getInstanceByName(m_baseInterfaceName.c_str());
-	//if(!interf)
-	//  return;
-
-	//MFnDependencyNode thisNode(interf->getThisMObject());
-	//MPlug plug = thisNode.findPlug(path.toUtf8().constData());
-	//if(plug.isNull())
-	//  return;
-
-	//MString cmdStr = "renameAttr \"";
-	//cmdStr += thisNode.name() + "." + MString(path.toUtf8().constData());
-	//cmdStr += "\" \"" + MString(newName.toUtf8().constData()) + "\";";
-	//MGlobal::executeCommandOnIdle(cmdStr, false);
 }
 
 //void DFGWidget::mayaLog(const char * message)

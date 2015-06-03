@@ -66,6 +66,12 @@
     <ClCompile Include="src\DockableWidget.cpp">
       <Filter>DFGWidget</Filter>
     </ClCompile>
+    <ClCompile Include="MaxDFGController.cpp">
+      <Filter>DFGWidget</Filter>
+    </ClCompile>
+    <ClCompile Include="MaxCommandStack.cpp">
+      <Filter>DFGWidget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\resource.h" />
@@ -123,6 +129,12 @@
       <Filter>DFGWidget</Filter>
     </ClInclude>
     <ClInclude Include="src\DockableWidget.h">
+      <Filter>DFGWidget</Filter>
+    </ClInclude>
+    <ClInclude Include="MaxDFGController.h">
+      <Filter>DFGWidget</Filter>
+    </ClInclude>
+    <ClInclude Include="MaxCommandStack.h">
       <Filter>DFGWidget</Filter>
     </ClInclude>
   </ItemGroup>

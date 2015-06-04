@@ -22,10 +22,9 @@ public:
   //static void closeWidgetsForBaseInterface(FabricDFGBaseInterface * interf);
 
 	public slots:
-	virtual void onValueChanged();
-	virtual void onStructureChanged();
-	virtual void onRecompilation();
-	virtual void onPortRenamed(QString path, QString newName);
+	virtual void onValueChanged() override;
+	virtual void onStructureChanged() override;
+	virtual void onRecompilation() override;
 
 private:
 

@@ -17,16 +17,6 @@ public:
 	~HoldActions() { theHold.Accept(m_msg); }
 };
 
-// this static function gives global access to the DFG undo stack
-namespace FabricServices {
-	namespace Commands {
-		class CommandStack;
-	}
-}
-extern FabricServices::Commands::CommandStack*  GetCommandStack();
-
-
-
 // This CustomKLUndoRedoCommandObject allows us to merge Max's undo system
 // and KL's.  It passes the Undo/Redo commands on to Fabric to to allow it
 // to undo/redo it's actions

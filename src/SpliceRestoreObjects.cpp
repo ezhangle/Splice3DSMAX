@@ -1,32 +1,7 @@
 #include "StdAfx.h"
 #include "SpliceRestoreObjects.h"
 #include "Commands\CommandStack.h"
-
-#pragma region CommandStack implementation
-// Singleton command stack holds the DFG undo objects
-class MaxCommandStack : public FabricServices::Commands::CommandStack 
-{
-	virtual bool add(FabricServices::Commands::Command * command) override
-	{
-		// TODO: Super-begin/Super Accept!
-		if (!theHold.Holding())
-			theHold.Begin();
-
-		// For every command added to the command stack, add a matching
-		// 3ds Max undo object.  The Max undo object will trigger the undo
-		if (theHold.Holding())
-			theHold.Put(new DFGCommandRestoreObj(command->getID()));
-		return __super::add(command);
-	}
-
-};
-FabricServices::Commands::CommandStack* GetCommandStack()
-{
-	static MaxCommandStack stack;
-	return &stack;
-}
-
-#pragma endregion
+#include "..\MaxCommandStack.h"
 
 #pragma region CustomKLUndoRedoCommandObject
 

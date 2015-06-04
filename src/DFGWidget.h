@@ -10,21 +10,24 @@ using namespace FabricUI;
 
 
 class DFGWidget : public DFG::DFGCombinedWidget {
-
+  
 public:
 	DFGWidget(QWidget * parent, FabricCore::Client& client, FabricServices::DFGWrapper::Binding& binding, FabricServices::DFGWrapper::Host* host);
 	~DFGWidget();
 
-	//static QWidget * creator(QWidget * parent, const QString & name);
-
-	//static void setCurrentUINodeName(const char * node);
-	//static void mayaLog(const char * message);
-	//static void closeWidgetsForBaseInterface(FabricDFGBaseInterface * interf);
+  //static QWidget * creator(QWidget * parent, const QString & name);
+  
+  //static void setCurrentUINodeName(const char * node);
+  //static void mayaLog(const char * message);
+  //static void closeWidgetsForBaseInterface(FabricDFGBaseInterface * interf);
 
 	public slots:
-	virtual void onRecompilation() override;
-	virtual void onStructureChanged() override;
+	virtual void onValueChanged();
+	virtual void onStructureChanged();
+	virtual void onRecompilation();
+	virtual void onPortRenamed(QString path, QString newName);
+
 private:
 
-	FabricServices::DFGWrapper::Host* m_host;
+  FabricServices::DFGWrapper::Host* m_host;
 };

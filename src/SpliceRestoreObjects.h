@@ -17,6 +17,15 @@ public:
 	~HoldActions() { theHold.Accept(m_msg); }
 };
 
+// this static function gives global access to the DFG undo stack
+namespace FabricServices {
+	namespace Commands {
+		class CommandStack;
+	}
+}
+extern FabricServices::Commands::CommandStack*  GetCommandStack();
+
+
 
 // This CustomKLUndoRedoCommandObject allows us to merge Max's undo system
 // and KL's.  It passes the Undo/Redo commands on to Fabric to to allow it
@@ -43,7 +52,8 @@ class SplicePortChangeObject : public RestoreObj
 	FabricCore::Variant m_postPortLayout;
 
 	// Cache the outport name so we can reconnect if necessary.
-	std::string m_outPortName;
+	std::string m_outPrePortName;
+	std::string m_outPostPortName;
 
 public:
 	SplicePortChangeObject(SpliceTranslationFPInterface* maxOwner);
@@ -51,5 +61,20 @@ public:
 
 	virtual void EndHold();
 	virtual void Restore( int isUndo );
+	virtual void Redo();
+};
+
+//////////////////////////////////////////////////////////////////////////
+// All DFG Commands will add an undo object to maxes queue
+
+class DFGCommandRestoreObj : public RestoreObj
+{
+	const int m_commandId;
+
+public:
+	DFGCommandRestoreObj(int id);
+	~DFGCommandRestoreObj();;
+
+	virtual void Restore(int isUndo);
 	virtual void Redo();
 };

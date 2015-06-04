@@ -89,18 +89,26 @@ int DockableWindow::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
 	case WM_ACTIVATE:
-		// If our window is activated, then disable
-		// Max's accelerators, we don't want keyboard events going to Max
-		if (LOWORD(wParam) == WA_ACTIVE)
-			DisableAccelerators();
-		else
-			EnableAccelerators();
+		// If our window is deactivated, let max have it's kb accelerators back.
+		// We cannot use WM_KILLFOCUS unfortunately, because the dialog sends
+		// this message internally when switching internal windows.
+		if (LOWORD(wParam) == WA_INACTIVE)
+			EnableAccelerators(); // DFG win Deactivated, max can accelerate
+		break;
+	case WM_SETFOCUS:
+		// When we gain focus, start owning that keyboard shit!
+		DisableAccelerators();
 		break;
 	case CUI_POSDATA_MSG: {
 		CUIPosData **cpd = (CUIPosData **)lParam;
 		cpd[0] = this;
 		return TRUE;
 	}
+	case WM_SHOWWINDOW:
+		// On creation, we do not receive a message WM_ACTIVATE, so
+		// we assume (yes, risky) that we have focus and will be accepting keys
+		DisableAccelerators();
+		break;
 	case WM_SIZING:
 		ResizeContentToFrame();
 		return FALSE;

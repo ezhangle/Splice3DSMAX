@@ -42,9 +42,3 @@ void DFGWidget::onRecompilation()
 	//  interf->invalidateNode();
 	//}
 }
-
-
-//void DFGWidget::mayaLog(const char * message)
-//{
-//  mayaLogFunc(message);
-//}

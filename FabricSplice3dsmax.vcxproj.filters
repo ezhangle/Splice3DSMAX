@@ -137,6 +137,9 @@
     <ClInclude Include="MaxCommandStack.h">
       <Filter>DFGWidget</Filter>
     </ClInclude>
+    <ClInclude Include="src\SpliceControl.hpp">
+      <Filter>MaxImplementations</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MaxScript files">

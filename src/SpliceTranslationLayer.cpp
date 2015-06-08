@@ -12,6 +12,9 @@
 class IntNameAccessor : public PBAccessor
 {
 	MSTR GetLocalName(ReferenceMaker* owner, ParamID id, int UNUSED(tabIndex)) {
+		if (owner == nullptr)
+			return _M("ERROR: No Owner");
+
 		IParamBlock2* pblock = owner->GetParamBlock(0);
 		if (pblock != 0)
 		{
@@ -250,17 +253,38 @@ ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName )
 	return AddMaxParameter(pDesc, type, sName.data());
 }
 
-void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPortPtr& port)
+void SetMaxParamLimits(ParamBlockDesc2* pDesc, DFGWrapper::ExecPortPtr& port)
 {
+	int id = GetPortParamID(port);
+	if (id < 0)
+		return;
+	ParamID pid = ParamID(id);
+
+	if (!port->hasMetadata("uiRange"))
+		return;
+
 	ParamDef& def = pDesc->GetParamDef(pid);
 	int baseType = base_type(def.type);
 
-	FabricCore::Variant uiMin;
-	if (port->hasOption("uiMin"))
+	std::string rangeStr = port->getMetadata("uiRange");
+	//FabricCore::Variant uiRange = FabricCore::Variant::CreateFromJSON(rangeStr);
+	if (rangeStr.length() < 2)
+		return;
+	DbgAssert(rangeStr[0] == '(' && rangeStr[rangeStr.length() - 1] == ')');
+	//rangeStr = rangeStr.substr(1, rangeStr.length() - 1);
+	size_t splitIdx = rangeStr.find(',');
+	std::string firstValStr = rangeStr.substr(1, splitIdx - 1);
+	std::string secondValStr = rangeStr.substr(splitIdx + 2, rangeStr.length() - 1);
+	
+	//DbgAssert(uiRange.isArray() && uiRange.getArraySize() == 2);
+	//const FabricCore::Variant* uiMin = uiRange.getArrayElement(0);
+	//const FabricCore::Variant* uiMax = uiRange.getArrayElement(1);
+
+	/*if (port->hasOption("uiMin"))
 		uiMin = port->getOption("uiMin");
 	FabricCore::Variant uiMax;
 	if (port->hasOption("uiMax"))
-		uiMax = port->getOption("uiMax");
+		uiMax = port->getOption("uiMax");*/
 	//if(uiMin.isNull() || uiMax.isNull())
 	//	return;
 
@@ -271,19 +295,15 @@ void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPort
 	case TYPE_PCNT_FRAC:	
 	case TYPE_WORLD:
 		{
-			float vMin = FLT_MIN;
-			float vMax = FLT_MAX;
-			SpliceToMaxValue(uiMax, vMax);
-			SpliceToMaxValue(uiMin, vMin);
+			float vMin = atof(firstValStr.c_str());
+			float vMax = atof(secondValStr.c_str());;
 			pDesc->ParamOption(pid, p_range, vMin, vMax, p_end); 
 			break;
 		}
 	case TYPE_INT:
 		{
-			int vMin = INT_MIN;
-			int vMax = INT_MAX;
-			SpliceToMaxValue(uiMax, vMax);
-			SpliceToMaxValue(uiMin, vMin);
+			int vMin = atoi(firstValStr.c_str());
+			int vMax = atoi(secondValStr.c_str());
 			pDesc->ParamOption(pid, p_range,  vMin, vMax, p_end); 
 			break;
 		}

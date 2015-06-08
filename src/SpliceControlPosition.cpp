@@ -4,11 +4,11 @@
 //***************************************************************************/
 
 #include "StdAfx.h"
-#include "SpliceTranslationLayer.hpp"
+#include "SpliceControl.hpp"
 
 #define SpliceControlPosition_CLASS_ID	Class_ID(0x34952088, 0x7d9a01d7)
 
-class SpliceControlPosition : public SpliceTranslationLayer<Control, Point3> {
+class SpliceControlPosition : public SpliceControl<Point3> {
 public:
 
 	//From Animatable
@@ -29,10 +29,6 @@ private:
 	void ResetPorts();
 
 	int GetValueType() { return TYPE_POINT3; }
-
-	bool CloneSpliceData(SpliceTranslationLayer<Control, Point3>* pMyClone) { return true; } ; // No cloning for me...
-
-	DFGWrapper::ExecPortPtr m_parentValuePort;
 };
 
 class SpliceControlPositionClassDesc : public DynPBCustAttrClassDesc {

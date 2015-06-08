@@ -45,7 +45,7 @@ class DynPBCustAttrClassDesc;
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const MCHAR* sName, ParamID desiredId=-1 );
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName );
 void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name);
-void SetMaxParamLimits(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPortPtr& port);
+void SetMaxParamLimits(ParamBlockDesc2* pDesc, DFGWrapper::ExecPortPtr& port);
 void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPortPtr& port, FabricCore::Client& client);
 void SetMaxParamFromSplice(IParamBlock2* pblock, ParamID pid, DFGWrapper::ExecPortPtr& port, FabricCore::Client& client);
 
@@ -229,8 +229,12 @@ public:
 	virtual MSTR				SubAnimName( int UNUSED(i) )		{ return _T("pblock"); }
 
 	// Save and Load.
-	IOResult					Save(ISave *isave);
-	IOResult					Load(ILoad *iload);
+	IOResult					Save(ISave *isave) override;
+	IOResult					Load(ILoad *iload) override;
+	// Allow implementation classes to save/load extra info
+	virtual IOResult			SaveImpData(ISave* isave) { return IO_OK; };
+	virtual IOResult			LoadImpData(ILoad* isave) { return IO_OK; };
+	// Set names for max parameters from loaded splice data
 	void						ReconnectPostLoad();
 
 	ReferenceTarget*			Clone(RemapDir &remap);
@@ -278,6 +282,9 @@ private:
 		\param ip - An instance of the UI interface class passed to BeginEditParams 
 		\return true if m_dialog is ready to use. */
 	bool GeneratePBlockUI();
+
+	/*! Update the posted UI spec (not values) */
+	void UpdateUISpec();
 
 #pragma endregion
 

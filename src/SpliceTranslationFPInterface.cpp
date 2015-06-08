@@ -26,7 +26,7 @@ BOOL SpliceTranslationFPInterface::ShowDFGGraphEditor()
 {
 	SAFE_DELETE(m_pDFGWidgetWindow);
 
-	bool ownApplication = QMfcApp::pluginInstance(hInstance);	
+	/*bool ownApplication = */ QMfcApp::pluginInstance(hInstance);	
 	m_pDFGWidgetWindow = DockableWindow::Create(_T("Fabric DFG"));
 	HWND h = m_pDFGWidgetWindow->GetHWND();
 	QWinWidget* dlg = new QWinWidget(h);

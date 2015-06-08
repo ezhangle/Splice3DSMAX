@@ -4,11 +4,11 @@
 //***************************************************************************/
 
 #include "StdAfx.h"
-#include "SpliceTranslationLayer.hpp"
+#include "SpliceControl.hpp"
 
 #define SpliceControlFloat_CLASS_ID	Class_ID(0x501d4dc2, 0x243979cd)
 
-class SpliceControlFloat : public SpliceTranslationLayer<Control, float> {
+class SpliceControlFloat : public SpliceControl<float> {
 public:
 
 	//From Animatable
@@ -31,8 +31,6 @@ private:
 	int GetValueType() { return TYPE_FLOAT; }
 
 	bool CloneSpliceData(SpliceTranslationLayer<Control, float>* pMyClone) { return true; } ; // No cloning for me...
-
-	DFGWrapper::ExecPortPtr m_parentValuePort;
 };
 
 class SpliceControlFloatClassDesc : public DynPBCustAttrClassDesc {

@@ -83,6 +83,7 @@
     <ClInclude Include="src\MouseCallbacks\SpliceCommandMode.h" />
     <ClInclude Include="src\MouseCallbacks\SpliceMouseCallback.h" />
     <ClInclude Include="src\Splice3dsmax.h" />
+    <ClInclude Include="src\SpliceControl.hpp" />
     <ClInclude Include="src\SpliceEvents.h" />
     <ClInclude Include="src\SpliceLogging.h" />
     <ClInclude Include="src\SpliceModifier.h" />

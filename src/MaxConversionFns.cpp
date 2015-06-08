@@ -230,24 +230,30 @@ extern FabricCore::Variant GetVariant(const FPValue& value)
 #pragma region Get RTVals
 void ConvertToRTVal(int param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
-	// TODO: Remove all traces to FabricSplice
+	if (!val.isValid())
+		return;
+
 	val = FabricCore::RTVal::ConstructSInt32(client, param);
-	//val.setData() = FabricCore.RTVal.ConstructSInt32 (param);
 }
 
 void ConvertToRTVal(float param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
+	if (!val.isValid())
+		return;
+
 	val.setFloat32(param);
 }
 
 void ConvertToRTVal(bool param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
 	val = FabricCore::RTVal::ConstructBoolean(client, param);
-	//val = FabricSplice::constructBooleanRTVal(param);
 }
 
 void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
+	if (!val.isValid())
+		return;
+
 	val.maybeGetMemberRef("x").setFloat32(param.x);
 	val.maybeGetMemberRef("y").setFloat32(param.y);
 	val.maybeGetMemberRef("z").setFloat32(param.z);
@@ -255,6 +261,9 @@ void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val, FabricCore::Cli
 
 void ConvertToRTVal(const Color& param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
+	if (!val.isValid())
+		return;
+
 	val.maybeGetMemberRef("a").setFloat32(128);
 	val.maybeGetMemberRef("r").setFloat32(uint16_t(param.r * 128));
 	val.maybeGetMemberRef("g").setFloat32(uint16_t(param.g * 128));
@@ -263,6 +272,9 @@ void ConvertToRTVal(const Color& param, FabricCore::RTVal& val, FabricCore::Clie
 
 void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
+	if (!val.isValid())
+		return;
+
 	if (strcmp(val.getTypeName().getStringCString(), "Color") == 0)
 	{
 		val.maybeGetMemberRef("r").setFloat32(param.x);
@@ -280,18 +292,24 @@ void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val, FabricCore::Cli
 
 void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
-	FabricCore::RTVal v = val.maybeGetMember("v");
+	if (!val.isValid())
+		return;
+
+	FabricCore::RTVal v = val.maybeGetMemberRef("v");
 	ConvertToRTVal(Point3(param.x, param.y, param.z), v, client);
-	val.maybeGetMember("w").setFloat32(param.w);
+	val.maybeGetMemberRef("w").setFloat32(param.w);
 }
 
 void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val, FabricCore::Client& client)
 {
+	if (!val.isValid())
+		return;
+
 	const MRow* pInMtx = param.GetAddr();
-	FabricCore::RTVal row0 = val.maybeGetMember("row0");
-	FabricCore::RTVal row1 = val.maybeGetMember("row1");
-	FabricCore::RTVal row2 = val.maybeGetMember("row2");
-	FabricCore::RTVal row3 = val.maybeGetMember("row3");
+	FabricCore::RTVal row0 = val.maybeGetMemberRef("row0");
+	FabricCore::RTVal row1 = val.maybeGetMemberRef("row1");
+	FabricCore::RTVal row2 = val.maybeGetMemberRef("row2");
+	FabricCore::RTVal row3 = val.maybeGetMemberRef("row3");
 
 	ConvertToRTVal(Point4(pInMtx[0][0], pInMtx[1][0], pInMtx[2][0], pInMtx[3][0]), row0, client);
 	ConvertToRTVal(Point4(pInMtx[0][1], pInMtx[1][1], pInMtx[2][1], pInMtx[3][1]), row1, client);

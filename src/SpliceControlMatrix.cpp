@@ -4,12 +4,12 @@
 //***************************************************************************/
 
 #include "StdAfx.h"
-#include "SpliceTranslationLayer.hpp"
+#include "SpliceControl.hpp"
 #include "Splice3dsmax.h"
 
 #define SpliceControlMatrix_CLASS_ID	Class_ID(0x6a53772, 0x7c2c7c4b)
 
-class SpliceControlMatrix : public SpliceTranslationLayer<Control, Matrix3> {
+class SpliceControlMatrix : public SpliceControl<Matrix3> {
 public:
 
 	//From Animatable
@@ -30,10 +30,6 @@ private:
 	void ResetPorts();
 
 	int GetValueType() { return TYPE_MATRIX3; }
-
-	bool CloneSpliceData(SpliceTranslationLayer<Control, Matrix3>* pMyClone) { return true; } ; // No cloning for me...
-
-	//DFGWrapper::PortPtr m_parentValuePort;
 
 	// Our cache is only valid if the parent has not changed.
 	// We cache the parents transform, and invalidate our cache
@@ -62,6 +58,7 @@ DynPBCustAttrClassDesc* SpliceTranslationLayer<Control, Matrix3>::GetClassDesc()
 SpliceControlMatrix::SpliceControlMatrix(BOOL loading)
 	: ParentClass(loading)
 {
+	m_value.IdentityMatrix();
 	if (!loading)
 		ResetPorts();
 }
@@ -75,16 +72,19 @@ void SpliceControlMatrix::ResetPorts()
 {
 	// We add a parent value to, so that our Splice operator can evaluate relative to the input matrix
 	// This is similar to how standard 3ds Max transforms plugins work
-	AddSpliceParameter(m_binding, TYPE_MATRIX3, _M("parentValue"), FabricCore::DFGPortType_In);
+	m_parentValuePort = AddSpliceParameter(m_binding, TYPE_MATRIX3, _M("parentValue"), FabricCore::DFGPortType_In);
+	m_parentValuePort->setMetadata("uiHidden", "true", false);
 	ParentClass::ResetPorts();
 }
 
-void SpliceControlMatrix::Copy(Control *)
+void SpliceControlMatrix::Copy(Control *from)
 {
+	m_value.IdentityMatrix();
+	TimeValue t = GetCOREInterface()->GetTime();
+	Interval iv;
+	from->GetValue(t, &m_value, iv, CTRL_RELATIVE);
 
 }
-
-
 
 void SpliceControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
@@ -92,14 +92,14 @@ void SpliceControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, G
 	Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
 	if(method == CTRL_ABSOLUTE)
 	{
-		//MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3::Identity);
+		MaxValueToSplice(m_client, m_parentValuePort, t, interval, Matrix3::Identity);
 	}
 	else
 	{
 		// if our parents value has changed, invalidate our cache
 		if (!(m_cachedParentVal == *pInVal))
 			Invalidate();
-		//MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
+		MaxValueToSplice(m_client, m_parentValuePort, t, interval, *pInVal);
 		// Cache parent transform for next eval
 		m_cachedParentVal = *pInVal;
 	}
@@ -111,6 +111,13 @@ void SpliceControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, G
 
 void SpliceControlMatrix::SetValue(TimeValue,void *value,int,GetSetMethod)
 {
-	// TODO:
-
+	// Cache input val, we will return this value until our graph evaluates
+	// This code allows us to assign the SpliceMatrix to a node, and it
+	// will hold it's current transform until a graph is assigned.
+	SetXFormPacket* packet = reinterpret_cast<SetXFormPacket*>(value);
+	if (packet->command == XFORM_SET)
+	{
+		m_value = *(Matrix3*)value;
+		Invalidate();
+	}
 }

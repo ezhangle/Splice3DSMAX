@@ -138,7 +138,7 @@ ParamBlockDesc2* SpliceTranslationLayer<TBaseClass, TResultType>::CopyPBDescript
 			// Ensure we copy available options
 			CStr portName = CStr::FromMCHAR(pbDef.int_name);
 			DFGWrapper::ExecPortPtr port = GetPort(portName);
-			SetMaxParamLimits(pNewDesc, newPid, port);
+			SetMaxParamLimits(pNewDesc, port);
 			SetMaxParamDefault(pNewDesc, newPid, port, m_client);
 		}
 	}
@@ -198,6 +198,14 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::GeneratePBlockUI()
 		m_dialogTemplate = ::GeneratePBlockUI(m_pblock);
 
 	return m_dialogTemplate != NULL;
+}
+
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::UpdateUISpec()
+{
+	MaybeRemoveParamUI();
+	SAFE_DELETE(m_dialogTemplate);
+	MaybePostParamUI();
 }
 
 #pragma endregion
@@ -423,9 +431,7 @@ RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged(cons
 
 		// If we are here, we _must_ be in between BeginEditParams
 		// and EndEditParams.  Remove the current UI and repost
-		MaybeRemoveParamUI();
-		SAFE_DELETE(m_dialogTemplate);
-		MaybePostParamUI();
+		UpdateUISpec();
 	}
 
 	return REF_SUCCEED;
@@ -510,6 +516,7 @@ ReferenceTarget *SpliceTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir
 #define PARAM_MAX_DATA_CHUNK	0x12
 #define PARAM_SPLICE_DATA		0x13
 #define PARAM_VALUE_NAME		0x14
+#define EXTRA_CLASS_DATA		0x15
 
 #define KL_CODE_NAME_CHUNK		0x20
 #define KL_CODE_OUTPORT_CHUNK	0x21
@@ -519,7 +526,7 @@ ReferenceTarget *SpliceTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir
 template<typename TBaseClass, typename TResultType>
 IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
 {	
-	//// Save out all the data needed to recreate parameters
+	// Save out all the data needed to recreate parameters
 	isave->BeginChunk(PARAM_SPLICE_DATA);
 	std::string json = m_binding.exportJSON();
 	isave->WriteCString(json.data());
@@ -529,6 +536,11 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
 	isave->BeginChunk(PARAM_VALUE_NAME);
 	const char* outName = GetOutPortName();
 	isave->WriteCString(outName);
+	isave->EndChunk();
+
+	// Save additional values for derived values
+	isave->BeginChunk(EXTRA_CLASS_DATA);
+	SaveImpData(isave);
 	isave->EndChunk();
 
 	return IO_OK;
@@ -575,6 +587,12 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 				if (IO_OK == iload->ReadCStringChunk(&buff))
 					outName = buff;
 				
+				break;
+			}
+		case EXTRA_CLASS_DATA:
+			{
+				// Load implementation-specific data
+				LoadImpData(iload);
 				break;
 			}
 		}
@@ -1014,7 +1032,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(DFGWrap
 	// If this is a legal type for this parameter, then go ahead
 	ParamBlockDesc2* pNewDesc = CopyPBDescriptor();
 	ParamID newId = AddMaxParameter(pNewDesc, maxType, ::GetPortName(aPort));
-	SetMaxParamLimits(pNewDesc, newId, aPort);
+	SetMaxParamLimits(pNewDesc, aPort);
 	SetMaxParamDefault(pNewDesc, newId, aPort, m_client);
 	::SetPortParamID(aPort, newId);
 	CreateParamBlock(pNewDesc);
@@ -1054,26 +1072,27 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortValue(const char* p
 template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortUIMinMax(const char* portname, FPValue* uiMin, FPValue* uiMax)
 {
-	DFGWrapper::ExecPortPtr aPort = GetPort(portname);
-	if (!aPort)
-		return false;
+	return false;
+	//DFGWrapper::ExecPortPtr aPort = GetPort(portname);
+	//if (!aPort)
+	//	return false;
 
-	bool res = true;
-	res &= ::SetPortOption(aPort, "uiMin", uiMin);
-	res &= ::SetPortOption(aPort, "uiMax", uiMax);
-	if (m_pblock != nullptr) 
-	{
-		int pid = ::GetPortParamID(aPort);
-		if (pid >= 0)
-		{
-			MaybeRemoveParamUI();
-			SetMaxParamLimits(m_pblock->GetDesc(), (ParamID)pid, aPort);
-			// Delete existing autogen UI
-			SAFE_DELETE(m_dialogTemplate);
-			MaybePostParamUI();
-		}
-	}
-	return res;
+	//bool res = true;
+	//res &= ::SetPortOption(aPort, "uiMin", uiMin);
+	//res &= ::SetPortOption(aPort, "uiMax", uiMax);
+	//if (m_pblock != nullptr) 
+	//{
+	//	int pid = ::GetPortParamID(aPort);
+	//	if (pid >= 0)
+	//	{
+	//		MaybeRemoveParamUI();
+	//		SetMaxParamLimits(m_pblock->GetDesc(), (ParamID)pid, aPort);
+	//		// Delete existing autogen UI
+	//		SAFE_DELETE(m_dialogTemplate);
+	//		MaybePostParamUI();
+	//	}
+	//}
+	//return res;
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -1322,11 +1341,9 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::onExecPortRenamed(FabricSe
 		// However, when changing name, no references change
 		// so we need to manually update the UI
 		MSTR str = MSTR::FromACP(port->getName());
-		MaybeRemoveParamUI();
 		SetMaxParamName(m_pblock->GetDesc(), (ParamID)pid, str);
 		// Delete existing autogen UI
-		SAFE_DELETE(m_dialogTemplate);
-		MaybePostParamUI();
+		UpdateUISpec();
 	}
 }
 
@@ -1356,6 +1373,16 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::onExecPortMetadataChanged(
 			// Recreate with default max type
 			SetMaxConnectedType(port, -2);
 		}
+		UpdateUISpec();
+	}
+	else if (strcmp(key, "uiRange") == 0)
+	{
+		SetMaxParamLimits(m_pblock->GetDesc(), port);
+		UpdateUISpec();
+	}
+	else if (strcmp(key, "scalarUnit"))
+	{
+		UpdateUISpec();
 	}
 }
 

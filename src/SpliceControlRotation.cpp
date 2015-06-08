@@ -4,11 +4,11 @@
 //***************************************************************************/
 
 #include "StdAfx.h"
-#include "SpliceTranslationLayer.hpp"
+#include "SpliceControl.hpp"
 
 #define SpliceControlRotation_CLASS_ID	Class_ID(0x122e256a, 0x6fcb1b17)
 
-class SpliceControlRotation : public SpliceTranslationLayer<Control, Quat> {
+class SpliceControlRotation : public SpliceControl<Quat> {
 public:
 
 	//From Animatable
@@ -28,10 +28,6 @@ private:
 	void ResetPorts();
 
 	int GetValueType() { return TYPE_QUAT; }
-
-	bool CloneSpliceData(SpliceTranslationLayer<Control, Quat>* pMyClone) { return true; } ; // No cloning for me...
-
-	DFGWrapper::ExecPortPtr m_parentValuePort;
 };
 
 class SpliceControlRotationClassDesc : public DynPBCustAttrClassDesc {

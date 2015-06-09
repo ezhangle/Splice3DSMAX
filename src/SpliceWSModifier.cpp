@@ -27,10 +27,10 @@ DynPBCustAttrClassDesc* SpliceWSModifier::ParentClass::GetClassDesc()
 // is dropped down in the UI.  If Splice is not initialized,
 // this takes about 4s (every drop down), which is just not polite.
 SpliceWSModifier::SpliceWSModifier(BOOL loading)
-	: ParentClass(loading == TRUE)
+	: ParentClass(true)
 {
-	if (!loading)
-		ResetPorts();
+//	if (!loading)
+//		ResetPorts();
 }
 
 SpliceWSModifier::~SpliceWSModifier()
@@ -39,6 +39,7 @@ SpliceWSModifier::~SpliceWSModifier()
 
 void SpliceWSModifier::RefAdded(RefMakerHandle rm)
 {
+	Init(false);
 	//if (Init())
 	//{
 	//	SetPortName("outputValue", "modifierMesh");

@@ -26,9 +26,9 @@ SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(BOOL loa
 	,	m_paramMap(NULL)
 	,	m_pblock(NULL)
 	,	m_valid(NEVER)
-//	,	m_valuePortIndex(-1)
 {
-	Init(loading);
+	if (!loading)
+		Init(loading);
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -572,6 +572,7 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 				char *buff = nullptr;
 				if (IO_OK == iload->ReadCStringChunk(&buff))
 				{
+					Init(true);
 					m_binding = m_host->createBindingFromJSON(buff);
 					m_binding.setNotificationCallback(bindingNotificationCallback, this);
 					// set the graph on the view

@@ -50,8 +50,12 @@ public:
 
 private:
 	// From SpliceTranslationLayer
-	int GetValueType() { return TYPE_MESH; }
-	bool CloneSpliceData(ParentClass* pMyClone) { return true; }
+	int GetValueType() override { return TYPE_MESH; }
+	bool CloneSpliceData(ParentClass* pMyClone) override { return true; }
+	void ResetPorts() override;
+
+	// Pass input mesh in
+	DFGWrapper::ExecPortPtr m_inMeshPort;
 
 	Interval m_inputValid;
 };

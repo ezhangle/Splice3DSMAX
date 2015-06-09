@@ -62,6 +62,7 @@ SpliceControlRotation::~SpliceControlRotation()
 void SpliceControlRotation::ResetPorts()
 {
 	m_parentValuePort = AddSpliceParameter(m_binding, TYPE_MATRIX3, _M("parentValue"), FabricCore::DFGPortType_In);
+	m_parentValuePort->setMetadata("uiHidden", "true", false);
 	ParentClass::ResetPorts();
 }
 

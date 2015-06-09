@@ -66,6 +66,7 @@ SpliceControlFloat::~SpliceControlFloat()
 void SpliceControlFloat::ResetPorts()
 {
 	m_parentValuePort = AddSpliceParameter(GetBinding(), TYPE_FLOAT, _M("parentValue"), FabricCore::DFGPortType_In);
+	m_parentValuePort->setMetadata("uiHidden", "true", false);
 	ParentClass::ResetPorts();
 }
 

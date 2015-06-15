@@ -96,7 +96,7 @@ public:
 		FN_2(fn_loadFromFile, TYPE_bool, LoadFromFile, TYPE_FILENAME, TYPE_bool);
 		FN_1(fn_saveToFile, TYPE_bool, SaveToFile, TYPE_FILENAME);
 
-		FN_1(fn_restoreFromJson, TYPE_bool, RestoreFromJSONMSTR, TYPE_TSTR_BV);
+		FN_2(fn_restoreFromJson, TYPE_bool, RestoreFromJSONMSTR, TYPE_TSTR_BV, TYPE_bool);
 		FN_0(fn_exportToJson, TYPE_TSTR_BV, ExportToJSONMSTR);
 
 		FN_2(fn_setKLCode, TYPE_TSTR_BV, SetKLCodeMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
@@ -146,8 +146,6 @@ public:
 
 	// Get the fabric graph driving this max class.
 	virtual DFGWrapper::Binding& GetBinding() = 0;
-	virtual FabricCore::Client& GetClient() = 0;
-	virtual DFGWrapper::Host* GetHost() = 0;
 
 	virtual std::string GetKLCode() = 0;
 	virtual std::string GetKLOperatorName() = 0;
@@ -226,7 +224,7 @@ public:
 	virtual bool LoadFromFile(const MCHAR* filename, bool createMaxParams)=0;
 	virtual bool SaveToFile(const MCHAR* filename)=0;
 
-	virtual bool RestoreFromJSON(const char* json) = 0;
+	virtual bool RestoreFromJSON(const char* json, bool createMaxParams) = 0;
 	virtual void ExportToJSON(std::string& outString) = 0;
 
 	// Show the MaxScript-based editor
@@ -313,7 +311,7 @@ protected:
 	MSTR_INVAL(bool, AddNewEmptyFunc);
 	bool AddNodeFromPresetMSTR(const MSTR& name, const MSTR& path) { return AddNodeFromPreset(name.ToCStr(), path.ToCStr()); }
 
-	MSTR_INVAL(bool, RestoreFromJSON);
+	bool RestoreFromJSONMSTR(const MSTR& json, bool createMaxParams) { return RestoreFromJSON(json.ToCStr(), createMaxParams);  }
 	MSTR ExportToJSONMSTR() {
 		std::string jsonData;
 		ExportToJSON(jsonData);
@@ -352,8 +350,9 @@ FPInterfaceDesc* GetDescriptor()
 				_M("filename"),	0,	TYPE_FILENAME,
 
 			SpliceTranslationFPInterface::fn_exportToJson, _T("ExportToJSON"), 0, TYPE_TSTR_BV, 0, 0,
-			SpliceTranslationFPInterface::fn_restoreFromJson, _T("RestoreFromJSON"), 0, TYPE_bool, 0, 1,
+			SpliceTranslationFPInterface::fn_restoreFromJson, _T("RestoreFromJSON"), 0, TYPE_bool, 0, 2,
 				_M("json"), 0, TYPE_TSTR_BV,
+				_M("createMaxParams"), 0, TYPE_bool,
 
 			SpliceTranslationFPInterface::fn_setSpliceGraph, _T("SetSpliceGraph"), 0, TYPE_BOOL, 0, 1,
 				_M("source"),	0,	TYPE_REFTARG,

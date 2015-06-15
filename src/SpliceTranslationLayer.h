@@ -39,22 +39,22 @@ class DynPBCustAttrClassDesc;
 	This function will search out the next available ID, and set this
 	to the appropriate parameter type.
 	\pDesc - The descriptor to add the parameter too.  Its important that
-		this has not been used to create a parameter block yet.
+	this has not been used to create a parameter block yet.
 	\type - The type of parameter to create
 	\return The ID of the newly created parameter definition */
-ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const MCHAR* sName, ParamID desiredId=-1 );
-ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName );
+ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const MCHAR* sName, ParamID desiredId = -1);
+ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName);
 void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name);
 void SetMaxParamLimits(ParamBlockDesc2* pDesc, DFGWrapper::ExecPortPtr& port);
-void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPortPtr& port, FabricCore::Client& client);
-void SetMaxParamFromSplice(IParamBlock2* pblock, ParamID pid, DFGWrapper::ExecPortPtr& port, FabricCore::Client& client);
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPortPtr& port);
+void SetMaxParamFromSplice(IParamBlock2* pblock, ParamID pid, DFGWrapper::ExecPortPtr& port);
 
 /*! Generate a Win32 dialog for the passed pblok
 	\param pblock - The list of parameters to generate UI for
 	\return the new dialog if successful, else NULL. */
 DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock);
 
-/** Create a new parameter block, copying the 
+/** Create a new parameter block, copying the
 	values off similarly named parameters on pCopyThis where possible */
 IParamBlock2* CreateParamBlock(ParamBlockDesc2* pDesc, IParamBlock2* pCopyThis, ReferenceTarget* pOwner);
 
@@ -62,23 +62,23 @@ IParamBlock2* CreateParamBlock(ParamBlockDesc2* pDesc, IParamBlock2* pCopyThis, 
 BitArray SpliceTypeToMaxTypes(const char* spliceType);
 
 /** Returns the Max ParamType2 that matches the named Splice type (NOTE - may not be legal for PB2) */
-int SpliceTypeToMaxType(const char* cType, bool isArray=false);
+int SpliceTypeToMaxType(const char* cType, bool isArray = false);
 
 /** Returns the default Max ParamType2 that matches the named Splice type */
 int SpliceTypeToDefaultMaxType(const char* cType);
 
-/** Add a new value port to the given DGGraph 
+/** Add a new value port to the given DGGraph
 	This adds in the appropriate Splice type to recieve
 	the Max parameter type, and connects the port.  The return
 	value should be cached as the port top set/get values
-	from the splice parameter 
+	from the splice parameter
 	\rGraph - a reference to the Splice sub-graph to add the parameter too
-	\type - The Max type that will be set 
+	\type - The Max type that will be set
 	\pName - The name of the parameter
 	\mode - whether this is a read/write variable */
-const DFGWrapper::ExecPortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, const char* type, const char* cName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension="");
+const DFGWrapper::ExecPortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, const char* type, const char* cName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension = "");
 const DFGWrapper::ExecPortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, int type, const MCHAR* pName, FabricCore::DFGPortType mode);
-const DFGWrapper::ExecPortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, int type, const char* pName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension="");
+const DFGWrapper::ExecPortPtr AddSpliceParameter(DFGWrapper::Binding& rBinding, int type, const char* pName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension = "");
 
 /** Get various useful info's from fabric Ports */
 int GetPortParamID(DFGWrapper::ExecPortPtr& aPort);
@@ -101,7 +101,7 @@ bool SetPortValue(DFGWrapper::ExecPortPtr& aPort, FPValue* value);
 /** Given a Max value, send it to the dgPort in the appropriate fashion */
 
 /** For each valid in the parameter block, send it to the appropriate Splice port in paramData */
-void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore::Client& client, DFGWrapper::Binding& rBinding, std::vector<Interval>& paramValidities, Interval& ivValid);
+void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, DFGWrapper::Binding& rBinding, std::vector<Interval>& paramValidities, Interval& ivValid);
 
 /** Callback from DFG actions */
 void bindingNotificationCallback(void * userData, char const *jsonCString, uint32_t jsonLength);
@@ -160,8 +160,7 @@ protected:
 
 	// Binding to a DFG
 	FabricServices::DFGWrapper::Binding m_binding;
-	FabricCore::Client m_client;
-	FabricServices::DFGWrapper::Host* m_host;
+
 	DFGWrapper::ExecPortPtr	m_valuePort;
 
 	// We store a vector recording the Max validity
@@ -205,10 +204,10 @@ public:
 	ParamDlg* CreateMyAutoParamDlg(HWND hwMtlEdit, IMtlParams* pMtlParams);
 
 	// Reference management.  We only reference 1 item (the parameter block)
-	int							NumRefs()							{ return 1;}
+	int							NumRefs()							{ return 1; }
 	virtual RefTargetHandle		GetReference(int i)					{ return (i == 0) ? m_pblock : NULL; }
 	virtual void				SetReference(int i, RefTargetHandle rtarg);
-	
+
 #if MAX_VERSION_MAJOR < 17 // Max 2015 is ver 17
 	RefResult					NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget, PartID& partID,  RefMessage message);
 #else
@@ -221,12 +220,12 @@ public:
 
 	// We use RefAdded t detect wehn we can update the name of the graph in the eval
 	// context. Only once we have a reference can we lookup the INode and get the name. 
-	void						RefAdded(	RefMakerHandle 	rm);
+	void						RefAdded(RefMakerHandle 	rm);
 
 	// Sub-anims are the entities that appear in the TrackView
 	virtual	int					NumSubs()							{ return 1; }
-	virtual	Animatable*			SubAnim( int i )					{ return (i == 0) ? m_pblock : NULL; }
-	virtual MSTR				SubAnimName( int UNUSED(i) )		{ return _T("pblock"); }
+	virtual	Animatable*			SubAnim(int i)					{ return (i == 0) ? m_pblock : NULL; }
+	virtual MSTR				SubAnimName(int UNUSED(i))		{ return _T("pblock"); }
 
 	// Save and Load.
 	IOResult					Save(ISave *isave) override;
@@ -270,7 +269,7 @@ private:
 		The caller is responsible for managing the new descriptor
 		\returns a copy of the current descriptor if possible, or a blank descriptor if not. */
 	ParamBlockDesc2* CopyPBDescriptor();
-	/*! Delete a parameter from the current parameter block 
+	/*! Delete a parameter from the current parameter block
 		This does not modify the splice graph.
 		\ParamID the ID of the parameter to delete
 		\return true on success, else false */
@@ -279,7 +278,7 @@ private:
 	// Methods for defining the UI for our current parameter block
 
 	/*! Generate if necessary and post a UI for our parameter block
-		\param ip - An instance of the UI interface class passed to BeginEditParams 
+		\param ip - An instance of the UI interface class passed to BeginEditParams
 		\return true if m_dialog is ready to use. */
 	bool GeneratePBlockUI();
 
@@ -313,8 +312,6 @@ public:
 	ReferenceTarget* CastToRefTarg() { return this; }
 
 	DFGWrapper::Binding& GetBinding()	{ return m_binding; }
-	FabricCore::Client& GetClient()		{ return m_client; }
-	DFGWrapper::Host* GetHost()			{ return m_host; }
 
 	std::string GetKLCode();
 	std::string GetKLOperatorName();
@@ -330,9 +327,9 @@ public:
 	// Splice port management
 	// Create a new port.  A matching Max parameter 
 	// will be added as well of maxType, if MaxType is -1 
-	int AddInputPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=false);
-	int AddOutputPort(const char* klType, const char* name, bool isArray=false, const char* inExtension=false);
-	int AddIOPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=false);
+	int AddInputPort(const char* klType, const char* name, int maxType = -1, bool isArray = false, const char* inExtension = false);
+	int AddOutputPort(const char* klType, const char* name, bool isArray = false, const char* inExtension = false);
+	int AddIOPort(const char* klType, const char* name, int maxType = -1, bool isArray = false, const char* inExtension = false);
 
 	// Remove specified port and matching max parameter
 	bool RemovePort(const char* name);
@@ -348,7 +345,7 @@ public:
 	bool SetOutPort(const char* name);
 
 	// Connect myPortName to the output port on pSrcContainer named srcPortName
-	bool ConnectPort(const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex, bool postConnectionsUI );
+	bool ConnectPort(const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex, bool postConnectionsUI);
 	// Disconnect a previously connected port.
 	bool DisconnectPort(const char* myPortName);
 
@@ -381,70 +378,72 @@ public:
 	bool AddNodeFromPreset(const char* name, const char* path);
 
 	// Set splice values
-//	const DFGWrapper::Binding& GetSpliceGraph() { return getGraph(); }
-//	void SetSpliceGraph(const DFGWrapper::Binding& graph, bool createMaxParams);
-//	void SetOutPort(const DFGWrapper::ExecPortPtr& port) { m_valuePort = port; };
+	//	const DFGWrapper::Binding& GetSpliceGraph() { return getGraph(); }
+	//	void SetSpliceGraph(const DFGWrapper::Binding& graph, bool createMaxParams);
+	//	void SetOutPort(const DFGWrapper::ExecPortPtr& port) { m_valuePort = port; };
 
 	// Load from a saved JSON file spec
 	bool LoadFromFile(const MCHAR* filename, bool createMaxParams);
 	bool SaveToFile(const MCHAR* filename);
 
-	bool RestoreFromJSON(const char* json);
+	bool RestoreFromJSON(const char* json, bool createMaxParams);
 	void ExportToJSON(std::string &outJson);
 
-	
+
 	virtual void ResetPorts();
 
 #pragma endregion
 
 #pragma region DFG-derived functions
 
-	  // notifications
-  // for now we only implement onPortInserted and onPortRemoved
-  virtual void onNotification(char const * json) override {}
-  virtual void onNodeInserted(FabricServices::DFGWrapper::NodePtr node) override {}
-  virtual void onNodeRemoved(FabricServices::DFGWrapper::NodePtr node) override {}
-  virtual void onNodePortInserted(FabricServices::DFGWrapper::NodePortPtr nodePort) override { };
-  virtual void onNodePortRemoved(FabricServices::DFGWrapper::NodePortPtr nodePort) override {};
-//  virtual void onPinInserted(FabricServices::DFGWrapper::PinPtr pin) {}
- // virtual void onPinRemoved(FabricServices::DFGWrapper::PinPtr pin) {}
-//  virtual void onPortInserted(FabricServices::DFGWrapper::ExecPortPtr port);
-//  virtual void onPortRemoved(FabricServices::DFGWrapper::ExecPortPtr port);
-  virtual void onExecPortInserted(FabricServices::DFGWrapper::ExecPortPtr port) override;
-  virtual void onExecPortRemoved(FabricServices::DFGWrapper::ExecPortPtr port) override;
-  virtual void onPortsConnected(FabricServices::DFGWrapper::PortPtr src, FabricServices::DFGWrapper::PortPtr dst) override;;
-  virtual void onPortsDisconnected(FabricServices::DFGWrapper::PortPtr src, FabricServices::DFGWrapper::PortPtr dst) override;;
-//  virtual void onEndPointsConnected(FabricServices::DFGWrapper::EndPointPtr src, FabricServices::DFGWrapper::EndPointPtr dst);
-//  virtual void onEndPointsDisconnected(FabricServices::DFGWrapper::EndPointPtr src, FabricServices::DFGWrapper::EndPointPtr dst) {}
-  virtual void onNodeMetadataChanged(FabricServices::DFGWrapper::NodePtr node, const char * key, const char * metadata) override {}
-  virtual void onNodeTitleChanged(FabricServices::DFGWrapper::NodePtr node, const char * title) override {}
- // virtual void onPortRenamed(FabricServices::DFGWrapper::ExecPortPtr port, const char * oldName)override;
-//  virtual void onPinRenamed(FabricServices::DFGWrapper::PinPtr pin, const char * oldName) {}
-  virtual void onExecPortRenamed(FabricServices::DFGWrapper::ExecPortPtr port, const char * oldName) override;
-  virtual void onNodePortRenamed(FabricServices::DFGWrapper::NodePortPtr nodePort, const char * oldName) override {};
+	// notifications
+	// for now we only implement onPortInserted and onPortRemoved
+	virtual void onNotification(char const * json) override {}
+	virtual void onNodeInserted(FabricServices::DFGWrapper::NodePtr node) override {}
+	virtual void onNodeRemoved(FabricServices::DFGWrapper::NodePtr node) override {}
+	virtual void onNodePortInserted(FabricServices::DFGWrapper::NodePortPtr nodePort) override { };
+	virtual void onNodePortRemoved(FabricServices::DFGWrapper::NodePortPtr nodePort) override {};
+	//  virtual void onPinInserted(FabricServices::DFGWrapper::PinPtr pin) {}
+	// virtual void onPinRemoved(FabricServices::DFGWrapper::PinPtr pin) {}
+	//  virtual void onPortInserted(FabricServices::DFGWrapper::ExecPortPtr port);
+	//  virtual void onPortRemoved(FabricServices::DFGWrapper::ExecPortPtr port);
+	virtual void onExecPortInserted(FabricServices::DFGWrapper::ExecPortPtr port) override;
+	virtual void onExecPortRemoved(FabricServices::DFGWrapper::ExecPortPtr port) override;
+	virtual void onPortsConnected(FabricServices::DFGWrapper::PortPtr src, FabricServices::DFGWrapper::PortPtr dst) override;;
+	virtual void onPortsDisconnected(FabricServices::DFGWrapper::PortPtr src, FabricServices::DFGWrapper::PortPtr dst) override;;
+	//  virtual void onEndPointsConnected(FabricServices::DFGWrapper::EndPointPtr src, FabricServices::DFGWrapper::EndPointPtr dst);
+	//  virtual void onEndPointsDisconnected(FabricServices::DFGWrapper::EndPointPtr src, FabricServices::DFGWrapper::EndPointPtr dst) {}
+	virtual void onNodeMetadataChanged(FabricServices::DFGWrapper::NodePtr node, const char * key, const char * metadata) override {}
+	virtual void onNodeTitleChanged(FabricServices::DFGWrapper::NodePtr node, const char * title) override {}
+	// virtual void onPortRenamed(FabricServices::DFGWrapper::ExecPortPtr port, const char * oldName)override;
+	//  virtual void onPinRenamed(FabricServices::DFGWrapper::PinPtr pin, const char * oldName) {}
+	virtual void onExecPortRenamed(FabricServices::DFGWrapper::ExecPortPtr port, const char * oldName) override;
+	virtual void onNodePortRenamed(FabricServices::DFGWrapper::NodePortPtr nodePort, const char * oldName) override {};
 
-  virtual void onExecMetadataChanged(FabricServices::DFGWrapper::ExecutablePtr exec, const char * key, const char * metadata) override{}
-  virtual void onExtDepAdded(const char * extension, const char * version) override{}
-  virtual void onExtDepRemoved(const char * extension, const char * version) override{}
-  virtual void onNodeCacheRuleChanged(const char * path, const char * rule) override{}
-  virtual void onExecCacheRuleChanged(const char * path, const char * rule) override{}
-  //virtual void onPortResolvedTypeChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * resolvedType);
-  //virtual void onPortTypeSpecChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * typeSpec) {}
-  virtual void onExecPortResolvedTypeChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * resolvedType) override;
-  virtual void onExecPortTypeSpecChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * typeSpec) override {};
-  virtual void onNodePortResolvedTypeChanged(FabricServices::DFGWrapper::NodePortPtr nodePort, const char * resolvedType) override {};
-//  virtual void onPortMetadataChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * key, const char * metadata) {}
-//  virtual void onPinMetadataChanged(FabricServices::DFGWrapper::PinPtr pin, const char * key, const char * metadata) {}
-//  virtual void onPinTypeChanged(FabricServices::DFGWrapper::PinPtr pin, FabricCore::DFGPortType pinType) {};
-//  virtual void onPortTypeChanged(FabricServices::DFGWrapper::ExecPortPtr port, FabricCore::DFGPortType portType) {};
-  virtual void onExecPortMetadataChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * key, const char * metadata) override;;
-  virtual void onNodePortMetadataChanged(FabricServices::DFGWrapper::NodePortPtr nodePort, const char * key, const char * metadata) override {};
-  virtual void onNodePortTypeChanged(FabricServices::DFGWrapper::NodePortPtr nodePort, FabricCore::DFGPortType nodePortType) override {};
-  virtual void onExecPortTypeChanged(FabricServices::DFGWrapper::ExecPortPtr port, FabricCore::DFGPortType portType) override {};
+	virtual void onExecMetadataChanged(FabricServices::DFGWrapper::ExecutablePtr exec, const char * key, const char * metadata) override{}
+	virtual void onExtDepAdded(const char * extension, const char * version) override{}
+	virtual void onExtDepRemoved(const char * extension, const char * version) override{}
+	virtual void onNodeCacheRuleChanged(const char * path, const char * rule) override{}
+	virtual void onExecCacheRuleChanged(const char * path, const char * rule) override{}
+	//virtual void onPortResolvedTypeChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * resolvedType);
+	//virtual void onPortTypeSpecChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * typeSpec) {}
+	virtual void onExecPortResolvedTypeChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * resolvedType) override;
+	virtual void onExecPortTypeSpecChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * typeSpec) override {};
+	virtual void onNodePortResolvedTypeChanged(FabricServices::DFGWrapper::NodePortPtr nodePort, const char * resolvedType) override {};
+	//  virtual void onPortMetadataChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * key, const char * metadata) {}
+	//  virtual void onPinMetadataChanged(FabricServices::DFGWrapper::PinPtr pin, const char * key, const char * metadata) {}
+	//  virtual void onPinTypeChanged(FabricServices::DFGWrapper::PinPtr pin, FabricCore::DFGPortType pinType) {};
+	//  virtual void onPortTypeChanged(FabricServices::DFGWrapper::ExecPortPtr port, FabricCore::DFGPortType portType) {};
+	virtual void onExecPortMetadataChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * key, const char * metadata) override;;
+	virtual void onNodePortMetadataChanged(FabricServices::DFGWrapper::NodePortPtr nodePort, const char * key, const char * metadata) override {};
+	virtual void onNodePortTypeChanged(FabricServices::DFGWrapper::NodePortPtr nodePort, FabricCore::DFGPortType nodePortType) override {};
+	virtual void onExecPortTypeChanged(FabricServices::DFGWrapper::ExecPortPtr port, FabricCore::DFGPortType portType) override {};
 
 #pragma endregion
-  //////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////
 
+	/// Check if our DFG Graph is valid (whether or not we can execute)
+	bool GraphCanEvaluate();
 	/// Invalidate our cached values, will cause a re-evalaute of the graph next evaluation
 	void Invalidate() { m_valid.SetEmpty(); }
 	// Push our parameters to the Splice system, and get the results back...
@@ -475,4 +474,18 @@ public:
 		Interface* pCore = GetCOREInterface();
 		pCore->RedrawViews(pCore->GetTime());
 	}
+
+	// Count the number 
+	static int s_nInstances;
+
 };
+
+
+extern FabricCore::Client& GetClient();
+extern DFGWrapper::Host* GetHost();
+extern FabricCore::RTVal& GetDrawing();
+
+extern void InstanceCreated();
+extern void InstanceDeleted();
+extern bool AnyInstances();
+extern void ReleaseAll();

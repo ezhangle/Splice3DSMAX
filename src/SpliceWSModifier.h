@@ -56,6 +56,7 @@ private:
 	bool CloneSpliceData(ParentClass* pMyClone) { return true; }
 
 	DFGWrapper::ExecPortPtr m_nodeTransformPort;
+	DFGWrapper::ExecPortPtr m_inMeshPort;
 
 	// Our cache is only valid if the node transform has not changed.
 	// We cache the nodes transform, and invalidate our cache

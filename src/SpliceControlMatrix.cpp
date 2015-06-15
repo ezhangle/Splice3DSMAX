@@ -92,14 +92,14 @@ void SpliceControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, G
 	Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
 	if(method == CTRL_ABSOLUTE)
 	{
-		MaxValueToSplice(m_client, m_parentValuePort, t, interval, Matrix3::Identity);
+		MaxValueToSplice(m_parentValuePort, t, interval, Matrix3::Identity);
 	}
 	else
 	{
 		// if our parents value has changed, invalidate our cache
 		if (!(m_cachedParentVal == *pInVal))
 			Invalidate();
-		MaxValueToSplice(m_client, m_parentValuePort, t, interval, *pInVal);
+		MaxValueToSplice(m_parentValuePort, t, interval, *pInVal);
 		// Cache parent transform for next eval
 		m_cachedParentVal = *pInVal;
 	}

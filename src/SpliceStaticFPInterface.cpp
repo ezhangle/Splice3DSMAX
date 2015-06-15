@@ -265,7 +265,8 @@ int SpliceStaticFPInterface::DisableLogging(int loggers) {
 
 void SpliceStaticFPInterface::DestroyClient(bool force) {
 	SpliceEvents::ReleaseInstance();
-	FabricSplice::DestroyClient(force);
+	
+	ReleaseAll();
 }
 
 bool SpliceStaticFPInterface::GetSpliceRendering()

@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "MeshNormalSpec.h"
+#include "DFGWrapper\Host.h"
 
 //////////////////////////////////////////////////////////////////////////
 //--- DynPBDefAccessor -------------------------------------------------------
@@ -295,8 +296,8 @@ void SetMaxParamLimits(ParamBlockDesc2* pDesc, DFGWrapper::ExecPortPtr& port)
 	case TYPE_PCNT_FRAC:	
 	case TYPE_WORLD:
 		{
-			float vMin = atof(firstValStr.c_str());
-			float vMax = atof(secondValStr.c_str());;
+			float vMin = (float)atof(firstValStr.c_str());
+			float vMax = (float)atof(secondValStr.c_str());;
 			pDesc->ParamOption(pid, p_range, vMin, vMax, p_end); 
 			break;
 		}
@@ -330,13 +331,13 @@ void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::Variant
 }
 
 template<typename TType>
-void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::RTVal& defaultVal, FabricCore::Client& client) {
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::RTVal& defaultVal) {
 	TType def;
-	SpliceToMaxValue(defaultVal, def, client);
+	SpliceToMaxValue(defaultVal, def);
 	pDesc->ParamOption(pid, p_default, def, p_end);
 }
 
-void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPortPtr& port, FabricCore::Client& client) {
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPortPtr& port) {
 
 	if (!port->isValid())
 		return;
@@ -356,7 +357,7 @@ void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPor
 	case TYPE_BOOL:
 	case TYPE_INT:
 		{
-			SetMaxParamDefault<int>(pDesc, pid, defaultVal, client);
+			SetMaxParamDefault<int>(pDesc, pid, defaultVal);
 			break;
 		}
 	case TYPE_FLOAT:	
@@ -364,33 +365,33 @@ void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, DFGWrapper::ExecPor
 	case TYPE_PCNT_FRAC:	
 	case TYPE_WORLD:
 		{
-			SetMaxParamDefault<float>(pDesc, pid, defaultVal, client);
+			SetMaxParamDefault<float>(pDesc, pid, defaultVal);
 			break;
 		}
 	case TYPE_RGBA:
 		{
-			SetMaxParamDefault<Color>(pDesc, pid, defaultVal, client);
+			SetMaxParamDefault<Color>(pDesc, pid, defaultVal);
 			break;
 		}
 	case TYPE_POINT3:
 		{
-			SetMaxParamDefault<Point3>(pDesc, pid, defaultVal, client);
+			SetMaxParamDefault<Point3>(pDesc, pid, defaultVal);
 			break;
 		}
 	case TYPE_FRGBA:
 	case TYPE_POINT4:
 		{
-			SetMaxParamDefault<Point4>(pDesc, pid, defaultVal, client);
+			SetMaxParamDefault<Point4>(pDesc, pid, defaultVal);
 			break;
 		}
 	case TYPE_MATRIX3:
 		{
-			SetMaxParamDefault<Matrix3>(pDesc, pid, defaultVal, client);
+			SetMaxParamDefault<Matrix3>(pDesc, pid, defaultVal);
 			break;
 		}
 	case TYPE_STRING:
 		{
-			SetMaxParamDefault<MSTR>(pDesc, pid, defaultVal, client);
+			SetMaxParamDefault<MSTR>(pDesc, pid, defaultVal);
 			break;
 		}
 	case TYPE_INODE:
@@ -426,16 +427,16 @@ void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name)
 }
 
 template<typename TType>
-void SetMaxParamValue(IParamBlock2* pblock, TimeValue t, ParamID pid, FabricCore::RTVal& value, FabricCore::Client& client) {
+void SetMaxParamValue(IParamBlock2* pblock, TimeValue t, ParamID pid, FabricCore::RTVal& value) {
 	// Check for existence!
 	if (pblock->IDtoIndex(pid) < 0)
 		return;
 	TType def;
-	SpliceToMaxValue(value, def, client);
+	SpliceToMaxValue(value, def);
 	pblock->SetValue(pid, t, def);
 }
 
-void SetMaxParamFromSplice(IParamBlock2* pblock, ParamID pid, DFGWrapper::ExecPortPtr& port, FabricCore::Client& client)
+void SetMaxParamFromSplice(IParamBlock2* pblock, ParamID pid, DFGWrapper::ExecPortPtr& port)
 {
 	if (!port->isValid() || pblock == nullptr)
 		return;
@@ -452,7 +453,7 @@ void SetMaxParamFromSplice(IParamBlock2* pblock, ParamID pid, DFGWrapper::ExecPo
 	case TYPE_BOOL:
 	case TYPE_INT:
 	{
-		SetMaxParamValue<int>(pblock, t, pid, currentVal, client);
+		SetMaxParamValue<int>(pblock, t, pid, currentVal);
 		break;
 	}
 	case TYPE_FLOAT:
@@ -460,33 +461,33 @@ void SetMaxParamFromSplice(IParamBlock2* pblock, ParamID pid, DFGWrapper::ExecPo
 	case TYPE_PCNT_FRAC:
 	case TYPE_WORLD:
 	{
-		SetMaxParamValue<float>(pblock, t, pid, currentVal, client);
+		SetMaxParamValue<float>(pblock, t, pid, currentVal);
 		break;
 	}
 	case TYPE_RGBA:
 	{
-		SetMaxParamValue<Color>(pblock, t, pid, currentVal, client);
+		SetMaxParamValue<Color>(pblock, t, pid, currentVal);
 		break;
 	}
 	case TYPE_POINT3:
 	{
-		SetMaxParamValue<Point3>(pblock, t, pid, currentVal, client);
+		SetMaxParamValue<Point3>(pblock, t, pid, currentVal);
 		break;
 	}
 	case TYPE_FRGBA:
 	case TYPE_POINT4:
 	{
-		SetMaxParamValue<Point4>(pblock, t, pid, currentVal, client);
+		SetMaxParamValue<Point4>(pblock, t, pid, currentVal);
 		break;
 	}
 	case TYPE_MATRIX3:
 	{
-		SetMaxParamValue<Matrix3>(pblock, t, pid, currentVal, client);
+		SetMaxParamValue<Matrix3>(pblock, t, pid, currentVal);
 		break;
 	}
 	case TYPE_STRING:
 	{
-		SetMaxParamValue<MSTR>(pblock, t, pid, currentVal, client);
+		SetMaxParamValue<MSTR>(pblock, t, pid, currentVal);
 		break;
 	}
 	}
@@ -1054,7 +1055,7 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 //////////////////////////////////////////////////////////////////////////
 template<typename TResultType, typename TConvertType>
-void ParameterBlockValuesToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
+void ParameterBlockValuesToSplice(DFGWrapper::ExecPortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
 {
 	MAXSPLICE_CATCH_BEGIN()
 
@@ -1068,20 +1069,20 @@ void ParameterBlockValuesToSplice(FabricCore::Client& client, DFGWrapper::ExecPo
 	TResultType* pVals = new TResultType[nParams];
 	for (int i = 0; i < nParams; i++)
 		pblock->GetValue(pid, t, pVals[i], ivValid, i);
-	MaxValuesToSplice<TResultType, TConvertType>(client, port, t, ivValid, pVals, nParams);
+	MaxValuesToSplice<TResultType, TConvertType>(port, t, ivValid, pVals, nParams);
 	delete pVals;
 
 	MAXSPLICE_CATCH_END
 }
 
 template<typename TResultType>
-void ParameterBlockValuesToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
+void ParameterBlockValuesToSplice(DFGWrapper::ExecPortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
 {
-	ParameterBlockValuesToSplice<TResultType, TResultType>(client, port, t, pblock, pid, ivValid);
+	ParameterBlockValuesToSplice<TResultType, TResultType>(port, t, pblock, pid, ivValid);
 }
 
 // This helper function converts from INode to the appropriate Splice type
-void MaxPtrToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID id, Interval& ivValid)
+void MaxPtrToSplice(DFGWrapper::ExecPortPtr& port, TimeValue t, IParamBlock2* pblock, ParamID id, Interval& ivValid)
 {
 	if (!port->isValid())
 		return;
@@ -1093,23 +1094,23 @@ void MaxPtrToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port, T
 	{
 	case TYPE_POINT3:
 		{
-			ParameterBlockValuesToSplice<INode*, Point3>(client, port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<INode*, Point3>(port, t, pblock, id, ivValid);
 			break;
 		}
 	case TYPE_QUAT:
 		{
-			ParameterBlockValuesToSplice<INode*, Quat>(client, port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<INode*, Quat>(port, t, pblock, id, ivValid);
 			break;
 		}
 	case TYPE_MATRIX3:
 		{
-			ParameterBlockValuesToSplice<INode*, Matrix3>(client, port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<INode*, Matrix3>(port, t, pblock, id, ivValid);
 			break;
 		}
 	case TYPE_MESH:
 		{
 			// Convert to mesh if possible
-			ParameterBlockValuesToSplice<INode*, Mesh>(client, port, t, pblock, id, ivValid);
+			ParameterBlockValuesToSplice<INode*, Mesh>(port, t, pblock, id, ivValid);
 			break;
 		}
 	default:
@@ -1117,7 +1118,7 @@ void MaxPtrToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port, T
 	}
 }
 // Pblock conversion function
-void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore::Client& client, DFGWrapper::Binding& graph, std::vector<Interval>& paramValids, Interval& ivValid)
+void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, DFGWrapper::Binding& graph, std::vector<Interval>& paramValids, Interval& ivValid)
 {
 	if (pblock == NULL)
 		return;
@@ -1156,45 +1157,45 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 		{
 		case TYPE_INT:		
 		case TYPE_INDEX:
-			ParameterBlockValuesToSplice<int>(client, port, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToSplice<int>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_TIMEVALUE:
-			ParameterBlockValuesToSplice<TimeValue, float>(client, port, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToSplice<TimeValue, float>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_FLOAT:
 		case TYPE_ANGLE:
 		case TYPE_WORLD:
 		case TYPE_PCNT_FRAC:
-			ParameterBlockValuesToSplice<float>(client, port, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToSplice<float>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_RGBA:
-			ParameterBlockValuesToSplice<Color>(client, port, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToSplice<Color>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		//case TYPE_POINT2:
 		//	MaxValueToSplice(port, pblock->GetPoint3(id, t));
 		//	break;
 		case TYPE_POINT3:
-			ParameterBlockValuesToSplice<Point3>(client, port, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToSplice<Point3>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_FRGBA:
-			ParameterBlockValuesToSplice<Point4>(client, port, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToSplice<Point4>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_POINT4:
-			ParameterBlockValuesToSplice<Point4>(client, port, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToSplice<Point4>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_BOOL:
-			ParameterBlockValuesToSplice<int, bool>(client, port, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToSplice<int, bool>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_MATRIX3:
-			ParameterBlockValuesToSplice<Matrix3>(client, port, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToSplice<Matrix3>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_STRING:
 		case TYPE_FILENAME:
-			ParameterBlockValuesToSplice<const MCHAR*>(client, port, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToSplice<const MCHAR*>(port, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_INODE:
 			{
-				MaxPtrToSplice(client, port, t, pblock, pid, paramValids[pidx]);
+				MaxPtrToSplice(port, t, pblock, pid, paramValids[pidx]);
 				break;
 			}
 		case TYPE_REFTARG:
@@ -1263,3 +1264,76 @@ void bindingNotificationCallback(void * userData, char const *jsonCString, uint3
 		printf("an argument type has changed. you might want to create a DCC port now.\n");
 	}
 }
+
+
+#pragma region Instance counting
+
+static int s_nInstances = 0;
+static FabricCore::Client s_client;
+static FabricServices::DFGWrapper::Host* s_DCCHost = nullptr;
+static FabricCore::RTVal s_drawing;
+
+FabricCore::Client& GetClient() 
+{
+	if (!s_client.isValid())
+	{
+		// create a client
+		FabricCore::Client::CreateOptions options;
+		memset(&options, 0, sizeof(options));
+		options.optimizationType = FabricCore::ClientOptimizationType_Background;
+		options.guarded = 1;
+		FabricCore::Client::ReportCallback pCallback = &myLogFunc;
+		s_client = FabricCore::Client(pCallback, nullptr, &options);
+	}
+	return s_client;
+}
+
+FabricServices::DFGWrapper::Host* GetHost()
+{
+	if (s_DCCHost == nullptr)
+	{
+		FabricCore::Client client = GetClient();
+		s_DCCHost = new DFGWrapper::Host(client);
+	}
+	return s_DCCHost;
+}
+
+FabricCore::RTVal& GetDrawing()
+{
+	if (!s_drawing.isValid())
+	{
+		s_drawing = FabricCore::RTVal::Construct(GetClient(), "OGLInlineDrawing", 0, 0);
+		if (!s_drawing.isValid())
+		{
+			//log("[GLWidget] Error: Cannot construct OGLInlineDrawing RTVal (extension loaded?)\n");
+		}
+		else
+			s_drawing = s_drawing.callMethod("OGLInlineDrawing", "getInstance", 0, 0);
+	}
+	return s_drawing;
+}
+void InstanceCreated() 
+{ 
+	s_nInstances++;  
+}
+
+void InstanceDeleted() 
+{ 
+	s_nInstances--;  
+	// If there are no instances left, release the client.
+	if (s_nInstances == 0)
+	{
+		ReleaseAll();
+	}
+}
+
+bool AnyInstances() { return s_nInstances > 0;  }
+
+extern void ReleaseAll()
+{
+	SAFE_DELETE(s_DCCHost);
+	s_client = FabricCore::Client();
+	s_drawing = FabricCore::RTVal();
+}
+
+#pragma endregion

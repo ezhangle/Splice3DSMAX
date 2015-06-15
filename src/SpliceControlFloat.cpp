@@ -82,11 +82,11 @@ void SpliceControlFloat::GetValue(TimeValue t, void *val, Interval &interval, Ge
 	if(method == CTRL_RELATIVE)
 	{
 		Invalidate(); // Evaluate every time in case parent changes too
-		MaxValueToSplice(m_client, m_parentValuePort, 0, interval, *pVal);
+		MaxValueToSplice(m_parentValuePort, 0, interval, *pVal);
 	}
 	else
 	{
-		MaxValueToSplice(m_client, m_parentValuePort, 0, interval, float(0));
+		MaxValueToSplice(m_parentValuePort, 0, interval, float(0));
 	}
 
 	// Evaluate value from splice

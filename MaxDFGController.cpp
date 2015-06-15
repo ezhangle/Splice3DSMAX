@@ -5,8 +5,8 @@
 using namespace FabricUI;
 using namespace GraphView;
 
-MaxDFGController::MaxDFGController(GraphView::Graph * graph, FabricServices::Commands::CommandStack * stack, FabricCore::Client * client, FabricServices::DFGWrapper::Host * host, FabricServices::ASTWrapper::KLASTManager * manager, bool overTakeBindingNotifications /*= true*/)
-	: DFGController(graph, stack, client, host, manager, overTakeBindingNotifications)
+MaxDFGController::MaxDFGController(GraphView::Graph * graph, FabricServices::Commands::CommandStack * stack, FabricServices::ASTWrapper::KLASTManager * manager, bool overTakeBindingNotifications /*= true*/)
+	: DFGController(graph, stack, &GetClient(), GetHost(), manager, overTakeBindingNotifications)
 {
 
 }

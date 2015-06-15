@@ -32,5 +32,8 @@ public:
 	static SpliceEvents* GetInstance();
 	static void ReleaseInstance();
 	
-	static FabricCore::RTVal s_DrawContexts[MAX_VPTS];
+	//static FabricCore::RTVal s_DrawContexts[MAX_VPTS];
+	static FabricCore::RTVal s_DrawContext;
+	static FabricCore::RTVal s_InlineViewports[MAX_VPTS];
+
 };

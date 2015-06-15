@@ -27,6 +27,8 @@ SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(BOOL loa
 	,	m_pblock(NULL)
 	,	m_valid(NEVER)
 {
+	InstanceCreated();
+
 	if (!loading)
 		Init(loading);
 }
@@ -43,6 +45,8 @@ SpliceTranslationLayer<TBaseClass, TResultType>::~SpliceTranslationLayer()
 	// be registered with our CD for release.
 	DynPBCustAttrClassDesc* ourCD = GetClassDesc();
 	ourCD->ReleaseObsoletePBDesc();
+
+	InstanceDeleted();
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -50,24 +54,10 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
 {
 	MAXSPLICE_CATCH_BEGIN();
 
-	if (!m_client.isValid())
-	{
-		// create a client
-		FabricCore::Client::CreateOptions options;
-		memset(&options, 0, sizeof(options));
-		options.optimizationType = FabricCore::ClientOptimizationType_Background;
-		options.guarded = 1;
-		FabricCore::Client::ReportCallback pCallback = &myLogFunc;
-		m_client = FabricCore::Client(pCallback, this, &options);
-
-		// create a host for Canvas
-		m_host = new DFGWrapper::Host(m_client);
-	}
-
 	//if (!loading)
 	{
 		// create an empty binding
-		m_binding = m_host->createBindingToNewGraph();
+		m_binding = GetHost()->createBindingToNewGraph();
 		m_binding.setNotificationCallback(bindingNotificationCallback, this);
 
 		// set the graph on the view
@@ -139,7 +129,7 @@ ParamBlockDesc2* SpliceTranslationLayer<TBaseClass, TResultType>::CopyPBDescript
 			CStr portName = CStr::FromMCHAR(pbDef.int_name);
 			DFGWrapper::ExecPortPtr port = GetPort(portName);
 			SetMaxParamLimits(pNewDesc, port);
-			SetMaxParamDefault(pNewDesc, newPid, port, m_client);
+			SetMaxParamDefault(pNewDesc, newPid, port);
 		}
 	}
 	// Return the new descriptor. This object is now the
@@ -572,11 +562,12 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 				char *buff = nullptr;
 				if (IO_OK == iload->ReadCStringChunk(&buff))
 				{
-					Init(true);
-					m_binding = m_host->createBindingFromJSON(buff);
-					m_binding.setNotificationCallback(bindingNotificationCallback, this);
-					// set the graph on the view
-					setGraph(DFGWrapper::GraphExecutablePtr::StaticCast(m_binding.getExecutable()));
+					RestoreFromJSON(buff, false);
+					//Init(true);
+					//m_binding = GetHost()->createBindingFromJSON(buff);
+					//m_binding.setNotificationCallback(bindingNotificationCallback, this);
+					//// set the graph on the view
+					//setGraph(DFGWrapper::GraphExecutablePtr::StaticCast(m_binding.getExecutable()));
 				}
 
 				break;
@@ -1034,12 +1025,12 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(DFGWrap
 	ParamBlockDesc2* pNewDesc = CopyPBDescriptor();
 	ParamID newId = AddMaxParameter(pNewDesc, maxType, ::GetPortName(aPort));
 	SetMaxParamLimits(pNewDesc, aPort);
-	SetMaxParamDefault(pNewDesc, newId, aPort, m_client);
+	SetMaxParamDefault(pNewDesc, newId, aPort);
 	::SetPortParamID(aPort, newId);
 	CreateParamBlock(pNewDesc);
 
 	// Set the value to the current port value
-	SetMaxParamFromSplice(m_pblock, newId, aPort, m_client);
+	SetMaxParamFromSplice(m_pblock, newId, aPort);
 	return newId;
 }
 
@@ -1195,7 +1186,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::LoadFromFile(const MCHAR* 
 
 	fclose(file);
 
-	RestoreFromJSON(buffer);
+	RestoreFromJSON(buffer, createMaxParams);
 	free(buffer);
 	return true;
 };
@@ -1224,35 +1215,38 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SaveToFile(const MCHAR* fi
 };
 
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const char* json)
+bool SpliceTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const char* json, bool createMaxParams)
 {
 	// The KL Editor has pointers to the current graph
 	CloseKLEditor();
 
-	m_binding = m_host->createBindingFromJSON(json);
+	m_binding = GetHost()->createBindingFromJSON(json);
 	m_binding.setNotificationCallback(bindingNotificationCallback, this);
 	// set the graph on the view
 	setGraph(DFGWrapper::GraphExecutablePtr::StaticCast(m_binding.getExecutable()));
 
 	// Setup port connections
-	DFGWrapper::ExecPortList allPorts = m_binding.getExecutable()->getPorts();
-
-	for (auto pitr = allPorts.begin(); pitr != allPorts.end(); pitr++)
+	if (createMaxParams)
 	{
-		// If this could be our out port?
-		if ((*pitr)->getOutsidePortType() == FabricCore::DFGPortType_Out)
+		DFGWrapper::ExecPortList allPorts = m_binding.getExecutable()->getPorts();
+
+		for (auto pitr = allPorts.begin(); pitr != allPorts.end(); pitr++)
 		{
-			DFGWrapper::ExecPortPtr asPort(*pitr);
-			BitArray compatibleTypes = SpliceTypeToMaxTypes(::GetPortType(asPort));
-			// If this splice type is compatible with this classes output,
-			// set this port as our outport
-			if (compatibleTypes[GetValueType()])
-				m_valuePort = *pitr;
-		}
-		else
-		{
-			// for input ports, we should trigger Max type creation
-			onExecPortInserted(*pitr);
+			// If this could be our out port?
+			if ((*pitr)->getOutsidePortType() == FabricCore::DFGPortType_Out)
+			{
+				DFGWrapper::ExecPortPtr asPort(*pitr);
+				BitArray compatibleTypes = SpliceTypeToMaxTypes(::GetPortType(asPort));
+				// If this splice type is compatible with this classes output,
+				// set this port as our outport
+				if (compatibleTypes[GetValueType()])
+					m_valuePort = *pitr;
+			}
+			else
+			{
+				// for input ports, we should trigger Max type creation
+				onExecPortInserted(*pitr);
+			}
 		}
 	}
 	InvalidateAll();
@@ -1391,15 +1385,26 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::onExecPortMetadataChanged(
 //////////////////////////////////////////////////////////////////////////
 #pragma region Evaluation
 
+
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::GraphCanEvaluate()
+{
+	if (!m_binding.isValid())
+		return false;
+
+	// If we aren't able to receive a value, abort
+	if (m_valuePort.isNull() || !m_valuePort->isValid() || !m_valuePort->isConnectedToAny())
+		return false;
+	// All checks passed
+	return true;
+}
+
 template<typename TBaseClass, typename TResultType>
 const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(TimeValue t, Interval& ivValid)
 {
-	if (!m_binding.isValid())
+	if (!GraphCanEvaluate())
 		return m_value;
-	
-	// If we aren't able to receive a value, abort
-	if (m_valuePort.isNull() || !m_valuePort->isValid() || !m_valuePort->isConnectedToAny())
-		return m_value;
+
 
 	// If our value is valid, do not re-evaluate
 	if (!m_valid.InInterval(t))
@@ -1424,13 +1429,13 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 		//}
 
 		// Set  all Max values on their splice equivalents
-		TransferAllMaxValuesToSplice(t, m_pblock, m_client, m_binding, m_portValidities, m_valid);
+		TransferAllMaxValuesToSplice(t, m_pblock, m_binding, m_portValidities, m_valid);
 
 		// Trigger graph evaluation
 		m_binding.execute();
 
 		// Get our value back!
-		SpliceToMaxValue(m_valuePort->getArgValue(), m_value, m_client);
+		SpliceToMaxValue(m_valuePort->getArgValue(), m_value);
 		
 		MAXSPLICE_CATCH_END;
 

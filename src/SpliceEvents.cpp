@@ -3,7 +3,6 @@
 #include <maxapi.h>
 #include <GraphicsWindow.h>
 #include "FabricCore.h"
-#include "FabricSplice.h"
 #include "SpliceLogging.h"
 #include <map>
 #include "Graphics\IDisplayManager.h"
@@ -47,23 +46,39 @@ bool SpliceEvents::MouseEventsHooked()
 //////////////////////////////////////////////////////////////////////////
 #pragma region Viewport Rendering event
 
+//FabricCore::RTVal SpliceEvents::s_DrawContexts[MAX_VPTS];
+FabricCore::RTVal SpliceEvents::s_DrawContext;
+FabricCore::RTVal SpliceEvents::s_InlineViewports[MAX_VPTS];
+FabricCore::RTVal s_viewportIds[MAX_VPTS];
+
 void doSpliceDrawing(void *data)
 {
 	// Invoke the Splice Drawing now that we have the OpenGL context bound.
 
 	MAXSPLICE_CATCH_BEGIN();
 
-		ViewExp *vpt = reinterpret_cast<ViewExp*>(data);
-		int id = vpt->GetViewID();
-		if(SpliceEvents::s_DrawContexts[id].isValid())
+		if (SpliceEvents::s_DrawContext.isValid())
 		{
-			FabricSplice::SceneManagement::drawOpenGL(SpliceEvents::s_DrawContexts[id]);
+			ViewExp *vpt = reinterpret_cast<ViewExp*>(data);
+			int id = vpt->GetViewID();
+			if (SpliceEvents::s_InlineViewports[id].isValid())
+			{
+				FabricCore::RTVal args[2];
+				args[0] = s_viewportIds[id];
+				args[1] = SpliceEvents::s_DrawContext;
+				FabricCore::RTVal success = GetDrawing().callMethod("Boolean", "drawViewport", 2, args);
+				if (!success.getBoolean())
+				{
+					myLogFunc(NULL, "Drawing Failed", -1);
+				}
+			}
 		}
 
 	MAXSPLICE_CATCH_END
 }
 
-FabricCore::RTVal SpliceEvents::s_DrawContexts[MAX_VPTS];
+
+
 
 class SpliceViewportDrawCallback : public ViewportDisplayCallback
 {
@@ -83,7 +98,7 @@ public:
 	{
 		MAXSPLICE_CATCH_BEGIN();
 
-		if(!FabricSplice::SceneManagement::hasRenderableContent())
+		if (!AnyInstances())
 			return;
 
 		// Force the whole window to update.
@@ -142,24 +157,48 @@ public:
 			return false;
 
 		FabricCore::RTVal drawContext = GetSpliceDrawContext(pView);
+		if (!drawContext.isValid())
+			return false;
+
 		// update the camera
+		FabricCore::Client client = GetClient();
+		float tSec = TicksToSec(t);
+		drawContext.setMember("time", FabricCore::RTVal::ConstructFloat32(client, tSec));
 
 		int width = gw->getWinSizeX();
 		int height = gw->getWinSizeY();
 		
 		//////////////////////////
 		// Setup the viewport
-		FabricCore::RTVal inlineViewport = FabricSplice::constructObjectRTVal("InlineViewport");
-		FabricCore::RTVal viewportDim = FabricSplice::constructRTVal("Vec2");
-		viewportDim.setMember("x", FabricSplice::constructFloat64RTVal(width));
-		viewportDim.setMember("y", FabricSplice::constructFloat64RTVal(height));
-		inlineViewport.setMember("dimensions", viewportDim);
+		int id = pView->GetViewID();
+		FabricCore::RTVal& inlineViewport = GetSpliceViewport(pView);
+		FabricCore::RTVal args[3];
+		args[0] = drawContext;
+		args[1] = FabricCore::RTVal::ConstructFloat64(client, width);
+		args[2] = FabricCore::RTVal::ConstructFloat64(client, height);
+		inlineViewport.callMethod("", "resize", 3, &args[0]);
 
 		{
-			FabricCore::RTVal inlineCamera = FabricSplice::constructObjectRTVal("InlineCamera");
+			FabricCore::RTVal inlineCamera = inlineViewport.callMethod("InlineCamera", "getCamera", 0, 0);
+
+			float viewProjTm[4][4];
+			Matrix3 invViewTm;
+			int persp;
+			float hither, yon;
+			gw->getCameraMatrix(viewProjTm, &invViewTm, &persp, &hither, &yon);
+
+			Camera maxCam;
+			maxCam.setClip(hither, yon);
+			maxCam.setPersp(pView->GetFOV(), float(width) / height);
+			maxCam.getProj(viewProjTm);
+
+			FabricCore::RTVal projectionMatrixExtArray = FabricCore::RTVal::ConstructExternalArray(client, "Float32", 16, viewProjTm);
+			FabricCore::RTVal projectionVal = inlineCamera.maybeGetMemberRef("projection");
+			projectionVal.callMethod("", "set", 1, &projectionMatrixExtArray);
 
 			bool isOrthographic = gw->isPerspectiveView() == FALSE;
-			inlineCamera.setMember("isOrthographic", FabricSplice::constructBooleanRTVal(isOrthographic));
+			FabricCore::RTVal param = FabricCore::RTVal::ConstructBoolean(client, isOrthographic);
+			inlineCamera.callMethod("", "setOrthographic", 1, &param);
 
 			Matrix3 tmView;
 			pView->GetAffineTM(tmView);
@@ -169,23 +208,25 @@ public:
 				//Don't know how the ortho scaling gets computed (FOV doesn't make sense), so extracting info from the matrix.
 				Point3 ptInFrontOfCamera = tmView.GetTrans();
 				float vptWidth = pView->GetVPWorldWidth(ptInFrontOfCamera);
-				inlineCamera.setMember("orthographicFrustumH", FabricSplice::constructFloat64RTVal(vptWidth));
+				FabricCore::RTVal rtVptWidth = FabricCore::RTVal::ConstructFloat64(client, vptWidth);
+				inlineCamera.callMethod("", "setOrthographicFrustumHeight", 1, &rtVptWidth);
 			}
 			else{
 				float fovX = pView->GetFOV();
 				//convert to vertical fov as the RTR camera is always using this mode:
 				double aspect = double(width) / double(height);
 				double fovY = (2.0 * atan(1.0 / aspect * tan(fovX / 2.0)));
-				inlineCamera.setMember("fovY", FabricSplice::constructFloat64RTVal(fovY));
+				FabricCore::RTVal rtFovY = FabricCore::RTVal::ConstructFloat64(client, fovY);
+				inlineCamera.callMethod("", "setFovY", 1, &rtFovY);
 			}
 			
-			float hither = vp13->GetHither();
-			float yon = vp13->GetYon();
-			inlineCamera.setMember("nearDistance", FabricSplice::constructFloat64RTVal(hither));
-			inlineCamera.setMember("farDistance", FabricSplice::constructFloat64RTVal(yon));
+			FabricCore::RTVal rtHither = FabricCore::RTVal::ConstructFloat64(client, hither);
+			inlineCamera.callMethod("", "setNearDistance", 1, &rtHither);
+			FabricCore::RTVal rtYon = FabricCore::RTVal::ConstructFloat64(client, yon);
+			inlineCamera.callMethod("", "setFarDistance", 1, &rtYon);
 
 
-          	FabricCore::RTVal cameraMat = FabricSplice::constructRTVal("Mat44");
+			FabricCore::RTVal cameraMat = FabricCore::RTVal::Construct(client, "Mat44", 0, nullptr);
 			FabricCore::RTVal cameraMatData = cameraMat.callMethod("Data", "data", 0, 0);
 
 			float * cameraMatFloats = (float*)cameraMatData.getData();
@@ -209,27 +250,69 @@ public:
 
 				inlineCamera.callMethod("", "setFromMat44", 1, &cameraMat);
 			}
-			inlineViewport.setMember("camera", inlineCamera);
 		}
-		drawContext.setMember("viewport", inlineViewport);
+		//drawContext.setMember("viewport", inlineViewport);
 		return true;
+	}
+
+	FabricCore::RTVal& GetSpliceViewport(ViewExp* pView)
+	{
+		int id = pView->GetViewID();
+		FabricCore::RTVal& rtViewport = SpliceEvents::s_InlineViewports[id];
+		DbgAssert(id < MAX_VPTS);
+		if (rtViewport.isValid())
+			return rtViewport;
+
+		// Create viewport ID
+		char buff[10];
+		sprintf_s(buff, 10, "vpt%d", id);
+		s_viewportIds[id] = FabricCore::RTVal::ConstructString(GetClient(), buff);
+
+		// Create viewport
+		rtViewport = FabricCore::RTVal::Create(GetClient(), "InlineViewport", 0, nullptr);
+		if (!rtViewport.isValid() || rtViewport.isNullObject())
+			throw FabricCore::Exception("Cannot create Fabric Viewport (Extension loaded?)");
+
+		rtViewport.callMethod("", "setName", 1, &s_viewportIds[id]);
+		rtViewport.callMethod("", "setup", 1, &GetSpliceDrawContext(pView));
+
+		// Register viewport with drawing system
+		FabricCore::RTVal args[2];
+		args[0] = s_viewportIds[id];
+		args[1] = rtViewport;
+		GetDrawing().callMethod("", "registerViewport", 2, args);
+
+		return rtViewport;
 	}
 
 	FabricCore::RTVal GetSpliceDrawContext(ViewExp* pView)
 	{
-		int id = pView->GetViewID();
-		if(!SpliceEvents::s_DrawContexts[id].isValid())
-			SpliceEvents::s_DrawContexts[id] = FabricSplice::constructObjectRTVal("DrawContext");
-		else if(SpliceEvents::s_DrawContexts[id].isNullObject())
-			SpliceEvents::s_DrawContexts[id] = FabricSplice::constructObjectRTVal("DrawContext");
-		return SpliceEvents::s_DrawContexts[id];
+		if (!SpliceEvents::s_DrawContext.isValid() || SpliceEvents::s_DrawContext.isNullObject())
+		{
+			try {
+				SpliceEvents::s_DrawContext = FabricCore::RTVal::Construct(GetClient(), "DrawContext", 0, nullptr);
+			}
+			catch (FabricCore::Exception e) {
+				// Empty catch.  This will happen if the user has not loaded InlineDrawing yet
+				return FabricCore::RTVal();
+			}
+
+			// We may get an invalid RTValue here if InlineDrawing hasn't been loaded yet.
+			if (SpliceEvents::s_DrawContext.isValid())
+			{
+				SpliceEvents::s_DrawContext = SpliceEvents::s_DrawContext.callMethod("DrawContext", "getInstance", 0, 0);
+			}
+		}
+		return SpliceEvents::s_DrawContext;
 	}
 
 	void ReleaseAllDrawContexts() 
 	{
+		SpliceEvents::s_DrawContext = FabricCore::RTVal();
 		for (int i = 0; i < MAX_VPTS; i++) {
 			// We release our draw contexts by assigning blank RTVals over them
-			SpliceEvents::s_DrawContexts[i] = FabricCore::RTVal();
+			SpliceEvents::s_InlineViewports[i] = FabricCore::RTVal();
+			s_viewportIds[i] = FabricCore::RTVal();
 		}
 	}
 };

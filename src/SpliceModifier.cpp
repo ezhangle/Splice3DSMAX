@@ -26,7 +26,7 @@ SpliceModifier::~SpliceModifier()
 
 void SpliceModifier::RefAdded(RefMakerHandle rm)
 {
-	if (m_host == nullptr)
+	if (!m_binding.isValid())
 		Init(false);
 
 	if (m_valuePort.isNull())
@@ -71,12 +71,14 @@ void SpliceModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os,
 		if (!m_inputValid.InInterval(t)) 
 		{
 			m_inputValid.SetInfinite();
-			MaxValuesToSplice<Object*, Mesh>(m_client, m_inMeshPort, t, m_inputValid, &os->obj, 1);
+			MaxValuesToSplice<Object*, Mesh>(m_inMeshPort, t, m_inputValid, &os->obj, 1);
 			ivValid &= m_inputValid;
+
 		}
 
-		// Set our output.
-		pTriObj->GetMesh() = Evaluate(t, ivValid);;
+		// Evaluate the graph, get our results
+		if (GraphCanEvaluate())
+			pTriObj->GetMesh() = Evaluate(t, ivValid);;
 	}
 	// We may have changed any of these attributes.
 	// OPTIMIZE: We should not invalidate things we haven't changed

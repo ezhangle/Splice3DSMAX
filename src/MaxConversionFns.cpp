@@ -228,15 +228,15 @@ extern FabricCore::Variant GetVariant(const FPValue& value)
 #pragma endregion // GetVariants
 
 #pragma region Get RTVals
-void ConvertToRTVal(int param, FabricCore::RTVal& val, FabricCore::Client& client)
+void ConvertToRTVal(int param, FabricCore::RTVal& val)
 {
 	if (!val.isValid())
 		return;
 
-	val = FabricCore::RTVal::ConstructSInt32(client, param);
+	val = FabricCore::RTVal::ConstructSInt32(GetClient(), param);
 }
 
-void ConvertToRTVal(float param, FabricCore::RTVal& val, FabricCore::Client& client)
+void ConvertToRTVal(float param, FabricCore::RTVal& val)
 {
 	if (!val.isValid())
 		return;
@@ -244,12 +244,12 @@ void ConvertToRTVal(float param, FabricCore::RTVal& val, FabricCore::Client& cli
 	val.setFloat32(param);
 }
 
-void ConvertToRTVal(bool param, FabricCore::RTVal& val, FabricCore::Client& client)
+void ConvertToRTVal(bool param, FabricCore::RTVal& val)
 {
-	val = FabricCore::RTVal::ConstructBoolean(client, param);
+	val = FabricCore::RTVal::ConstructBoolean(GetClient(), param);
 }
 
-void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val, FabricCore::Client& client)
+void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val)
 {
 	if (!val.isValid())
 		return;
@@ -259,7 +259,7 @@ void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val, FabricCore::Cli
 	val.maybeGetMemberRef("z").setFloat32(param.z);
 }
 
-void ConvertToRTVal(const Color& param, FabricCore::RTVal& val, FabricCore::Client& client)
+void ConvertToRTVal(const Color& param, FabricCore::RTVal& val)
 {
 	if (!val.isValid())
 		return;
@@ -270,7 +270,7 @@ void ConvertToRTVal(const Color& param, FabricCore::RTVal& val, FabricCore::Clie
 	val.maybeGetMemberRef("b").setFloat32(uint16_t(param.b * 128));
 }
 
-void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val, FabricCore::Client& client)
+void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
 {
 	if (!val.isValid())
 		return;
@@ -290,17 +290,17 @@ void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val, FabricCore::Cli
 	}
 }
 
-void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val, FabricCore::Client& client)
+void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val)
 {
 	if (!val.isValid())
 		return;
 
 	FabricCore::RTVal v = val.maybeGetMemberRef("v");
-	ConvertToRTVal(Point3(param.x, param.y, param.z), v, client);
+	ConvertToRTVal(Point3(param.x, param.y, param.z), v);
 	val.maybeGetMemberRef("w").setFloat32(param.w);
 }
 
-void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val, FabricCore::Client& client)
+void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val)
 {
 	if (!val.isValid())
 		return;
@@ -311,26 +311,26 @@ void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val, FabricCore::Cl
 	FabricCore::RTVal row2 = val.maybeGetMemberRef("row2");
 	FabricCore::RTVal row3 = val.maybeGetMemberRef("row3");
 
-	ConvertToRTVal(Point4(pInMtx[0][0], pInMtx[1][0], pInMtx[2][0], pInMtx[3][0]), row0, client);
-	ConvertToRTVal(Point4(pInMtx[0][1], pInMtx[1][1], pInMtx[2][1], pInMtx[3][1]), row1, client);
-	ConvertToRTVal(Point4(pInMtx[0][2], pInMtx[1][2], pInMtx[2][2], pInMtx[3][2]), row2, client);
-	ConvertToRTVal(Point4(0, 0, 0, 1), row3, client);
+	ConvertToRTVal(Point4(pInMtx[0][0], pInMtx[1][0], pInMtx[2][0], pInMtx[3][0]), row0);
+	ConvertToRTVal(Point4(pInMtx[0][1], pInMtx[1][1], pInMtx[2][1], pInMtx[3][1]), row1);
+	ConvertToRTVal(Point4(pInMtx[0][2], pInMtx[1][2], pInMtx[2][2], pInMtx[3][2]), row2);
+	ConvertToRTVal(Point4(0, 0, 0, 1), row3);
 }
 
 
-void ConvertToRTVal(const MSTR& param, FabricCore::RTVal& val, FabricCore::Client& client)
+void ConvertToRTVal(const MSTR& param, FabricCore::RTVal& val)
 {
 	CStr cStr = param.ToCStr();
-	val = FabricCore::RTVal::ConstructString(client, cStr.data());
+	val = FabricCore::RTVal::ConstructString(GetClient(), cStr.data());
 }
 
-void ConvertToRTVal(const MCHAR* param, FabricCore::RTVal& val, FabricCore::Client& client)
+void ConvertToRTVal(const MCHAR* param, FabricCore::RTVal& val)
 {
 	CStr cStr = CStr::FromMCHAR(param);
-	val = FabricCore::RTVal::ConstructString(client, cStr.data());
+	val = FabricCore::RTVal::ConstructString(GetClient(), cStr.data());
 }
 
-void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh, FabricCore::Client& client)
+void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 {
 	if(!rtMesh.isValid() || rtMesh.isNullObject())
 		return;
@@ -340,6 +340,8 @@ void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh, FabricCore::Cl
 	if(rebuildMesh){
 		rtMesh.callMethod("", "clear", 0, 0);
 	}
+
+	FabricCore::Client client = GetClient();
 
 	// Send all vertices to Splice
 	std::vector<FabricCore::RTVal> args(2);
@@ -576,24 +578,24 @@ void SpliceToMaxValue(const FabricCore::Variant& var, MSTR& param)
 #pragma region Splice RTVal -> Max
 //////////////////////////////////////////////////////////////////////////
 // Convert from RTVal to Max value
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param, FabricCore::Client& client)
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param)
 {
 	param = const_cast<FabricCore::RTVal&>(rtVal).getSInt32();
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param, FabricCore::Client& client)
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param)
 {
 	param = static_cast<float>(const_cast<FabricCore::RTVal&>(rtVal).getFloat32());
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point3& param, FabricCore::Client& client)
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point3& param)
 {
 	param[0] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("x").getFloat32();
 	param[1] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("y").getFloat32();
 	param[2] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("z").getFloat32();
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param, FabricCore::Client& client)
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param)
 {
 	FabricCore::RTVal& ncVal = const_cast<FabricCore::RTVal&>(rtVal);
 	if (strcmp(ncVal.getTypeName().getStringCString(), "Vec4") == 0) {
@@ -610,19 +612,19 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param, FabricCore:
 	}
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Color& param, FabricCore::Client& client)
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Color& param)
 {
 	param.r = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("r").getFloat32();
 	param.g = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("g").getFloat32();
 	param.b = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("b").getFloat32();
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Quat& param, FabricCore::Client& client)
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Quat& param)
 {
 	// Fabric Quats are structured ( Vec3 v; Scalar w; )
 	FabricCore::RTVal rtV = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("v");
 	Point3 maxV;
-	SpliceToMaxValue(rtV, maxV, client);
+	SpliceToMaxValue(rtV, maxV);
 	float w = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("w").getFloat32();
 	param.Set(maxV, w);
 	// When converting from Splices Y up to Max's Z up, our
@@ -631,7 +633,7 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Quat& param, FabricCore::C
 	param.Invert();
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param, FabricCore::Client& client)
+void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param)
 {
 	FabricCore::RTVal pRow0 = dgPort.maybeGetMemberRef("row0");
 	FabricCore::RTVal pRow1 = dgPort.maybeGetMemberRef("row1");
@@ -645,9 +647,9 @@ void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param, FabricCor
 	}
 
 	Point4 columns[3];
-	SpliceToMaxValue(pRow0, columns[0], client);
-	SpliceToMaxValue(pRow1, columns[1], client);
-	SpliceToMaxValue(pRow2, columns[2], client);
+	SpliceToMaxValue(pRow0, columns[0]);
+	SpliceToMaxValue(pRow1, columns[1]);
+	SpliceToMaxValue(pRow2, columns[2]);
 
 	param.SetColumn(0, columns[0]);
 	param.SetColumn(1, columns[1]);
@@ -656,10 +658,12 @@ void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param, FabricCor
 	param.ValidateFlags();
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param, FabricCore::Client& client)
+void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 {
 	if (rtv.isNullObject())
 		return;
+
+	FabricCore::Client client = GetClient();
 
 	// Cache version number, compare for purposes of caching.
 	// this line was causing asserts. 
@@ -861,7 +865,7 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param, FabricCore::Cli
 
 }
 
-void SpliceToMaxValue(const FabricCore::RTVal& rtv, MSTR& param, FabricCore::Client& client) {
+void SpliceToMaxValue(const FabricCore::RTVal& rtv, MSTR& param) {
 	FabricCore::RTVal& ncval = const_cast<FabricCore::RTVal&>(rtv);
 	param = MSTR::FromACP(ncval.getStringCString(), ncval.getStringLength());
 }

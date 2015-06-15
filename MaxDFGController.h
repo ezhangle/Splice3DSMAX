@@ -3,7 +3,7 @@
 
 class MaxDFGController : FabricUI::DFG::DFGController {
 
-	MaxDFGController(FabricUI::GraphView::Graph * graph, FabricServices::Commands::CommandStack * stack, FabricCore::Client * client, FabricServices::DFGWrapper::Host * host, FabricServices::ASTWrapper::KLASTManager * manager, bool overTakeBindingNotifications = true);
+	MaxDFGController(FabricUI::GraphView::Graph * graph, FabricServices::Commands::CommandStack * stack, FabricServices::ASTWrapper::KLASTManager * manager, bool overTakeBindingNotifications = true);
 
 
 	virtual bool beginInteraction() override;

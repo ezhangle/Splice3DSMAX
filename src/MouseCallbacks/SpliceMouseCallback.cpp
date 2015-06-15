@@ -7,7 +7,6 @@
 #include "SpliceMouseCallback.h"
 #include <objmode.h>
 #include "FabricCore.h"
-#include "FabricSplice.h"
 #include "..\SpliceEvents.h"
 #include "..\Splice3dsmax.h"
 #include "..\SpliceRestoreObjects.h"
@@ -61,6 +60,7 @@ BOOL SpliceMouseCallback::TolerateOrthoMode()
 FabricCore::RTVal SetupViewport(ViewExp* pView)
 {
 	GraphicsWindow* gw = pView->getGW();
+	FabricCore::Client& client = GetClient();
 
 	ViewExp13* vp13 = NULL;
 	if (pView->IsAlive())
@@ -71,17 +71,17 @@ FabricCore::RTVal SetupViewport(ViewExp* pView)
 
 	//////////////////////////
 	// Setup the viewport
-	FabricCore::RTVal inlineViewport = FabricSplice::constructObjectRTVal("InlineViewport");
-	FabricCore::RTVal viewportDim = FabricSplice::constructRTVal("Vec2");
-	viewportDim.setMember("x", FabricSplice::constructFloat64RTVal(width));
-	viewportDim.setMember("y", FabricSplice::constructFloat64RTVal(height));
+	FabricCore::RTVal inlineViewport = FabricCore::RTVal::Construct(client, "InlineViewport", 0, nullptr);
+	FabricCore::RTVal viewportDim = FabricCore::RTVal::Construct(client, "Vec2", 0, nullptr);
+	viewportDim.setMember("x", FabricCore::RTVal::ConstructFloat64(client, width));
+	viewportDim.setMember("y", FabricCore::RTVal::ConstructFloat64(client, height));
 	inlineViewport.setMember("dimensions", viewportDim);
 
 	{
-		FabricCore::RTVal inlineCamera = FabricSplice::constructObjectRTVal("InlineCamera");
+		FabricCore::RTVal inlineCamera = FabricCore::RTVal::Construct(client, "InlineCamera", 0, nullptr);
 
 		bool isOrthographic = gw->isPerspectiveView() == FALSE;
-		inlineCamera.setMember("isOrthographic", FabricSplice::constructBooleanRTVal(isOrthographic));
+		inlineCamera.setMember("isOrthographic", FabricCore::RTVal::ConstructBoolean(client, isOrthographic));
 
 		Matrix3 tmView;
 		pView->GetAffineTM(tmView);
@@ -91,23 +91,23 @@ FabricCore::RTVal SetupViewport(ViewExp* pView)
 			//Don't know how the ortho scaling gets computed (FOV doesn't make sense), so extracting info from the matrix.
 			Point3 ptInFrontOfCamera = tmView.GetTrans();
 			float vptWidth = pView->GetVPWorldWidth(ptInFrontOfCamera);
-			inlineCamera.setMember("orthographicFrustumH", FabricSplice::constructFloat64RTVal(vptWidth));
+			inlineCamera.setMember("orthographicFrustumH", FabricCore::RTVal::ConstructFloat64(client, vptWidth));
 		}
 		else{
 			float fovX = pView->GetFOV();
 			//convert to vertical fov as the RTR camera is always using this mode:
 			double aspect = double(width) / double(height);
 			double fovY = (2.0 * atan(1.0 / aspect * tan(fovX / 2.0)));
-			inlineCamera.setMember("fovY", FabricSplice::constructFloat64RTVal(fovY));
+			inlineCamera.setMember("fovY", FabricCore::RTVal::ConstructFloat64(client, fovY));
 		}
 
 		float hither = vp13->GetHither();
 		float yon = vp13->GetYon();
-		inlineCamera.setMember("nearDistance", FabricSplice::constructFloat64RTVal(hither));
-		inlineCamera.setMember("farDistance", FabricSplice::constructFloat64RTVal(yon));
+		inlineCamera.setMember("nearDistance", FabricCore::RTVal::ConstructFloat64(client, hither));
+		inlineCamera.setMember("farDistance", FabricCore::RTVal::ConstructFloat64(client, yon));
 
 
-        FabricCore::RTVal cameraMat = FabricSplice::constructRTVal("Mat44");
+        FabricCore::RTVal cameraMat = FabricCore::RTVal::Construct(client, "Mat44", 0, nullptr);
 		FabricCore::RTVal cameraMatData = cameraMat.callMethod("Data", "data", 0, 0);
 
 		float * cameraMatFloats = (float*)cameraMatData.getData();
@@ -146,7 +146,8 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 
 	MAXSPLICE_CATCH_BEGIN()
 
-	FabricCore::RTVal klevent = FabricSplice::constructObjectRTVal("MouseEvent");
+	FabricCore::Client& client = GetClient();
+	FabricCore::RTVal klevent = FabricCore::RTVal::Construct(client, "MouseEvent", 0, nullptr);
 
 	int eventType;
 
@@ -225,15 +226,15 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	if(m_MMouseDown)
 		buttons += MouseButton_MiddleButton;
 
-	FabricCore::RTVal klpos = FabricSplice::constructRTVal("Vec2");
-	klpos.setMember("x", FabricSplice::constructFloat32RTVal((float)m.x));
-	klpos.setMember("y", FabricSplice::constructFloat32RTVal((float)m.y));
+	FabricCore::RTVal klpos = FabricCore::RTVal::Construct(client, "Vec2", 0, nullptr);
+	klpos.setMember("x", FabricCore::RTVal::ConstructFloat32(client, (float)m.x));
+	klpos.setMember("y", FabricCore::RTVal::ConstructFloat32(client, (float)m.y));
 	klevent.setMember("pos", klpos);
 
 
 	// In Max, we may have different behaviour, so figure out what we can do here
-	klevent.setMember("button", FabricSplice::constructUInt32RTVal(buttons));
-	klevent.setMember("buttons", FabricSplice::constructUInt32RTVal(buttons));
+	klevent.setMember("button", FabricCore::RTVal::ConstructUInt32(client, buttons));
+	klevent.setMember("buttons", FabricCore::RTVal::ConstructUInt32(client, buttons));
 
 	SendKLEvent(klevent, GetCOREInterface7()->GetViewExp(hwnd), eventType);
 
@@ -246,10 +247,7 @@ void SpliceMouseCallback::EnterMode()
 {
 	MAXSPLICE_CATCH_BEGIN();
 
-	const FabricCore::Client * client = NULL;
-	FECS_DGGraph_getClient(&client);
-
-	if(!client){
+	if (!AnyInstances()) {
 		logMessage("Fabric Client not constructed yet. A Splice Node must be created before the manipulation tool can be activated.");
 		return;
 	}
@@ -257,7 +255,9 @@ void SpliceMouseCallback::EnterMode()
 	// We should not re-enter this mode while already active
 	//DbgAssert(!mEventDispatcher.isValid());
 
-    FabricCore::RTVal eventDispatcherHandle = FabricSplice::constructObjectRTVal("EventDispatcherHandle");
+	FabricCore::Client& client = GetClient();
+
+	FabricCore::RTVal eventDispatcherHandle = FabricCore::RTVal::Construct(client, "EventDispatcherHandle", 0, nullptr);
     mEventDispatcher = eventDispatcherHandle.callMethod("EventDispatcher", "getEventDispatcher", 0, 0);
 	if (mEventDispatcher.isValid())
 	{
@@ -300,17 +300,21 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 		
 		int eventType = 0;
 		if (HIWORD(lParam) & KF_UP) {
+			FabricCore::Client& client = GetClient();
+
 			eventType = Event_KeyRelease;
-			klevent = FabricSplice::constructObjectRTVal("KeyEvent");
-			klevent.setMember("key", FabricSplice::constructUInt32RTVal(KeyTbl[wParam&0xFF]));
-			klevent.setMember("count", FabricSplice::constructUInt32RTVal(0xFFFF & lParam));
+			klevent = FabricCore::RTVal::Construct(client, "KeyEvent", 0, nullptr);
+			klevent.setMember("key", FabricCore::RTVal::ConstructUInt32(client, KeyTbl[wParam&0xFF]));
+			klevent.setMember("count", FabricCore::RTVal::ConstructUInt32(client, 0xFFFF & lParam));
 		}
 		else {
+			FabricCore::Client& client = GetClient();
+
 			eventType = Event_KeyPress;
-			klevent = FabricSplice::constructObjectRTVal("KeyEvent");
-			klevent.setMember("key", FabricSplice::constructUInt32RTVal(KeyTbl[wParam&0xFF]));
-			klevent.setMember("count", FabricSplice::constructUInt32RTVal(0xFFFF & lParam));
-			klevent.setMember("isAutoRepeat", FabricSplice::constructBooleanRTVal(HIWORD(lParam) & KF_REPEAT));
+			klevent = FabricCore::RTVal::Construct(client, "KeyEvent", 0, nullptr);
+			klevent.setMember("key", FabricCore::RTVal::ConstructUInt32(client, KeyTbl[wParam & 0xFF]));
+			klevent.setMember("count", FabricCore::RTVal::ConstructUInt32(client, 0xFFFF & lParam));
+			klevent.setMember("isAutoRepeat", FabricCore::RTVal::ConstructBoolean(client, HIWORD(lParam) & KF_REPEAT));
 		}
 		
 		if (klevent.isValid()) {
@@ -329,12 +333,13 @@ bool SendKLEvent(FabricCore::RTVal& klevent, ViewExp& pView, int eventType)
 
 	// Trigger the event on Splice
 	FabricCore::RTVal inlineViewport = SetupViewport(&pView);
+	FabricCore::Client& client = GetClient();
 
 	//////////////////////////
 	// Setup the Host
 	// We cannot set an interface value via RTVals.
-	FabricCore::RTVal host = FabricSplice::constructObjectRTVal("Host");
-	host.setMember("hostName", FabricSplice::constructStringRTVal("3dsMax"));
+	FabricCore::RTVal host = FabricCore::RTVal::Construct(client, "Host", 0, nullptr);
+	host.setMember("hostName", FabricCore::RTVal::ConstructString(client, "3dsMax"));
 
 	long modifiers = 0;
 	if(GetKeyState(VK_CONTROL) & (1<<16))
@@ -351,10 +356,10 @@ bool SendKLEvent(FabricCore::RTVal& klevent, ViewExp& pView, int eventType)
 	std::vector<FabricCore::RTVal> args(4);
 	args[0] = host;
 	args[1] = inlineViewport;
-	args[2] = FabricSplice::constructUInt32RTVal(eventType);
-	args[3] = FabricSplice::constructUInt32RTVal(modifiers);
+	args[2] = FabricCore::RTVal::ConstructUInt32(client, eventType);
+	args[3] = FabricCore::RTVal::ConstructUInt32(client, modifiers);
 	klevent.callMethod("", "init", 4, &args[0]);
-	//klevent.setMember("modifiers", FabricSplice::constructUInt32RTVal(modifiers));
+	//klevent.setMember("modifiers", FabricCore::RTVal::ConstructUInt32(client, modifiers));
 
 	SpliceMouseCallback::GetEventDispatcher().callMethod("Boolean", "onEvent", 1, &klevent);
 

@@ -12,7 +12,7 @@ using namespace FabricUI;
 class DFGWidget : public DFG::DFGCombinedWidget {
   
 public:
-	DFGWidget(QWidget * parent, FabricCore::Client& client, FabricServices::DFGWrapper::Binding& binding, FabricServices::DFGWrapper::Host* host);
+	DFGWidget(QWidget * parent, FabricServices::DFGWrapper::Binding& binding);
 	~DFGWidget();
 
   //static QWidget * creator(QWidget * parent, const QString & name);
@@ -28,5 +28,5 @@ public:
 
 private:
 
-  FabricServices::DFGWrapper::Host* m_host;
+  //FabricServices::DFGWrapper::Host* m_host;
 };

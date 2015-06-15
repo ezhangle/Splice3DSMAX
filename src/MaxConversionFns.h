@@ -37,21 +37,25 @@ extern FabricCore::Variant GetVariant(const FPValue& value);
 template<typename T>
 FabricCore::Variant GetVariant(const T& param) { ThisShouldNotCompile }
 
-extern void ConvertToRTVal(int param, FabricCore::RTVal& val, FabricCore::Client& client);
-extern void ConvertToRTVal(float param, FabricCore::RTVal& val, FabricCore::Client& client);
-extern void ConvertToRTVal(bool param, FabricCore::RTVal& val, FabricCore::Client& client);
-extern void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val, FabricCore::Client& client);
-extern void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val, FabricCore::Client& client);
-extern void ConvertToRTVal(const Color& param, FabricCore::RTVal& val, FabricCore::Client& client);
-extern void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val, FabricCore::Client& client);
-extern void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val, FabricCore::Client& client);
-extern void ConvertToRTVal(const MCHAR* param, FabricCore::RTVal& val, FabricCore::Client& client);
-extern void ConvertToRTVal(const MSTR& param, FabricCore::RTVal& val, FabricCore::Client& client);
-extern void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& val, FabricCore::Client& client);
+extern void ConvertToRTVal(int param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(float param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(bool param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const Color& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const MCHAR* param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const MSTR& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& val);
+// Annoyingly, if we don't have a conversion function for a type,
+// some types get silently promoted to bool, and we call the wrong fn
+template<typename T>
+void ConvertToRTVal(const T& param, FabricCore::RTVal& val) { ThisShouldNotCompile }
 
 // Entry point to the Max->Splice value translation
 template<typename TResultType, typename TConvertType>
-void MaxValuesToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port, TimeValue t, Interval& ivValid, const TResultType* params, int nParams)
+void MaxValuesToSplice(DFGWrapper::ExecPortPtr& port, TimeValue t, Interval& ivValid, const TResultType* params, int nParams)
 {
 	if (port.isNull() || !port->isValid())
 		return;
@@ -80,7 +84,7 @@ void MaxValuesToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port
 		{
 			Convert(*params, t, ivValid, convert);
 			FabricCore::RTVal aVal = port->getArgValue();
-			ConvertToRTVal(convert, aVal, client);
+			ConvertToRTVal(convert, aVal);
 			// Is resetting the value necessary?
 			port->setArgValue(aVal);
 			//dgPort.setRTVal(ConvertToRTVal(convert, aVal));
@@ -90,7 +94,7 @@ void MaxValuesToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port
 }
 
 template<typename TResultType>
-void MaxValueToSplice(FabricCore::Client& client, DFGWrapper::ExecPortPtr& port, TimeValue t, Interval& ivValid, const TResultType& param) { MaxValuesToSplice<TResultType, TResultType>(client, port, t, ivValid, &param, 1); }
+void MaxValueToSplice(DFGWrapper::ExecPortPtr& port, TimeValue t, Interval& ivValid, const TResultType& param) { MaxValuesToSplice<TResultType, TResultType>(port, t, ivValid, &param, 1); }
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Splice->Max
@@ -112,19 +116,19 @@ template<typename TResultType>
 void SpliceToMaxValue(const FabricCore::Variant& spliceVal, TResultType& maxVal) { ThisShouldNotCompile }
 
 /** Get the value of the splice dgPort on the reference of param */
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param, FabricCore::Client& client);
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param, FabricCore::Client& client);
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point3& param, FabricCore::Client& client);
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param, FabricCore::Client& client);
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Color& param, FabricCore::Client& client);
-void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Quat& param, FabricCore::Client& client);
-void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param, FabricCore::Client& client);
-void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param, FabricCore::Client& client);
-void SpliceToMaxValue(const FabricCore::RTVal& rtv, MSTR& param, FabricCore::Client& client);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point3& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Color& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Quat& param);
+void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtv, MSTR& param);
 	// Annoyingly, if we don't have a conversion function for a type,
 	// some types get silently promoted to bool, and we call the wrong fn
 template<typename TResultType>
-void SpliceToMaxValue(const FabricCore::RTVal& spliceVal, TResultType& maxVal, FabricCore::Client& client)  { ThisShouldNotCompile }
+void SpliceToMaxValue(const FabricCore::RTVal& spliceVal, TResultType& maxVal)  { ThisShouldNotCompile }
 
 //////////////////////////////////////////////////////////////////////////
 //template<typename TResultType>

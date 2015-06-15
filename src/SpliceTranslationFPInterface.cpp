@@ -30,7 +30,7 @@ BOOL SpliceTranslationFPInterface::ShowDFGGraphEditor()
 	m_pDFGWidgetWindow = DockableWindow::Create(_T("Fabric DFG"));
 	HWND h = m_pDFGWidgetWindow->GetHWND();
 	QWinWidget* dlg = new QWinWidget(h);
-	DFGWidget* pWidget = new DFGWidget(dlg, GetClient(), GetBinding(), GetHost());
+	DFGWidget* pWidget = new DFGWidget(dlg, GetBinding());
 
 	m_pDFGWidgetWindow->SetWidget(dlg);
 	return TRUE;

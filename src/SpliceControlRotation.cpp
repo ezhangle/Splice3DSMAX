@@ -25,7 +25,6 @@ public:
 	~SpliceControlRotation();	
 
 private:
-	void ResetPorts();
 
 	int GetValueType() { return TYPE_QUAT; }
 };
@@ -59,12 +58,6 @@ SpliceControlRotation::~SpliceControlRotation()
 {
 }
 
-void SpliceControlRotation::ResetPorts()
-{
-	m_parentValuePort = AddSpliceParameter(m_binding, TYPE_MATRIX3, _M("parentValue"), FabricCore::DFGPortType_In);
-	m_parentValuePort->setMetadata("uiHidden", "true", false);
-	ParentClass::ResetPorts();
-}
 
 void SpliceControlRotation::Copy(Control *)
 {
@@ -78,7 +71,7 @@ void SpliceControlRotation::GetValue(TimeValue t, void *val, Interval &interval,
 		Invalidate(); // Evaluate every time in case parent changes too
 		Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
 		Point3 pos = pInVal->GetTrans();
-		MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
+		MaxValueToSplice(m_binding, m_parentArgName.c_str(), 0, interval, *pInVal);
 		const Quat& res = Evaluate(t, interval);
 		// To apply the value relatively, we pre-rotate by the result
 		Matrix3 tmRot;
@@ -89,7 +82,7 @@ void SpliceControlRotation::GetValue(TimeValue t, void *val, Interval &interval,
 	else
 	{
 		Quat* pOutVal = reinterpret_cast<Quat*>(val);
-		MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3(1));
+		MaxValueToSplice(m_binding, m_parentArgName.c_str(), 0, interval, Matrix3(1));
 		*pOutVal = Evaluate(t, interval);
 	}
 

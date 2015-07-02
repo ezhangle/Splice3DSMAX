@@ -48,6 +48,7 @@ extern void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val);
 extern void ConvertToRTVal(const MCHAR* param, FabricCore::RTVal& val);
 extern void ConvertToRTVal(const MSTR& param, FabricCore::RTVal& val);
 extern void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& val);
+extern void ConvertToRTVal(const FPValue& param, FabricCore::RTVal& val);
 // Annoyingly, if we don't have a conversion function for a type,
 // some types get silently promoted to bool, and we call the wrong fn
 template<typename T>
@@ -55,9 +56,9 @@ void ConvertToRTVal(const T& param, FabricCore::RTVal& val) { ThisShouldNotCompi
 
 // Entry point to the Max->Splice value translation
 template<typename TResultType, typename TConvertType>
-void MaxValuesToSplice(DFGWrapper::ExecPortPtr& port, TimeValue t, Interval& ivValid, const TResultType* params, int nParams)
+void MaxValuesToSplice(FabricCore::DFGBinding & binding, const char* argName, TimeValue t, Interval& ivValid, const TResultType* params, int nParams)
 {
-	if (port.isNull() || !port->isValid())
+	if (!binding.getExec().haveExecPort(argName))
 		return;
 
 	MAXSPLICE_CATCH_BEGIN()
@@ -83,18 +84,18 @@ void MaxValuesToSplice(DFGWrapper::ExecPortPtr& port, TimeValue t, Interval& ivV
 		//if (nParams > 0)
 		{
 			Convert(*params, t, ivValid, convert);
-			FabricCore::RTVal aVal = port->getArgValue();
+			FabricCore::RTVal aVal = binding.getArgValue(argName);
 			ConvertToRTVal(convert, aVal);
 			// Is resetting the value necessary?
-			port->setArgValue(aVal);
-			//dgPort.setRTVal(ConvertToRTVal(convert, aVal));
+			//port->setArgValue(aVal);
+			binding.setArgValue(argName, aVal);
 		}
 	}
 	MAXSPLICE_CATCH_END
 }
 
 template<typename TResultType>
-void MaxValueToSplice(DFGWrapper::ExecPortPtr& port, TimeValue t, Interval& ivValid, const TResultType& param) { MaxValuesToSplice<TResultType, TResultType>(port, t, ivValid, &param, 1); }
+void MaxValueToSplice(FabricCore::DFGBinding& binding, const char* argName, TimeValue t, Interval& ivValid, const TResultType& param) { MaxValuesToSplice<TResultType, TResultType>(binding, argName, t, ivValid, &param, 1); }
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Splice->Max
@@ -132,7 +133,7 @@ void SpliceToMaxValue(const FabricCore::RTVal& spliceVal, TResultType& maxVal)  
 
 //////////////////////////////////////////////////////////////////////////
 //template<typename TResultType>
-//void SpliceToMaxValue(DFGWrapper::Binding* binding, const char* port, TResultType& param, int index=-1)
+//void SpliceToMaxValue(FabricCore::DFGBinding* binding, const char* port, TResultType& param, int index=-1)
 //{
 //	// De-const because some splice functions are not marked const
 //	//DFGWrapper::PortPtr& ncDGPort = const_cast<DFGWrapper::PortPtr&>(dgPort);

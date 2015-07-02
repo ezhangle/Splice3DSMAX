@@ -5,8 +5,15 @@
 using namespace FabricUI;
 using namespace GraphView;
 
-MaxDFGController::MaxDFGController(GraphView::Graph * graph, FabricServices::Commands::CommandStack * stack, FabricServices::ASTWrapper::KLASTManager * manager, bool overTakeBindingNotifications /*= true*/)
-	: DFGController(graph, stack, &GetClient(), GetHost(), manager, overTakeBindingNotifications)
+MaxDFGController::MaxDFGController(
+	GraphView::Graph * graph, 
+	FabricServices::Commands::CommandStack * stack, 
+	FabricServices::ASTWrapper::KLASTManager * manager, 
+	FabricCore::DFGBinding binding, 
+	FabricCore::DFGExec exec,
+	bool overTakeBindingNotifications /*= true*/
+	)
+ : DFGController(graph, GetClient(), manager, GetHost(), binding, exec, stack, overTakeBindingNotifications)
 {
 
 }
@@ -24,42 +31,42 @@ bool MaxDFGController::endInteraction()
 	return res;
 }
 
-
-Node * MaxDFGController::addNodeFromPreset(QString preset, QPointF pos)
-{
-	HoldActions hold(_M("addNodeFromPreset"));
-	return Controller::addNodeFromPreset(preset, pos);
-}
+//
+//Node * MaxDFGController::addNodeFromPreset(QString preset, QPointF pos)
+//{
+//	HoldActions hold(_M("addNodeFromPreset"));
+//	return Controller::addNodeFromPreset(preset, pos);
+//}
 
 bool MaxDFGController::moveNode(Node * node, QPointF pos, bool isTopLeftPos /*= false*/)
 {
 	HoldActions hold(_M("moveNode"));
 	return __super::moveNode(node, pos, isTopLeftPos);
 }
-
-bool MaxDFGController::renameNode(Node * node, QString title)
-{
-	HoldActions hold(_M("renameNode"));
-	return __super::renameNode(node, title);
-}
-
-Pin * MaxDFGController::addPin(Node * node, QString name, PortType pType, QColor color, QString dataType /*= ""*/)
-{
-	HoldActions hold(_M("addPin"));
-	return __super::addPin(node, name, pType, color, dataType);
-}
+//
+//bool MaxDFGController::renameNode(Node * node, QString title)
+//{
+//	HoldActions hold(_M("renameNode"));
+//	return __super::renameNode(node, title);
+//}
+//
+//Pin * MaxDFGController::addPin(Node * node, QString name, PortType pType, QColor color, QString dataType /*= ""*/)
+//{
+//	HoldActions hold(_M("addPin"));
+//	return __super::addPin(node, name, pType, color, dataType);
+//}
 
 bool MaxDFGController::removePin(Pin * pin)
 {
 	HoldActions hold(_M("removePin"));
 	return __super::removePin(pin);
 }
-
-Port * MaxDFGController::addPort(QString name, PortType pType, QColor color, QString dataType /*= ""*/)
-{
-	HoldActions hold(_M("addPort"));
-	return Controller::addPort(name, pType, color, dataType);
-}
+//
+//Port * MaxDFGController::addPort(QString name, PortType pType, QColor color, QString dataType /*= ""*/)
+//{
+//	HoldActions hold(_M("addPort"));
+//	return Controller::addPort(name, pType, color, dataType);
+//}
 
 bool MaxDFGController::removePort(Port * port)
 {
@@ -72,12 +79,12 @@ Port * MaxDFGController::addPortFromPin(Pin * pin, PortType pType)
 	HoldActions hold(_M("addPortFromPin"));
 	return __super::addPortFromPin(pin, pType);
 }
-
-bool MaxDFGController::renamePort(Port * port, QString title)
-{
-	HoldActions hold(_M("renamePort"));
-	return Controller::renamePort(port, title);
-}
+//
+//bool MaxDFGController::renamePort(Port * port, QString title)
+//{
+//	HoldActions hold(_M("renamePort"));
+//	return Controller::renamePort(port, title);
+//}
 
 bool MaxDFGController::addConnection(ConnectionTarget * src, ConnectionTarget * dst)
 {

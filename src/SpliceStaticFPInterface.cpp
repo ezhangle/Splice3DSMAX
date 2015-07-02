@@ -126,18 +126,18 @@ BOOL SpliceStaticFPInterface::ExportSpliceFile(const MSTR& file, ReferenceTarget
 		return FALSE;
 
 	CStr cFile = file.ToCStr();
-	//DFGWrapper::Binding* pGraph = const_cast<DFGWrapper::Binding*>(&pSpliceInterface->GetSpliceGraph());
+	//FabricCore::DFGBinding* pGraph = const_cast<FabricCore::DFGBinding*>(&pSpliceInterface->GetSpliceGraph());
 	return false ; //pGraph->saveToFile(cFile.data());
 }
 
 int SpliceStaticFPInterface::GetGlobalKLOperatorCount()
 {
-	return 0; //DFGWrapper::Binding::getGlobalKLOperatorCount();
+	return 0; //FabricCore::DFGBinding::getGlobalKLOperatorCount();
 }
 
 MSTR SpliceStaticFPInterface::GetGlobalKLOperatorName(int index)
 {
-	//const char* opName = DFGWrapper::Binding::getGlobalKLOperatorName(index);
+	//const char* opName = FabricCore::DFGBinding::getGlobalKLOperatorName(index);
 	//MSTR rval;
 	//rval.FromACP(opName);
 	//return rval;

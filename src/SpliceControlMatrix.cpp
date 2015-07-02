@@ -27,8 +27,6 @@ public:
 
 private:
 
-	void ResetPorts();
-
 	int GetValueType() { return TYPE_MATRIX3; }
 
 	// Our cache is only valid if the parent has not changed.
@@ -68,15 +66,6 @@ SpliceControlMatrix::~SpliceControlMatrix()
 {
 }		
 
-void SpliceControlMatrix::ResetPorts()
-{
-	// We add a parent value to, so that our Splice operator can evaluate relative to the input matrix
-	// This is similar to how standard 3ds Max transforms plugins work
-	m_parentValuePort = AddSpliceParameter(m_binding, TYPE_MATRIX3, _M("parentValue"), FabricCore::DFGPortType_In);
-	m_parentValuePort->setMetadata("uiHidden", "true", false);
-	ParentClass::ResetPorts();
-}
-
 void SpliceControlMatrix::Copy(Control *from)
 {
 	m_value.IdentityMatrix();
@@ -92,14 +81,14 @@ void SpliceControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, G
 	Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
 	if(method == CTRL_ABSOLUTE)
 	{
-		MaxValueToSplice(m_parentValuePort, t, interval, Matrix3::Identity);
+		MaxValueToSplice(m_binding, m_parentArgName.c_str(), t, interval, Matrix3::Identity);
 	}
 	else
 	{
 		// if our parents value has changed, invalidate our cache
 		if (!(m_cachedParentVal == *pInVal))
 			Invalidate();
-		MaxValueToSplice(m_parentValuePort, t, interval, *pInVal);
+		MaxValueToSplice(m_binding, m_parentArgName.c_str(), t, interval, *pInVal);
 		// Cache parent transform for next eval
 		m_cachedParentVal = *pInVal;
 	}

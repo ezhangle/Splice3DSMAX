@@ -12,7 +12,8 @@ using namespace FabricUI;
 class DFGWidget : public DFG::DFGCombinedWidget {
   
 public:
-	DFGWidget(QWidget * parent, FabricServices::DFGWrapper::Binding& binding);
+	
+	DFGWidget(QWidget * parent, FabricCore::DFGBinding& binding);
 	~DFGWidget();
 
   //static QWidget * creator(QWidget * parent, const QString & name);

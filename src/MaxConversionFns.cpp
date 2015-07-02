@@ -419,6 +419,53 @@ void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 	return;
 }
 
+void ConvertToRTVal(const FPValue& param, FabricCore::RTVal& val)
+{
+	if (is_tab(param.type) || val.isArray())
+	{
+		if (is_tab(param.type) && val.isArray())
+		{
+			int cnt = param.aa_tab->Count();
+			val.setArraySize(cnt);
+
+			/*for (int i = 0; i < cnt; i++) {
+				ConvertToRTVal()
+				}*/
+		}
+	}
+	else
+	{
+		// Is not tab or array
+		switch ((int)param.type)
+		{
+		case TYPE_BOOL:
+			return ConvertToRTVal(param.b, val);
+		case TYPE_INT:
+			return ConvertToRTVal(param.i, val);
+		case TYPE_FLOAT:
+		case TYPE_ANGLE:
+		case TYPE_WORLD:
+		case TYPE_PCNT_FRAC:
+			return ConvertToRTVal(param.f, val);
+		case TYPE_RGBA:
+			return ConvertToRTVal(*param.clr, val);
+		case TYPE_FRGBA:
+			return ConvertToRTVal(*param.p4, val);
+		case TYPE_POINT3:
+			return ConvertToRTVal(*param.p, val);
+		case TYPE_POINT4:
+			return ConvertToRTVal(*param.p4, val);
+		case TYPE_QUAT:
+			return ConvertToRTVal(*param.q, val);
+		case TYPE_TSTR:
+			return ConvertToRTVal(*param.tstr, val);
+		default:
+			DbgAssert(_T("Implement Me"));
+			//return FabricCore::RTVal();
+		}
+	}
+}
+
 #pragma endregion // GetVariants
 
 

@@ -8,14 +8,14 @@
 //std::string DFGWidget::s_currentUINodeName;
 //std::map<DFGWidget*, FabricDFGBaseInterface*> DFGWidget::s_widgets;
 
-DFGWidget::DFGWidget(QWidget * parent, FabricServices::DFGWrapper::Binding& binding)
+DFGWidget::DFGWidget(QWidget * parent, FabricCore::DFGBinding& binding)
 	: DFG::DFGCombinedWidget(parent)
 {
 	FabricCore::Client client = GetClient();
 
 	ASTWrapper::KLASTManager* manager = ASTWrapper::KLASTManager::retainGlobalManager(&client);
-	DFGWrapper::GraphExecutablePtr graph = DFGWrapper::GraphExecutablePtr::StaticCast(binding.getExecutable());
-	init(&client, manager, GetHost(), binding, graph, GetCommandStack(), false);
+	FabricCore::DFGExec exec = binding.getExec();
+	init(client, manager, GetHost(), binding, exec, GetCommandStack(), false);
 }
 
 DFGWidget::~DFGWidget()

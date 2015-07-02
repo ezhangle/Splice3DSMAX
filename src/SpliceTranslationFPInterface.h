@@ -110,7 +110,7 @@ public:
 		//FN_1(fn_removePortIdx, TYPE_bool, RemovePort, TYPE_INDEX);
 		FN_1(fn_removePortName, TYPE_bool, RemovePortMSTR, TYPE_TSTR_BV);
 		FN_1(fn_getPortName, TYPE_TSTR_BV, GetPortNameMSTR, TYPE_INT);
-		FN_2(fn_setPortName, TYPE_bool, SetPortNameMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
+		FN_2(fn_setPortName, TYPE_TSTR_BV, SetPortNameMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
 		FN_1(fn_getPortType, TYPE_TSTR_BV, GetPortTyeMSTR, TYPE_TSTR_BV);
 		FN_1(fn_isPortArray, TYPE_bool, IsPortArrayMSTR, TYPE_TSTR_BV);
 
@@ -145,7 +145,7 @@ public:
 	BOOL ShowDFGGraphEditor();
 
 	// Get the fabric graph driving this max class.
-	virtual DFGWrapper::Binding& GetBinding() = 0;
+	virtual FabricCore::DFGBinding& GetBinding() = 0;
 
 	virtual std::string GetKLCode() = 0;
 	virtual std::string GetKLOperatorName() = 0;
@@ -155,8 +155,8 @@ public:
 
 	// Get the number of ports on this graph
 	virtual int GetPortCount() = 0;
-	virtual DFGWrapper::ExecPortPtr GetPort(int i)=0;
-	virtual DFGWrapper::ExecPortPtr GetPort(const char* name)=0;
+	//virtual DFGWrapper::ExecPortPtr GetPort(int i)=0;
+	//virtual DFGWrapper::ExecPortPtr GetPort(const char* name)=0;
 
 	// Splice port management
 	// Create a new port.  A matching Max parameter 
@@ -173,7 +173,7 @@ public:
 
 	// Get name of port
 	virtual const char* GetPortName(int i) = 0;
-	virtual bool SetPortName(const char* oldName, const char* newName) = 0;
+	virtual const char* SetPortName(const char* oldName, const char* newName) = 0;
 	virtual const char* GetPortType(const char* port) = 0;
 	// Returns if the in port is an array type or not
 	virtual bool IsPortArray(const char* port)=0;
@@ -217,7 +217,7 @@ public:
 	// Allow others to set the splice graph etc we are using.
 	// These functions are not called directly from MaxScript, instead
 	// they are used by the static interface
-//	virtual void SetSpliceGraph(const DFGWrapper::Binding& graph, bool createMaxParams) = 0;
+//	virtual void SetSpliceGraph(const FabricCore::DFGBinding& graph, bool createMaxParams) = 0;
 //	virtual void SetOutPort(const DFGWrapper::PortPtr& port) = 0;
 
 	// Load the splice graph for this entity from the given filename
@@ -275,7 +275,7 @@ protected:
 	}
 
 	MSTR GetPortNameMSTR(int i)	{ return ToMSTR(GetPortName(i), 0); }
-	bool SetPortNameMSTR(const MSTR& oldName, const MSTR& newName)	{ return SetPortName(oldName.ToCStr(), newName.ToCStr()); }
+	MSTR SetPortNameMSTR(const MSTR& oldName, const MSTR& newName)	{ return MSTR::FromACP(SetPortName(oldName.ToCStr(), newName.ToCStr())); }
 	MSTR GetPortTyeMSTR(const MSTR& port)	{ return ToMSTR(GetPortType(port.ToCStr()), 0); }
 	MSTR_INVAL(bool, IsPortArray);
 	//bool IsPortArrayMSTR(const MSTR& port) { return IsPortArray(port.ToCStr()); }
@@ -390,7 +390,7 @@ FPInterfaceDesc* GetDescriptor()
 
 			SpliceTranslationFPInterface::fn_getPortName, _T("GetPortName"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("portIndex"),	0,	TYPE_INDEX,
-			SpliceTranslationFPInterface::fn_setPortName, _T("SetPortName"), 0, TYPE_VOID, 0, 2,
+			SpliceTranslationFPInterface::fn_setPortName, _T("SetPortName"), 0, TYPE_TSTR_BV, 0, 2,
 				_M("oldName"),			0,	TYPE_TSTR_BV,
 				_M("newName"),			0,	TYPE_TSTR_BV,
 			SpliceTranslationFPInterface::fn_getPortType, _T("GetPortType"), 0, TYPE_TSTR_BV, 0, 1,

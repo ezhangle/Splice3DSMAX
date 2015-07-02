@@ -26,8 +26,6 @@ public:
 
 private:
 
-	void ResetPorts();
-
 	int GetValueType() { return TYPE_POINT3; }
 };
 
@@ -61,13 +59,6 @@ SpliceControlPosition::~SpliceControlPosition()
 {
 }		
 
-void SpliceControlPosition::ResetPorts()
-{
-	m_parentValuePort = AddSpliceParameter(m_binding, TYPE_MATRIX3, _M("parentValue"), FabricCore::DFGPortType_In);
-	m_parentValuePort->setMetadata("uiHidden", "true", false);
-	ParentClass::ResetPorts();
-}
-
 void SpliceControlPosition::Copy(Control *)
 {
 
@@ -79,13 +70,13 @@ void SpliceControlPosition::GetValue(TimeValue t, void *val, Interval &interval,
 	{
 		Invalidate(); // Evaluate every time in case parent changes too
 		Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
-		MaxValueToSplice(m_parentValuePort, 0, interval, *pInVal);
+		MaxValueToSplice(m_binding, m_parentArgName.c_str(), 0, interval, *pInVal);
 		pInVal->SetTrans(Evaluate(t, interval));
 	}
 	else
 	{
 		Point3* pOutVal = reinterpret_cast<Point3*>(val);
-		MaxValueToSplice(m_parentValuePort, 0, interval, Matrix3::Identity);
+		MaxValueToSplice(m_binding, m_parentArgName.c_str(), 0, interval, Matrix3::Identity);
 		*pOutVal = Evaluate(t, interval);
 	}
 }

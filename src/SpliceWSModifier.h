@@ -55,8 +55,8 @@ private:
 	int GetValueType() { return TYPE_MESH; }
 	bool CloneSpliceData(ParentClass* pMyClone) { return true; }
 
-	DFGWrapper::ExecPortPtr m_nodeTransformPort;
-	DFGWrapper::ExecPortPtr m_inMeshPort;
+	std::string m_nodeTransformArgName;
+	std::string m_inMeshArgName;
 
 	// Our cache is only valid if the node transform has not changed.
 	// We cache the nodes transform, and invalidate our cache

@@ -60,7 +60,7 @@ void SplicePortChangeObject::EndHold()
 void SplicePortChangeObject::Restore( int isUndo )
 {
 	GetCommandStack()->undo();
-	//DFGWrapper::Binding graph = m_maxOwner->GetSpliceGraph();
+	//FabricCore::DFGBinding graph = m_maxOwner->GetSpliceGraph();
 	//graph.setFromPersistenceDataDict(m_prePortLayout);
 	//m_maxOwner->UpdateKLEditor();
 	//// Re-connect the outport (TODO: Parent ports?)
@@ -71,7 +71,7 @@ void SplicePortChangeObject::Restore( int isUndo )
 void SplicePortChangeObject::Redo()
 {
 	GetCommandStack()->redo();
-	//DFGWrapper::Binding graph = m_maxOwner->GetSpliceGraph();
+	//FabricCore::DFGBinding graph = m_maxOwner->GetSpliceGraph();
 	//graph.setFromPersistenceDataDict(m_postPortLayout);
 	//m_maxOwner->UpdateKLEditor();
 	//// Re-connect the outport (TODO: Parent ports?)

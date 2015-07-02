@@ -29,12 +29,7 @@ void SpliceModifier::RefAdded(RefMakerHandle rm)
 	if (!m_binding.isValid())
 		Init(false);
 
-	if (m_valuePort.isNull())
-		ResetPorts();
-	//if (Init(FALSE))
-	//{
-	//	SetPortName("outputValue", "modifierMesh");
-	//}
+	ResetPorts();
 }
 
 Interval SpliceModifier::LocalValidity(TimeValue t)
@@ -71,7 +66,7 @@ void SpliceModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os,
 		if (!m_inputValid.InInterval(t)) 
 		{
 			m_inputValid.SetInfinite();
-			MaxValuesToSplice<Object*, Mesh>(m_inMeshPort, t, m_inputValid, &os->obj, 1);
+			MaxValuesToSplice<Object*, Mesh>(m_binding, m_inMeshPort.c_str(), t, m_inputValid, &os->obj, 1);
 			ivValid &= m_inputValid;
 
 		}
@@ -144,8 +139,11 @@ void SpliceModifier::ResetPorts()
 	ParentClass::ResetPorts();
 
 	// Our value is an IO port as we can set data in and 
-	m_inMeshPort = AddSpliceParameter(GetBinding(), GetValueType(), "inputMesh", FabricCore::DFGPortType_In);
-	m_inMeshPort->setMetadata("uiHidden", "true", false);
+	if (AddSpliceParameter(GetBinding(), GetValueType(), "inputMesh", FabricCore::DFGPortType_In))
+	{
+		m_inMeshPort = "inputMesh";
+		m_binding.getExec().setExecPortMetadata(m_inMeshPort.c_str(), "uiHidden", "true", false);
+	}
 
 	// By default, hook up the ports to create a valid graph.
 	// This prevents our mesh from dissappearing on assigning SpliceMod

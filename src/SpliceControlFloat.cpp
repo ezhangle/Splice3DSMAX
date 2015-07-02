@@ -26,8 +26,6 @@ public:
 
 private:
 
-	void ResetPorts();
-
 	int GetValueType() { return TYPE_FLOAT; }
 
 	bool CloneSpliceData(SpliceTranslationLayer<Control, float>* pMyClone) { return true; } ; // No cloning for me...
@@ -63,13 +61,6 @@ SpliceControlFloat::~SpliceControlFloat()
 {
 }		
 
-void SpliceControlFloat::ResetPorts()
-{
-	m_parentValuePort = AddSpliceParameter(GetBinding(), TYPE_FLOAT, _M("parentValue"), FabricCore::DFGPortType_In);
-	m_parentValuePort->setMetadata("uiHidden", "true", false);
-	ParentClass::ResetPorts();
-}
-
 void SpliceControlFloat::Copy(Control *)
 {
 
@@ -82,11 +73,11 @@ void SpliceControlFloat::GetValue(TimeValue t, void *val, Interval &interval, Ge
 	if(method == CTRL_RELATIVE)
 	{
 		Invalidate(); // Evaluate every time in case parent changes too
-		MaxValueToSplice(m_parentValuePort, 0, interval, *pVal);
+		MaxValueToSplice(m_binding, m_parentArgName.c_str(), 0, interval, *pVal);
 	}
 	else
 	{
-		MaxValueToSplice(m_parentValuePort, 0, interval, float(0));
+		MaxValueToSplice(m_binding, m_parentArgName.c_str(), 0, interval, float(0));
 	}
 
 	// Evaluate value from splice

@@ -2,7 +2,6 @@
 #include "SpliceEvents.h"
 #include <maxapi.h>
 #include <GraphicsWindow.h>
-#include "FabricCore.h"
 #include "SpliceLogging.h"
 #include <map>
 #include "Graphics\IDisplayManager.h"

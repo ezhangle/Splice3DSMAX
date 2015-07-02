@@ -82,10 +82,10 @@ void SpliceWSModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* o
 	else {
 		// A modifier is a special kind of mesh, in that we pipe our
 		// mesh into the output port as an IO port
-		MaxValuesToSplice<Object*, Mesh>(m_valuePort, t, ivValid, &os->obj, 1);
+		MaxValuesToSplice<Object*, Mesh>(m_binding, m_outArgName.c_str(), t, ivValid, &os->obj, 1);
 
 		// A WSModifier is a special kind of modifier that has access to its nodes transform
-		MaxValueToSplice(m_nodeTransformPort, t, ivValid, tmNode);
+		MaxValueToSplice(m_binding, m_nodeTransformArgName.c_str(), t, ivValid, tmNode);
 
 		// Set our output.
 		TriObject* pTriObj = static_cast<TriObject*>(os->obj);
@@ -159,12 +159,18 @@ void SpliceWSModifier::GetLocalBoundBox(TimeValue t, INode *mat, ViewExp * /*vpt
 void SpliceWSModifier::ResetPorts()
 {
 	// We add a transform value so that our Splice operator can evaluate relative to the input matrix
-	m_nodeTransformPort = AddSpliceParameter(m_binding, TYPE_MATRIX3, _M("nodeTransform"), FabricCore::DFGPortType_In);
-	m_nodeTransformPort->setMetadata("uiHidden", "true", false);
+	m_nodeTransformArgName = "nodeTransform";
+	if (AddSpliceParameter(m_binding, TYPE_MATRIX3, _M("nodeTransform"), FabricCore::DFGPortType_In))
+	{
+		m_binding.getExec().setExecPortMetadata(m_nodeTransformArgName.c_str(), "uiHidden", "true", false);
+	}
 
 	// Our value is an IO port as we can set data in and 
-	m_inMeshPort = AddSpliceParameter(GetBinding(), GetValueType(), "inputMesh", FabricCore::DFGPortType_In);
-	m_inMeshPort->setMetadata("uiHidden", "true", false);
+	if (AddSpliceParameter(GetBinding(), GetValueType(), "inputMesh", FabricCore::DFGPortType_In))
+	{
+		m_inMeshArgName = "inputMesh";
+		m_binding.getExec().setExecPortMetadata(m_nodeTransformArgName.c_str(), "uiHidden", "true", false);
+	}
 
 	ParentClass::ResetPorts();
 }

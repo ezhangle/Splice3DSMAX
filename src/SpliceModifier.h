@@ -55,7 +55,7 @@ private:
 	void ResetPorts() override;
 
 	// Pass input mesh in
-	DFGWrapper::ExecPortPtr m_inMeshPort;
+	std::string m_inMeshPort;
 
 	Interval m_inputValid;
 };

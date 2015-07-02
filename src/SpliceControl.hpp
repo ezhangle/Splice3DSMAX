@@ -10,13 +10,15 @@ protected:
 	SpliceControl(BOOL loading);
 	~SpliceControl();
 
+	void ResetPorts() override;
+
 	IOResult SaveImpData(ISave* isave) override;
 	IOResult LoadImpData(ILoad* isave) override;
 
 	bool CloneSpliceData(ParentClass* pMyClone) override { return true; }; // No cloning for me...
 
 	// Handle parent value port
-	DFGWrapper::ExecPortPtr m_parentValuePort;
+	std::string m_parentArgName;
 	typedef SpliceControl<TResultType> ParentClass;
 };
 
@@ -33,14 +35,24 @@ SpliceControl<TResultType>::~SpliceControl()
 
 }
 
+
+template<typename TResultType>
+void SpliceControl<TResultType>::ResetPorts()
+{
+	m_parentArgName = "parentValue";
+	bool success = AddSpliceParameter(GetBinding(), GetValueType(), m_parentArgName.c_str(), FabricCore::DFGPortType_In);
+	if (success)
+	{
+		m_binding.getExec().setExecPortMetadata(m_parentArgName.c_str(), "uiHidden", "true", false);
+	}
+	__super::ResetPorts();
+}
+
+
 template<typename TResultType>
 IOResult SpliceControl<TResultType>::SaveImpData(ISave* isave)
 {
-	if (m_parentValuePort.isNull() && !m_parentValuePort->isValid())
-		return IO_OK;
-
-	const char* parentName = m_parentValuePort->getName();
-	isave->WriteCString(parentName);
+	isave->WriteCString(m_parentArgName.c_str());
 	return IO_OK;
 }
 
@@ -50,8 +62,7 @@ IOResult SpliceControl<TResultType>::LoadImpData(ILoad* iload)
 {
 	char* parentName = nullptr;
 	iload->ReadCStringChunk(&parentName);
-	if (parentName != nullptr)
-		m_parentValuePort = GetPort(parentName);
+	m_parentArgName = parentName;
 	return IO_OK;
 }
 

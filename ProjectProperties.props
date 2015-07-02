@@ -83,7 +83,7 @@
 			<StringPooling>true</StringPooling>
       <PrecompiledHeader>Use</PrecompiledHeader>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-     	<PreprocessorDefinitions>FEC_SHARED;FECS_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+     	<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;FEC_SHARED;FECS_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
 		</ClCompile>        
 

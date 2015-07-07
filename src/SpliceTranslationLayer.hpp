@@ -74,11 +74,14 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
 
 		// given a scene base object or modifier, look for a referencing node via successive 
 		// reference enumerations up through the ref hierarchy untill we find an inode.
-		//INode* node = GetCOREInterface7()->FindNodeFromBaseObject(m_pblock);
-		//if(node)
-		//	evalContext.setMember("graph", FabricSplice::constructStringRTVal( TSTR(node->GetName()).ToCStr().data() ));
-		//else
-		//	evalContext.setMember("graph", FabricSplice::constructStringRTVal(m_graph.getName()));
+		MSTR name;
+		INode* node = GetCOREInterface7()->FindNodeFromBaseObject(m_pblock);
+		if (node)
+			name = node->GetName();
+		else
+			name = _M("3dsMaxDFGGraph");
+		CStr cName = name.ToCStr();
+		m_binding.getExec().setTitle(cName.data());
 
 		//evalContext.setMember("currentFilePath", FabricSplice::constructStringRTVal(filepath.ToCStr().data()));
 	}
@@ -1352,14 +1355,27 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::GraphCanEvaluate()
 	if (!m_binding.isValid())
 		return false;
 
-	// If we aren't able to receive a value, abort
-	if (!m_binding.getExec().haveExecPort(m_outArgName.c_str())) {
+	FabricCore::DFGExec rootExec = m_binding.getExec();
+	if (!rootExec.isValid())
 		return false;
-	}
-	//if (m_outArgName.isNull() || !m_outArgName->isValid() || !m_outArgName->isConnectedToAny())
+
+	return (rootExec.getErrorCount() == 0);
+
+
+
+	//// If we aren't able to receive a value, abort
+	//if (!m_binding.getExec().haveExecPort(m_outArgName.c_str())) {
 	//	return false;
-	// All checks passed
-	return true;
+	//}
+
+	//// If we aren't able to receive a value, abort
+	//if (!m_binding.getExec().isConnectedToAny(m_outArgName.c_str())) {
+	//	return false;
+	//}
+	////if (m_outArgName.isNull() || !m_outArgName->isValid() || !m_outArgName->isConnectedToAny())
+	////	return false;
+	//// All checks passed
+	//return true;
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -1398,8 +1414,11 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 		m_binding.execute();
 
 		// Get our value back!
-		FabricCore::RTVal rtOutVal = m_binding.getArgValue(m_outArgName.c_str());
-		SpliceToMaxValue(rtOutVal, m_value);
+		if (m_binding.getExec().haveExecPort(m_outArgName.c_str()))
+		{
+			FabricCore::RTVal rtOutVal = m_binding.getArgValue(m_outArgName.c_str());
+			SpliceToMaxValue(rtOutVal, m_value);
+		}
 		
 		MAXSPLICE_CATCH_END;
 

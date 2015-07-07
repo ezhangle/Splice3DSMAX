@@ -144,6 +144,8 @@ public:
 	BOOL ShowSceneGraphEditor() { /* TODO */ return FALSE; };
 	BOOL ShowDFGGraphEditor();
 
+	virtual MSTR GetGraphName();
+
 	// Get the fabric graph driving this max class.
 	virtual FabricCore::DFGBinding& GetBinding() = 0;
 
@@ -317,7 +319,7 @@ protected:
 		ExportToJSON(jsonData);
 		return MSTR::FromACP(jsonData.data(), jsonData.length());
 	}
-
+	
 #pragma endregion
 };
 

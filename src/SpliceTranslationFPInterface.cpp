@@ -99,6 +99,14 @@ void SpliceTranslationFPInterface::UpdateKLEditor()
 		CallMaxScriptFunction(_M("fn_From_Cpp_UpdateKLEditor"), m_klEditor, false);
 }
 
+MSTR SpliceTranslationFPInterface::GetGraphName()
+{
+	FabricCore::DFGBinding& binding = GetBinding();
+	FabricCore::DFGExec exec = binding.getExec();
+	const char* title = exec.getTitle();
+	return MSTR::FromACP(title);
+}
+
 Value* CallMaxScriptFunction(MCHAR* function, ReferenceTarget* fnArgument, bool returnResult) 
 {
 	Value* valueArg = MAXClass::make_wrapper_for(fnArgument);

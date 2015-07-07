@@ -1121,11 +1121,55 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if (curInstance == NULL) 
 				return 0;
 
+			// A few static vars are shared between save and load
+			static int filterIndex = 0;
+			static MSTR initialDir = MSTR::FromACP(std::getenv("FABRIC_DIR"));
+
 			// If we are the KL editor button, pop that editor
 			if (wParam == IDC_BTN_EDIT_KL)
 			{
 				//curInstance->ShowKLEditor();
 				curInstance->ShowDFGGraphEditor();
+			}
+			else if (wParam == IDC_SAVE)
+			{
+				MSTR filename = curInstance->GetGraphName();
+				filename += _M(".dfg.json");
+
+				FilterList filterList;
+				filterList.Append(_M("DFG Preset files(*.dfg.json)"));
+				filterList.Append(_M("*.dfg.json"));
+
+				filterList.Append(_M("All Files (*.*)"));
+				filterList.Append(_M("*.*"));
+
+				filterList.SetFilterIndex(filterIndex);
+
+				if (GetCOREInterface8()->DoMaxSaveAsDialog(NULL, GetString(IDS_SAVE_PRESET), filename, initialDir, filterList))
+				{
+					filterIndex = filterList.GetFilterIndex();
+					curInstance->SaveToFile(filename.data());
+				}
+			}
+			else if (wParam == IDC_LOAD)
+			{
+				MSTR filename = curInstance->GetGraphName();
+				filename += _M(".dfg.json");
+
+				FilterList filterList;
+				filterList.Append(_M("DFG Preset files(*.dfg.json)"));
+				filterList.Append(_M("*.dfg.json"));
+
+				filterList.Append(_M("All Files (*.*)"));
+				filterList.Append(_M("*.*"));
+
+				filterList.SetFilterIndex(filterIndex);
+
+				if (GetCOREInterface8()->DoMaxOpenDialog(NULL, GetString(IDS_LOAD_PRESET), filename, initialDir, filterList))
+				{
+					filterIndex = filterList.GetFilterIndex();
+					curInstance->LoadFromFile(filename.data(), true);
+				}
 			}
 		}
 		break;

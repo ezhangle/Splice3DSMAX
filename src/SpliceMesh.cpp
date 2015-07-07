@@ -221,14 +221,17 @@ int SpliceMesh::Display(TimeValue t, INode* inode, ViewExp* vpt, int flags)
 {
 	if (!IsNitrousGraphicsEnabled())
 	{
-		GraphicsWindow *gw = vpt->getGW();
-		Matrix3 mat = inode->GetObjectTM(t);	 
-		gw->setTransform(mat);
+		if (GraphCanEvaluate())
+		{
+			GraphicsWindow *gw = vpt->getGW();
+			Matrix3 mat = inode->GetObjectTM(t);
+			gw->setTransform(mat);
 
-		Interval ivDontCare;
-		const Mesh& mesh = Evaluate(t, ivDontCare);
-		Mesh* pMeshNoConst = const_cast<Mesh*>(&mesh);
-		pMeshNoConst->render(gw, inode->Mtls(), (flags&USE_DAMAGE_RECT) ? &vpt->GetDammageRect() : NULL, COMP_ALL, inode->NumMtls());
+			Interval ivDontCare;
+			const Mesh& mesh = Evaluate(t, ivDontCare);
+			Mesh* pMeshNoConst = const_cast<Mesh*>(&mesh);
+			pMeshNoConst->render(gw, inode->Mtls(), (flags&USE_DAMAGE_RECT) ? &vpt->GetDammageRect() : NULL, COMP_ALL, inode->NumMtls());
+		}
 	}
 	return(0);
 }
@@ -283,10 +286,14 @@ void SpliceMesh::GetDeformBBox(TimeValue t, Box3& box, Matrix3* tm, BOOL useSel 
 Mesh* SpliceMesh::GetRenderMesh(TimeValue t, 
 						INode *inode, ::View& view, BOOL& needDelete)
 {
-	needDelete = FALSE;
-	Interval ivDontCare;
-	const Mesh& mesh = Evaluate(t, ivDontCare);
-	return const_cast<Mesh*>(&mesh);
+	if (GraphCanEvaluate())
+	{
+		needDelete = FALSE;
+		Interval ivDontCare;
+		const Mesh& mesh = Evaluate(t, ivDontCare);
+		return const_cast<Mesh*>(&mesh);
+	}
+	return nullptr;
 }
 //#endif
 

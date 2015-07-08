@@ -77,7 +77,39 @@ void doSpliceDrawing(void *data)
 }
 
 
+void ComputeFOVProjection(float result[4][4], float fov, float aspect, float nearDist, float farDist, bool leftHanded = true )
+{
+	//
+	// General form of the Projection Matrix
+	//
+	// uh = Cot( fov/2 ) == 1/Tan(fov/2)
+	// uw / uh = 1/aspect
+	// 
+	//   uw         0       0       0
+	//    0        uh       0       0
+	//    0         0      f/(f-n)  1
+	//    0         0    -fn/(f-n)  0
+	//
+	// Make result to be identity first
 
+	// check for bad parameters to avoid divide by zero:
+	// if found, assert and return an identity matrix.
+	if (fov <= 0 || aspect == 0)
+	{
+		DbgAssert(fov > 0 && aspect != 0);
+		return;
+	}
+
+	float frustumDepth = farDist - nearDist;
+	float oneOverDepth = 1 / frustumDepth;
+
+	result[1][1] = 1 / tan(0.5f * fov);
+	result[0][0] = (leftHanded ? 1 : -1) * result[1][1] / aspect;
+	result[2][2] = farDist * oneOverDepth;
+	result[3][2] = (-farDist * nearDist) * oneOverDepth;
+	result[2][3] = 1;
+	result[3][3] = 0;
+}
 
 class SpliceViewportDrawCallback : public ViewportDisplayCallback
 {
@@ -180,18 +212,24 @@ public:
 		{
 			FabricCore::RTVal inlineCamera = inlineViewport.callMethod("InlineCamera", "getCamera", 0, 0);
 
-			float viewProjTm[4][4];
-			Matrix3 invViewTm;
-			int persp;
-			float hither, yon;
-			gw->getCameraMatrix(viewProjTm, &invViewTm, &persp, &hither, &yon);
+			//float viewProjTm[4][4];
+			//Matrix3 invViewTm;
+			//int persp;
+			//float hither, yon;
+			//gw->getCameraMatrix(viewProjTm, &invViewTm, &persp, &hither, &yon);
+			float hither = vp13->GetHither();
+			float yon = vp13->GetYon();
 
-			Camera maxCam;
-			maxCam.setClip(hither, yon);
-			maxCam.setPersp(pView->GetFOV(), float(width) / height);
-			maxCam.getProj(viewProjTm);
+			float viewProjTm2[4][4];
+			memset(viewProjTm2, 0, sizeof(float) * 16);
+			ComputeFOVProjection(viewProjTm2, pView->GetFOV(), float(width) / height, hither, yon, false);
 
-			FabricCore::RTVal projectionMatrixExtArray = FabricCore::RTVal::ConstructExternalArray(client, "Float32", 16, viewProjTm);
+			//Camera maxCam;
+			//maxCam.setClip(hither, yon);
+			//maxCam.setPersp(pView->GetFOV(), float(width) / height);
+			//maxCam.getProj(viewProjTm);
+
+			FabricCore::RTVal projectionMatrixExtArray = FabricCore::RTVal::ConstructExternalArray(client, "Float32", 16, viewProjTm2);
 			FabricCore::RTVal projectionVal = inlineCamera.maybeGetMemberRef("projection");
 			projectionVal.callMethod("", "set", 1, &projectionMatrixExtArray);
 

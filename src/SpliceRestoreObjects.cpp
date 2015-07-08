@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "SpliceRestoreObjects.h"
 #include "Commands\CommandStack.h"
-#include "..\MaxCommandStack.h"
+#include "MaxCommandStack.h"
 
 #pragma region CustomKLUndoRedoCommandObject
 

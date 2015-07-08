@@ -8,6 +8,10 @@
 #include "MaxConversionFns.h"
 #include "Splice3dsmax.h"
 #include "SpliceRestoreObjects.h"
+#include "MaxDFGNotificationRouter.h"
+#include "MaxDFGController.h"
+#include "ASTWrapper/KLASTManager.h"
+#include "MaxCommandStack.h"
 
 //////////////////////////////////////////////////////////////////////////
 //--- SpliceTranslationLayer -------------------------------------------------------
@@ -38,6 +42,8 @@ SpliceTranslationLayer<TBaseClass, TResultType>::~SpliceTranslationLayer()
 	// We _must_ have been released by now
 	DbgAssert(m_pblock == NULL);
 
+	SAFE_DELETE(m_router);
+
 	// Now is a good time to release any old pbdescs
 	// If we are in a reset, our pblock would have 
 	// been released by now, and the descriptor would
@@ -58,6 +64,12 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
 		// create an empty binding
 		m_binding = GetHost().createBindingToNewGraph();
 		m_binding.setNotificationCallback(bindingNotificationCallback, this);
+
+		m_router = new MaxDFGNotificationRouter(this, m_binding, m_binding.getExec());
+
+		FabricServices::ASTWrapper::KLASTManager* manager = FabricServices::ASTWrapper::KLASTManager::retainGlobalManager(&GetClient());
+		m_ctrl = new MaxDFGController(NULL, GetCommandStack(), manager, m_binding, m_binding.getExec(), false);
+		m_ctrl->setRouter(m_router);
 
 		// set the graph on the view
 		//setGraph(DFGWrapper::GraphExecutablePtr::StaticCast(m_binding.getExecutable()));
@@ -162,6 +174,9 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::DeleteMaxParameter(ParamID
 
 	// Replace old pblock with new one (will copy values).
 	CreateParamBlock(pNewDesc);
+
+	// Invalidate everything 
+	InvalidateAll();
 	return true;
 }
 
@@ -948,7 +963,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::GetMaxConnectedType( const 
 	{
 		return m_pblock->GetParameterType((ParamID)pid);
 	}
-	return -1;
+	return -2;
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -1184,8 +1199,11 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const char
 
 	m_binding = GetHost().createBindingFromJSON(json);
 	m_binding.setNotificationCallback(bindingNotificationCallback, this);
-	// set the graph on the view
-	//setGraph(m_binding.getExec());
+
+	// Hook up our router again
+	SAFE_DELETE(m_router);
+	m_router = new MaxDFGNotificationRouter(this, m_binding, m_binding.getExec());
+	m_router->setController(m_ctrl);
 
 	// Setup port connections
 	if (createMaxParams)
@@ -1194,10 +1212,10 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const char
 
 		for (unsigned int i = 0; i < exec.getExecPortCount(); i++)
 		{
+			const char* portName = exec.getExecPortName(i);
 			// If this could be our out port?
 			if (exec.getExecPortType(i) == FabricCore::DFGPortType_Out)
 			{
-				const char* portName = exec.getExecPortName(i);
 				exec.getExecPortResolvedType(i);
 				BitArray compatibleTypes = SpliceTypeToMaxTypes(::GetPortType(m_binding, portName));
 				// If this splice type is compatible with this classes output,
@@ -1208,7 +1226,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const char
 			else
 			{
 				// for input ports, we should trigger Max type creation
-				//onExecPortInserted(*pitr);
+				m_router->onExecPortResolvedTypeChanged(portName, "");
 			}
 		}
 	}
@@ -1230,120 +1248,6 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
 }
 
 #pragma endregion
-//
-////////////////////////////////////////////////////////////////////////////
-//#pragma region DFG-Derived functions
-//
-//template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::onExecPortInserted(FabricServices::DFGWrapper::ExecPortPtr port)
-//{
-//	if (theHold.RestoreOrRedoing())
-//		return;
-//
-////	HoldActions hold(_M("Splice Add Port"));
-////	if (theHold.Holding())
-////		theHold.Put(new SplicePortChangeObject(this));
-//
-//	// By default, hook up a Max param for each new port.
-////		if (port->getExecPortType() == FabricCore::DFGPortType_In)
-////		SetMaxConnectedType(port, -2);
-//}
-//
-//template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::onExecPortRemoved(FabricServices::DFGWrapper::ExecPortPtr port)
-//{
-//	if (theHold.RestoreOrRedoing())
-//		return;
-//
-////	HoldActions hold(_M("Splice Remove Port"));
-////	if (theHold.Holding())
-////		theHold.Put(new SplicePortChangeObject(this));
-//
-//	// Ensure the max data is released
-//	int pid = GetPortParamID(port);
-//	if (pid >= 0)
-//		DeleteMaxParameter((ParamID)pid);
-//
-//	InvalidateAll();
-//}
-//
-//template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::onPortsConnected(FabricServices::DFGWrapper::PortPtr src, FabricServices::DFGWrapper::PortPtr dst)
-//{
-//	InvalidateAll();
-//}
-//
-//
-//
-//template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::onPortsDisconnected(FabricServices::DFGWrapper::PortPtr src, FabricServices::DFGWrapper::PortPtr dst)
-//{
-//	InvalidateAll();
-//}
-//
-//template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::onExecPortRenamed(FabricServices::DFGWrapper::ExecPortPtr port, const char * oldName)
-//{
-//	if (theHold.RestoreOrRedoing())
-//		return;
-//
-////	HoldActions hold(_M("Splice Rename Port"));
-////	if (theHold.Holding())
-////		theHold.Put(new SplicePortChangeObject(this));
-//
-//	int pid = GetPortParamID(port);
-//	if (pid >= 0)
-//	{
-//		// Normally when we edit the pblock, changes
-//		// are notified in the form of a call to SetReference
-//		// However, when changing name, no references change
-//		// so we need to manually update the UI
-//		MSTR str = MSTR::FromACP(port->getName());
-//		SetMaxParamName(m_pblock->GetDesc(), (ParamID)pid, str);
-//		// Delete existing autogen UI
-//		UpdateUISpec();
-//	}
-//}
-//
-//template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::onExecPortResolvedTypeChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * resolvedType)
-//{
-////	HoldActions hold(_M("Splice Port Type Changed"));
-//	if (theHold.RestoreOrRedoing())
-//		return;
-//
-//	if (port->getOutsidePortType() != FabricCore::DFGPortType_Out)
-//		SetMaxConnectedType(port, GetPort3dsMaxType(port));
-//}
-//
-//template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::onExecPortMetadataChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * key, const char * metadata)
-//{
-//	if (strcmp(key, "uiHidden") == 0 || strcmp(key, "uiOpaque") == 0)
-//	{
-//		if (strcmp(metadata, "true") == 0)
-//		{
-//			// If our port is hidden or opaque, it means it has no Max connection
-//			SetMaxConnectedType(port, -1);
-//		}
-//		else
-//		{
-//			// Recreate with default max type
-//			SetMaxConnectedType(port, -2);
-//		}
-//		UpdateUISpec();
-//	}
-//	else if (strcmp(key, "uiRange") == 0)
-//	{
-//		SetMaxParamLimits(m_pblock->GetDesc(), port);
-//		UpdateUISpec();
-//	}
-//	else if (strcmp(key, "scalarUnit"))
-//	{
-//		UpdateUISpec();
-//	}
-//}
-
 
 //////////////////////////////////////////////////////////////////////////
 #pragma region Evaluation

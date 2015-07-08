@@ -2,7 +2,7 @@
 
 #include "DFGWidget.h"
 #include "plugin.h"
-#include "..\MaxCommandStack.h"
+#include "MaxCommandStack.h"
 
 
 //std::string DFGWidget::s_currentUINodeName;

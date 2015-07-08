@@ -238,6 +238,10 @@ public:
 	// After load, reconnect names.
 	virtual void ReconnectPostLoad()=0;
 
+	// A list of functions exposed just so DFGNotificationRouter can talk to us
+	virtual void SetPblockParamName(int paramID, MSTR str) = 0;
+	virtual void InvalidateAll() = 0;
+	virtual void UpdateUISpec() = 0;
 protected:
 
 	// This function allows us to go up the other pants leg of 
@@ -319,7 +323,8 @@ protected:
 		ExportToJSON(jsonData);
 		return MSTR::FromACP(jsonData.data(), jsonData.length());
 	}
-	
+
+
 #pragma endregion
 };
 

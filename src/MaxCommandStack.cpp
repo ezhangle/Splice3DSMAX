@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "MaxCommandStack.h"
-#include "src/SpliceRestoreObjects.h"
+#include "SpliceRestoreObjects.h"
 
 MaxCommandStack::MaxCommandStack()
 {

@@ -1,7 +1,9 @@
 #pragma once
 #include "DFG\DFGController.h"
 
-class MaxDFGController : FabricUI::DFG::DFGController {
+class MaxDFGController : public FabricUI::DFG::DFGController {
+
+public:
 
 	MaxDFGController(FabricUI::GraphView::Graph * graph,
 		FabricServices::Commands::CommandStack * stack,

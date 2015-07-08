@@ -66,11 +66,14 @@
     <ClCompile Include="src\DockableWidget.cpp">
       <Filter>DFGWidget</Filter>
     </ClCompile>
-    <ClCompile Include="MaxDFGController.cpp">
+    <ClCompile Include="src\MaxDFGController.cpp">
       <Filter>DFGWidget</Filter>
     </ClCompile>
-    <ClCompile Include="MaxCommandStack.cpp">
+    <ClCompile Include="src\MaxCommandStack.cpp">
       <Filter>DFGWidget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MaxDFGNotificationRouter.cpp">
+      <Filter>SpliceTranslation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -131,14 +134,17 @@
     <ClInclude Include="src\DockableWidget.h">
       <Filter>DFGWidget</Filter>
     </ClInclude>
-    <ClInclude Include="MaxDFGController.h">
-      <Filter>DFGWidget</Filter>
-    </ClInclude>
-    <ClInclude Include="MaxCommandStack.h">
-      <Filter>DFGWidget</Filter>
-    </ClInclude>
     <ClInclude Include="src\SpliceControl.hpp">
       <Filter>MaxImplementations</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MaxDFGController.h">
+      <Filter>DFGWidget</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MaxCommandStack.h">
+      <Filter>DFGWidget</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MaxDFGNotificationRouter.h">
+      <Filter>SpliceTranslation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

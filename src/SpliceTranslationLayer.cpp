@@ -260,7 +260,7 @@ void SetMaxParamLimits(ParamBlockDesc2* pDesc, FabricCore::DFGBinding& binding, 
 		return;
 	ParamID pid = ParamID(id);
 
-	std::string rangeStr = binding.getExec().getNodePortMetadata(argName, "uiRange");
+	std::string rangeStr = binding.getExec().getExecPortMetadata(argName, "uiRange");
 	if (rangeStr.empty())
 		return;
 
@@ -644,7 +644,7 @@ const char* AddSpliceParameter(FabricCore::DFGBinding& rBinding, int type, const
 int GetPortParamID(FabricCore::DFGBinding& binding, const char* argName)
 {
 	const char* idstr = binding.getExec().getExecPortMetadata(argName, MAX_PID_OPT);
-	if (idstr != nullptr) {
+	if (idstr != nullptr && idstr[0] != '\0') {
 		return atoi(idstr);
 	}
 	return -1;
@@ -719,7 +719,7 @@ const char* GetPortType( FabricCore::DFGBinding& binding, const char* argName )
 int GetPort3dsMaxType(FabricCore::DFGBinding& binding, const char* argName)
 {
 	const char* idstr = binding.getExec().getExecPortMetadata(argName, MAX_PARM_TYPE_OPT);
-	if (idstr != nullptr) {
+	if (idstr != nullptr && idstr[0] != '\0') {
 		return atoi(idstr);
 	}
 	return -2;
@@ -729,7 +729,7 @@ void SetPort3dsMaxType(FabricCore::DFGBinding& binding, const char* argName, int
 {
 	char buff[20];
 	_itoa_s(type, buff, 10);
-	binding.getExec().setExecPortMetadata(argName, MAX_PID_OPT, buff, true);
+	binding.getExec().setExecPortMetadata(argName, MAX_PARM_TYPE_OPT, buff, true);
 }
 
 bool SetPortOption(FabricCore::DFGBinding& binding, const char* argName, const char* option, FPValue* value)

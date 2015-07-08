@@ -20,6 +20,7 @@
 #define IDS_SPLICE_SCL_CTRL_CLASS_NAME  14
 #define IDS_SPLICE_FLT_CTRL_CLASS_NAME  15
 #define IDS_LOAD_PRESET                 16
+#define IDS_STRING17                    17
 #define IDD_UTIL_UI                     102
 #define IDS_SPLICE_REFTARG_CLASS_NAME   104
 #define IDD_PARAM_GENERATION_UI         900

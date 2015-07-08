@@ -228,12 +228,36 @@ extern FabricCore::Variant GetVariant(const FPValue& value)
 #pragma endregion // GetVariants
 
 #pragma region Get RTVals
-void ConvertToRTVal(int param, FabricCore::RTVal& val)
+void ConvertToRTVal(int param, FabricCore::RTVal& rtVal)
 {
-	if (!val.isValid())
+	if (!rtVal.isValid())
 		return;
 
-	val = FabricCore::RTVal::ConstructSInt32(GetClient(), param);
+	const char* spliceType = rtVal.getTypeName().getStringCString();
+	if (strcmp(spliceType, "SInt32") == 0)
+		rtVal = FabricCore::RTVal::ConstructSInt32(GetClient(), param);
+	else if (strcmp(spliceType, "UInt32") == 0)
+		rtVal = FabricCore::RTVal::ConstructUInt32(GetClient(), param);
+
+	else if (strcmp(spliceType, "SInt8") == 0)
+		rtVal = FabricCore::RTVal::ConstructSInt8(GetClient(), param);
+	else if (strcmp(spliceType, "SInt16") == 0)
+		rtVal = FabricCore::RTVal::ConstructSInt16(GetClient(), param);
+	else if (strcmp(spliceType, "SInt64") == 0)
+		rtVal = FabricCore::RTVal::ConstructSInt64(GetClient(), param);
+
+	else if (strcmp(spliceType, "UInt8") == 0)
+		rtVal = FabricCore::RTVal::ConstructUInt8(GetClient(), param);
+	else if (strcmp(spliceType, "UInt16") == 0)
+		rtVal = FabricCore::RTVal::ConstructUInt16(GetClient(), param);
+	else if (strcmp(spliceType, "UInt64") == 0)
+		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
+
+	// These last two param types may be deprecated
+	else if (strcmp(spliceType, "Size") == 0)
+		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
+	else if (strcmp(spliceType, "Index") == 0)
+		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
 }
 
 void ConvertToRTVal(float param, FabricCore::RTVal& val)
@@ -241,7 +265,12 @@ void ConvertToRTVal(float param, FabricCore::RTVal& val)
 	if (!val.isValid())
 		return;
 
-	val.setFloat32(param);
+	const char* spliceType = val.getTypeName().getStringCString();
+
+	if (strcmp(spliceType, "Float32") == 0)
+		val.setFloat32(param);
+	if (strcmp(spliceType, "Float64") == 0)
+		param = FabricCore::RTVal::ConstructFloat64(GetClient(), param);
 }
 
 void ConvertToRTVal(bool param, FabricCore::RTVal& val)
@@ -627,12 +656,47 @@ void SpliceToMaxValue(const FabricCore::Variant& var, MSTR& param)
 // Convert from RTVal to Max value
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param)
 {
-	param = const_cast<FabricCore::RTVal&>(rtVal).getSInt32();
+	FabricCore::RTVal& ncrtVal = const_cast<FabricCore::RTVal&>(rtVal);
+	const char* spliceType = rtVal.getTypeName().getStringCString();
+	if (strcmp(spliceType, "SInt32") == 0)
+		param = ncrtVal.getSInt32();
+	else if (strcmp(spliceType, "UInt32") == 0)
+		param = ncrtVal.getUInt32();
+
+	else if (strcmp(spliceType, "SInt8") == 0)
+		param = ncrtVal.getSInt8();
+	else if (strcmp(spliceType, "SInt16") == 0)
+		param = ncrtVal.getSInt16();
+	else if (strcmp(spliceType, "SInt64") == 0)
+		param = ncrtVal.getSInt64();
+
+	else if (strcmp(spliceType, "UInt8") == 0)
+		param = ncrtVal.getUInt8();
+	else if (strcmp(spliceType, "UInt16") == 0)
+		param = ncrtVal.getUInt16();
+	else if (strcmp(spliceType, "UInt64") == 0)
+		param = ncrtVal.getUInt64();
+
+	// These last two param types may be deprecated
+	else if (strcmp(spliceType, "Size") == 0)
+		param = ncrtVal.getUInt64();
+	else if (strcmp(spliceType, "Index") == 0)
+		param = ncrtVal.getUInt64();
+
+	//param = const_cast<FabricCore::RTVal&>(rtVal).getSInt32();
 }
 
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param)
 {
-	param = static_cast<float>(const_cast<FabricCore::RTVal&>(rtVal).getFloat32());
+	FabricCore::RTVal& ncrtVal = const_cast<FabricCore::RTVal&>(rtVal);
+	const char* spliceType = rtVal.getTypeName().getStringCString();
+
+	if (strcmp(spliceType, "Float32") == 0)
+		param = ncrtVal.getFloat32();
+	if (strcmp(spliceType, "Float64") == 0)
+		param = ncrtVal.getFloat64();
+
+	//param = static_cast<float>(const_cast<FabricCore::RTVal&>(rtVal).getFloat32());
 }
 
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point3& param)

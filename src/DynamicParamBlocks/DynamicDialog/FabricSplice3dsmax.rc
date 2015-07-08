@@ -99,6 +99,7 @@ END
 
 STRINGTABLE
 BEGIN
+    IDS_LIBDESCRIPTION      "Fabric Engines DFG for 3ds Max"
     IDS_CATEGORY            "SpliceMax"
     IDS_CLASS_NAME          "DynPBCustAttr"
     IDS_PARAMS              "Parameters"

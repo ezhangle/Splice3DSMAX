@@ -382,9 +382,12 @@ public:
 	bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax);
 
 	// Add DFG Entities
-	bool AddNewEmptyGraph(const char* name);
-	bool AddNewEmptyFunc(const char* name);
-	bool AddNodeFromPreset(const char* name, const char* path);
+	const char* AddNewEmptyGraph(const char* name);
+	const char* AddNewEmptyFunc(const char* name);
+	const char* AddNodeFromPreset(const char* name, const char* path);
+
+	bool SetKLCodeForFunc(const char* name, const char* code);
+	const char* GetKLCodeForFunc(const char* name);
 
 	// Set splice values
 	//	const FabricCore::DFGBinding& GetSpliceGraph() { return getGraph(); }

@@ -72,6 +72,9 @@ public:
 		fn_newEmptyFunc,
 		fn_addNodeFromPreset,
 
+		fn_getFuncKLCode,
+		fn_setFuncKLCode,
+
 		prop_getPortCount,
 		prop_portNames,
 
@@ -123,9 +126,12 @@ public:
 		FN_3(fn_setPortOption, TYPE_bool, SetPortOptionMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_FPVALUE);
 		FN_2(fn_setPortValue, TYPE_bool, SetPortValueMSTR, TYPE_TSTR_BV, TYPE_FPVALUE);
 
-		FN_1(fn_newEmptyGraph, TYPE_bool, AddNewEmptyGraphMSTR, TYPE_TSTR_BV);
-		FN_1(fn_newEmptyFunc, TYPE_bool, AddNewEmptyFuncMSTR, TYPE_TSTR_BV);
-		FN_2(fn_addNodeFromPreset, TYPE_bool, AddNodeFromPresetMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
+		FN_1(fn_newEmptyGraph, TYPE_TSTR_BV, AddNewEmptyGraphMSTR, TYPE_TSTR_BV);
+		FN_1(fn_newEmptyFunc, TYPE_TSTR_BV, AddNewEmptyFuncMSTR, TYPE_TSTR_BV);
+		FN_2(fn_addNodeFromPreset, TYPE_TSTR_BV, AddNodeFromPresetMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
+
+		FN_1(fn_getFuncKLCode, TYPE_TSTR_BV, GetKLCodeForFuncMSTR, TYPE_TSTR_BV);
+		FN_2(fn_setFuncKLCode, TYPE_bool, SetKLCodeForFuncMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
 
 		FN_3(fn_setPortMinMax, TYPE_bool, SetPortUIMinMaxMSTR, TYPE_TSTR_BV, TYPE_FPVALUE, TYPE_FPVALUE);
 
@@ -195,9 +201,12 @@ public:
 	// Convenience functions
 	virtual bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax)=0;
 
-	virtual bool AddNewEmptyGraph(const char* name) = 0;
-	virtual bool AddNewEmptyFunc(const char* name) = 0;
-	virtual bool AddNodeFromPreset(const char* name, const char* path) = 0;
+	virtual const char* AddNewEmptyGraph(const char* name) = 0;
+	virtual const char* AddNewEmptyFunc(const char* name) = 0;
+	virtual const char* AddNodeFromPreset(const char* name, const char* path) = 0;
+
+	virtual bool SetKLCodeForFunc(const char* name, const char* code) = 0;
+	virtual const char* GetKLCodeForFunc(const char* name) = 0;
 
 	// Connect myPortName to the output port on pSrcContainer named srcPortName
 	// Returns true if successfully connected, false if for any reason the
@@ -310,12 +319,15 @@ protected:
 	MSTR_INVAL(bool, DisconnectPort);
 
 	bool SetPortOptionMSTR(const MSTR& port, const MSTR& option, FPValue* value)	{ return SetPortOption(port.ToCStr(), option.ToCStr(), value); }
-	bool SetPortValueMSTR(const MSTR& port, FPValue* value)	{ return SetPortValue(port.ToCStr(), value); }
-	bool SetPortUIMinMaxMSTR(const MSTR& port, FPValue* uiMin, FPValue* uiMax)	{ return SetPortUIMinMax(port.ToCStr(), uiMin, uiMax); }
+	bool SetPortValueMSTR(const MSTR& port, FPValue* value)							{ return SetPortValue(port.ToCStr(), value); }
+	bool SetPortUIMinMaxMSTR(const MSTR& port, FPValue* uiMin, FPValue* uiMax)		{ return SetPortUIMinMax(port.ToCStr(), uiMin, uiMax); }
 
-	MSTR_INVAL(bool, AddNewEmptyGraph);
-	MSTR_INVAL(bool, AddNewEmptyFunc);
-	bool AddNodeFromPresetMSTR(const MSTR& name, const MSTR& path) { return AddNodeFromPreset(name.ToCStr(), path.ToCStr()); }
+	MSTR AddNewEmptyGraphMSTR(MSTR& graphName)						{ return MSTR::FromACP(AddNewEmptyGraph(graphName.ToCStr())); }
+	MSTR AddNewEmptyFuncMSTR(MSTR& funcName)						{ return MSTR::FromACP(AddNewEmptyFunc(funcName.ToCStr())); }
+	MSTR AddNodeFromPresetMSTR(const MSTR& name, const MSTR& path)	{ return MSTR::FromACP(AddNodeFromPreset(name.ToCStr(), path.ToCStr())); }
+
+	bool SetKLCodeForFuncMSTR(const MSTR& funcName, MSTR& code)		{ return SetKLCodeForFunc(funcName.ToCStr(), code.ToCStr());	}
+	MSTR GetKLCodeForFuncMSTR(const MSTR& name)						{ return MSTR::FromACP(GetKLCodeForFunc(name.ToCStr()));  }
 
 	bool RestoreFromJSONMSTR(const MSTR& json, bool createMaxParams) { return RestoreFromJSON(json.ToCStr(), createMaxParams);  }
 	MSTR ExportToJSONMSTR() {
@@ -434,15 +446,19 @@ FPInterfaceDesc* GetDescriptor()
 				_M("uiMin"),	0,	TYPE_FPVALUE, 
 				_M("uiMax"),	0,	TYPE_FPVALUE, 
 
-			SpliceTranslationFPInterface::fn_newEmptyFunc, _T("AddNewEmptyFunc"), 0, TYPE_bool, 0, 1,
+			SpliceTranslationFPInterface::fn_newEmptyFunc, _T("AddNewEmptyFunc"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("name"), 0, TYPE_TSTR_BV,
-			SpliceTranslationFPInterface::fn_newEmptyGraph, _T("AddNewEmptyGraph"), 0, TYPE_bool, 0, 1,
+			SpliceTranslationFPInterface::fn_newEmptyGraph, _T("AddNewEmptyGraph"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("name"), 0, TYPE_TSTR_BV,
-			SpliceTranslationFPInterface::fn_addNodeFromPreset, _T("AddNodeFromPreset"), 0, TYPE_bool, 0, 2,
+			SpliceTranslationFPInterface::fn_addNodeFromPreset, _T("AddNodeFromPreset"), 0, TYPE_TSTR_BV, 0, 2,
 				_M("name"), 0, TYPE_TSTR_BV,
 				_M("presetPath"), 0, TYPE_TSTR_BV,
 
-
+			SpliceTranslationFPInterface::fn_getFuncKLCode, _T("GetFuncKLCode"), 0, TYPE_TSTR_BV, 0, 1,
+				_M("funcPath"), 0, TYPE_TSTR_BV,
+			SpliceTranslationFPInterface::fn_setFuncKLCode, _T("SetFuncKLCode"), 0, TYPE_bool, 0, 2,
+				_M("funcPath"), 0, TYPE_TSTR_BV,
+				_M("code"), 0, TYPE_TSTR_BV,
 		properties,
 			SpliceTranslationFPInterface::prop_getPortCount, FP_NO_FUNCTION, _T("PortCount"), 0, TYPE_INT,
 			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_SetOutPort, _T("OutPort"), 0, TYPE_TSTR_BV,

@@ -205,7 +205,6 @@ public:
 			FabricCore::RTVal rtYon = FabricCore::RTVal::ConstructFloat64(client, yon);
 			inlineCamera.callMethod("", "setFarDistance", 1, &rtYon);
 
-
 			FabricCore::RTVal cameraMat = FabricCore::RTVal::Construct(client, "Mat44", 0, nullptr);
 			FabricCore::RTVal cameraMatData = cameraMat.callMethod("Data", "data", 0, 0);
 

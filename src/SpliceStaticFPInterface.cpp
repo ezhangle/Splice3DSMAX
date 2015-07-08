@@ -146,25 +146,23 @@ MSTR SpliceStaticFPInterface::GetGlobalKLOperatorName(int index)
 
 BOOL SpliceStaticFPInterface::LoadExtension( const MSTR& extension, const MSTR& version, bool reload)
 {
-	//const FabricCore::Client* pClient = NULL;
-	//FECS_DGGraph_getClient(&pClient);
+	//MAXSPLICE_CATCH_BEGIN
 
-	//// No client, nothing to do (the extension will be loaded when requested
-	//if(pClient == nullptr)
-	//	return FALSE;
+	CStr cExtension = extension.ToCStr();
+	CStr cVersion = version.ToCStr();
 
-	//CStr cExtension = extension.ToCStr();
-	//CStr cVersion = version.ToCStr();
-	//FEC_ClientLoadExtension(pClient->getFECClientRef(), cExtension.data(), cVersion.data(), reload);
+	GetClient().loadExtension(cExtension.data(), cVersion.data(), reload);
 
 	//// If the call failed for any reason, we need to clear the exception status from Fabric
-	//uint32_t length = FEC_GetLastExceptionLength();
-	//if ( length > 0 )
-	//{
-	//	MSTR message = MSTR::FromACP(FEC_GetLastExceptionCString(), length);
-	//	FEC_ClearLastException();
-	//	throw UserThrownError(message.data(), FALSE);
-	//}
+	uint32_t length = FEC_GetLastExceptionLength();
+	if ( length > 0 )
+	{
+		MSTR message = MSTR::FromACP(FEC_GetLastExceptionCString(), length);
+		FEC_ClearLastException();
+		throw UserThrownError(message.data(), FALSE);
+	}
+
+	//MAXSPLICE_CATCH_RETURN(false);
 	return TRUE;
 }
 

@@ -172,12 +172,12 @@ void MaxDFGNotificationRouter::onExecPortRemoved(FTL::CStrRef portName)
 	if (theHold.RestoreOrRedoing())
 		return;
 	
-	//	HoldActions hold(_M("Splice Remove Port"));
-	//	if (theHold.Holding())
-	//		theHold.Put(new SplicePortChangeObject(this));
+	if (GetExec().getExecPortType(portName.c_str()) != FabricCore::DFGPortType_In)
+	{
+		m_pInterface->SetMaxConnectedType(portName.c_str(), -1);
+	}
 	
 	// Ensure the max data is released
-	m_pInterface->SetMaxConnectedType(portName.c_str(), -1);
 	//int pid = GetPortParamID(GetBinding(), portName.c_str());
 	//if (pid >= 0)
 	//	m_pInterface->DeleteMaxParameter((ParamID)pid);

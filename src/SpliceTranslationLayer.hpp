@@ -71,6 +71,10 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
 		m_ctrl = new MaxDFGController(NULL, GetCommandStack(), manager, m_binding, m_binding.getExec(), false);
 		m_ctrl->setRouter(m_router);
 
+
+		// Enforce loading the Util extension to ensure that EvalContext is available to us
+		GetClient().loadExtension("Util", "", false);
+
 		// set the graph on the view
 		//setGraph(DFGWrapper::GraphExecutablePtr::StaticCast(m_binding.getExecutable()));
 
@@ -78,6 +82,8 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
 		//m_graph = FabricCore::DFGBinding("3dsMaxGraph");
 		//m_graph.constructDGNode();
 		//m_graph.setUserPointer(this);
+
+		
 
 		// Set static context values
 		//MSTR filepath = GetCOREInterface()->GetCurFilePath();
@@ -1065,20 +1071,63 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortUIMinMax(const char
 }
 
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::AddNewEmptyGraph(const char* name)
+const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddNewEmptyGraph(const char* name)
 {
-	return false;
+	FabricCore::DFGExec graph = m_binding.getExec();
+	const char* newItem = graph.addInstWithNewGraph(name);
+	graph.setInstTitle(newItem, name);
+	return newItem;
 }
+
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::AddNewEmptyFunc(const char* name)
+const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddNewEmptyFunc(const char* name)
 {
-	return false;
+	FabricCore::DFGExec graph = m_binding.getExec();
+	const char* newItem = graph.addInstWithNewFunc(name);
+	graph.setInstTitle(newItem, name);
+
+	return newItem;
 }
+
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::AddNodeFromPreset(const char* name, const char* path)
+const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddNodeFromPreset(const char* name, const char* path)
 {
-	return false;
+
+	FabricCore::DFGExec graph = m_binding.getExec();
+	const char* newItem = graph.addInstFromPreset(path);
+	graph.setInstTitle(newItem, name);
+	return newItem;
 }
+
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCodeForFunc(const char* funcPath, const char* code)
+{
+	FabricCore::DFGExec graph = m_binding.getExec();
+	
+	FabricCore::DFGExec subExec = graph.getSubExec(funcPath);
+	if (!subExec.isValid())
+		return false;
+
+	subExec.setCode(code);
+	return true;
+}
+
+template<typename TBaseClass, typename TResultType>
+const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetKLCodeForFunc(const char* funcPath)
+{
+	//MAXSPLICE_CATCH_BEGIN
+
+		FabricCore::DFGExec graph = m_binding.getExec();
+		FabricCore::DFGExec subExec = graph.getSubExec(funcPath);
+		if (!subExec.isValid())
+			return "";
+
+		return subExec.getCode();
+
+	//MAXSPLICE_CATCH_END
+	//return "";
+}
+
 
 //template<typename TBaseClass, typename TResultType>
 //void SpliceTranslationLayer<TBaseClass, TResultType>::SetSpliceGraph(const FabricCore::DFGBinding& binding, bool createMaxParams) 

@@ -233,7 +233,8 @@ void ConvertToRTVal(int param, FabricCore::RTVal& rtVal)
 	if (!rtVal.isValid())
 		return;
 
-	const char* spliceType = rtVal.getTypeName().getStringCString();
+	FabricCore::RTVal type = rtVal.getTypeName();
+	const char* spliceType = type.getStringCString();
 	if (strcmp(spliceType, "SInt32") == 0)
 		rtVal = FabricCore::RTVal::ConstructSInt32(GetClient(), param);
 	else if (strcmp(spliceType, "UInt32") == 0)
@@ -265,12 +266,13 @@ void ConvertToRTVal(float param, FabricCore::RTVal& val)
 	if (!val.isValid())
 		return;
 
-	const char* spliceType = val.getTypeName().getStringCString();
+	FabricCore::RTVal type = val.getTypeName();
+	const char* spliceType = type.getStringCString();
 
 	if (strcmp(spliceType, "Float32") == 0)
 		val.setFloat32(param);
 	if (strcmp(spliceType, "Float64") == 0)
-		param = FabricCore::RTVal::ConstructFloat64(GetClient(), param);
+		val = FabricCore::RTVal::ConstructFloat64(GetClient(), param);
 }
 
 void ConvertToRTVal(bool param, FabricCore::RTVal& val)

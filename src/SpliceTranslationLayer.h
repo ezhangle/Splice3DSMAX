@@ -156,11 +156,6 @@ protected:
 	//! We cache based on Max's animation validity intervals
 	Interval m_valid;
 
-	//! The callback from the DFG graph is responsible for updating this class
-	//! in response to changes at the DFG level (ie, new params, etc)
-	MaxDFGNotificationRouter* m_router;
-	MaxDFGController* m_ctrl;
-
 #pragma endregion
 
 #pragma region Splice Connections
@@ -174,6 +169,14 @@ protected:
 	// of each parameter.  We only reset data on Splice
 	// if the parameter has actually changed.
 	std::vector<Interval> m_portValidities;
+
+	//! The eval context is responsible for sending host info to the graph (eg time, filepath etc)
+	FabricCore::RTVal m_evalContext;
+
+	//! The callback from the DFG graph is responsible for updating this class
+	//! in response to changes at the DFG level (ie, new params, etc)
+	MaxDFGNotificationRouter* m_router;
+	MaxDFGController* m_ctrl;
 #pragma endregion
 
 public:
@@ -408,6 +411,8 @@ public:
 	bool GraphCanEvaluate();
 	/// Invalidate our cached values, will cause a re-evalaute of the graph next evaluation
 	void Invalidate() { m_valid.SetEmpty(); }
+	// Send DCC info to graph (time, name, etc)
+	void SetupEvalContext(TimeValue t);
 	// Push our parameters to the Splice system, and get the results back...
 	const TResultType& Evaluate(TimeValue t, Interval& ivValid);
 	// Do an evaluation, but do not return the calculated value

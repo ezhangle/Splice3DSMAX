@@ -1264,22 +1264,27 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::GraphCanEvaluate()
 		return false;
 
 	return (rootExec.getErrorCount() == 0);
+}
 
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::SetupEvalContext(TimeValue t)
+{
+	FabricCore::Client& client = GetClient();
+	if (!m_evalContext.isValid())
+	{
+		m_evalContext = FabricCore::RTVal::Create(client, "EvalContext", 0, 0);
+		m_evalContext = m_evalContext.callMethod("EvalContext", "getInstance", 0, 0);
+		m_evalContext.setMember("host", FabricCore::RTVal::ConstructString(client, "3dsMax"));
 
-
-	//// If we aren't able to receive a value, abort
-	//if (!m_binding.getExec().haveExecPort(m_outArgName.c_str())) {
-	//	return false;
-	//}
-
-	//// If we aren't able to receive a value, abort
-	//if (!m_binding.getExec().isConnectedToAny(m_outArgName.c_str())) {
-	//	return false;
-	//}
-	////if (m_outArgName.isNull() || !m_outArgName->isValid() || !m_outArgName->isConnectedToAny())
-	////	return false;
-	//// All checks passed
-	//return true;
+		CStr filename = GetCOREInterface()->GetCurFilePath().ToCStr();
+		m_evalContext.setMember("currentFilePath", FabricCore::RTVal::ConstructString(client, filename.data()));
+	}
+	if (m_evalContext.isValid())
+	{
+		CStr graphName = GetGraphName().ToCStr();
+		m_evalContext.setMember("graph", FabricCore::RTVal::ConstructString(client, graphName.data()));
+		m_evalContext.setMember("time", FabricCore::RTVal::ConstructFloat32(client, TicksToSec(t)));
+	}
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -1293,6 +1298,8 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 	if (!m_valid.InInterval(t))
 	{
 		MAXSPLICE_CATCH_BEGIN();
+
+		SetupEvalContext(t);
 
 		//bool usesTime = m_graph.usesEvalContext();
 		//if(usesTime)

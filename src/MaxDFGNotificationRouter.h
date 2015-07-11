@@ -14,6 +14,7 @@ public:
 #pragma region DFG-derived functions
 
 	// DFG Change notifications
+	void onNotification(FTL::CStrRef json);
 
 	void onNodeInserted(
 		FTL::CStrRef nodeName,

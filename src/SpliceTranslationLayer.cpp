@@ -337,7 +337,7 @@ void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::RTVal& 
 
 void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::DFGBinding& binding, const char* argName) {
 
-	char const *resolvedType = GetPortType(binding, argName);
+	char const *resolvedType = GetPortType(binding.getExec(), argName);
 	if (!resolvedType)
 		return;
 
@@ -711,14 +711,14 @@ void SetPortConnection(FabricCore::DFGBinding& binding, const char* argName, con
 //	return aPort->getName();
 //}
 
-const char* GetPortType( FabricCore::DFGBinding& binding, const char* argName )
+const char* GetPortType( FabricCore::DFGExec exec, const char* argName )
 {
-	return binding.getExec().getExecPortResolvedType(argName);
+	return exec.getExecPortResolvedType(argName);
 }
 
-int GetPort3dsMaxType(FabricCore::DFGBinding& binding, const char* argName)
+int GetPort3dsMaxType(FabricCore::DFGExec& exec, const char* argName)
 {
-	const char* idstr = binding.getExec().getExecPortMetadata(argName, MAX_PARM_TYPE_OPT);
+	const char* idstr = exec.getExecPortMetadata(argName, MAX_PARM_TYPE_OPT);
 	if (idstr != nullptr && idstr[0] != '\0') {
 		return atoi(idstr);
 	}
@@ -764,10 +764,26 @@ bool SetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue*
 BitArray SpliceTypeToMaxTypes(const char* cType)
 {
 	BitArray res(TYPE_DOUBLE);
+
+	if (cType == NULL)
+		return res;
+
 	if (strcmp(cType, "Integer") == 0 ||
-		strcmp(cType, "Size") == 0)
+		strcmp(cType, "Size") == 0 ||
+		strcmp(cType, "UInt32") == 0 ||
+		strcmp(cType, "UInt16") == 0 ||
+		strcmp(cType, "UInt8") == 0 ||
+		strcmp(cType, "UInt64") == 0 ||
+		strcmp(cType, "SInt32") == 0 ||
+		strcmp(cType, "SInt16") == 0 ||
+		strcmp(cType, "SInt8") == 0 ||
+		strcmp(cType, "SInt64") == 0)
+	{
 		res.Set(TYPE_INT);
-	else if (strcmp(cType, "Scalar") == 0)
+	}
+	else if (strcmp(cType, "Scalar") == 0 || 
+		strcmp(cType, "Float32") == 0 || 
+		strcmp(cType, "Float64") == 0)
 	{
 		res.Set(TYPE_FLOAT);
 		res.Set(TYPE_ANGLE);
@@ -786,7 +802,10 @@ BitArray SpliceTypeToMaxTypes(const char* cType)
 		res.Set(TYPE_INODE);	// Devolves to position
 	}
 	else if (strcmp(cType, "Vec4") == 0)
+	{
 		res.Set(TYPE_POINT4);
+		res.Set(TYPE_FRGBA);
+	}
 	else if (strcmp(cType, "Boolean") == 0)
 		res.Set(TYPE_BOOL);
 	else if (strcmp(cType, "Mat44") == 0)

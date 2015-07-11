@@ -92,9 +92,9 @@ void SetPortConnection(FabricCore::DFGBinding& binding, const char* argName, con
 //bool GetPortPostConnectionUI(DFGWrapper::ExecPortPtr& aPort);
 //void SetPortPostConnectionUI(DFGWrapper::ExecPortPtr& aPort, bool postUi);
 //const char* GetPortName(DFGWrapper::ExecPortPtr& aPort);
-const char* GetPortType(FabricCore::DFGBinding& binding, const char* argName);
+const char* GetPortType(FabricCore::DFGExec binding, const char* argName);
 
-int GetPort3dsMaxType(FabricCore::DFGBinding& binding, const char* argName);
+int GetPort3dsMaxType(FabricCore::DFGExec& binding, const char* argName);
 void SetPort3dsMaxType(FabricCore::DFGBinding& binding, const char* argName, int type);
 
 bool SetPortOption(FabricCore::DFGBinding& binding, const char* argName, const char* option, FPValue* value);

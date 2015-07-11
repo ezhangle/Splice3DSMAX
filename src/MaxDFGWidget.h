@@ -9,12 +9,14 @@ using namespace FabricServices;
 using namespace FabricUI;
 
 
-class DFGWidget : public DFG::DFGCombinedWidget {
+class MaxDFGWidget : public DFG::DFGCombinedWidget {
   
+	Q_OBJECT
+
 public:
 	
-	DFGWidget(QWidget * parent, FabricCore::DFGBinding& binding);
-	~DFGWidget();
+	MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding);
+	~MaxDFGWidget();
 
   //static QWidget * creator(QWidget * parent, const QString & name);
   
@@ -27,7 +29,11 @@ public:
 	virtual void onStructureChanged() override;
 	virtual void onRecompilation() override;
 
-private:
+	private slots:
 
-  //FabricServices::DFGWrapper::Host* m_host;
+	void whenPortEditDialogCreated(FabricUI::DFG::DFGBaseDialog * dialog) override;
+	void whenPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog * dialog) override;
+
+	//void editDialogCreated(DFG::DFGBaseDialog * dialog);
+	//void editDialogInvoked(DFG::DFGBaseDialog * dialog);
 };

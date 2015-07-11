@@ -19,6 +19,27 @@ MaxDFGNotificationRouter::~MaxDFGNotificationRouter()
 //
 
 
+void MaxDFGNotificationRouter::onNotification(FTL::CStrRef json)
+{
+	FTL::JSONStrWithLoc jsonStrWithLoc(json);
+	FTL::OwnedPtr<FTL::JSONObject> jsonObject(
+		FTL::JSONValue::Decode(jsonStrWithLoc)->cast<FTL::JSONObject>()
+		);
+	FTL::StrRef descStr = jsonObject->getString(FTL_STR("desc"));
+
+	// TODO: Remove this once the naming bug is fixed in DFGNotificationRouter
+	if (descStr == FTL_STR("execPortMetadataChanged"))
+	{
+		onExecPortMetadataChanged(
+			jsonObject->getString(FTL_STR("portName")),
+			jsonObject->getString(FTL_STR("key")),
+			jsonObject->getString(FTL_STR("value"))
+			);
+	}
+	else
+		__super::onNotification(json);
+}
+
 void MaxDFGNotificationRouter::onFuncCodeChanged(FTL::CStrRef code)
 {
 	__super::onFuncCodeChanged(code);
@@ -51,6 +72,11 @@ void MaxDFGNotificationRouter::onNodePortMetadataChanged(FTL::CStrRef nodeName, 
 
 void MaxDFGNotificationRouter::onExecPortMetadataChanged(FTL::CStrRef portName, FTL::CStrRef key, FTL::CStrRef value)
 {
+	if (key == MAX_PARM_TYPE_OPT)
+	{
+		int type = atoi(value.data());
+		m_pInterface->SetMaxConnectedType(portName.c_str(), type);
+	}
 	__super::onExecPortMetadataChanged(portName, key, value);
 }
 

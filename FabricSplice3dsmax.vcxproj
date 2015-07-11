@@ -46,7 +46,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\DFGWidget.cpp" />
+    <ClCompile Include="src\MaxDFGWidget.cpp" />
     <ClCompile Include="src\DockableWidget.cpp" />
     <ClCompile Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.cpp" />
     <ClCompile Include="src\DynamicParamBlocks\DynPBUndo.cpp" />
@@ -54,6 +54,9 @@
     <ClCompile Include="src\MaxConversionFns.cpp" />
     <ClCompile Include="src\MaxDFGController.cpp" />
     <ClCompile Include="src\MaxDFGNotificationRouter.cpp" />
+    <ClCompile Include="src\moc_MaxDFGWidget.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug 2015|x64'">StdAfx.h</ForcedIncludeFiles>
+    </ClCompile>
     <ClCompile Include="src\MouseCallbacks\SpliceCommandMode.cpp" />
     <ClCompile Include="src\MouseCallbacks\SpliceMouseCallback.cpp" />
     <ClCompile Include="src\SpliceControlFloat.cpp" />
@@ -74,7 +77,11 @@
     <ClCompile Include="src\StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClInclude Include="src\DFGWidget.h" />
+    <CustomBuild Include="src\MaxDFGWidget.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug 2015|x64'">$(QT_DIR)/bin/moc -o "%(RelativeDir)moc_%(Filename).cpp" "%(FullPath)"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug 2015|x64'">moc_%(Filename).cpp</Outputs>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug 2015|x64'">true</TreatOutputAsContent>
+    </CustomBuild>
     <ClInclude Include="src\DockableWidget.h" />
     <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\resource.h" />
     <ClInclude Include="src\MaxCommandStack.h" />

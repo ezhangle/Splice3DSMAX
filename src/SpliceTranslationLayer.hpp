@@ -855,7 +855,7 @@ const char* SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(const c
 template<typename TBaseClass, typename TResultType>
 const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetPortType(const char* argName)
 {
-	return ::GetPortType(m_binding, argName);
+	return ::GetPortType(m_binding.getExec(), argName);
 }
 
 
@@ -873,7 +873,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPort(const char* arg
 	MAXSPLICE_CATCH_BEGIN()
 
 	// can this port be translated to our out-type?
-	BitArray legalTypes = SpliceTypeToMaxTypes(::GetPortType(m_binding, argName));
+	BitArray legalTypes = SpliceTypeToMaxTypes(GetPortType(argName));
 	if (!legalTypes[GetValueType()])
 		return false;
 
@@ -976,7 +976,7 @@ template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(const char* argName, int maxType)
 {
 	// The user has requested the default type (-2)
-	const char* spliceType = ::GetPortType(m_binding, argName);
+	const char* spliceType = GetPortType(argName);
 	if (maxType == -2)
 		maxType = SpliceTypeToDefaultMaxType(spliceType);
 	else if (maxType == -1) 
@@ -1266,7 +1266,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const char
 			if (exec.getExecPortType(i) == FabricCore::DFGPortType_Out)
 			{
 				exec.getExecPortResolvedType(i);
-				BitArray compatibleTypes = SpliceTypeToMaxTypes(::GetPortType(m_binding, portName));
+				BitArray compatibleTypes = SpliceTypeToMaxTypes(GetPortType(portName));
 				// If this splice type is compatible with this classes output,
 				// set this port as our outport
 				if (compatibleTypes[GetValueType()])

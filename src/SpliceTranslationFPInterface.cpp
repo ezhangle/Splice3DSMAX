@@ -4,7 +4,7 @@
 #include <MaxScript/MaxScript.h>
 #include <maxscript\foundation\functions.h>
 #include <maxscript\maxwrapper\mxsobjects.h>
-#include "DFGWidget.h"
+#include "MaxDFGWidget.h"
 #include "DockableWidget.h"
 
 #include "../qt-solutions/qtwinmigrate/src/qwinwidget.h"
@@ -30,7 +30,7 @@ BOOL SpliceTranslationFPInterface::ShowDFGGraphEditor()
 	m_pDFGWidgetWindow = DockableWindow::Create(_T("Fabric DFG"));
 	HWND h = m_pDFGWidgetWindow->GetHWND();
 	QWinWidget* dlg = new QWinWidget(h);
-	DFGWidget* pWidget = new DFGWidget(dlg, GetBinding());
+	MaxDFGWidget* pWidget = new MaxDFGWidget(dlg, GetBinding());
 
 	m_pDFGWidgetWindow->SetWidget(dlg);
 	return TRUE;

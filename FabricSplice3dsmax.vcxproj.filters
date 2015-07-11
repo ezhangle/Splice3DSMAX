@@ -60,9 +60,6 @@
     <ClCompile Include="src\SpliceWSModifier.cpp">
       <Filter>MaxImplementations</Filter>
     </ClCompile>
-    <ClCompile Include="src\DFGWidget.cpp">
-      <Filter>DFGWidget</Filter>
-    </ClCompile>
     <ClCompile Include="src\DockableWidget.cpp">
       <Filter>DFGWidget</Filter>
     </ClCompile>
@@ -74,6 +71,12 @@
     </ClCompile>
     <ClCompile Include="src\MaxDFGNotificationRouter.cpp">
       <Filter>SpliceTranslation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MaxDFGWidget.cpp">
+      <Filter>DFGWidget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\moc_MaxDFGWidget.cpp">
+      <Filter>DFGWidget</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -127,9 +130,6 @@
     </ClInclude>
     <ClInclude Include="src\SpliceWSModifier.h">
       <Filter>MaxImplementations</Filter>
-    </ClInclude>
-    <ClInclude Include="src\DFGWidget.h">
-      <Filter>DFGWidget</Filter>
     </ClInclude>
     <ClInclude Include="src\DockableWidget.h">
       <Filter>DFGWidget</Filter>
@@ -225,5 +225,10 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\DynamicParamBlocks\DynamicDialog\FabricSplice3dsmax.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="src\MaxDFGWidget.h">
+      <Filter>DFGWidget</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

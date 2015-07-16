@@ -273,7 +273,7 @@ void SetMaxParamLimits(ParamBlockDesc2* pDesc, FabricCore::DFGBinding& binding, 
 	//rangeStr = rangeStr.substr(1, rangeStr.length() - 1);
 	size_t splitIdx = rangeStr.find(',');
 	std::string firstValStr = rangeStr.substr(1, splitIdx - 1);
-	std::string secondValStr = rangeStr.substr(splitIdx + 2, rangeStr.length() - 1);
+	std::string secondValStr = rangeStr.substr(splitIdx + 1, rangeStr.length() - (splitIdx + 2));
 	
 	//DbgAssert(uiRange.isArray() && uiRange.getArraySize() == 2);
 	//const FabricCore::Variant* uiMin = uiRange.getArrayElement(0);
@@ -770,53 +770,82 @@ bool GetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue&
 	switch (type)
 	{
 	case TYPE_INT:
-		SpliceToMaxValue(rtVal, value.i);
-		break;
+	{
+		int i;
+		SpliceToMaxValue(rtVal, i);
+		value.Load(TYPE_INT, i);
+	}
+	break;
 	case TYPE_BOOL:
-		SpliceToMaxValue(rtVal, value.b);
+	{
+		bool b;
+		SpliceToMaxValue(rtVal, b);
+		value.Load(TYPE_BOOL, b);
 		break;
+	}
 	case TYPE_FLOAT:
-		SpliceToMaxValue(rtVal, value.f);
+	{
+		float f;
+		SpliceToMaxValue(rtVal, f);
+		value.Load(TYPE_FLOAT, f);
 		break;
+	}
 	case TYPE_FRGBA:
-		value.p4 = new Point4;
-		SpliceToMaxValue(rtVal, *value.p4);
+	{
+		Point4 p4;
+		SpliceToMaxValue(rtVal, p4);
+		value.Load(TYPE_FRGBA, p4);
 		break;
+	}
 	case TYPE_POINT2:
-		value.p2 = new Point2;
-		SpliceToMaxValue(rtVal, *value.p2);
+	{
+		Point2 p2;
+		SpliceToMaxValue(rtVal, p2);
+		value.Load(TYPE_POINT2, p2);
 		break;
+	}
 	case TYPE_POINT3:
-		//value.p = new Point3;
 	{
 		Point3 v;
 		SpliceToMaxValue(rtVal, v);
-		value.LoadPtr(TYPE_POINT3, &v);
+		value.Load(TYPE_POINT3, v);
 		break;
 	}
 	case TYPE_POINT4:
 	{
-		value.p4 = new Point4;
-		SpliceToMaxValue(rtVal, *value.p4);
+		Point4 p4;
+		SpliceToMaxValue(rtVal, p4);
+		value.Load(TYPE_POINT4, p4);
 		break;
 	}
 	case TYPE_MATRIX3:
-		value.m = new Matrix3;
-		SpliceToMaxValue(rtVal, *value.m);
+	{
+		Matrix3 m;
+		SpliceToMaxValue(rtVal, m);
+		value.Load(TYPE_MATRIX3, m);
 		break;
+	}
 	case TYPE_QUAT:
-		value.q = new Quat;
-		SpliceToMaxValue(rtVal, *value.q);
+	{
+		Quat q;
+		SpliceToMaxValue(rtVal, q);
+		value.Load(TYPE_QUAT, q);
 		break;
+	}
 	case TYPE_STRING:
-		value.tstr = new TSTR;
-		SpliceToMaxValue(rtVal, *value.tstr);
+	{
+		TSTR tstr;
+		SpliceToMaxValue(rtVal, tstr);
+		value.Load(TYPE_TSTR, tstr);
 		break;
+	}
 	case TYPE_MESH:
+	{
 		Mesh mesh;
 		SpliceToMaxValue(rtVal, mesh);
-		value.LoadPtr(TYPE_MESH, &mesh);
+		value.Load(TYPE_MESH, mesh);
 		break;
+	}
 
 	}
 	return true;

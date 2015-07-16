@@ -41,4 +41,5 @@ m.SetPortMetaData "outPort" "isAwesome" "true" canUndo:false
 res = m.GetPortMetaData "outPort" "isAwesome" 
 assert (res == "true") message:"MetaData not set" options:#(#dialog)
 
-m.SetPortValue "newPOrt" (Point3 0 10 0)
+--m.SetPortValue "newPOrt" (Point3 0 10 0)
+m.SetPortMinMax "newPOrt" 0 10

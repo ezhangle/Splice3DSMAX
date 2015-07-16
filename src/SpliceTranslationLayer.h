@@ -373,7 +373,6 @@ public:
 
 	// Allow setting various options on ports 
 	// Set UI limits.  This will not actually limit the value, but for sliders etc it will limit what is presented to the user.
-	bool SetPortMetaData(const char* port, const char* option, const char* value);
 	bool SetPortValue(const char* name, FPValue* value);
 	bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax);
 

@@ -856,27 +856,26 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(const c
 template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortUIMinMax(const char* argName, FPValue* uiMin, FPValue* uiMax)
 {
+	// For now, we only support Float/Int max types
+	if ((uiMin->type == TYPE_FLOAT && uiMax->type == TYPE_FLOAT) ||
+		(uiMin->type == TYPE_INT && uiMax->type == TYPE_INT))
+	{
+		char buffer[128];
+		if (uiMax->type == TYPE_FLOAT)
+		{
+			float min = uiMin->f;
+			float max = uiMax->f;
+			sprintf_s(buffer, "(%f,%f)", min, max);
+		}
+		else
+		{
+			int min = uiMin->i;
+			int max = uiMax->i;
+			sprintf_s(buffer, "(%i,%i)", min, max);
+		}
+		return SetPortMetaData(argName, "uiRange", buffer, theHold.Holding());
+	}
 	return false;
-	//DFGWrapper::ExecPortPtr aPort = GetPort(argName);
-	//if (!aPort)
-	//	return false;
-
-	//bool res = true;
-	//res &= ::SetPortOption(aPort, "uiMin", uiMin);
-	//res &= ::SetPortOption(aPort, "uiMax", uiMax);
-	//if (m_pblock != nullptr) 
-	//{
-	//	int pid = ::GetPortParamID(aPort);
-	//	if (pid >= 0)
-	//	{
-	//		MaybeRemoveParamUI();
-	//		SetMaxParamLimits(m_pblock->GetDesc(), (ParamID)pid, aPort);
-	//		// Delete existing autogen UI
-	//		SAFE_DELETE(m_dialogTemplate);
-	//		MaybePostParamUI();
-	//	}
-	//}
-	//return res;
 }
 
 template<typename TBaseClass, typename TResultType>

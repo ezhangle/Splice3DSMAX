@@ -9,6 +9,7 @@
 
 #include "../qt-solutions/qtwinmigrate/src/qwinwidget.h"
 #include "../qt-solutions/qtwinmigrate/src/QMfcApp"
+#include "Splice3dsmax.h"
 
 SpliceTranslationFPInterface::SpliceTranslationFPInterface()
 	: m_klEditor(nullptr)
@@ -34,18 +35,6 @@ BOOL SpliceTranslationFPInterface::ShowDFGGraphEditor()
 
 	m_pDFGWidgetWindow->SetWidget(dlg);
 	return TRUE;
-}
-
-BOOL SpliceTranslationFPInterface::SetSpliceGraph(ReferenceTarget* rtarg)
-{
-	SpliceTranslationFPInterface* pTargetInterface = static_cast<SpliceTranslationFPInterface*>(rtarg->GetInterface(ISPLICE__INTERFACE));
-	if (pTargetInterface != nullptr)
-	{
-		// We are going to share the graph of the target interface
-		//SetSpliceGraph(pTargetInterface->GetSpliceGraph(), rtarg->GetParamBlock(0));
-		//return TRUE;
-	}
-	return FALSE;
 }
 
 //bool SpliceTranslationFPInterface::RemovePortMSTR(const MSTR& name) 
@@ -105,6 +94,24 @@ MSTR SpliceTranslationFPInterface::GetGraphName()
 	FabricCore::DFGExec exec = binding.getExec();
 	const char* title = exec.getTitle();
 	return MSTR::FromACP(title);
+}
+
+bool SpliceTranslationFPInterface::SetPortMetaData(const char* port, const char* option, const char* value, bool canUndo)
+{
+	MAXSPLICE_CATCH_BEGIN()
+	GetBinding().getExec().setExecPortMetadata(port, option, value, canUndo);
+	MAXSPLICE_CATCH_RETURN(false);
+	return true;
+}
+
+const char* SpliceTranslationFPInterface::GetPortMetaData(const char* port, const char* option)
+{
+	return GetBinding().getExec().getExecPortMetadata(port, option);
+}
+
+bool SpliceTranslationFPInterface::SetPortValue(const char* port, FPValue* value)
+{
+	return ::SetPortValue(GetBinding(), port, value);
 }
 
 Value* CallMaxScriptFunction(MCHAR* function, ReferenceTarget* fnArgument, bool returnResult) 

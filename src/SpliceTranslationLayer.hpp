@@ -647,181 +647,27 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 //---------------------------------------------------------------------------------------------------------------
 #pragma region MaxScript function
 
-template<typename TBaseClass, typename TResultType>
-std::string SpliceTranslationLayer<TBaseClass, TResultType>::GetKLCode()
-{
-	MAXSPLICE_CATCH_BEGIN()
-
-	std::string cName = GetKLOperatorName();
-	//if (m_graph.getKLOperatorCount() > 0)
-	//{
-	//	// If we have a valid graph, return code
-	//	// for our classes operator
-	//	return m_graph.getKLOperatorSourceCode(cName.data());
-	//}
-
-	// generate default operator code.
-
-	// If we are generating sample code, ensure that we 
-	// have all the necessary ports initialized
-	// Otherwise they won't be included in the sample code
-	if (strcmp(GetOutPortName(), "") == 0)
-	{
-		std::string cOutPortName = cName + "Val";
-		SetOutPort(cOutPortName.data());
-	}
-
-	// Generate sample operator code and return
-	//FabricCore::Variant generatedCode = m_graph.generateKLOperatorSourceCode(cName.data());
-	//return generatedCode.getString_cstr();
-
-	MAXSPLICE_CATCH_RETURN(std::string())
-		return "";
-}
-
-template<typename TBaseClass, typename TResultType>
-std::string SpliceTranslationLayer<TBaseClass, TResultType>::GetKLOperatorName()
-{
-	MAXSPLICE_CATCH_BEGIN()
-
-	//if (m_graph.getKLOperatorCount() > 0)
-	//{
-	//	// If we have a graph, get default name (TODO: Explicitly find
-	//	// our operators name (can we do that?)
-	//	return m_graph.getKLOperatorName();
-	//}
-
-	// By default, we use the internal name as our operator name (The MaxScript name)
-	std::string cDefName = CStr::FromMCHAR(GetClassDesc()->InternalName());
-	return cDefName;
-
-	MAXSPLICE_CATCH_RETURN(std::string())
-}
-
-template<typename TBaseClass, typename TResultType>
-std::string SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCode(const std::string& entry, const std::string& script)
-{
-
-	if (entry.empty())
-		return "ERROR: No entry point specified";// TODO: Globalize this
-	if (script.empty())
-		return "ERROR: Cannot cannot compile empty script";// TODO: Globalize this
-
-	GatherCompilerResults doGather;
-
-	// Try-catch
-	MAXSPLICE_CATCH_BEGIN()
-
-		// Try initializing 
-		bool success = false;
-
-		//DFGWrapper::GraphExecutablePtr graph = DFGWrapper::GraphExecutablePtr::StaticCast(GetBinding().getExecutable());
-
-		// add a report node
-		//DFGWrapper::NodePtr reportNode = graph->addNodeFromPreset("Fabric.Core.Func.Report");
-		//m_binding.getExecutable()
-		//FabricCore::DFGExec& coreExec = m_binding.getExecutable()->getWrappedCoreExec();
-
-		//const char* cnode = coreExec.addNodeWithNewFunc(entry.data());
-		//cnode;
-		//int nNodes = graph->getNodes().size();
-		//if (nNodes == 1)
-		//{
-		//	DFGWrapper::NodePtr funcNode = graph->addNodeWithNewFunc("DummyFunc");
-		//	bool wtf = funcNode->isFunc();
-		//	wtf;
-		//}
-		//nNodes = graph->getNodes().size();
-
-		//
-
-		//DFGWrapper::FuncExecutablePtr realFunc = DFGWrapper::FuncExecutable::Create(GetBinding().getWrappedCoreBinding(), GetBinding().getWrappedCoreBinding().getExec(), entry.c_str());
-		//nNodes = graph->getNodes().size();
-		//realFunc->setCode(script.c_str());
-
-		// add a report node
-		//const char* crnode = coreExec.addNodeFromPreset("Fabric.Core.Func.Report");
-		//crnode;
-		//DFGWrapper::NodePtr reportNode = coreExec.addNodeFromPreset("Fabric.Core.Func.Report");
-
-		//nNodes = coreExec.getNodeCount();
-
-		//FabricCore::DFGExec& fnExec = coreExec.getNo(0);
-
-		//coreExec.setCode()
-
-		// Are we renaming?  In that case, remove the old operator
-		//if (!m_operator.empty() && m_operator != entry)
-		//{
-		//	m_graph.removeKLOperator(m_operator.c_str());
-		//}
-
-		//// If this named operator exists on the graph, update it.
-		//if (m_graph.hasKLOperator(entry.c_str()))
-		//{
-		//	success = m_graph.setKLOperatorSourceCode(entry.c_str(), script.c_str());
-		//}
-		//else // create a new operator
-		//{
-		//	success = m_graph.constructKLOperator(entry.c_str(), script.c_str());
-		//}
-		if (success)
-		{
-			//m_operator = entry;
-			// Tell max, we might have changed here.
-			NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
-			m_valid = NEVER;
-			doGather.LogSomething("OK");
-		}                                                                                                                                                                                                                                                           
-		else
-		{
-			// Theoretically, we should never actually reach this code.  Fabric will throw if somethins outta whack
-			doGather.LogSomething("Unknown Error");
-		}
-
-	MAXSPLICE_CATCH_END;
-	return doGather.GetGatheredResults();
-}
-
 //////////////////////////////////////////////////////////////////////////
 // Add Ports
 template<typename TBaseClass, typename TResultType>
-int SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
+const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
 {
-	//HoldActions hold(_M("Add Input Port"));
-
-	//if (theHold.Holding())
-	//	theHold.Put(new SplicePortChangeObject(this));
-
-	AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_In, isArray, inExtension);
-	// Can/Should we create a matching max type for this?
-	// A matching Max type should automatically be generated
-	return 0;
+	HoldActions hold(_M("Add Input Port"));
+	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_In, isArray, inExtension);
 }
 
 template<typename TBaseClass, typename TResultType>
-int SpliceTranslationLayer<TBaseClass, TResultType>::AddOutputPort(const char* name, const char* spliceType, bool isArray/*=false*/, const char* inExtension)
+const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddOutputPort(const char* name, const char* spliceType, bool isArray/*=false*/, const char* inExtension)
 {
-	//HoldActions hold(_M("Add Output Port"));
-	//if (theHold.Holding())
-	//	theHold.Put(new SplicePortChangeObject(this));
-	// Create the port
-	bool success = AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_Out, isArray, inExtension);
-	return success ? 1 : 0;
+	HoldActions hold(_M("Add Output Port"));
+	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_Out, isArray, inExtension);
 }
 
 template<typename TBaseClass, typename TResultType>
-int SpliceTranslationLayer<TBaseClass, TResultType>::AddIOPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
+const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddIOPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
 {
 	HoldActions hold(_M("Add IO Port"));
-	if (theHold.Holding())
-		theHold.Put(new SplicePortChangeObject(this));
-
-	// Create the port
-	AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_IO, isArray, inExtension);
-
-	// Can/Should we create a matching max type for this?
-	return SetMaxConnectedType(name, maxType);
+	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_IO, isArray, inExtension);
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -1032,19 +878,6 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(const c
 }
 
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortOption(const char* argName, const char* option, FPValue* value)
-{
-	throw("Whats happening here");
-	return ::SetPortOption(m_binding, argName, option, value);
-}
-
-template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortValue(const char* argName, FPValue* value)
-{
-	return ::SetPortValue(m_binding, argName, value);
-}
-
-template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortUIMinMax(const char* argName, FPValue* uiMin, FPValue* uiMax)
 {
 	return false;
@@ -1127,65 +960,6 @@ const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetKLCodeForFunc(co
 	//MAXSPLICE_CATCH_END
 	//return "";
 }
-
-
-//template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::SetSpliceGraph(const FabricCore::DFGBinding& binding, bool createMaxParams) 
-//{ 
-//	// First, clear any existing parameters
-//	ReplaceReference(0, nullptr);
-//
-//	// Reset all variables.
-//	m_binding = binding; 
-//
-//	// Invalid current value
-//	m_valid = NEVER;
-//
-//	ResetPorts();
-//
-//	// Early exit
-//	if (!m_binding.isValid())
-//		return;
-
-	// Try to find an output value for our class
-	//bool foundOutPort = false;
-	//int nPorts = m_graph.getDGPortCount();
-	//for (int i = 0; i < nPorts; i++)
-	//{
-	//	std::string argName = m_graph.getDGPortName(i);
-	//	DFGWrapper::ExecPortPtr port = m_graph.getDGPort(i);
-	//	if(!port.isValid())
-	//		continue;
-
-	//	FabricCore::DFGPortType portMode = port.getMode();
-
-	//	if (portMode != FabricCore::DFGPortType_In)
-	//	{
-	//		if (!foundOutPort)
-	//		{
-	//			const char* sDataType = port.getDataType();
-	//			int type = SpliceTypeToMaxType(sDataType);
-	//			// Is this legal for us?  If so, connect our value port
-	//			if (type == GetValueType())
-	//			{
-	//				SetOutPort(port);
-	//				bool isArray = port.isArray();
-	//				if (isArray)
-	//					SetOutPortArrayIdx(0);
-	//				foundOutPort = true;
-	//			}
-	//		}
-	//	}
-	//	else if (createMaxParams)
-	//	{
-	//		// We have been requested to create Max parameters for all possible ports.
-	//		SetMaxConnectedType(port, -2); // Create default type
-	//	}
-	//}
-
-	//if (!foundOutPort)
-	//	m_valuePort = DFGWrapper::ExecPortPtr();
-//};
 
 template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::LoadFromFile(const MCHAR* filename, bool createMaxParams) 

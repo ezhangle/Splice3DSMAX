@@ -320,12 +320,7 @@ public:
 	}
 
 	ReferenceTarget* CastToRefTarg() { return this; }
-
 	FabricCore::DFGBinding& GetBinding()	{ return m_binding; }
-
-	std::string GetKLCode();
-	std::string GetKLOperatorName();
-	std::string SetKLCode(const std::string& name, const std::string& script);
 
 	// Port creation/management
 
@@ -337,9 +332,9 @@ public:
 	// Splice port management
 	// Create a new port.  A matching Max parameter 
 	// will be added as well of maxType, if MaxType is -1 
-	int AddInputPort(const char* klType, const char* name, int maxType = -1, bool isArray = false, const char* inExtension = false);
-	int AddOutputPort(const char* klType, const char* name, bool isArray = false, const char* inExtension = false);
-	int AddIOPort(const char* klType, const char* name, int maxType = -1, bool isArray = false, const char* inExtension = false);
+	const char* AddInputPort(const char* klType, const char* name, int maxType = -1, bool isArray = false, const char* inExtension = false);
+	const char* AddOutputPort(const char* klType, const char* name, bool isArray = false, const char* inExtension = false);
+	const char* AddIOPort(const char* klType, const char* name, int maxType = -1, bool isArray = false, const char* inExtension = false);
 
 	// Remove specified port and matching max parameter
 	bool RemovePort(const char* name);
@@ -377,7 +372,7 @@ public:
 
 	// Allow setting various options on ports 
 	// Set UI limits.  This will not actually limit the value, but for sliders etc it will limit what is presented to the user.
-	bool SetPortOption(const char* name, const char* option, FPValue* value);
+	bool SetPortMetaData(const char* port, const char* option, const char* value);
 	bool SetPortValue(const char* name, FPValue* value);
 	bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax);
 
@@ -391,7 +386,6 @@ public:
 
 	// Set splice values
 	//	const FabricCore::DFGBinding& GetSpliceGraph() { return getGraph(); }
-	//	void SetSpliceGraph(const FabricCore::DFGBinding& graph, bool createMaxParams);
 	//	void SetOutPort(const DFGWrapper::ExecPortPtr& port) { m_valuePort = port; };
 
 	// Load from a saved JSON file spec

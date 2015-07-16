@@ -12,3 +12,4 @@
 *.suo
 *.user
 Generated.Plugin.Splice.ini
+src/moc_MaxDFGWidget.cpp

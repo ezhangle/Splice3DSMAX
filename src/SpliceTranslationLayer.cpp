@@ -732,18 +732,18 @@ void SetPort3dsMaxType(FabricCore::DFGBinding& binding, const char* argName, int
 	binding.getExec().setExecPortMetadata(argName, MAX_PARM_TYPE_OPT, buff, true);
 }
 
-bool SetPortOption(FabricCore::DFGBinding& binding, const char* argName, const char* option, FPValue* value)
-{
-	MAXSPLICE_CATCH_BEGIN()
-
-	//if (value == nullptr)
-	//	return false;
-	//FabricCore::Variant variant = GetVariant(*value);
-	//// if (!variant.isNull()) Do we want to allow setting Null values (remove option?);
-	//	aPort->setOption(option, &variant);
-	//return true;
-	MAXSPLICE_CATCH_RETURN(false);
-}
+//bool SetPortOption(FabricCore::DFGBinding& binding, const char* argName, const char* option, FPValue* value)
+//{
+//	MAXSPLICE_CATCH_BEGIN()
+//
+//	//if (value == nullptr)
+//	//	return false;
+//	//FabricCore::Variant variant = GetVariant(*value);
+//	//// if (!variant.isNull()) Do we want to allow setting Null values (remove option?);
+//	//	aPort->setOption(option, &variant);
+//	//return true;
+//	MAXSPLICE_CATCH_RETURN(false);
+//}
 
 bool SetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue* value)
 {
@@ -891,6 +891,9 @@ int SpliceTypeToMaxType(const char* cType, bool isArray /*=false*/)
 // doesn't support that data, so we need it to create an INODE parameter instead.
 int SpliceTypeToDefaultMaxType(const char* cType)
 {
+	if (cType == nullptr)
+		return -1;
+
 	if (strcmp(cType, "PolygonMesh") == 0)
 		return TYPE_INODE;
 	return SpliceTypeToMaxType(cType);

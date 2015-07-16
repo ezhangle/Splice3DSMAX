@@ -29,28 +29,18 @@ public:
 	// The follow exposes our functions to Max
 	enum FN_IDS {
 		// System management callbacks
-		fn_showSceneGraphEditor,
 		fn_showDFGGraphEditor,
 
-		fn_setSpliceGraph,
 		fn_loadFromFile,
 		fn_saveToFile,
 
 		fn_restoreFromJson,
 		fn_exportToJson,
 		
-		//fn_getOpCount,
-		//fn_getOpName,
-
-		fn_getKLCode,
-		fn_getKLOpName,
-		fn_setKLCode,
-	
 		fn_addInputPort,
 		fn_addOutputPort,
 		fn_addIOPort,
 
-		//fn_removePortIdx,
 		fn_removePortName,
 		fn_getPortName,
 		fn_setPortName,
@@ -63,7 +53,8 @@ public:
 		fn_setMaxConnectedType,
 		fn_getLegalMaxTypes,
 
-		fn_setPortOption,
+		fn_setPortMetaData,
+		fn_getPortMetaData,
 		fn_setPortMinMax,
 		fn_setPortValue,
 
@@ -92,25 +83,18 @@ public:
 	};
 
 	BEGIN_FUNCTION_MAP	
-		FN_0(fn_showSceneGraphEditor, TYPE_BOOL, ShowSceneGraphEditor);
 		FN_0(fn_showDFGGraphEditor, TYPE_BOOL, ShowDFGGraphEditor);
 
-		FN_1(fn_setSpliceGraph, TYPE_BOOL, SetSpliceGraph, TYPE_REFTARG);
 		FN_2(fn_loadFromFile, TYPE_bool, LoadFromFile, TYPE_FILENAME, TYPE_bool);
 		FN_1(fn_saveToFile, TYPE_bool, SaveToFile, TYPE_FILENAME);
 
 		FN_2(fn_restoreFromJson, TYPE_bool, RestoreFromJSONMSTR, TYPE_TSTR_BV, TYPE_bool);
 		FN_0(fn_exportToJson, TYPE_TSTR_BV, ExportToJSONMSTR);
 
-		FN_2(fn_setKLCode, TYPE_TSTR_BV, SetKLCodeMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
-		FN_0(fn_getKLCode, TYPE_TSTR_BV, GetKLCodeMSTR);
-		FN_0(fn_getKLOpName, TYPE_TSTR_BV, GetKLOperatorNameMSTR);
+		FN_5(fn_addInputPort, TYPE_TSTR_BV, AddInputPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_INT, TYPE_BOOL, TYPE_TSTR_BV);
+		FN_4(fn_addOutputPort, TYPE_TSTR_BV, AddOutputPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_BOOL, TYPE_TSTR_BV);
+		FN_5(fn_addIOPort, TYPE_TSTR_BV, AddIOPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_INT, TYPE_BOOL, TYPE_TSTR_BV);
 
-		FN_5(fn_addInputPort, TYPE_INT, AddInputPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_INT, TYPE_BOOL, TYPE_TSTR_BV);
-		FN_4(fn_addOutputPort, TYPE_INT, AddOutputPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_BOOL, TYPE_TSTR_BV);
-		FN_5(fn_addIOPort, TYPE_INT, AddIOPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_INT, TYPE_BOOL, TYPE_TSTR_BV);
-
-		//FN_1(fn_removePortIdx, TYPE_bool, RemovePort, TYPE_INDEX);
 		FN_1(fn_removePortName, TYPE_bool, RemovePortMSTR, TYPE_TSTR_BV);
 		FN_1(fn_getPortName, TYPE_TSTR_BV, GetPortNameMSTR, TYPE_INT);
 		FN_2(fn_setPortName, TYPE_TSTR_BV, SetPortNameMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
@@ -123,7 +107,9 @@ public:
 		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxConnectedTypeMSTR, TYPE_TSTR_BV, TYPE_INT);
 		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypesMSTR, TYPE_TSTR_BV);
 
-		FN_3(fn_setPortOption, TYPE_bool, SetPortOptionMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_FPVALUE);
+		FN_4(fn_setPortMetaData, TYPE_bool, SetPortMetaDataMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_bool);
+		FN_2(fn_getPortMetaData, TYPE_TSTR_BV, GetPortMetaDataMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
+
 		FN_2(fn_setPortValue, TYPE_bool, SetPortValueMSTR, TYPE_TSTR_BV, TYPE_FPVALUE);
 
 		FN_1(fn_newEmptyGraph, TYPE_TSTR_BV, AddNewEmptyGraphMSTR, TYPE_TSTR_BV);
@@ -137,41 +123,30 @@ public:
 
 		// Properties 
 
-		RO_PROP_FN(prop_getPortCount, GetPortCount, TYPE_INT)
-		PROP_FNS(prop_getOutPortName, GetOutPortNameMSTR, prop_SetOutPort, SetOutPortMSTR, TYPE_TSTR_BV)
-		//PROP_FNS(prop_getOutPortArrayIdx, GetOutPortArrayIdx, prop_setOutPortArrayIdx, SetOutPortArrayIdx, TYPE_INT)
-		//RO_PROP_FN(prop_getAllPortSignature, GetAllPortSignatureMSTR, TYPE_TSTR_BV)
-
-		RO_PROP_FN(prop_klEditor, GetKLEditor, TYPE_VALUE)
+		RO_PROP_FN(prop_getPortCount, GetPortCount, TYPE_INT);
+		PROP_FNS(prop_getOutPortName, GetOutPortNameMSTR, prop_SetOutPort, SetOutPortMSTR, TYPE_TSTR_BV);
+		RO_PROP_FN(prop_klEditor, GetKLEditor, TYPE_VALUE);
 		
 	END_FUNCTION_MAP
 
 	// Implement the functions exposed above
-	BOOL ShowSceneGraphEditor() { /* TODO */ return FALSE; };
 	BOOL ShowDFGGraphEditor();
 
 	virtual MSTR GetGraphName();
-
 	// Get the fabric graph driving this max class.
 	virtual FabricCore::DFGBinding& GetBinding() = 0;
-
-	virtual std::string GetKLCode() = 0;
-	virtual std::string GetKLOperatorName() = 0;
-	virtual std::string SetKLCode(const std::string& name, const std::string& script) = 0;
 
 	// Port creation/management
 
 	// Get the number of ports on this graph
 	virtual int GetPortCount() = 0;
-	//virtual DFGWrapper::ExecPortPtr GetPort(int i)=0;
-	//virtual DFGWrapper::ExecPortPtr GetPort(const char* name)=0;
 
 	// Splice port management
 	// Create a new port.  A matching Max parameter 
 	// will be added as well of maxType, if MaxType is -1 
-	virtual int AddInputPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=nullptr) = 0;
-	virtual int AddOutputPort(const char* klType, const char* name, bool isArray=false, const char* inExtension=nullptr) = 0;
-	virtual int AddIOPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=nullptr) = 0;
+	virtual const char* AddInputPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=nullptr) = 0;
+	virtual const char* AddOutputPort(const char* klType, const char* name, bool isArray=false, const char* inExtension=nullptr) = 0;
+	virtual const char* AddIOPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=nullptr) = 0;
 
 	// Remove specified port and matching max parameter
 	virtual bool RemovePort(const char* portName) = 0;
@@ -194,9 +169,10 @@ public:
 	virtual BitArray GetLegalMaxTypes(const char* portName) = 0;
 
 	// Allow setting various options on our ports
-	virtual bool SetPortOption(const char* port, const char* option, FPValue* value)=0;
+	bool SetPortMetaData(const char* port, const char* option, const char* value, bool canUndo);
+	const char* GetPortMetaData(const char* port, const char* option);
 	// Allow setting values directly on our ports
-	virtual bool SetPortValue(const char* port, FPValue* value)=0;
+	bool SetPortValue(const char* port, FPValue* value);
 
 	// Convenience functions
 	virtual bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax)=0;
@@ -220,17 +196,6 @@ public:
 	// Allow external classes to trigger evaluations on us
 	virtual void TriggerEvaluate(TimeValue t, Interval& ivValid)=0;
 	
-	// Set this instance to use the splice graph on the rtarg instance
-	// This can be useful when setting a group of Splice instances to
-	// all share a single graph.
-	BOOL SetSpliceGraph(ReferenceTarget* rtarg);
-
-	// Allow others to set the splice graph etc we are using.
-	// These functions are not called directly from MaxScript, instead
-	// they are used by the static interface
-//	virtual void SetSpliceGraph(const FabricCore::DFGBinding& graph, bool createMaxParams) = 0;
-//	virtual void SetOutPort(const DFGWrapper::PortPtr& port) = 0;
-
 	// Load the splice graph for this entity from the given filename
 	virtual bool LoadFromFile(const MCHAR* filename, bool createMaxParams)=0;
 	virtual bool SaveToFile(const MCHAR* filename)=0;
@@ -279,46 +244,39 @@ protected:
 	}
 
 	// TODO: Add default vals for these
-	MSTR_OUTVAL(GetKLOperatorName, 0);
 	MSTR_OUTVAL(GetOutPortName, 0);
 
 	MSTR_INVAL(bool, SetOutPort);
 	
-	MSTR GetKLCodeMSTR() { return ToMSTR(GetKLCode().data(), 0); }
-	MSTR SetKLCodeMSTR(MSTR name, MSTR script) { 
-		return ToMSTR(SetKLCode(name.ToCStr().data(), script.ToCStr().data()).data(), 0); 
-	}
-
 	MSTR GetPortNameMSTR(int i)	{ return ToMSTR(GetPortName(i), 0); }
 	MSTR SetPortNameMSTR(const MSTR& oldName, const MSTR& newName)	{ return MSTR::FromACP(SetPortName(oldName.ToCStr(), newName.ToCStr())); }
 	MSTR GetPortTyeMSTR(const MSTR& port)	{ return ToMSTR(GetPortType(port.ToCStr()), 0); }
 	MSTR_INVAL(bool, IsPortArray);
-	//bool IsPortArrayMSTR(const MSTR& port) { return IsPortArray(port.ToCStr()); }
 	MSTR_INVAL(bool, GetMaxConnectedType);
-	//int GetMaxConnectedTypeMSTR(const MSTR& port) { return GetMaxConnectedType(port.ToCStr()); }
 	int SetMaxConnectedTypeMSTR(const MSTR& port, int type) { return SetMaxConnectedType(port.ToCStr(), type); }
-	//BitArray GetLegalMaxTypesMSTR(const MSTR& port) { return GetLegalMaxTypes(port.ToCStr()); }
 	MSTR_INVAL(BitArray, GetLegalMaxTypes);
 
 
-	int AddInputPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
+	MSTR AddInputPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
 	{
-		return AddInputPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data());
+		return MSTR::FromACP(AddInputPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data()));
 	}
-	int AddOutputPortMSTR(const MSTR& name, const MSTR& type, bool isArray, const MSTR& inExtension)
+	MSTR AddOutputPortMSTR(const MSTR& name, const MSTR& type, bool isArray, const MSTR& inExtension)
 	{
-		return AddOutputPort(name.ToCStr().data(), type.ToCStr().data(), isArray, inExtension.ToCStr().data());
+		return MSTR::FromACP(AddOutputPort(name.ToCStr().data(), type.ToCStr().data(), isArray, inExtension.ToCStr().data()));
 	}
-	int AddIOPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
+	MSTR AddIOPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
 	{
-		return AddIOPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data());
+		return MSTR::FromACP(AddIOPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data()));
 	}
 	MSTR_INVAL(bool, RemovePort);
 
 	bool ConnectPortMSTR(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI );
 	MSTR_INVAL(bool, DisconnectPort);
 
-	bool SetPortOptionMSTR(const MSTR& port, const MSTR& option, FPValue* value)	{ return SetPortOption(port.ToCStr(), option.ToCStr(), value); }
+	bool SetPortMetaDataMSTR(const MSTR& port, const MSTR& option, const MSTR& value, bool canUndo)	{ return SetPortMetaData(port.ToCStr(), option.ToCStr(), value.ToCStr(), canUndo); }
+	MSTR GetPortMetaDataMSTR(const MSTR& port, const MSTR& option)	{ return MSTR::FromACP(GetPortMetaData(port.ToCStr(), option.ToCStr())); }
+
 	bool SetPortValueMSTR(const MSTR& port, FPValue* value)							{ return SetPortValue(port.ToCStr(), value); }
 	bool SetPortUIMinMaxMSTR(const MSTR& port, FPValue* uiMin, FPValue* uiMax)		{ return SetPortUIMinMax(port.ToCStr(), uiMin, uiMax); }
 
@@ -359,7 +317,6 @@ FPInterfaceDesc* GetDescriptor()
 		SpliceTranslationLayer<TBaseClass, TResultType>::GetClassDesc(), 
 		0,
 		// Describe our function(s)
-			SpliceTranslationFPInterface::fn_showSceneGraphEditor, _T("ShowSceneGraphEditor"), 0, TYPE_BOOL, 0, 0, 
 			SpliceTranslationFPInterface::fn_showDFGGraphEditor, _T("ShowDFGGraphEditor"), 0, TYPE_BOOL, 0, 0,
 
 			SpliceTranslationFPInterface::fn_loadFromFile, _T("LoadFromFile"), 0, TYPE_bool, 0, 2, 
@@ -373,37 +330,24 @@ FPInterfaceDesc* GetDescriptor()
 				_M("json"), 0, TYPE_TSTR_BV,
 				_M("createMaxParams"), 0, TYPE_bool,
 
-			SpliceTranslationFPInterface::fn_setSpliceGraph, _T("SetSpliceGraph"), 0, TYPE_BOOL, 0, 1,
-				_M("source"),	0,	TYPE_REFTARG,
-
-
-
-			SpliceTranslationFPInterface::fn_getKLCode, _T("GetKLCode"), 0, TYPE_TSTR_BV, 0, 0, 
-			SpliceTranslationFPInterface::fn_getKLOpName, _T("GetKLOperatorName"), 0, TYPE_TSTR_BV, 0, 0, 
-			SpliceTranslationFPInterface::fn_setKLCode, _T("SetKLCode"), 0, TYPE_TSTR_BV, 0, 2,
-				_M("name"),		0,	TYPE_TSTR_BV,
-				_M("script"),	0,	TYPE_TSTR_BV,
-
-			SpliceTranslationFPInterface::fn_addInputPort, _T("AddInputPort"), 0, TYPE_INDEX, 0, 5,
+			SpliceTranslationFPInterface::fn_addInputPort, _T("AddInputPort"), 0, TYPE_TSTR_BV, 0, 5,
 				_M("name"),			0,	TYPE_TSTR_BV,
 				_M("fabricType"),	0,	TYPE_TSTR_BV,
 				_M("maxType"),		0,	TYPE_INT,
 				_M("isArray"),		0,	TYPE_bool, f_keyArgDefault, false,
 				_M("Extension"),	0,	TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
-			SpliceTranslationFPInterface::fn_addOutputPort, _T("AddOutputPort"), 0, TYPE_INDEX, 0, 4,
+			SpliceTranslationFPInterface::fn_addOutputPort, _T("AddOutputPort"), 0, TYPE_TSTR_BV, 0, 4,
 				_M("name"),			0,	TYPE_TSTR_BV,
 				_M("fabricType"),	0,	TYPE_TSTR_BV,
 				_M("isArray"),		0,	TYPE_bool, f_keyArgDefault, false,
 				_M("Extension"),	0,	TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
-			SpliceTranslationFPInterface::fn_addIOPort, _T("AddIOPort"), 0, TYPE_INDEX, 0, 5,
+			SpliceTranslationFPInterface::fn_addIOPort, _T("AddIOPort"), 0, TYPE_TSTR_BV, 0, 5,
 				_M("name"),			0,	TYPE_TSTR_BV,
 				_M("fabricType"),	0,	TYPE_TSTR_BV,
 				_M("maxType"),		0,	TYPE_INT,
 				_M("isArray"),		0,	TYPE_bool, f_keyArgDefault, false,
 				_M("Extension"),	0,	TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
 
-			//SpliceTranslationFPInterface::fn_removePortIdx,	 _T("RemovePortByIndex"), 0, TYPE_bool, 0, 1,
-			//	_M("portIndex"),	0,	TYPE_INDEX,
 			SpliceTranslationFPInterface::fn_removePortName, _T("RemovePort"), 0, TYPE_bool, 0, 1,
 				_M("portName"),		0,	TYPE_TSTR_BV,
 
@@ -432,12 +376,17 @@ FPInterfaceDesc* GetDescriptor()
 			SpliceTranslationFPInterface::fn_getLegalMaxTypes, _T("GetLegalMaxTypes"), 0, TYPE_BITARRAY, 0, 1,
 				_M("port"),		0,	TYPE_TSTR_BV, 
 
-			SpliceTranslationFPInterface::fn_setPortOption, _T("SetPortOption"), 0, TYPE_bool, 0, 3,
+			SpliceTranslationFPInterface::fn_setPortMetaData, _T("SetPortMetaData"), 0, TYPE_bool, 0, 4,
 				_M("port"),		0,	TYPE_TSTR_BV, 
 				_M("option"),	0,	TYPE_TSTR_BV, 
-				_M("value"),	0,	TYPE_FPVALUE, 
+				_M("value"),	0,	TYPE_TSTR_BV, 
+				_M("canUndo"),	0, TYPE_bool, f_keyArgDefault, true,
 
-			SpliceTranslationFPInterface::fn_setPortMinMax, _T("SetPortValue"), 0, TYPE_bool, 0, 2,
+			SpliceTranslationFPInterface::fn_getPortMetaData, _T("GetPortMetaData"), 0, TYPE_TSTR_BV, 0, 2,
+				_M("port"), 0, TYPE_TSTR_BV,
+				_M("option"), 0, TYPE_TSTR_BV,
+
+			SpliceTranslationFPInterface::fn_setPortValue, _T("SetPortValue"), 0, TYPE_bool, 0, 2,
 				_M("port"),		0,	TYPE_TSTR_BV, 
 				_M("value"),	0,	TYPE_FPVALUE, 
 

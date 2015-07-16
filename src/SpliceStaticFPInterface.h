@@ -27,9 +27,6 @@ public:
 	// The follow exposes our functions to Max
 	enum FN_IDS {
 		// System management callbacks
-		fn_showSceneGraphEditor,
-		fn_showDFGGraphEditor,
-		
 		fn_importSpliceFile,
 		fn_exportSpliceFile,
 
@@ -51,9 +48,6 @@ public:
 		loggingEnums
 	};
 	BEGIN_FUNCTION_MAP	
-		FN_0(fn_showSceneGraphEditor, TYPE_BOOL, ShowSceneGraphEditor);
-		FN_0(fn_showDFGGraphEditor, TYPE_BOOL, ShowDFGGraphEditor);
-
 		FN_1(fn_importSpliceFile, TYPE_BOOL, ImportSpliceFile, TYPE_TSTR_BV);
 		FN_2(fn_exportSpliceFile, TYPE_BOOL, ExportSpliceFile, TYPE_TSTR_BV, TYPE_REFTARG);
 		
@@ -75,9 +69,6 @@ public:
 	END_FUNCTION_MAP
 
 	// Implement the functions exposed above
-	BOOL ShowSceneGraphEditor();
-	BOOL ShowDFGGraphEditor();
-
 	void ShowKLEditor();
 
 	BOOL ImportSpliceFile(const MSTR& file);

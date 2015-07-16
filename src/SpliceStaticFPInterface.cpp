@@ -19,9 +19,6 @@ SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
 		// Describe our interface
 		ISPLICE_STATIC_INTERFACE , _T("Splice"), 0, NULL, FP_CORE,
 		// Describe our function(s)
-			SpliceStaticFPInterface::fn_showSceneGraphEditor, _T("ShowSceneGraphEditor"), 0, TYPE_BOOL, 0, 0, 
-			SpliceStaticFPInterface::fn_showDFGGraphEditor, _T("ShowSceneGraphEditor"), 0, TYPE_BOOL, 0, 0,
-
 			SpliceStaticFPInterface::fn_importSpliceFile, _T("LoadFromFile"), 0, TYPE_BOOL, 0, 1,
 				_M("file"),	0,	TYPE_TSTR_BV,
 			
@@ -64,30 +61,6 @@ SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
 		p_end
 		);
 	return &_theInstance;
-}
-
-
-// Implement the functions exposed above
-BOOL SpliceStaticFPInterface::ShowSceneGraphEditor()
-{
-	//if (CPApplication::m_applicationState == CPApplication::kReady)
-	//{
-	//	SGCAPI::Wrapper* pWrapper = CPApplication::GetInstance()->GetWrapper();
-	//	if (pWrapper == NULL)
-	//		return FALSE;
-
-	//	SGCAPI::Widget widget = pWrapper->getApplication()->getWidget("Xfo Options");
-	//	HWND mainWindowId = GetCOREInterface()->GetMAXHWnd();
-	//	widget.show((long)mainWindowId);
-	//	return TRUE;
-	//}
-	return FALSE;
-}
-
-// Implement the functions exposed above
-BOOL SpliceStaticFPInterface::ShowDFGGraphEditor()
-{
-	return FALSE;
 }
 
 BOOL SpliceStaticFPInterface::ImportSpliceFile(const TSTR& file)

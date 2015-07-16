@@ -114,6 +114,16 @@ bool SpliceTranslationFPInterface::SetPortValue(const char* port, FPValue* value
 	return ::SetPortValue(GetBinding(), port, value);
 }
 
+FPValue& SpliceTranslationFPInterface::GetPortValue(const char* port)
+{
+	// We make the val static so we don't leak pointers assigned to it.
+	static FPValue val;
+	// Free whatever memory was assigned last time
+	val.Free();
+	::GetPortValue(GetBinding(), port, val);
+	return val;
+}
+
 Value* CallMaxScriptFunction(MCHAR* function, ReferenceTarget* fnArgument, bool returnResult) 
 {
 	Value* valueArg = MAXClass::make_wrapper_for(fnArgument);

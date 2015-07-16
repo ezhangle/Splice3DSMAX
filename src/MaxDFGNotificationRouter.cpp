@@ -77,6 +77,30 @@ void MaxDFGNotificationRouter::onExecPortMetadataChanged(FTL::CStrRef portName, 
 		int type = atoi(value.data());
 		m_pInterface->SetMaxConnectedType(portName.c_str(), type);
 	}
+	else if (key == "uiHidden" || key == "uiOpaque")
+	{
+		if (value == "true")
+		{
+			// If our port is hidden or opaque, it means it has no Max connection
+			m_pInterface->SetMaxConnectedType(portName.c_str(), -1);
+		}
+		else
+		{
+			// Recreate with default max type
+			m_pInterface->SetMaxConnectedType(portName.c_str(), -2);
+		}
+		m_pInterface->UpdateUISpec();
+	}
+	else if (key == "uiRange")
+	{
+		::SetMaxParamLimits(m_pInterface->GetPBlock()->GetDesc(), m_pInterface->GetBinding(), portName.c_str());
+		m_pInterface->UpdateUISpec();
+	}
+	else if (key == "scalarUnit")
+	{
+		// TODO: Sync our ScalarUnit label with Maya's
+		m_pInterface->UpdateUISpec();
+	}
 	__super::onExecPortMetadataChanged(portName, key, value);
 }
 
@@ -280,28 +304,6 @@ void MaxDFGNotificationRouter::onNodeInserted(FTL::CStrRef nodeName, FTL::JSONOb
 //
 //void MaxDFGNotificationRouter::onExecPortMetadataChanged(FabricServices::DFGWrapper::ExecPortPtr port, const char * key, const char * metadata)
 //{
-//	if (strcmp(key, "uiHidden") == 0 || strcmp(key, "uiOpaque") == 0)
-//	{
-//		if (strcmp(metadata, "true") == 0)
-//		{
-//			// If our port is hidden or opaque, it means it has no Max connection
-//			SetMaxConnectedType(port, -1);
-//		}
-//		else
-//		{
-//			// Recreate with default max type
-//			SetMaxConnectedType(port, -2);
-//		}
-//		UpdateUISpec();
-//	}
-//	else if (strcmp(key, "uiRange") == 0)
-//	{
-//		SetMaxParamLimits(m_pblock->GetDesc(), port);
-//		UpdateUISpec();
-//	}
-//	else if (strcmp(key, "scalarUnit"))
-//	{
-//		UpdateUISpec();
-//	}
+
 //}
 #pragma endregion

@@ -99,6 +99,7 @@ void SetPort3dsMaxType(FabricCore::DFGBinding& binding, const char* argName, int
 
 bool SetPortOption(FabricCore::DFGBinding& binding, const char* argName, const char* option, FPValue* value);
 bool SetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue* value);
+bool GetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue& outValue);
 
 /** Given a Max value, send it to the dgPort in the appropriate fashion */
 
@@ -400,6 +401,9 @@ public:
 
 	void SetPblockParamName(int paramID, MSTR str) override { SetMaxParamName(m_pblock->GetDesc(), ParamID(paramID), str); UpdateUISpec();  }
 
+	IParamBlock2* GetPBlock() { return m_pblock;  }
+
+	void SetBinding(FabricCore::DFGBinding& binding);
 #pragma endregion
 
 	//////////////////////////////////////////////////////////////////////////

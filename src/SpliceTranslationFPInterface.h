@@ -57,6 +57,7 @@ public:
 		fn_getPortMetaData,
 		fn_setPortMinMax,
 		fn_setPortValue,
+		fn_getPortValue,
 
 		// DFG-Specific functionality
 		fn_newEmptyGraph,
@@ -111,6 +112,7 @@ public:
 		FN_2(fn_getPortMetaData, TYPE_TSTR_BV, GetPortMetaDataMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
 
 		FN_2(fn_setPortValue, TYPE_bool, SetPortValueMSTR, TYPE_TSTR_BV, TYPE_FPVALUE);
+		FN_1(fn_getPortValue, TYPE_FPVALUE_BR, GetPortValueMSTR, TYPE_TSTR_BV);
 
 		FN_1(fn_newEmptyGraph, TYPE_TSTR_BV, AddNewEmptyGraphMSTR, TYPE_TSTR_BV);
 		FN_1(fn_newEmptyFunc, TYPE_TSTR_BV, AddNewEmptyFuncMSTR, TYPE_TSTR_BV);
@@ -173,6 +175,7 @@ public:
 	const char* GetPortMetaData(const char* port, const char* option);
 	// Allow setting values directly on our ports
 	bool SetPortValue(const char* port, FPValue* value);
+	FPValue& GetPortValue(const char* port);
 
 	// Convenience functions
 	virtual bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax)=0;
@@ -216,6 +219,8 @@ public:
 	virtual void SetPblockParamName(int paramID, MSTR str) = 0;
 	virtual void InvalidateAll() = 0;
 	virtual void UpdateUISpec() = 0;
+
+	virtual IParamBlock2* GetPBlock() = 0;
 protected:
 
 	// This function allows us to go up the other pants leg of 
@@ -278,6 +283,7 @@ protected:
 	MSTR GetPortMetaDataMSTR(const MSTR& port, const MSTR& option)	{ return MSTR::FromACP(GetPortMetaData(port.ToCStr(), option.ToCStr())); }
 
 	bool SetPortValueMSTR(const MSTR& port, FPValue* value)							{ return SetPortValue(port.ToCStr(), value); }
+	FPValue& GetPortValueMSTR(const MSTR& port)										{ return GetPortValue(port.ToCStr()); }
 	bool SetPortUIMinMaxMSTR(const MSTR& port, FPValue* uiMin, FPValue* uiMax)		{ return SetPortUIMinMax(port.ToCStr(), uiMin, uiMax); }
 
 	MSTR AddNewEmptyGraphMSTR(MSTR& graphName)						{ return MSTR::FromACP(AddNewEmptyGraph(graphName.ToCStr())); }
@@ -389,6 +395,8 @@ FPInterfaceDesc* GetDescriptor()
 			SpliceTranslationFPInterface::fn_setPortValue, _T("SetPortValue"), 0, TYPE_bool, 0, 2,
 				_M("port"),		0,	TYPE_TSTR_BV, 
 				_M("value"),	0,	TYPE_FPVALUE, 
+			SpliceTranslationFPInterface::fn_getPortValue, _T("GetPortValue"), 0, TYPE_FPVALUE_BR, 0, 1,
+				_M("port"), 0, TYPE_TSTR_BV,
 
 			SpliceTranslationFPInterface::fn_setPortMinMax, _T("SetPortMinMax"), 0, TYPE_bool, 0, 3,
 				_M("port"),		0,	TYPE_TSTR_BV, 

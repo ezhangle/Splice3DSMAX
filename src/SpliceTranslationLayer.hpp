@@ -62,33 +62,11 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
 	//if (!loading)
 	{
 		// create an empty binding
-		m_binding = GetHost().createBindingToNewGraph();
-		m_binding.setNotificationCallback(bindingNotificationCallback, this);
-
-		m_router = new MaxDFGNotificationRouter(this, m_binding, m_binding.getExec());
-
-		FabricServices::ASTWrapper::KLASTManager* manager = FabricServices::ASTWrapper::KLASTManager::retainGlobalManager(&GetClient());
-		m_ctrl = new MaxDFGController(NULL, GetCommandStack(), manager, m_binding, m_binding.getExec(), false);
-		m_ctrl->setRouter(m_router);
-
+		FabricCore::DFGBinding binding = GetHost().createBindingToNewGraph();
+		SetBinding(binding);
 
 		// Enforce loading the Util extension to ensure that EvalContext is available to us
 		GetClient().loadExtension("Util", "", false);
-
-		// set the graph on the view
-		//setGraph(DFGWrapper::GraphExecutablePtr::StaticCast(m_binding.getExecutable()));
-
-		//// create a graph to hold our dependency graph nodes.
-		//m_graph = FabricCore::DFGBinding("3dsMaxGraph");
-		//m_graph.constructDGNode();
-		//m_graph.setUserPointer(this);
-
-		
-
-		// Set static context values
-		//MSTR filepath = GetCOREInterface()->GetCurFilePath();
-		//FabricCore::RTVal evalContext = m_graph.getEvalContext();
-		//evalContext.setMember("host", FabricSplice::constructStringRTVal("3dsMax"));
 
 		// given a scene base object or modifier, look for a referencing node via successive 
 		// reference enumerations up through the ref hierarchy untill we find an inode.
@@ -100,8 +78,6 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
 			name = _M("3dsMaxDFGGraph");
 		CStr cName = name.ToCStr();
 		m_binding.getExec().setTitle(cName.data());
-
-		//evalContext.setMember("currentFilePath", FabricSplice::constructStringRTVal(filepath.ToCStr().data()));
 	}
 
 	MAXSPLICE_CATCH_RETURN(false);
@@ -1020,18 +996,13 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const char
 	// The KL Editor has pointers to the current graph
 	CloseKLEditor();
 
-	m_binding = GetHost().createBindingFromJSON(json);
-	m_binding.setNotificationCallback(bindingNotificationCallback, this);
-
-	// Hook up our router again
-	SAFE_DELETE(m_router);
-	m_router = new MaxDFGNotificationRouter(this, m_binding, m_binding.getExec());
-	m_router->setController(m_ctrl);
+	FabricCore::DFGBinding binding = GetHost().createBindingFromJSON(json);
+	SetBinding(binding);
 
 	// Setup port connections
 	if (createMaxParams)
 	{
-		FabricCore::DFGExec exec = m_binding.getExec();
+		FabricCore::DFGExec exec = binding.getExec();
 
 		for (unsigned int i = 0; i < exec.getExecPortCount(); i++)
 		{
@@ -1068,6 +1039,23 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
 {
 	// Setup any necessary ports for the current graph
 	m_outArgName = AddSpliceParameter(GetBinding(), GetValueType(), "outputValue", FabricCore::DFGPortType_Out);
+}
+
+
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::SetBinding(FabricCore::DFGBinding& binding)
+{
+	m_binding = binding;
+	m_binding.setNotificationCallback(bindingNotificationCallback, this);
+
+	SAFE_DELETE(m_ctrl);
+	FabricServices::ASTWrapper::KLASTManager* manager = FabricServices::ASTWrapper::KLASTManager::retainGlobalManager(&GetClient());
+	m_ctrl = new MaxDFGController(NULL, GetCommandStack(), manager, m_binding, m_binding.getExec(), false);
+
+	// Hook up our router again
+	SAFE_DELETE(m_router);
+	m_router = new MaxDFGNotificationRouter(this, m_binding, m_binding.getExec());
+	m_router->setController(m_ctrl);
 }
 
 #pragma endregion

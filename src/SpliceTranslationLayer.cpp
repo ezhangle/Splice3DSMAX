@@ -759,6 +759,72 @@ bool SetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue*
 	return false;
 }
 
+bool GetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue& value)
+{
+	MAXSPLICE_CATCH_BEGIN()
+	
+	FabricCore::RTVal rtVal = binding.getArgValue(argName);
+	const char* cType = GetPortType(binding.getExec(), argName);
+	int type = SpliceTypeToMaxType(cType);
+
+	switch (type)
+	{
+	case TYPE_INT:
+		SpliceToMaxValue(rtVal, value.i);
+		break;
+	case TYPE_BOOL:
+		SpliceToMaxValue(rtVal, value.b);
+		break;
+	case TYPE_FLOAT:
+		SpliceToMaxValue(rtVal, value.f);
+		break;
+	case TYPE_FRGBA:
+		value.p4 = new Point4;
+		SpliceToMaxValue(rtVal, *value.p4);
+		break;
+	case TYPE_POINT2:
+		value.p2 = new Point2;
+		SpliceToMaxValue(rtVal, *value.p2);
+		break;
+	case TYPE_POINT3:
+		//value.p = new Point3;
+	{
+		Point3 v;
+		SpliceToMaxValue(rtVal, v);
+		value.LoadPtr(TYPE_POINT3, &v);
+		break;
+	}
+	case TYPE_POINT4:
+	{
+		value.p4 = new Point4;
+		SpliceToMaxValue(rtVal, *value.p4);
+		break;
+	}
+	case TYPE_MATRIX3:
+		value.m = new Matrix3;
+		SpliceToMaxValue(rtVal, *value.m);
+		break;
+	case TYPE_QUAT:
+		value.q = new Quat;
+		SpliceToMaxValue(rtVal, *value.q);
+		break;
+	case TYPE_STRING:
+		value.tstr = new TSTR;
+		SpliceToMaxValue(rtVal, *value.tstr);
+		break;
+	case TYPE_MESH:
+		Mesh mesh;
+		SpliceToMaxValue(rtVal, mesh);
+		value.LoadPtr(TYPE_MESH, &mesh);
+		break;
+
+	}
+	return true;
+#pragma message("TEST THIS")
+	MAXSPLICE_CATCH_END
+		return false;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Converting types to/from Fabric
 BitArray SpliceTypeToMaxTypes(const char* cType)

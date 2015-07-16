@@ -467,7 +467,7 @@ void ConvertToRTVal(const FPValue& param, FabricCore::RTVal& val)
 	else
 	{
 		// Is not tab or array
-		switch ((int)param.type)
+		switch ((int)root_type(param.type))
 		{
 		case TYPE_BOOL:
 			return ConvertToRTVal(param.b, val);
@@ -488,8 +488,17 @@ void ConvertToRTVal(const FPValue& param, FabricCore::RTVal& val)
 			return ConvertToRTVal(*param.p4, val);
 		case TYPE_QUAT:
 			return ConvertToRTVal(*param.q, val);
+		case TYPE_ANGAXIS:
+		{
+			// Splice has no AngAxis, so try converting to Quat
+			AngAxis& aa = *param.aa;
+			Quat q(aa);
+			return ConvertToRTVal(q, val);
+		}
 		case TYPE_TSTR:
 			return ConvertToRTVal(*param.tstr, val);
+		case TYPE_MESH:
+			return ConvertToRTVal(*param.msh, val);
 		default:
 			DbgAssert(_T("Implement Me"));
 			//return FabricCore::RTVal();
@@ -656,6 +665,12 @@ void SpliceToMaxValue(const FabricCore::Variant& var, MSTR& param)
 #pragma region Splice RTVal -> Max
 //////////////////////////////////////////////////////////////////////////
 // Convert from RTVal to Max value
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, bool& param)
+{
+	FabricCore::RTVal& ncrtVal = const_cast<FabricCore::RTVal&>(rtVal);
+	param = ncrtVal.getBoolean();
+}
+
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param)
 {
 	FabricCore::RTVal& ncrtVal = const_cast<FabricCore::RTVal&>(rtVal);
@@ -699,6 +714,12 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param)
 		param = ncrtVal.getFloat64();
 
 	//param = static_cast<float>(const_cast<FabricCore::RTVal&>(rtVal).getFloat32());
+}
+
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point2& param)
+{
+	param[0] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("x").getFloat32();
+	param[1] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("y").getFloat32();
 }
 
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point3& param)

@@ -118,7 +118,9 @@ void SpliceToMaxValue(const FabricCore::Variant& spliceVal, TResultType& maxVal)
 
 /** Get the value of the splice dgPort on the reference of param */
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, bool& param);
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param);
+void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point2& param);
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point3& param);
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param);
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Color& param);

@@ -3,9 +3,9 @@
 
 #include "ifnpub.h"
 
-#define ISPLICE_STATIC_INTERFACE Interface_ID(0xb7750cf, 0x7e1b3bed)
+#define IFabric_STATIC_INTERFACE Interface_ID(0xb7750cf, 0x7e1b3bed)
 
-class SpliceStaticFPInterface : public FPStaticInterface {
+class FabricStaticFPInterface : public FPStaticInterface {
 	
 	// This paramter stores what logging functions have been turned on so far.
 	int m_FabrigLogging;
@@ -27,8 +27,8 @@ public:
 	// The follow exposes our functions to Max
 	enum FN_IDS {
 		// System management callbacks
-		fn_importSpliceFile,
-		fn_exportSpliceFile,
+		fn_importFabricFile,
+		fn_exportFabricFile,
 
 		fn_getGlobalOperatorCount,
 		fn_getGlobalOperatorName,
@@ -40,16 +40,16 @@ public:
 
 		fn_destroyClient,
 
-		prop_getSpliceRendering,
-		prop_setSpliceRendering,
-		prop_getSpliceManip,
-		prop_setSpliceManip,
+		prop_getFabricRendering,
+		prop_setFabricRendering,
+		prop_getFabricManip,
+		prop_setFabricManip,
 
 		loggingEnums
 	};
 	BEGIN_FUNCTION_MAP	
-		FN_1(fn_importSpliceFile, TYPE_BOOL, ImportSpliceFile, TYPE_TSTR_BV);
-		FN_2(fn_exportSpliceFile, TYPE_BOOL, ExportSpliceFile, TYPE_TSTR_BV, TYPE_REFTARG);
+		FN_1(fn_importFabricFile, TYPE_BOOL, ImportFabricFile, TYPE_TSTR_BV);
+		FN_2(fn_exportFabricFile, TYPE_BOOL, ExportFabricFile, TYPE_TSTR_BV, TYPE_REFTARG);
 		
 		FN_0(fn_getGlobalOperatorCount, TYPE_INT, GetGlobalKLOperatorCount);
 		FN_1(fn_getGlobalOperatorName, TYPE_TSTR_BV, GetGlobalKLOperatorName, TYPE_INDEX);
@@ -62,8 +62,8 @@ public:
 
 		VFN_1(fn_destroyClient, DestroyClient, TYPE_bool);
 
-		PROP_FNS(prop_getSpliceRendering, GetSpliceRendering, prop_setSpliceRendering, SetSpliceRendering, TYPE_bool);
-		PROP_FNS(prop_getSpliceManip, GetSpliceManip, prop_setSpliceManip, SetSpliceManip, TYPE_bool);
+		PROP_FNS(prop_getFabricRendering, GetFabricRendering, prop_setFabricRendering, SetFabricRendering, TYPE_bool);
+		PROP_FNS(prop_getFabricManip, GetFabricManip, prop_setFabricManip, SetFabricManip, TYPE_bool);
 
 
 	END_FUNCTION_MAP
@@ -71,8 +71,8 @@ public:
 	// Implement the functions exposed above
 	void ShowKLEditor();
 
-	BOOL ImportSpliceFile(const MSTR& file);
-	BOOL ExportSpliceFile(const MSTR& file, ReferenceTarget* spliceEntity);
+	BOOL ImportFabricFile(const MSTR& file);
+	BOOL ExportFabricFile(const MSTR& file, ReferenceTarget* FabricEntity);
 
 	int GetGlobalKLOperatorCount();
 	MSTR GetGlobalKLOperatorName(int index);
@@ -86,18 +86,18 @@ public:
 
 	void DestroyClient(bool force/*=false*/);
 
-	bool GetSpliceRendering();
-	void SetSpliceRendering(bool isRendering);
+	bool GetFabricRendering();
+	void SetFabricRendering(bool isRendering);
 
-	bool GetSpliceManip();
-	void SetSpliceManip(bool isManipulating);
+	bool GetFabricManip();
+	void SetFabricManip(bool isManipulating);
 
 	// General purpose exposure
-	static SpliceStaticFPInterface* GetInstance();
+	static FabricStaticFPInterface* GetInstance();
 
 private:
 
 	// Declares the constructor of this class. It is private so a single static instance of this class
 	// may be instantiated.
-	DECLARE_DESCRIPTOR(SpliceStaticFPInterface);
+	DECLARE_DESCRIPTOR(FabricStaticFPInterface);
 };

@@ -91,7 +91,7 @@ void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 {
 	// setup the callback functions
 	InitLoggingTimer();
-	SpliceStaticFPInterface::GetInstance()->EnableLogging(SpliceStaticFPInterface::LOG_ALL);
+	FabricStaticFPInterface::GetInstance()->EnableLogging(FabricStaticFPInterface::LOG_ALL);
 
 	// Magic initialization stuff for maxscript.
 	static bool menus_setup = false;
@@ -118,7 +118,7 @@ void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 void OnShutdown(void* param, NotifyInfo* info)
 {
 	// On shutdown we release all info
-	SpliceStaticFPInterface::GetInstance()->DestroyClient(true);
+	FabricStaticFPInterface::GetInstance()->DestroyClient(true);
 	UnRegisterNotification(OnShutdown, nullptr);
 	// Cleanup once callback is done.
 }
@@ -153,7 +153,7 @@ __declspec( dllexport ) int LibShutdown(void)
 	//FabricSplice::Logging::setKLReportFunc(nullptr);
 	//FabricSplice::Logging::setKLStatusFunc(nullptr);
 
-    //FabricSplice::Finalize();
+	//FabricSplice::Finalize();
 	return TRUE;
 }
 

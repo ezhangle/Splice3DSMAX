@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "SpliceRestoreObjects.h"
 #include "Commands\CommandStack.h"
-#include "MaxCommandStack.h"
 
 #pragma region CustomKLUndoRedoCommandObject
 
@@ -59,7 +58,7 @@ void SplicePortChangeObject::EndHold()
 
 void SplicePortChangeObject::Restore( int isUndo )
 {
-	GetCommandStack()->undo();
+	//GetCommandStack()->undo();
 	//FabricCore::DFGBinding graph = m_maxOwner->GetSpliceGraph();
 	//graph.setFromPersistenceDataDict(m_prePortLayout);
 	//m_maxOwner->UpdateKLEditor();
@@ -70,7 +69,7 @@ void SplicePortChangeObject::Restore( int isUndo )
 
 void SplicePortChangeObject::Redo()
 {
-	GetCommandStack()->redo();
+	//GetCommandStack()->redo();
 	//FabricCore::DFGBinding graph = m_maxOwner->GetSpliceGraph();
 	//graph.setFromPersistenceDataDict(m_postPortLayout);
 	//m_maxOwner->UpdateKLEditor();
@@ -93,11 +92,11 @@ DFGCommandRestoreObj::~DFGCommandRestoreObj()
 
 void DFGCommandRestoreObj::Restore(int isUndo)
 {
-	GetCommandStack()->undo(m_commandId);
+//	GetCommandStack()->undo(m_commandId);
 }
 
 void DFGCommandRestoreObj::Redo()
 {
-	GetCommandStack()->redo(m_commandId);
+//	GetCommandStack()->redo(m_commandId);
 }
 

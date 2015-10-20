@@ -2,24 +2,29 @@
 
 #include "MaxDFGWidget.h"
 #include "plugin.h"
-#include "MaxCommandStack.h"
 
 #include "FabricUI/DFG/Dialogs/DFGEditPortDialog.h"
 #include "QListView"
 
+#include <QtGui/QUndoStack>
+
+QUndoStack s_undoStack;
+
 MaxDFGWidget::MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding)
-	: DFG::DFGCombinedWidget(parent)
+	: m_binding(binding)
+	, DFG::DFGCombinedWidget(parent)
+	, m_cmdHandler(&s_undoStack)
 {
 	FabricCore::Client client = GetClient();
 
 	ASTWrapper::KLASTManager* manager = ASTWrapper::KLASTManager::retainGlobalManager(&client);
 	FabricCore::DFGExec exec = binding.getExec();
-	init(client, manager, GetHost(), binding, exec, GetCommandStack(), false);
+	init(client, manager, GetHost(), binding, "", exec, &m_cmdHandler, false);
 
 	QObject::connect(this, SIGNAL(portEditDialogCreated(FabricUI::DFG::DFGBaseDialog*)),
-		this, SLOT(whenPortEditDialogCreated(FabricUI::DFG::DFGBaseDialog*)));
+		this, SLOT(onPortEditDialogCreated(FabricUI::DFG::DFGBaseDialog*)));
 	QObject::connect(this, SIGNAL(portEditDialogInvoked(FabricUI::DFG::DFGBaseDialog*)),
-		this, SLOT(whenPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog*)));
+		this, SLOT(onPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog*)));
 }
 
 MaxDFGWidget::~MaxDFGWidget()
@@ -39,14 +44,22 @@ void MaxDFGWidget::onStructureChanged()
 	//	theHold.Accept(_M("Splice Structure Changed"));
 }
 
-void MaxDFGWidget::onRecompilation()
+
+
+void MaxDFGWidget::onUndo()
 {
-	//FabricDFGBaseInterface * interf = FabricDFGBaseInterface::getInstanceByName(m_baseInterfaceName.c_str());
-	//if(interf)
-	//{
-	//  interf->invalidateNode();
-	//}
+	//if (theHold.Holding())
+	//	theHold.Accept(_M("Splice Structure Changed"));
 }
+
+void MaxDFGWidget::onRedo()
+{
+	//if (theHold.Holding())
+	//	theHold.Accept(_M("Splice Structure Changed"));
+}
+
+
+//////////////////////////////////////////////////////////////////////////
 
 class FillComboBox : public BitArrayCallback {
 
@@ -174,7 +187,7 @@ public:
 	}
 };
 
-void MaxDFGWidget::whenPortEditDialogCreated(DFG::DFGBaseDialog * dialog)
+void MaxDFGWidget::onPortEditDialogCreated(DFG::DFGBaseDialog * dialog)
 {
 	DFG::DFGController * controller = dialog->getDFGController();
 	if (!controller->isViewingRootGraph())
@@ -186,7 +199,7 @@ void MaxDFGWidget::whenPortEditDialogCreated(DFG::DFGBaseDialog * dialog)
 	QComboBox *comboBox = new QComboBox;
 	if (title.length() > 0)
 	{
-		FabricCore::DFGExec exec = controller->getCoreDFGExec();
+		FabricCore::DFGExec exec = m_binding.getExec();
 		QByteArray asName = title.toUtf8();
 		const char* fabricType = GetPortType(exec, asName.constData());
 
@@ -207,38 +220,40 @@ void MaxDFGWidget::whenPortEditDialogCreated(DFG::DFGBaseDialog * dialog)
 	dialog->addInput(comboBox, "3ds Max Type");
 }
 
-void MaxDFGWidget::whenPortEditDialogInvoked(DFG::DFGBaseDialog * dialog)
+void MaxDFGWidget::onPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog * dialog, FTL::JSONObjectEnc<> * additionalMetaData)
 {
 	DFG::DFGController * controller = dialog->getDFGController();
 	if (!controller->isViewingRootGraph())
 		return;
 
-	QComboBox *comboBox = (QComboBox *)dialog->input("3ds Max Type");
-	if (comboBox)
+	//if (additionalMetaData)
 	{
-		if (!comboBox->isEnabled())
-			return;
-
-		int selItem = comboBox->currentIndex();
-		if (selItem < 0)
-			return;
-		int maxType = comboBox->itemData(selItem).toInt();
-
-		DFG::DFGEditPortDialog * editPortDialog = (DFG::DFGEditPortDialog *)dialog;
-		QString title = editPortDialog->title();
-		if (title.length() > 0)
+		QComboBox *comboBox = (QComboBox *)dialog->input("3ds Max Type");
+		if (comboBox)
 		{
-			// Figure out what kind of parameter
-			// we can/will create on the Fabric side
-			QString spliceType = editPortDialog->dataType();
-			QByteArray asSpliceType = spliceType.toAscii();
-			BitArray legalTypes = SpliceTypeToMaxTypes(asSpliceType.constData());
-			// The requested max type is not legal for this splice type
-			if (!legalTypes[maxType])
-				maxType = SpliceTypeToDefaultMaxType(asSpliceType.constData()); // Reset to default
+			if (!comboBox->isEnabled())
+				return;
 
-			FabricCore::DFGBinding binding = getCoreDFGBinding();
-			SetPort3dsMaxType(binding, title.toUtf8().constData(), maxType);
+			int selItem = comboBox->currentIndex();
+			if (selItem < 0)
+				return;
+			int maxType = comboBox->itemData(selItem).toInt();
+
+			DFG::DFGEditPortDialog * editPortDialog = (DFG::DFGEditPortDialog *)dialog;
+			QString title = editPortDialog->title();
+			if (title.length() > 0)
+			{
+				// Figure out what kind of parameter
+				// we can/will create on the Fabric side
+				QString spliceType = editPortDialog->dataType();
+				QByteArray asSpliceType = spliceType.toAscii();
+				BitArray legalTypes = SpliceTypeToMaxTypes(asSpliceType.constData());
+				// The requested max type is not legal for this splice type
+				if (!legalTypes[maxType])
+					maxType = SpliceTypeToDefaultMaxType(asSpliceType.constData()); // Reset to default
+
+				SetPort3dsMaxType(m_binding, title.toUtf8().constData(), maxType);
+			}
 		}
 	}
 }

@@ -1503,21 +1503,49 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 
 #pragma endregion
 
-void bindingNotificationCallback(void * userData, char const *jsonCString, uint32_t jsonLength)
+void bindingNotificationCallback(void * userData, char const *jsonStr, uint32_t jsonLength)
 {
-	if (!jsonCString)
+	if (!jsonStr)
 		return;
-	//BaseInterface * interf = (BaseInterface *)userData;
+	
+	SpliceTranslationFPInterface * owner = reinterpret_cast<SpliceTranslationFPInterface *>(userData);
 
-	FabricCore::Variant notificationVar = FabricCore::Variant::CreateFromJSON(jsonCString, jsonLength);
+	FTL::JSONStrWithLoc jsonStrWithLoc(jsonStr);
+	FTL::OwnedPtr<FTL::JSONObject const> jsonObject(
+		FTL::JSONValue::Decode(jsonStrWithLoc)->cast<FTL::JSONObject>()
+		);
 
-	const FabricCore::Variant * descVar = notificationVar.getDictValue("desc");
-	std::string descStr = descVar->getStringData();
+	FTL::CStrRef descStr = jsonObject->getString(FTL_STR("desc"));
 
-	if (descStr == "argTypeChanged")
+	if (descStr == FTL_STR("dirty"))
 	{
-		printf("an argument type has changed. you might want to create a DCC port now.\n");
+	//	//if (!_isEvaluating && !_isTransferingInputs)
+	//	//{
+	//	//	// when we receive this notification we need to 
+	//	//	// ensure that the DCC reevaluates the node
+	//	//	incrementEvalID();
+	//	//}
 	}
+	else if (descStr == FTL_STR("argInserted"))
+	{
+
+	}
+	else if (descStr == FTL_STR("argTypeChanged"))
+	{
+		FTL::CStrRef portName = jsonObject->getString(FTL_STR("name"));
+		FTL::CStrRef portType = jsonObject->getString(FTL_STR("type"));
+		owner->SetMaxConnectedType(portName.c_str(), -2);
+	}
+	else if (descStr == FTL_STR("execPortMetadataChanged"))
+	{
+		// TODO: Remove this once the naming bug is fixed in DFGNotificationRouter
+		//onExecPortMetadataChanged(
+		//	jsonObject->getString(FTL_STR("portName")),
+		//	jsonObject->getString(FTL_STR("key")),
+		//	jsonObject->getString(FTL_STR("value"))
+		//	);
+	}
+
 }
 
 

@@ -1,54 +1,54 @@
 
--- macro script to toggle splice rendering
-macroScript SpliceRendering 
-category:"Fabric Splice"
-internalCategory:"FabricSplice"
-tooltip:"Enable Splice Viewport Rendering"
+-- macro script to toggle Fabric rendering
+macroScript FabricRendering 
+category:"FabricEngine"
+internalCategory:"FabricEngine"
+tooltip:"Enable Fabric Viewport Rendering"
 buttontext:"Viewport Render"
 autoUndoEnabled:false
 (
-    on execute do  Splice.Rendering = not Splice.Rendering
-    on isChecked return Splice.Rendering
+    on execute do Fabric.Rendering = not Fabric.Rendering
+    on isChecked return Fabric.Rendering
 )
 
--- macro script to toggle splice manipulation
-macroScript SpliceManipulation
-category:"Fabric Splice"
-internalCategory:"FabricSplice"
-tooltip:"Enable Splice Manipulation"
+-- macro script to toggle Fabric manipulation
+macroScript FabricManipulation
+category:"FabricEngine"
+internalCategory:"FabricEngine"
+tooltip:"Enable Fabric Manipulation"
 buttontext:"Manipulation"
 autoUndoEnabled:false
 (
-    on execute do  Splice.Manipulation = not Splice.Manipulation
-    on isChecked return Splice.Manipulation
+    on execute do Fabric.Manipulation = not Fabric.Manipulation
+    on isChecked return Fabric.Manipulation
 )
 
--- macro script to load a splice preset
-macroScript LoadSplicePreset
-category:"Fabric Splice"
-internalCategory:"FabricSplice"
-tooltip:"Load a Splice Preset File"
-buttontext:"Load Splice Preset"
+-- macro script to load a Fabric preset
+macroScript LoadFabricPreset
+category:"FabricEngine"
+internalCategory:"FabricEngine"
+tooltip:"Load a Fabric Canvas Preset File"
+buttontext:"Load Preset"
 autoUndoEnabled:false
 (
-  f = getOpenFileName caption:"Select a Splice Preset File:" types:"Splice Preset(*.splice)|*.splice"
+  f = getOpenFileName caption:"Select a canvas Preset File:" types:"Fabric Canvas Preset(*.canvas)|*.canvas"
   if f != undefined then
   (
-    Splice.LoadFromFile f
+    Fabric.LoadFromFile f
   )
 )
 
--- macro script to open the help for Splice. 
-macroScript SpliceHelp 
-category:"Fabric Splice" 
-internalCategory:"FabricSplice"
+-- macro script to open the help for Fabric. 
+macroScript FabricHelp 
+category:"FabricEngine" 
+internalCategory:"FabricEngine"
 autoUndoEnabled:false
 (
-  shellLaunch "http://documentation.fabric-engine.com/FabricEngine/latest/HTML/Splice/" ""
+  shellLaunch "http://documentation.fabric-engine.com/FabricEngine/latest/HTML/Fabric/" ""
 )
-__FE_MENU_NAME = "Splice"
+__FE_MENU_NAME = "Fabric"
 
-fn findFabricSpliceMenuItem = (
+fn findFabricEngineMenuItem = (
   local mainMenuBar = menuMan.getMainMenuBar()
   res = false
   for i = 1 to mainMenuBar.numItems() do (
@@ -58,82 +58,82 @@ fn findFabricSpliceMenuItem = (
   res
 )
 
--- Add Splice commadns to the menu bar if they don't already exist
-fn RegisterFabricSpliceMenu = (
+-- Add Fabric commadns to the menu bar if they don't already exist
+fn RegisterFabricEngineMenu = (
   -- This example adds a new sub-menu to MAX's main menu bar. -- It adds the menu just before the "Help" menu.
-  if findFabricSpliceMenuItem() == false do
+  if findFabricEngineMenuItem() == false do
   (
     -- Get the main menu bar
     local mainMenuBar = menuMan.getMainMenuBar()
     -- Create a new menu
-    local spliceMenu = menuMan.createMenu __FE_MENU_NAME
+    local FabricMenu = menuMan.createMenu __FE_MENU_NAME
 
-    local toggleRenderingAction = menuMan.createActionItem "SpliceRendering" "FabricSplice"
+    local toggleRenderingAction = menuMan.createActionItem "FabricRendering" "FabricEngine"
     --add the ActionItem to the menu
-    spliceMenu.addItem toggleRenderingAction -1
+    FabricMenu.addItem toggleRenderingAction -1
 
-    local toggleManipulationAction = menuMan.createActionItem "SpliceManipulation" "FabricSplice"
+    local toggleManipulationAction = menuMan.createActionItem "FabricManipulation" "FabricEngine"
     --add the ActionItem to the menu
-    spliceMenu.addItem toggleManipulationAction -1
+    FabricMenu.addItem toggleManipulationAction -1
 
     local sepItem = menuMan.createSeparatorItem()
-    spliceMenu.addItem sepItem -1
+    FabricMenu.addItem sepItem -1
 
-    local loadSplicePresetAction = menuMan.createActionItem "LoadSplicePreset" "FabricSplice"
+    local loadFabricPresetAction = menuMan.createActionItem "LoadFabricPreset" "FabricEngine"
     --add the ActionItem to the menu
-    spliceMenu.addItem loadSplicePresetAction -1
+    FabricMenu.addItem loadFabricPresetAction -1
 
     local sepItem = menuMan.createSeparatorItem()
-    spliceMenu.addItem sepItem -1
+    FabricMenu.addItem sepItem -1
 
-    local spliceHelpAction = menuMan.createActionItem "SpliceHelp" "FabricSplice"
+    local FabricHelpAction = menuMan.createActionItem "FabricHelp" "FabricEngine"
     --add the ActionItem to the menu
-    spliceMenu.addItem spliceHelpAction -1
+    FabricMenu.addItem FabricHelpAction -1
 
 
     -- Create a new menu item with the menu as it's sub-menu
-    local spliceSubMenuItem = menuMan.createSubMenuItem __FE_MENU_NAME spliceMenu
+    local FabricSubMenuItem = menuMan.createSubMenuItem __FE_MENU_NAME FabricMenu
     -- compute the index of the next-to-last menu item in the main menu bar
     local subMenuIndex = mainMenuBar.numItems() - 1
     -- Add the sub-menu just at the second to last slot
-    mainMenuBar.addItem spliceSubMenuItem subMenuIndex
+    mainMenuBar.addItem FabricSubMenuItem subMenuIndex
     
     -- redraw the menu bar with the new item
     menuMan.updateMenuBar()
   )
 )
 
-fn DeRegisterFabricSpliceMenu = (
-  local spliceMenuItem = findFabricSpliceMenuItem()
-  if (spliceMenuItem != false) do (
+fn DeRegisterFabricEngineMenu = (
+  local FabricMenuItem = findFabricEngineMenuItem()
+  if (FabricMenuItem != false) do (
     -- Get the main menu bar
     local mainMenuBar = menuMan.getMainMenuBar()
     -- Remove menu item
-    mainMenuBar.removeItem spliceMenuItem
+    mainMenuBar.removeItem FabricMenuItem
     -- Create a new menu
-    local spliceMenu = menuMan.findMenu __FE_MENU_NAME
+    local FabricMenu = menuMan.findMenu __FE_MENU_NAME
     -- Remove this menu
-    if (spliceMenu != undefined) do ( menuMan.unRegisterMenu spliceMenu )
+    if (FabricMenu != undefined) do ( menuMan.unRegisterMenu FabricMenu )
     menuMan.updateMenuBar()
   )
-  -- Force the release of any remaining splice happenings
-  Splice.DestroyClient force:true
+  -- Force the release of any remaining Fabric happenings
+  Fabric.DestroyClient force:true
 )
 
 -- When this script executes, we automatically add our menu
 -- to max if it doesn't already exist
-RegisterFabricSpliceMenu()
+RegisterFabricEngineMenu()
 
 -- Register a on-shutdown event to remove our menu's.
 -- We don't want them appearing in max when this
 -- script hasn't been executed
-callbacks.addScript #preSystemShutdown "DeRegisterSpliceMenu()" id:#SpliceRemoveMenu
+callbacks.addScript #preSystemShutdown "DeRegisterFabricMenu()" id:#FabricRemoveMenu
 
--- Our default initial state is Splice cleaned up and rendering on
-fn InitSpliceToDefault = (
-	Splice.DestroyClient force:true
-	Splice.Rendering = true
+-- Our default initial state is Fabric cleaned up and rendering on
+fn InitFabricToDefault = (
+	Fabric.DestroyClient force:true
+	Fabric.Rendering = true
 )
-callbacks.addScript #systemPostReset "InitSpliceToDefault()" id:#SpliceDefaultVptRenderOn1
-callbacks.addScript #systemPostNew "InitSpliceToDefault()" id:#SpliceDefaultVptRenderOn2
-callbacks.addScript #postSystemStartup "InitSpliceToDefault()" id:#SpliceDefaultVptRenderOn
+callbacks.addScript #systemPostReset "InitFabricToDefault()" id:#FabricDefaultVptRenderOn1
+callbacks.addScript #systemPostNew "InitFabricToDefault()" id:#FabricDefaultVptRenderOn2
+callbacks.addScript #postSystemStartup "InitFabricToDefault()" id:#FabricDefaultVptRenderOn

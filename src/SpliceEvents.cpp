@@ -68,7 +68,7 @@ void doSpliceDrawing(void *data)
 				FabricCore::RTVal success = GetDrawing().callMethod("Boolean", "drawViewport", 2, args);
 				if (!success.getBoolean())
 				{
-					myLogFunc(NULL, "Drawing Failed", -1);
+					//myLogFunc(NULL, "Drawing Failed", -1);
 				}
 			}
 		}

@@ -46,7 +46,11 @@ extern TCHAR *GetString(int id);
 //using namespace FabricServices;
 
 #include <FabricCore.h>
+
 #include <FTL/CStrRef.h>
+#include <FTL/OwnedPtr.h>
+#include <FTL/JSONDec.h>
+#include <FTL/JSONValue.h>
 
 // Local includes
 #include "DynamicParamBlocks\DynamicDialog\resource.h"

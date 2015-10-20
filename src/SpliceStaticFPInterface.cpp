@@ -2,7 +2,6 @@
 #include "SpliceStaticFPInterface.h"
 #include "MaxScript/MaxScript.h"
 #include "SpliceEvents.h"
-#include "FabricSplice.h"
 #include "FabricCore.h"
 #include <fstream>      // std::ifstream
 
@@ -10,26 +9,26 @@
 #define p_end end
 #endif
 
-SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
+FabricStaticFPInterface* FabricStaticFPInterface::GetInstance()
 {
 	// The single instance of this class
 	// Initialize our instance.  This part is tells Max about the
 	// functions exposed in our function map.
-	static SpliceStaticFPInterface _theInstance(
+	static FabricStaticFPInterface _theInstance(
 		// Describe our interface
-		ISPLICE_STATIC_INTERFACE , _T("Splice"), 0, NULL, FP_CORE,
+		IFabric_STATIC_INTERFACE , _T("Fabric"), 0, NULL, FP_CORE,
 		// Describe our function(s)
-			SpliceStaticFPInterface::fn_importSpliceFile, _T("LoadFromFile"), 0, TYPE_BOOL, 0, 1,
+			FabricStaticFPInterface::fn_importFabricFile, _T("LoadFromFile"), 0, TYPE_BOOL, 0, 1,
 				_M("file"),	0,	TYPE_TSTR_BV,
 			
-			SpliceStaticFPInterface::fn_getGlobalOperatorCount, _T("GetGlobalOperatorCount"), 0, TYPE_INT, 0, 0,
-			SpliceStaticFPInterface::fn_getGlobalOperatorName, _T("GetGlobalOperatorName"), 0, TYPE_TSTR_BV, 0, 1,
+			FabricStaticFPInterface::fn_getGlobalOperatorCount, _T("GetGlobalOperatorCount"), 0, TYPE_INT, 0, 0,
+			FabricStaticFPInterface::fn_getGlobalOperatorName, _T("GetGlobalOperatorName"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("index"),	0,	TYPE_INDEX,
-			SpliceStaticFPInterface::fn_loadFabricExtension, _T("LoadExtension"), 0, TYPE_BOOL, 0, 3,
+			FabricStaticFPInterface::fn_loadFabricExtension, _T("LoadExtension"), 0, TYPE_BOOL, 0, 3,
 				_M("extension"),	0,	TYPE_TSTR_BV,
 				_M("version"),	0,	TYPE_TSTR_BV,
 				_M("reload"),	0,	TYPE_bool,
-			SpliceStaticFPInterface::fn_registerFabricExtension, _T("RegisterExtension"), 0, TYPE_BOOL, 0, 6,
+			FabricStaticFPInterface::fn_registerFabricExtension, _T("RegisterExtension"), 0, TYPE_BOOL, 0, 6,
 				_M("extension"),	0,	TYPE_TSTR_BV,
 				_M("version"),	0,	TYPE_TSTR_BV,
 				_M("versionOverride"),	0,	TYPE_TSTR_BV,
@@ -37,21 +36,21 @@ SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
 				_M("load"),	0,	TYPE_bool,
 				_M("reload"),	0,	TYPE_bool,
 
-			SpliceStaticFPInterface::fn_enableLogging, _T("EnableLoggers"), 0, TYPE_INT, 0, 1,
-				_M("loggers"),	0,	TYPE_ENUM, SpliceStaticFPInterface::loggingEnums,
-			SpliceStaticFPInterface::fn_disableLogging, _T("DisableLoggers"), 0, TYPE_INT, 0, 1,
-				_M("loggers"),	0,	TYPE_ENUM, SpliceStaticFPInterface::loggingEnums,
+			FabricStaticFPInterface::fn_enableLogging, _T("EnableLoggers"), 0, TYPE_INT, 0, 1,
+				_M("loggers"),	0,	TYPE_ENUM, FabricStaticFPInterface::loggingEnums,
+			FabricStaticFPInterface::fn_disableLogging, _T("DisableLoggers"), 0, TYPE_INT, 0, 1,
+				_M("loggers"),	0,	TYPE_ENUM, FabricStaticFPInterface::loggingEnums,
 
-			SpliceStaticFPInterface::fn_destroyClient, _T("DestroyClient"), 0, TYPE_INT, 0, 1,
+			FabricStaticFPInterface::fn_destroyClient, _T("DestroyClient"), 0, TYPE_INT, 0, 1,
 				_M("force"),	0,	TYPE_BOOL, f_keyArgDefault, false,
 
 
 		properties,
-			SpliceStaticFPInterface::prop_getSpliceRendering,SpliceStaticFPInterface::prop_setSpliceRendering, _T("Rendering"), 0,TYPE_bool,
-			SpliceStaticFPInterface::prop_getSpliceManip,SpliceStaticFPInterface::prop_setSpliceManip, _T("Manipulation"), 0,TYPE_bool,
+			FabricStaticFPInterface::prop_getFabricRendering,FabricStaticFPInterface::prop_setFabricRendering, _T("Rendering"), 0,TYPE_bool,
+			FabricStaticFPInterface::prop_getFabricManip,FabricStaticFPInterface::prop_setFabricManip, _T("Manipulation"), 0,TYPE_bool,
 
 		enums,
-			SpliceStaticFPInterface::loggingEnums, LOG_ENUM_COUNT,
+			FabricStaticFPInterface::loggingEnums, LOG_ENUM_COUNT,
 				_T("logGeneric"), LOG_GENERIC,
 				_T("logErrors"), LOG_ERROR,
 				_T("logCompiler"), LOG_COMPILER_ERROR,
@@ -63,7 +62,7 @@ SpliceStaticFPInterface* SpliceStaticFPInterface::GetInstance()
 	return &_theInstance;
 }
 
-BOOL SpliceStaticFPInterface::ImportSpliceFile(const TSTR& file)
+BOOL FabricStaticFPInterface::ImportFabricFile(const TSTR& file)
 {
 	ClassDesc2* pCD = SpliceTranslationLayer<GeomObject, Mesh>::GetClassDesc();
 	BOOL res = FALSE;
@@ -75,14 +74,14 @@ BOOL SpliceStaticFPInterface::ImportSpliceFile(const TSTR& file)
 		// to the Scene graph, and is the only type that really makes sense
 		Object* pRef = reinterpret_cast<Object*>(pCD->Create(TRUE));
 
-		SpliceTranslationFPInterface* pSpliceInterface = GetSpliceInterface(pRef);
-		if (pSpliceInterface != NULL)
-			res = pSpliceInterface->LoadFromFile(file, true);
+		SpliceTranslationFPInterface* pFabricInterface = GetSpliceInterface(pRef);
+		if (pFabricInterface != NULL)
+			res = pFabricInterface->LoadFromFile(file, true);
 
 		if (!res)
 			pRef->MaybeAutoDelete();
 		else {
-			// Give the new node the name of the splice preset. 
+			// Give the new node the name of the Fabric preset. 
 			INode* pNode = GetCOREInterface()->CreateObjectNode(pRef);
 			TSTR directory, filename, extension;
 			SplitFilename (file, &directory, &filename, &extension);
@@ -92,23 +91,23 @@ BOOL SpliceStaticFPInterface::ImportSpliceFile(const TSTR& file)
 	return res;
 }
 
-BOOL SpliceStaticFPInterface::ExportSpliceFile(const MSTR& file, ReferenceTarget* spliceEntity) 
+BOOL FabricStaticFPInterface::ExportFabricFile(const MSTR& file, ReferenceTarget* FabricEntity) 
 {
-	SpliceTranslationFPInterface* pSpliceInterface = GetSpliceInterface(spliceEntity);
-	if (pSpliceInterface == nullptr)
+	SpliceTranslationFPInterface* pFabricInterface = GetSpliceInterface(FabricEntity);
+	if (pFabricInterface == nullptr)
 		return FALSE;
 
 	CStr cFile = file.ToCStr();
-	//FabricCore::DFGBinding* pGraph = const_cast<FabricCore::DFGBinding*>(&pSpliceInterface->GetSpliceGraph());
+	//FabricCore::DFGBinding* pGraph = const_cast<FabricCore::DFGBinding*>(&pFabricInterface->GetFabricGraph());
 	return false ; //pGraph->saveToFile(cFile.data());
 }
 
-int SpliceStaticFPInterface::GetGlobalKLOperatorCount()
+int FabricStaticFPInterface::GetGlobalKLOperatorCount()
 {
 	return 0; //FabricCore::DFGBinding::getGlobalKLOperatorCount();
 }
 
-MSTR SpliceStaticFPInterface::GetGlobalKLOperatorName(int index)
+MSTR FabricStaticFPInterface::GetGlobalKLOperatorName(int index)
 {
 	//const char* opName = FabricCore::DFGBinding::getGlobalKLOperatorName(index);
 	//MSTR rval;
@@ -117,9 +116,9 @@ MSTR SpliceStaticFPInterface::GetGlobalKLOperatorName(int index)
 	return _M("");
 }
 
-BOOL SpliceStaticFPInterface::LoadExtension( const MSTR& extension, const MSTR& version, bool reload)
+BOOL FabricStaticFPInterface::LoadExtension( const MSTR& extension, const MSTR& version, bool reload)
 {
-	//MAXSPLICE_CATCH_BEGIN
+	//MAXFabric_CATCH_BEGIN
 
 	CStr cExtension = extension.ToCStr();
 	CStr cVersion = version.ToCStr();
@@ -135,7 +134,7 @@ BOOL SpliceStaticFPInterface::LoadExtension( const MSTR& extension, const MSTR& 
 		throw UserThrownError(message.data(), FALSE);
 	}
 
-	//MAXSPLICE_CATCH_RETURN(false);
+	//MAXFabric_CATCH_RETURN(false);
 	return TRUE;
 }
 
@@ -158,7 +157,7 @@ bool ReadFileIntoString(const char* file, std::string& outcontents) {
 	return false;
 }
 
-bool SpliceStaticFPInterface::RegisterExtension( const MSTR& extension, const MSTR& version, const MSTR& override, const Tab<MSTR*>& files, bool load, bool reload )
+bool FabricStaticFPInterface::RegisterExtension( const MSTR& extension, const MSTR& version, const MSTR& override, const Tab<MSTR*>& files, bool load, bool reload )
 {
 	//const FabricCore::Client* pClient = NULL;
 	//FECS_DGGraph_getClient(&pClient);
@@ -202,7 +201,7 @@ bool SpliceStaticFPInterface::RegisterExtension( const MSTR& extension, const MS
 }
 
 
-int SpliceStaticFPInterface::EnableLogging(int loggers) {
+int FabricStaticFPInterface::EnableLogging(int loggers) {
 	if (loggers & LOG_GENERIC)
 		SetGenericLoggerEnabled(true);
 	if (loggers & LOG_ERROR)
@@ -218,7 +217,7 @@ int SpliceStaticFPInterface::EnableLogging(int loggers) {
 	return m_FabrigLogging;
 }
 
-int SpliceStaticFPInterface::DisableLogging(int loggers) {
+int FabricStaticFPInterface::DisableLogging(int loggers) {
 	if (loggers & LOG_GENERIC)
 		SetGenericLoggerEnabled(false);
 	if (loggers & LOG_ERROR)
@@ -234,18 +233,18 @@ int SpliceStaticFPInterface::DisableLogging(int loggers) {
 	return m_FabrigLogging;
 }
 
-void SpliceStaticFPInterface::DestroyClient(bool force) {
+void FabricStaticFPInterface::DestroyClient(bool force) {
 	SpliceEvents::ReleaseInstance();
 	
 	ReleaseAll();
 }
 
-bool SpliceStaticFPInterface::GetSpliceRendering()
+bool FabricStaticFPInterface::GetFabricRendering()
 {
 	return SpliceEvents::GetInstance()->ViewportRenderHooked();
 }
 
-void SpliceStaticFPInterface::SetSpliceRendering(bool isRendering)
+void FabricStaticFPInterface::SetFabricRendering(bool isRendering)
 {
 	if (isRendering)
 	{
@@ -256,12 +255,12 @@ void SpliceStaticFPInterface::SetSpliceRendering(bool isRendering)
 }
 
 
-bool SpliceStaticFPInterface::GetSpliceManip()
+bool FabricStaticFPInterface::GetFabricManip()
 {
 	return SpliceEvents::GetInstance()->MouseEventsHooked();
 }
 
-void SpliceStaticFPInterface::SetSpliceManip(bool isManipulating)
+void FabricStaticFPInterface::SetFabricManip(bool isManipulating)
 {
 	if (isManipulating)
 	{

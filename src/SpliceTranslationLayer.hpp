@@ -8,10 +8,7 @@
 #include "MaxConversionFns.h"
 #include "Splice3dsmax.h"
 #include "SpliceRestoreObjects.h"
-#include "MaxDFGNotificationRouter.h"
-#include "MaxDFGController.h"
 #include "ASTWrapper/KLASTManager.h"
-#include "MaxCommandStack.h"
 
 //////////////////////////////////////////////////////////////////////////
 //--- SpliceTranslationLayer -------------------------------------------------------
@@ -41,8 +38,6 @@ SpliceTranslationLayer<TBaseClass, TResultType>::~SpliceTranslationLayer()
 {
 	// We _must_ have been released by now
 	DbgAssert(m_pblock == NULL);
-
-	SAFE_DELETE(m_router);
 
 	// Now is a good time to release any old pbdescs
 	// If we are in a reset, our pblock would have 
@@ -628,6 +623,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 template<typename TBaseClass, typename TResultType>
 const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
 {
+	bool b = (theHold.Holding());
 	HoldActions hold(_M("Add Input Port"));
 	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_In, isArray, inExtension);
 }
@@ -1005,21 +1001,17 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const char
 
 		for (unsigned int i = 0; i < exec.getExecPortCount(); i++)
 		{
-			const char* portName = exec.getExecPortName(i);
 			// If this could be our out port?
 			if (exec.getExecPortType(i) == FabricCore::DFGPortType_Out)
 			{
+				const char* portName = exec.getExecPortName(i);
 				exec.getExecPortResolvedType(i);
 				BitArray compatibleTypes = SpliceTypeToMaxTypes(GetPortType(portName));
 				// If this splice type is compatible with this classes output,
 				// set this port as our outport
-				if (compatibleTypes[GetValueType()])
+				if (compatibleTypes[GetValueType()]) {
 					m_outArgName = portName;
-			}
-			else
-			{
-				// for input ports, we should trigger Max type creation
-				m_router->onExecPortResolvedTypeChanged(portName, "");
+				}
 			}
 		}
 	}
@@ -1047,14 +1039,14 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetBinding(FabricCore::DFG
 	m_binding = binding;
 	m_binding.setNotificationCallback(bindingNotificationCallback, this);
 
-	SAFE_DELETE(m_ctrl);
-	FabricServices::ASTWrapper::KLASTManager* manager = FabricServices::ASTWrapper::KLASTManager::retainGlobalManager(&GetClient());
-	m_ctrl = new MaxDFGController(NULL, GetCommandStack(), manager, m_binding, m_binding.getExec(), false);
+	//SAFE_DELETE(m_ctrl);
+	//FabricServices::ASTWrapper::KLASTManager* manager = FabricServices::ASTWrapper::KLASTManager::retainGlobalManager(&GetClient());
+	//m_ctrl = new MaxDFGController(NULL, GetCommandStack(), manager, m_binding, m_binding.getExec(), false);
 
 	// Hook up our router again
-	SAFE_DELETE(m_router);
-	m_router = new MaxDFGNotificationRouter(this, m_binding, m_binding.getExec());
-	m_router->setController(m_ctrl);
+	//SAFE_DELETE(m_router);
+	//m_router = new MaxDFGNotificationRouter(this, m_binding, m_binding.getExec());
+	//m_router->setController(m_ctrl);
 }
 
 #pragma endregion

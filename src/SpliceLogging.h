@@ -20,7 +20,12 @@ public:
 // capacity of Splice to the default
 extern void InitLoggingTimer();
 
-extern void myLogFunc(void* pCallbackData, const char * message, unsigned int length);
+extern void myLogFunc(
+	void *reportUserdata,
+	FEC_ReportSource source,
+	FEC_ReportLevel level,
+	char const *lineCStr,
+	uint32_t lineSize);
 
 extern void SetGenericLoggerEnabled(bool enable);
 extern void SetErrorLoggerEnabled(bool enable);

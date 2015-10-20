@@ -6,32 +6,36 @@
 		<IsRelease>$([System.Convert]::ToString( $([System.Text.RegularExpressions.Regex]::IsMatch($(Configuration), '[Rr]elease'))))</IsRelease>
 
 		<!-- variable contains max version -->
+		<MaxVersion>0</MaxVersion>
 		<MaxVersion Condition="'$(Configuration.Contains(2012))'">2012</MaxVersion>
 		<MaxVersion Condition="'$(Configuration.Contains(2013))'">2013</MaxVersion>
 		<MaxVersion Condition="'$(Configuration.Contains(2014))'">2014</MaxVersion>
 		<MaxVersion Condition="'$(Configuration.Contains(2015))'">2015</MaxVersion>
+        <MaxVersion Condition="'$(Configuration.Contains(2016))'">2016</MaxVersion>
 
 		<!-- version specific path selectors -->
 		<MaxPath Condition="'$(MaxVersion)'=='2012' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2012)</MaxPath>
 		<MaxPath Condition="'$(MaxVersion)'=='2013' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2013)</MaxPath>
 		<MaxPath Condition="'$(MaxVersion)'=='2014' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2014)</MaxPath>
-		<MaxPath Condition="'$(MaxVersion)'=='2015' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2015)</MaxPath>
+        <MaxPath Condition="'$(MaxVersion)'=='2015' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2015)</MaxPath>
+		<MaxPath Condition="'$(MaxVersion)'=='2016' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2016)</MaxPath>
 
 		<MaxSDKPath Condition="'$(MaxVersion)'=='2012'">$(ADSK_3DSMAX_SDK_2012)\maxsdk\</MaxSDKPath>
 		<MaxSDKPath Condition="'$(MaxVersion)'=='2013'">$(ADSK_3DSMAX_SDK_2013)\maxsdk\</MaxSDKPath>
 		<MaxSDKPath Condition="'$(MaxVersion)'=='2014'">$(ADSK_3DSMAX_SDK_2014)\</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2015'">$(ADSK_3DSMAX_SDK_2015)\</MaxSDKPath>
+        <MaxSDKPath Condition="'$(MaxVersion)'=='2015'">$(ADSK_3DSMAX_SDK_2015)\</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2016'">$(ADSK_3DSMAX_SDK_2016)\</MaxSDKPath>
 
 		<!-- If no install of Max SDK is present, default to the fabric system build values  -->
 		<MaxSDKPath Condition="'$(MaxSDKPath)'==''">$(FABRIC_SCENE_GRAPH_DIR)\ThirdParty\PreBuilt\Windows\x86_64\Release\3dsmax\3ds Max $(MaxVersion) SDK\</MaxSDKPath>
 
 		<!-- Autodesc changed the folder structure of the SDK from 2014 onwards -->
-		<MaxSDKLibPath>$(MaxSDKPath)x64\lib\</MaxSDKLibPath>
-		<MaxSDKLibPath Condition="'$(MaxVersion)' &gt; '2013'">$(MaxSDKPath)\lib\x64\Release</MaxSDKLibPath>
-
+		<MaxSDKLibPath>$(MaxSDKPath)\lib\x64\Release</MaxSDKLibPath>
+		<MaxSDKLibPath Condition="'$(MaxVersion)' &lt; '2013'">$(MaxSDKPath)x64\lib\</MaxSDKLibPath>
+		
 		<!-- switcher for unicode build -->
-		<IsUnicode>false</IsUnicode>
-		<IsUnicode Condition="'$(MaxVersion)' &gt; '2012'">true</IsUnicode>
+		<IsUnicode>true</IsUnicode>
+		<IsUnicode Condition="'$(MaxVersion)' &lt; '2013'">false</IsUnicode>
 
 		<SpliceOutDir>$(FABRIC_DIR)\SpliceIntegrations\FabricSplice3dsmax$(MaxVersion)\</SpliceOutDir>
 
@@ -47,19 +51,19 @@
 	<PropertyGroup Label="Configuration">
 		<UseOfMfc>false</UseOfMfc>
 		<UseOfAtl>false</UseOfAtl>
-		<IsUnicode>true</IsUnicode>
-		<CharacterSet>Unicode</CharacterSet>
 		<IntDir>build\FabricSplice3dsmax\obj\$(Configuration)\</IntDir>
 		<OutDir>$(SpliceOutDir)plugin\</OutDir>
 		<TargetExt>.dlu</TargetExt>
 		<ConfigurationType>DynamicLibrary</ConfigurationType>
 		<UseDebugLibraries>false</UseDebugLibraries>
+        <ReferencePath>$(MaxSDKPath)include/;$(QT_DIR)include/</ReferencePath>
 	</PropertyGroup>
 
 	<!-- Rest Unicode values -->
 	<PropertyGroup Condition="!'$(IsUnicode)'" Label="Configuration">
 		<CharacterSet>MultiByte</CharacterSet>
 	</PropertyGroup>
+
 	<!-- Set appropriate compiler version -->
 	<PropertyGroup> <!-- Max 2010 thru 2012 -->
 		<PlatformToolset>v90</PlatformToolset>
@@ -70,7 +74,7 @@
 	<PropertyGroup Condition="'$(MaxVersion)' &gt; '2014'">
 		<PlatformToolset>v110</PlatformToolset>
 	</PropertyGroup>
-	<PropertyGroup><!-- Tmp overwrite VS version, until FE supplies libraries we can link vs earlier VS versions-->
+	<PropertyGroup Condition="'$(MaxVersion)' &gt; '2015'"><!-- Tmp overwrite VS version, until FE supplies libraries we can link vs earlier VS versions-->
 		<PlatformToolset>v120</PlatformToolset>
 	</PropertyGroup>
 	
@@ -81,10 +85,10 @@
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<StringPooling>true</StringPooling>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+            <PrecompiledHeader>Use</PrecompiledHeader>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-     	<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;FEC_SHARED;FECS_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+     	    <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_QTWINMIGRATE_IMPORT;FEC_SHARED;FECS_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
 		</ClCompile>        
 
 		<!-- Turn on E&C for Debug Win32 builds -->
@@ -106,6 +110,10 @@
 			<WholeProgramOptimization>true</WholeProgramOptimization>
 		</ClCompile>
 		
+		<ClCompile Condition="'$(IsUnicode)'" Label="Configuration">
+			<PreprocessorDefinitions>UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+
 		<!-- Linker Common Settings -->
 		<Link>
 			<LinkIncremental>true</LinkIncremental>
@@ -113,8 +121,8 @@
 			<SubSystem>Windows</SubSystem>
 			<AdditionalDependencies>assetmanagement.lib;atscore.lib;biped.lib;bmm.lib;core.lib;crowd.lib;custdlg.lib;databridge.lib;edmodel.lib;expr.lib;flt.lib;geom.lib;gfx.lib;GraphicsDriver.lib;gup.lib;igame.lib;imageviewers.lib;manipsys.lib;maxnet.lib;maxscrpt.lib;maxutil.lib;menuman.lib;menus.lib;mesh.lib;mnmath.lib;paramblk2.lib;particle.lib;particleflow.lib;physique.lib;poly.lib;polypaint.lib;renderutil.lib;rtmax.lib;tessint.lib;viewfile.lib;zlibdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies Condition="'$(MaxVersion)'!='2012'">GraphicsUtility.lib;%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalDependencies>FabricSplitSearch.lib;FabricCore-2.0.lib;FabricServices-MSVC-12.0-md.lib;FabricUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalDependencies>QtCore$(QtSuffix).lib;QtGui$(QtSuffix).lib;QtOpenGL$(QtSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>FabricSplitSearch.lib;FabricCore-2.0.lib;FabricServices-MSVC-12.0-mt.lib;FabricUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>QtSolutions_MFCMigrationFramework-head.lib;QtCore$(QtSuffix).lib;QtGui$(QtSuffix).lib;QtOpenGL$(QtSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalLibraryDirectories>$(QT_DIR)lib;$(FabricUIDir)stage\lib;$(FABRIC_DIR)\lib;$(BOOST_DIR);$(MaxSDKLibPath);$(SolutionDir)qt-solutions\qtwinmigrate\lib</AdditionalLibraryDirectories>
 		</Link>
 	</ItemDefinitionGroup>

@@ -3,7 +3,9 @@
 #pragma once
 
 
-#include <DFG/DFGCombinedWidget.h>
+#include <FabricUI/DFG/DFGCombinedWidget.h>
+//#include "MaxDFGCmdHandler.h"
+#include <FabricUI/DFG/DFGUICmdHandler_QUndo.h>
 
 using namespace FabricServices;
 using namespace FabricUI;
@@ -13,6 +15,9 @@ class MaxDFGWidget : public DFG::DFGCombinedWidget {
   
 	Q_OBJECT
 
+		FabricUI::DFG::DFGUICmdHandler_QUndo m_cmdHandler;
+
+	FabricCore::DFGBinding& m_binding;
 public:
 	
 	MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding);
@@ -24,16 +29,13 @@ public:
   //static void mayaLog(const char * message);
   //static void closeWidgetsForBaseInterface(FabricDFGBaseInterface * interf);
 
-	public slots:
+public slots:
 	virtual void onValueChanged() override;
 	virtual void onStructureChanged() override;
-	virtual void onRecompilation() override;
+	virtual void onUndo() override;
+	virtual void onRedo() override;
 
-	private slots:
-
-	void whenPortEditDialogCreated(FabricUI::DFG::DFGBaseDialog * dialog) override;
-	void whenPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog * dialog) override;
-
-	//void editDialogCreated(DFG::DFGBaseDialog * dialog);
-	//void editDialogInvoked(DFG::DFGBaseDialog * dialog);
+private slots:
+	void onPortEditDialogCreated(FabricUI::DFG::DFGBaseDialog * dialog);
+	void onPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog * dialog, FTL::JSONObjectEnc<> * additionalMetaData);
 };

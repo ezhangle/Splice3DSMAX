@@ -1,16 +1,16 @@
 #pragma once
-#include "DFG\DFGController.h"
+#include <FabricUI\DFG\DFGController.h>
 
 class MaxDFGController : public FabricUI::DFG::DFGController {
 
 public:
 
-	MaxDFGController(FabricUI::GraphView::Graph * graph,
-		FabricServices::Commands::CommandStack * stack,
+	MaxDFGController(
+		FabricUI::GraphView::Graph * graph,
+		FabricUI::DFG::DFGWidget* dfgWidget,
 		FabricServices::ASTWrapper::KLASTManager * manager,
-		FabricCore::DFGBinding binding,
-		FabricCore::DFGExec exec,
-		bool overTakeBindingNotifications /*= true*/);
+		FabricUI::DFG::DFGUICmdHandler* cmdHandler,
+		bool overTakeBindingNotifications=true);
 
 
 	virtual bool beginInteraction() override;
@@ -18,25 +18,25 @@ public:
 
 	//virtual FabricUI::GraphView::Node * addNodeFromPreset(QString preset, QPointF pos) override;
 
-	virtual bool moveNode(FabricUI::GraphView::Node * node, QPointF pos, bool isTopLeftPos = false) override;
+	//virtual bool moveNode(FabricUI::GraphView::Node * node, QPointF pos, bool isTopLeftPos = false) override;
 
 	//virtual bool renameNode(FabricUI::GraphView::Node * node, QString title) override;
 
 	//virtual FabricUI::GraphView::Pin * addPin(FabricUI::GraphView::Node * node, QString name, FabricUI::GraphView::PortType pType, QColor color, QString dataType = "") override;
 
-	virtual bool removePin(FabricUI::GraphView::Pin * pin) override;
+	//virtual bool removePin(FabricUI::GraphView::Pin * pin) override;
 
 	//virtual FabricUI::GraphView::Port * addPort(QString name, FabricUI::GraphView::PortType pType, QColor color, QString dataType = "") override;
 
-	virtual bool removePort(FabricUI::GraphView::Port * port) override;
+	//virtual bool removePort(FabricUI::GraphView::Port * port) override;
 
-	virtual FabricUI::GraphView::Port * addPortFromPin(FabricUI::GraphView::Pin * pin, FabricUI::GraphView::PortType pType) override;
+	//virtual FabricUI::GraphView::Port * addPortFromPin(FabricUI::GraphView::Pin * pin, FabricUI::GraphView::PortType pType) override;
 
 	//virtual bool renamePort(FabricUI::GraphView::Port * port, QString title) override;
 
-	virtual bool addConnection(FabricUI::GraphView::ConnectionTarget * src, FabricUI::GraphView::ConnectionTarget * dst) override;
+	//virtual bool addConnection(FabricUI::GraphView::ConnectionTarget * src, FabricUI::GraphView::ConnectionTarget * dst) override;
 
-	virtual bool removeConnection(FabricUI::GraphView::ConnectionTarget * src, FabricUI::GraphView::ConnectionTarget * dst) override;
+	//virtual bool removeConnection(FabricUI::GraphView::ConnectionTarget * src, FabricUI::GraphView::ConnectionTarget * dst) override;
 
-	virtual bool removeConnection(FabricUI::GraphView::Connection * conn) override;
+	//virtual bool removeConnection(FabricUI::GraphView::Connection * conn) override;
 };

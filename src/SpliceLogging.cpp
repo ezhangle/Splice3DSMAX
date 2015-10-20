@@ -27,12 +27,12 @@ std::wstring s2ws(const std::string& s)
 
 bool WasLoggingCompiler()
 {
-	return (SpliceStaticFPInterface::GetInstance()->EnableLogging(0)&SpliceStaticFPInterface::LOG_COMPILER_ERROR) != 0;
+	return (FabricStaticFPInterface::GetInstance()->EnableLogging(0)&FabricStaticFPInterface::LOG_COMPILER_ERROR) != 0;
 }
 
 bool WasLoggingErrors()
 {
-	return (SpliceStaticFPInterface::GetInstance()->EnableLogging(0)&SpliceStaticFPInterface::LOG_ERROR) != 0;
+	return (FabricStaticFPInterface::GetInstance()->EnableLogging(0)&FabricStaticFPInterface::LOG_ERROR) != 0;
 }
 
 std::list<GatherCompilerResults*> s_CompilerStack;
@@ -79,9 +79,9 @@ GatherCompilerResults::~GatherCompilerResults()
 	{
 		// Reset our logging output to default channels.
 		if (WasLoggingCompiler())
-			SpliceStaticFPInterface::GetInstance()->EnableLogging(SpliceStaticFPInterface::LOG_COMPILER_ERROR);
+			FabricStaticFPInterface::GetInstance()->EnableLogging(FabricStaticFPInterface::LOG_COMPILER_ERROR);
 		if (WasLoggingErrors())
-			SpliceStaticFPInterface::GetInstance()->EnableLogging(SpliceStaticFPInterface::LOG_ERROR);
+			FabricStaticFPInterface::GetInstance()->EnableLogging(FabricStaticFPInterface::LOG_ERROR);
 	}
 }
 
@@ -135,10 +135,15 @@ void postLogMessages()
 	s_Messages.clear();
 }
 
-void myLogFunc(void* pCallbackData, const char * message, unsigned int length)
+void myLogFunc(
+	void *reportUserdata,
+	FEC_ReportSource source,
+	FEC_ReportLevel level,
+	char const *lineCStr,
+	uint32_t lineSize)
 {
 	CStr cstr;
-	cstr.printf("[Splice] %s\n", message);
+	cstr.printf("[Splice] %s\n", lineCStr);
 	logMessage(cstr);
 }
 

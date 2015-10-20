@@ -1037,16 +1037,8 @@ template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::SetBinding(FabricCore::DFGBinding& binding)
 {
 	m_binding = binding;
-	m_binding.setNotificationCallback(bindingNotificationCallback, this);
-
-	//SAFE_DELETE(m_ctrl);
-	//FabricServices::ASTWrapper::KLASTManager* manager = FabricServices::ASTWrapper::KLASTManager::retainGlobalManager(&GetClient());
-	//m_ctrl = new MaxDFGController(NULL, GetCommandStack(), manager, m_binding, m_binding.getExec(), false);
-
-	// Hook up our router again
-	//SAFE_DELETE(m_router);
-	//m_router = new MaxDFGNotificationRouter(this, m_binding, m_binding.getExec());
-	//m_router->setController(m_ctrl);
+	SpliceTranslationFPInterface* fpThis = this;
+	m_binding.setNotificationCallback(bindingNotificationCallback, fpThis);
 }
 
 #pragma endregion

@@ -1533,8 +1533,8 @@ void bindingNotificationCallback(void * userData, char const *jsonStr, uint32_t 
 	else if (descStr == FTL_STR("argTypeChanged"))
 	{
 		FTL::CStrRef portName = jsonObject->getString(FTL_STR("name"));
-		FTL::CStrRef portType = jsonObject->getString(FTL_STR("type"));
-		owner->SetMaxConnectedType(portName.c_str(), -2);
+		//FTL::CStrRef portType = jsonObject->getString(FTL_STR("type"));
+		owner->SetMaxConnectedType(portName.c_str);
 	}
 	else if (descStr == FTL_STR("execPortMetadataChanged"))
 	{

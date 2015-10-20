@@ -26,6 +26,7 @@ SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(BOOL loa
 	,	m_paramMap(NULL)
 	,	m_pblock(NULL)
 	,	m_valid(NEVER)
+	,	m_notificationHandler(this)
 {
 	InstanceCreated();
 
@@ -1037,8 +1038,7 @@ template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::SetBinding(FabricCore::DFGBinding& binding)
 {
 	m_binding = binding;
-	SpliceTranslationFPInterface* fpThis = this;
-	m_binding.setNotificationCallback(bindingNotificationCallback, fpThis);
+	m_notificationHandler.updateBinding(binding);
 }
 
 #pragma endregion

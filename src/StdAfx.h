@@ -40,6 +40,7 @@
 extern HINSTANCE hInstance;
 extern TCHAR *GetString(int id);
 
+#pragma warning(push, 0)
 // Fabric includes
 //#include <DFGWrapper/DFGWrapper.h>
 //#include <DFGWrapper/Port.h>
@@ -51,6 +52,8 @@ extern TCHAR *GetString(int id);
 #include <FTL/OwnedPtr.h>
 #include <FTL/JSONDec.h>
 #include <FTL/JSONValue.h>
+
+#pragma warning(pop)
 
 // Local includes
 #include "DynamicParamBlocks\DynamicDialog\resource.h"

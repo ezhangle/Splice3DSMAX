@@ -6,20 +6,19 @@
 #include "FabricUI/DFG/Dialogs/DFGEditPortDialog.h"
 #include "QListView"
 
-#include <QtGui/QUndoStack>
+//#include <QtGui/QUndoStack>
 
-QUndoStack s_undoStack;
+//QUndoStack s_undoStack;
 
-MaxDFGWidget::MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding)
+MaxDFGWidget::MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding, FabricUI::DFG::DFGUICmdHandler* cmdHandler)
 	: m_binding(binding)
 	, DFG::DFGCombinedWidget(parent)
-	, m_cmdHandler(&s_undoStack)
 {
 	FabricCore::Client client = GetClient();
 
 	ASTWrapper::KLASTManager* manager = ASTWrapper::KLASTManager::retainGlobalManager(&client);
 	FabricCore::DFGExec exec = binding.getExec();
-	init(client, manager, GetHost(), binding, "", exec, &m_cmdHandler, false);
+	init(client, manager, GetHost(), binding, "", exec, cmdHandler, false);
 
 	QObject::connect(this, SIGNAL(portEditDialogCreated(FabricUI::DFG::DFGBaseDialog*)),
 		this, SLOT(onPortEditDialogCreated(FabricUI::DFG::DFGBaseDialog*)));

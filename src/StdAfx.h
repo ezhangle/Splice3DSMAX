@@ -48,6 +48,8 @@ extern TCHAR *GetString(int id);
 
 #include <FabricCore.h>
 
+#include <FabricUI/DFG/DFGUICmdHandler.h>
+
 #include <FTL/CStrRef.h>
 #include <FTL/OwnedPtr.h>
 #include <FTL/JSONDec.h>

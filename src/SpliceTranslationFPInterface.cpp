@@ -31,7 +31,7 @@ BOOL SpliceTranslationFPInterface::ShowDFGGraphEditor()
 	m_pDFGWidgetWindow = DockableWindow::Create(_T("Fabric DFG"));
 	HWND h = m_pDFGWidgetWindow->GetHWND();
 	QWinWidget* dlg = new QWinWidget(h);
-	MaxDFGWidget* pWidget = new MaxDFGWidget(dlg, GetBinding());
+	MaxDFGWidget* pWidget = new MaxDFGWidget(dlg, GetBinding(), GetCmdHandler());
 
 	m_pDFGWidgetWindow->SetWidget(dlg);
 	return TRUE;

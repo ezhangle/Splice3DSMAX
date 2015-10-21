@@ -15,12 +15,10 @@ class MaxDFGWidget : public DFG::DFGCombinedWidget {
   
 	Q_OBJECT
 
-		FabricUI::DFG::DFGUICmdHandler_QUndo m_cmdHandler;
-
 	FabricCore::DFGBinding& m_binding;
 public:
 	
-	MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding);
+	MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding, FabricUI::DFG::DFGUICmdHandler* cmdHandler);
 	~MaxDFGWidget();
 
   //static QWidget * creator(QWidget * parent, const QString & name);

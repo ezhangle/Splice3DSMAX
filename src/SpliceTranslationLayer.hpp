@@ -27,6 +27,7 @@ SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(BOOL loa
 	,	m_pblock(NULL)
 	,	m_valid(NEVER)
 	,	m_notificationHandler(this)
+	,	m_maxCmdHandler(this)
 {
 	InstanceCreated();
 
@@ -626,7 +627,9 @@ const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const 
 {
 	bool b = (theHold.Holding());
 	HoldActions hold(_M("Add Input Port"));
-	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_In, isArray, inExtension);
+	m_maxCmdHandler.dfgDoAddPort(m_binding, "", m_binding.getExec(), name, FabricCore::DFGPortType_In, spliceType, "", inExtension, "");
+	return name;
+//	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_In, isArray, inExtension);
 }
 
 template<typename TBaseClass, typename TResultType>

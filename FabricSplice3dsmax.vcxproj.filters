@@ -54,9 +54,6 @@
     <ClCompile Include="src\SpliceStaticFPInterface.cpp">
       <Filter>SpliceTranslation</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceRestoreObjects.cpp">
-      <Filter>SpliceTranslation</Filter>
-    </ClCompile>
     <ClCompile Include="src\SpliceWSModifier.cpp">
       <Filter>MaxImplementations</Filter>
     </ClCompile>
@@ -72,11 +69,14 @@
     <ClCompile Include="src\moc_MaxDFGWidget.cpp">
       <Filter>DFGWidget</Filter>
     </ClCompile>
-    <ClCompile Include="src\MaxDFGCmdHandler.cpp">
-      <Filter>DFGWidget</Filter>
-    </ClCompile>
     <ClCompile Include="src\MaxDFGNotificationHandler.cpp">
       <Filter>SpliceCallbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MaxDFGCmdHandler.cpp">
+      <Filter>Undo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpliceRestoreObjects.cpp">
+      <Filter>Undo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -122,9 +122,6 @@
     <ClInclude Include="src\SpliceStaticFPInterface.h">
       <Filter>SpliceTranslation</Filter>
     </ClInclude>
-    <ClInclude Include="src\SpliceRestoreObjects.h">
-      <Filter>SpliceTranslation</Filter>
-    </ClInclude>
     <ClInclude Include="src\SpliceModifier.h">
       <Filter>MaxImplementations</Filter>
     </ClInclude>
@@ -140,11 +137,14 @@
     <ClInclude Include="src\MaxDFGController.h">
       <Filter>DFGWidget</Filter>
     </ClInclude>
-    <ClInclude Include="src\MaxDFGCmdHandler.h">
-      <Filter>DFGWidget</Filter>
-    </ClInclude>
     <ClInclude Include="src\MaxDFGNotificationHandler.h">
       <Filter>SpliceCallbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MaxDFGCmdHandler.h">
+      <Filter>Undo</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SpliceRestoreObjects.h">
+      <Filter>Undo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -168,6 +168,9 @@
     </Filter>
     <Filter Include="DFGWidget">
       <UniqueIdentifier>{3c16cf14-eb20-4a24-b03e-944679a9f2a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Undo">
+      <UniqueIdentifier>{8516ec32-5c11-422e-af56-3b35cab5c45f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

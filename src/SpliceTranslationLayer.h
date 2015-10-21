@@ -18,6 +18,7 @@
 #include <vector>
 #include "SpliceTranslationFPInterface.h"
 #include "MaxDFGNotificationHandler.h"
+#include "MaxDFGCmdHandler.h"
 #include "MaxConversionFns.h"
 
 namespace DynamicDialog
@@ -28,6 +29,7 @@ class IParamBlock2;
 class DynPBCustAttrClassDesc;
 class MaxDFGNotificationHandler;
 class MaxDFGController;
+
 
 // Stores a connection between Max data (ParamID) and Splice data (DGPort)
 //typedef std::pair<ParamID, DFGWrapper::ExecPortPtr> ConnData;
@@ -84,7 +86,7 @@ const char* AddSpliceParameter(FabricCore::DFGBinding& rBinding, int type, const
 const char* AddSpliceParameter(FabricCore::DFGBinding& rBinding, int type, const char* pName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension = "");
 
 /** Get various useful info's from fabric Ports */
-int GetPortParamID(FabricCore::DFGBinding& binding, const char* argName);
+int GetPortParamID(const FabricCore::DFGBinding& binding, const char* argName);
 void SetPortParamID(FabricCore::DFGBinding& binding, const char* argName, ParamID id);
 std::string GetPortConnection(FabricCore::DFGBinding& binding, const char* argName);
 void SetPortConnection(FabricCore::DFGBinding& binding, const char* argName, const char* name);
@@ -175,6 +177,8 @@ protected:
 	//! The callback from the DFG graph is responsible for updating this class
 	//! in response to changes at the DFG level (ie, new params, etc)
 	MaxDFGNotificationHandler m_notificationHandler;
+
+	MaxDFGCmdHandler m_maxCmdHandler;
 
 #pragma endregion
 
@@ -320,6 +324,8 @@ public:
 
 	ReferenceTarget* CastToRefTarg() { return this; }
 	FabricCore::DFGBinding& GetBinding()	{ return m_binding; }
+
+	FabricUI::DFG::DFGUICmdHandler* GetCmdHandler() { return &m_maxCmdHandler; }
 
 	// Port creation/management
 

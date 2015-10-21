@@ -641,7 +641,7 @@ const char* AddSpliceParameter(FabricCore::DFGBinding& rBinding, int type, const
 
 //////////////////////////////////////////////////////////////////////////
 // Helper functions for accessing options
-int GetPortParamID(FabricCore::DFGBinding& binding, const char* argName)
+int GetPortParamID(const FabricCore::DFGBinding& binding, const char* argName)
 {
 	const char* idstr = binding.getExec().getExecPortMetadata(argName, MAX_PID_OPT);
 	if (idstr != nullptr && idstr[0] != '\0') {

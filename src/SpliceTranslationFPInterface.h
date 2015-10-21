@@ -137,6 +137,8 @@ public:
 	virtual MSTR GetGraphName();
 	// Get the fabric graph driving this max class.
 	virtual FabricCore::DFGBinding& GetBinding() = 0;
+	// Get the command handler (mostly for sending to the UI)
+	virtual FabricUI::DFG::DFGUICmdHandler* GetCmdHandler() = 0;
 
 	// Port creation/management
 

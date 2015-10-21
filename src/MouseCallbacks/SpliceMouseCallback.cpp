@@ -426,8 +426,8 @@ bool SendKLEvent(FabricCore::RTVal& klevent, ViewExp& pView, int eventType)
 			bCloseHold = true;
 		}
 		FabricCore::RTVal fabricUndoVal = host.callMethod("UndoRedoCommand[]", "getUndoRedoCommands", 0, 0);
-		CustomKLUndoRedoCommandObject* pNewUndo = new CustomKLUndoRedoCommandObject(fabricUndoVal);
-		theHold.Put(pNewUndo);
+		//CustomKLUndoRedoCommandObject* pNewUndo = new CustomKLUndoRedoCommandObject(fabricUndoVal);
+		//theHold.Put(pNewUndo);
 
 		// if we are in mouse-up, then close our hold
 		if (bCloseHold){

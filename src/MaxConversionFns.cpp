@@ -795,7 +795,10 @@ void SpliceToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param)
 void SpliceToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 {
 	if (rtv.isNullObject())
+	{
+		param.FreeAll();
 		return;
+	}
 
 	FabricCore::Client client = GetClient();
 

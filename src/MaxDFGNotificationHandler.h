@@ -25,156 +25,17 @@ public:
 
 #pragma region notification methods
 
-	void onNodeInserted(
-		FTL::CStrRef nodeName,
-		FTL::JSONObject const *jsonObject
-		);
-	void onNodeRemoved(
-		FTL::CStrRef nodeName
-		);
-	void onNodePortInserted(
-		FTL::CStrRef nodeName,
-		FTL::CStrRef portName,
-		FTL::JSONObject const *jsonObject
-		);
-	void onNodePortRemoved(
-		FTL::CStrRef nodeName,
-		FTL::CStrRef portName
-		);
-	void onExecPortInserted(
-		FTL::CStrRef portName,
-		FTL::JSONObject const *jsonObject
-		);
-	void onExecPortRemoved(
-		FTL::CStrRef portName
-		);
-	void onPortsConnected(
-		FTL::CStrRef srcPath,
-		FTL::CStrRef dstPath
-		);
-	void onPortsDisconnected(
-		FTL::CStrRef srcPath,
-		FTL::CStrRef dstPath
-		);
-	void onNodeMetadataChanged(
-		FTL::CStrRef nodePath,
-		FTL::CStrRef key,
-		FTL::CStrRef value
-		);
-	void onNodeTitleChanged(
-		FTL::CStrRef nodePath,
-		FTL::CStrRef title
-		);
-	void onExecPortRenamed(
-		FTL::CStrRef oldPortName,
-		FTL::CStrRef newPortName,
-		FTL::JSONObject const *execPortJSONObject
-		);
-	void onNodePortRenamed(
-		FTL::CStrRef nodeName,
-		FTL::CStrRef oldPortName,
-		FTL::CStrRef newPortName
-		);
-	void onExecMetadataChanged(
-		FTL::CStrRef key,
-		FTL::CStrRef value
-		);
-	void onExtDepAdded(
-		FTL::CStrRef extension,
-		FTL::CStrRef version
-		);
-	void onExtDepRemoved(
-		FTL::CStrRef extension,
-		FTL::CStrRef version
-		);
-	void onNodeCacheRuleChanged(
-		FTL::CStrRef nodeName,
-		FTL::CStrRef newCacheRule
-		);
-	void onExecCacheRuleChanged(
-		FTL::CStrRef newCacheRule
-		);
-	void onExecPortResolvedTypeChanged(
-		FTL::CStrRef portName,
-		FTL::CStrRef newResolvedType
-		);
-	void onExecPortTypeSpecChanged(
-		FTL::CStrRef portName,
-		FTL::CStrRef typeSpec
-		);
-	void onNodePortResolvedTypeChanged(
-		FTL::CStrRef nodeName,
-		FTL::CStrRef portName,
-		FTL::CStrRef newResolvedType
-		);
-	void onNodePortMetadataChanged(
-		FTL::CStrRef nodeName,
-		FTL::CStrRef portName,
-		FTL::CStrRef key,
-		FTL::CStrRef value
-		);
-	void onExecPortMetadataChanged(
-		FTL::CStrRef portName,
-		FTL::CStrRef key,
-		FTL::CStrRef value
-		);
-	void onExecPortTypeChanged(
-		FTL::CStrRef portName,
-		FTL::CStrRef execPortType
-		);
-	void onNodePortTypeChanged(
-		FTL::CStrRef nodeName,
-		FTL::CStrRef portName,
-		FTL::CStrRef nodePortType
-		);
-	void onRefVarPathChanged(
-		FTL::CStrRef refName,
-		FTL::CStrRef newVarPath
-		);
-	void onFuncCodeChanged(
-		FTL::CStrRef code
-		);
-	void onExecExtDepsChanged(
-		FTL::CStrRef extDeps
-		);
-	void onExecPortDefaultValuesChanged(
-		FTL::CStrRef portName
-		);
-	void onNodePortDefaultValuesChanged(
-		FTL::CStrRef nodeName,
-		FTL::CStrRef portName
-		);
-	void onRemovedFromOwner();
-	void onExecPortsReordered(
-		unsigned int indexCount,
-		unsigned int * indices
-		);
-	void onNodePortsReordered(
-		FTL::CStrRef nodeName,
-		unsigned int indexCount,
-		unsigned int * indices
-		);
-	void onExecDidAttachPreset(
-		FTL::CStrRef presetFilePath
-		);
-	void onInstExecDidAttachPreset(
-		FTL::CStrRef nodeName,
-		FTL::CStrRef presetFilePath
-		);
-	void onExecWillDetachPreset(
-		FTL::CStrRef presetFilePath
-		);
-	void onInstExecWillDetachPreset(
-		FTL::CStrRef nodeName,
-		FTL::CStrRef presetFilePath
-		);
-	void onExecPresetFileRefCountDidChange(
-		int newPresetFileRefCount
-		);
-	void onInstExecPresetFileRefCountDidChange(
-		FTL::CStrRef nodeName,
-		int newPresetFileRefCount
-		);
+	void onArgInserted(int index, FTL::CStrRef name, FTL::CStrRef type);
+
+	void onArgTypeChanged(int index, FTL::CStrRef name, FTL::CStrRef newType);
+
+	void onArgRenamed(FTL::CStrRef oldName, FTL::CStrRef newName);
+	
+	void onArgRemoved(FTL::CStrRef name);
+
+	void onArgChanged(FTL::CStrRef name);
+
+	void onDirty();
 
 #pragma endregion
 

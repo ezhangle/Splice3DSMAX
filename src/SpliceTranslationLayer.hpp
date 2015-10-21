@@ -438,23 +438,26 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::RefDeleted() {
 
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::RefAdded(	RefMakerHandle 	rm) {
-	if (m_binding.isValid())
-	{
-		MAXSPLICE_CATCH_BEGIN();
+	// Note: We were using this to name our class, but it causes undo objects 
+	// to be created at the worst time.  Skip for now.
 
-		// Set static context values
-		//MSTR filepath = GetCOREInterface()->GetCurFilePath();
-		//FabricCore::RTVal evalContext = m_graph.getEvalContext();
+	//if (m_binding.isValid())
+	//{
+	//	MAXSPLICE_CATCH_BEGIN();
 
-		// given a scene base object or modifier, look for a referencing node via successive 
-		// reference enumerations up through the ref hierarchy untill we find an inode.
-		INode* node = GetCOREInterface7()->FindNodeFromBaseObject(this);
-		if (node) {
-			m_binding.getExec().setTitle(TSTR(node->GetName()).ToCStr().data());
-		}
+	//	// Set static context values
+	//	//MSTR filepath = GetCOREInterface()->GetCurFilePath();
+	//	//FabricCore::RTVal evalContext = m_graph.getEvalContext();
 
-		MAXSPLICE_CATCH_END;
-	}
+	//	// given a scene base object or modifier, look for a referencing node via successive 
+	//	// reference enumerations up through the ref hierarchy untill we find an inode.
+	//	INode* node = GetCOREInterface7()->FindNodeFromBaseObject(this);
+	//	if (node) {
+	//		CoreHoldActions hold("DFG Set Title");
+	//		m_binding.getExec().setTitle(TSTR(node->GetName()).ToCStr().data());
+	//	}
+	//	MAXSPLICE_CATCH_END;
+	//}
 }
 #pragma endregion
 
@@ -625,11 +628,9 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 template<typename TBaseClass, typename TResultType>
 const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
 {
-	bool b = (theHold.Holding());
-	HoldActions hold(_M("Add Input Port"));
-	m_maxCmdHandler.dfgDoAddPort(m_binding, "", m_binding.getExec(), name, FabricCore::DFGPortType_In, spliceType, "", inExtension, "");
+	std::string realName = m_maxCmdHandler.dfgDoAddPort(m_binding, "", m_binding.getExec(), name, FabricCore::DFGPortType_In, spliceType, "", inExtension, "");
+	// Because of memory issues, we can't return string here?
 	return name;
-//	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_In, isArray, inExtension);
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -1042,6 +1043,65 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetBinding(FabricCore::DFG
 {
 	m_binding = binding;
 	m_notificationHandler.updateBinding(binding);
+}
+
+bool GetISVisibleInUI(const FabricCore::DFGBinding& binding, const char* portName) {
+	return true;
+}
+
+template<typename TBaseClass, typename TResultType>
+int SpliceTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam(const char* argName)
+{
+	// Does this type already exist?
+	int paramId = GetPortParamID(m_binding, argName);
+	
+	// What type _should_ be set?
+	int maxType = GetPort3dsMaxType(m_binding.getExec(), argName);
+
+	// If we should not have a type, bail
+	if (maxType < 0)
+	{
+		if (paramId >= 0)
+		{
+			DeleteMaxParameter((ParamID)paramId);
+			paramId = -1;
+		}
+	}
+	else
+	{
+		if (paramId >= 0)
+		{
+			// Check that its not the correct type already
+			if (m_pblock->GetParamDef((ParamID)paramId).type != maxType)
+			{
+				// Is the type incompatible?  For now... guess so...
+				DeleteMaxParameter((ParamID)paramId);
+				paramId = -1;
+			}
+		}
+
+		// Do we need to create a new type?
+		if (paramId < 0)
+		{
+			// If this is a legal type for this parameter, then go ahead
+			ParamBlockDesc2* pNewDesc = CopyPBDescriptor();
+			paramId = AddMaxParameter(pNewDesc, maxType, argName);
+			CreateParamBlock(pNewDesc);
+		}
+
+		if (m_pblock != nullptr)
+		{
+			// Sync meta data
+			ParamBlockDesc2* pDesc = m_pblock->GetDesc();
+			SetMaxParamLimits(pDesc, m_binding, argName);
+			SetMaxParamDefault(pDesc, (ParamID)paramId, m_binding, argName);
+
+			// Set the value to the current port value
+			SetMaxParamFromSplice(m_pblock, (ParamID)paramId, m_binding, argName);
+		}
+	}
+	SetPortParamID(m_binding, argName, paramId);
+	return paramId;
 }
 
 #pragma endregion

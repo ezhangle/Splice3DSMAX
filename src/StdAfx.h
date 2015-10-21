@@ -49,11 +49,14 @@ extern TCHAR *GetString(int id);
 #include <FabricCore.h>
 
 #include <FabricUI/DFG/DFGUICmdHandler.h>
+#include <FabricUI/DFG/Dialogs/DFGEditPortDialog.h>
 
 #include <FTL/CStrRef.h>
 #include <FTL/OwnedPtr.h>
 #include <FTL/JSONDec.h>
 #include <FTL/JSONValue.h>
+
+#include <QtGui/qwidget.h>
 
 #pragma warning(pop)
 

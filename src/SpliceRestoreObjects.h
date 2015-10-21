@@ -8,7 +8,8 @@
 
 #pragma once
 
-// This RAII scopes calls
+//////////////////////////////////////////////////////////////////////////
+// This RAII scopes calls to the undo system
 class HoldActions {
 	MSTR m_msg;
 
@@ -19,18 +20,21 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 // A specialization automatically adds a DFGCommandRestoreObj to the stack
-
-class QHoldActions : public HoldActions {
+class DFGHoldActions : public HoldActions {
 public:
-	QHoldActions(const MCHAR* msg);
+	DFGHoldActions(const MCHAR* msg);
 };
 
 //////////////////////////////////////////////////////////////////////////
-// This CustomKLUndoRedoCommandObject allows us to merge Max's undo system
-// and KL's.  It passes the Undo/Redo commands on to Fabric to to allow it
-// to undo/redo it's actions
-// All DFG Commands will add an undo object to maxes queue
+// A specialization automatically adds a FabricCoreRestoreObj to the stack
+class CoreHoldActions : public HoldActions {
+public:
+	CoreHoldActions(const MCHAR* msg);
+};
 
+//////////////////////////////////////////////////////////////////////////
+// The DFG CommandRestoreObj synchronizes max undos with QUndoStack
+// passed to the MaxDFGCmdHandler
 class DFGCommandRestoreObj : public RestoreObj
 {
 	const int m_index;
@@ -44,6 +48,19 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
+// The FabricCore restore obj synchronizes max undos with a single
+// core operation.  These are used when we interact directly with
+// the FabricCore (eg, setExecTitle, and directly setting port metadata)
+class FabricCoreRestoreObj : public RestoreObj
+{
+public:
+	FabricCoreRestoreObj();
+	~FabricCoreRestoreObj();
 
+	virtual void Restore(int isUndo);
+	virtual void Redo();
+};
+
+//////////////////////////////////////////////////////////////////////////
 // Allow CmdHandler to reference the shared undo stack.
 extern QUndoStack* GetQtUndoStack();

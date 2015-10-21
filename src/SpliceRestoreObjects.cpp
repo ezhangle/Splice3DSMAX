@@ -3,12 +3,23 @@
 
 
 //////////////////////////////////////////////////////////////////////////
-QHoldActions::QHoldActions(const MCHAR* msg) : HoldActions(msg)
+DFGHoldActions::DFGHoldActions(const MCHAR* msg) 
+	: HoldActions(msg)
 {
 	if (theHold.Holding())
 	{
 		int nextIndex = GetQtUndoStack()->count();
 		theHold.Put(new DFGCommandRestoreObj(nextIndex));
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+CoreHoldActions::CoreHoldActions(const MCHAR* msg) 
+	: HoldActions(msg)
+{
+	if (theHold.Holding())
+	{
+		theHold.Put(new FabricCoreRestoreObj());
 	}
 }
 
@@ -34,6 +45,27 @@ void DFGCommandRestoreObj::Redo()
 }
 
 //////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+FabricCoreRestoreObj::FabricCoreRestoreObj()
+{
+}
+
+FabricCoreRestoreObj::~FabricCoreRestoreObj()
+{
+}
+
+void FabricCoreRestoreObj::Restore(int isUndo)
+{
+	bool didUndo = GetHost().maybeUndo();
+	DbgAssert(didUndo);
+}
+
+void FabricCoreRestoreObj::Redo()
+{
+	bool didRedo = GetHost().maybeRedo();
+	DbgAssert(didRedo);
+}
 
 QUndoStack* GetQtUndoStack()
 {

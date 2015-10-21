@@ -97,7 +97,7 @@ void SetPortConnection(FabricCore::DFGBinding& binding, const char* argName, con
 //const char* GetPortName(DFGWrapper::ExecPortPtr& aPort);
 const char* GetPortType(FabricCore::DFGExec binding, const char* argName);
 
-int GetPort3dsMaxType(FabricCore::DFGExec& binding, const char* argName);
+int GetPort3dsMaxType(FabricCore::DFGExec binding, const char* argName);
 void SetPort3dsMaxType(FabricCore::DFGBinding& binding, const char* argName, int type);
 
 bool SetPortOption(FabricCore::DFGBinding& binding, const char* argName, const char* option, FPValue* value);
@@ -407,6 +407,8 @@ public:
 	IParamBlock2* GetPBlock() { return m_pblock;  }
 
 	void SetBinding(FabricCore::DFGBinding& binding);
+
+	int SyncMetaDataFromPortToParam(const char* portName);
 #pragma endregion
 
 	//////////////////////////////////////////////////////////////////////////

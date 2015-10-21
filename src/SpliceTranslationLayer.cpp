@@ -654,7 +654,11 @@ void SetPortParamID(FabricCore::DFGBinding& binding, const char* argName, ParamI
 {
 	char buff[20];
 	_itoa_s(id, buff, 10);
-	binding.getExec().setExecPortMetadata(argName, MAX_PID_OPT, buff, true);
+	bool doUndo = theHold.Holding();
+	if (doUndo)
+		theHold.Put(new FabricCoreRestoreObj());
+
+	binding.getExec().setExecPortMetadata(argName, MAX_PID_OPT, buff, false);
 }
 
 std::string GetPortConnection(FabricCore::DFGBinding& binding, const char* argName) 
@@ -664,6 +668,10 @@ std::string GetPortConnection(FabricCore::DFGBinding& binding, const char* argNa
 
 void SetPortConnection(FabricCore::DFGBinding& binding, const char* argName, const char* name) 
 {
+	bool doUndo = theHold.Holding();
+	if (doUndo)
+		theHold.Put(new FabricCoreRestoreObj());
+
 	binding.getExec().setExecPortMetadata(argName, MAX_SRC_OPT, name, true);
 }
 
@@ -716,20 +724,37 @@ const char* GetPortType( FabricCore::DFGExec exec, const char* argName )
 	return exec.getExecPortResolvedType(argName);
 }
 
-int GetPort3dsMaxType(FabricCore::DFGExec& exec, const char* argName)
+int GetPort3dsMaxType(FabricCore::DFGExec exec, const char* argName)
 {
 	const char* idstr = exec.getExecPortMetadata(argName, MAX_PARM_TYPE_OPT);
+	int maxType = -2;
 	if (idstr != nullptr && idstr[0] != '\0') {
-		return atoi(idstr);
+		maxType = atoi(idstr);
 	}
-	return -2;
+
+	const char* portType = GetPortType(exec, argName);
+	if (maxType > 0)
+	{
+		// If our type is not legal for our current port type,
+		// reset it to the default
+		BitArray legalTypes = SpliceTypeToMaxTypes(portType);
+		if (!legalTypes[maxType])
+			maxType = -2;
+	}
+	if (maxType == -2)
+		maxType = SpliceTypeToDefaultMaxType(portType);
+
+	return maxType;
 }
 
 void SetPort3dsMaxType(FabricCore::DFGBinding& binding, const char* argName, int type)
 {
 	char buff[20];
 	_itoa_s(type, buff, 10);
-	binding.getExec().setExecPortMetadata(argName, MAX_PARM_TYPE_OPT, buff, true);
+	bool doUndo = theHold.Holding();
+	if (doUndo)
+		theHold.Put(new FabricCoreRestoreObj());
+	binding.getExec().setExecPortMetadata(argName, MAX_PARM_TYPE_OPT, buff, doUndo);
 }
 
 //bool SetPortOption(FabricCore::DFGBinding& binding, const char* argName, const char* option, FPValue* value)
@@ -1568,6 +1593,15 @@ bool AnyInstances() { return s_nInstances > 0;  }
 
 extern void ReleaseAll()
 {
+	// Ensure we have no more live classes?
+	DbgAssert(s_nInstances == 0);
+
+	// Assume we have no more need for the undo stack...
+	GetQtUndoStack()->clear();
+	if (s_Host.isValid())
+		s_Host.flushUndoRedo();
+
+	// Release our static variables
 	s_Host = FabricCore::DFGHost();
 	s_client = FabricCore::Client();
 	s_drawing = FabricCore::RTVal();

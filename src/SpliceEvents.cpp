@@ -143,9 +143,9 @@ public:
 	{
 		GraphicsWindow* gw = pView->getGW();
 		
-        ViewExp13* vp13 = NULL;
-        if (pView->IsAlive())
-            vp13 = reinterpret_cast<ViewExp13*>(pView->Execute(ViewExp::kEXECUTE_GET_VIEWEXP_13));
+		ViewExp13* vp13 = NULL;
+		if (pView->IsAlive())
+			vp13 = reinterpret_cast<ViewExp13*>(pView->Execute(ViewExp::kEXECUTE_GET_VIEWEXP_13));
 		else
 			return false;
 
@@ -303,7 +303,7 @@ void SpliceEvents::HookViewportRender()
 	//if (getCfgMgr().keyExists(_T("GFXType"))) {
 	//	getCfgMgr().getString(_T("GFXType"), buf, GW_MAX_FILE_LEN);
 
-    if (MaxSDK::Graphics::IsRetainedModeEnabled())
+	if (MaxSDK::Graphics::IsRetainedModeEnabled())
 	{
 		static DWORD dontShowMsg(0);
 		if (!dontShowMsg && !GetCOREInterface()->GetQuietMode())

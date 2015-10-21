@@ -223,6 +223,14 @@ public:
 	virtual void UpdateUISpec() = 0;
 
 	virtual IParamBlock2* GetPBlock() = 0;
+
+	//
+	// Synchronize metadata from the dfg port passed
+	// to the 3ds max parameter (if it exists).  This
+	// includes things like max parameter type & 
+	// value limits etc.
+	//
+	virtual int SyncMetaDataFromPortToParam(const char* dfgPort) = 0;
 protected:
 
 	// This function allows us to go up the other pants leg of 

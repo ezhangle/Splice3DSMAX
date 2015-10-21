@@ -3,13 +3,6 @@
 #include "MaxDFGWidget.h"
 #include "plugin.h"
 
-#include "FabricUI/DFG/Dialogs/DFGEditPortDialog.h"
-#include "QListView"
-
-//#include <QtGui/QUndoStack>
-
-//QUndoStack s_undoStack;
-
 MaxDFGWidget::MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding, FabricUI::DFG::DFGUICmdHandler* cmdHandler)
 	: m_binding(binding)
 	, DFG::DFGCombinedWidget(parent)
@@ -225,7 +218,7 @@ void MaxDFGWidget::onPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog * dialog
 	if (!controller->isViewingRootGraph())
 		return;
 
-	//if (additionalMetaData)
+	if (additionalMetaData)
 	{
 		QComboBox *comboBox = (QComboBox *)dialog->input("3ds Max Type");
 		if (comboBox)
@@ -251,7 +244,10 @@ void MaxDFGWidget::onPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog * dialog
 				if (!legalTypes[maxType])
 					maxType = SpliceTypeToDefaultMaxType(asSpliceType.constData()); // Reset to default
 
-				SetPort3dsMaxType(m_binding, title.toUtf8().constData(), maxType);
+				FTL::JSONEnc<> paramTypeEnc(*additionalMetaData, FTL_STR(MAX_PARM_TYPE_OPT));
+				FTL::JSONSInt32Enc<> typeS32Enc(paramTypeEnc, maxType);
+
+				//SetPort3dsMaxType(m_binding, title.toUtf8().constData(), maxType);
 			}
 		}
 	}

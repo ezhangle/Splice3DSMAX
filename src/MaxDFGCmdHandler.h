@@ -3,6 +3,8 @@
 
 #include <FabricUI/DFG/DFGUICmdHandler_QUndo.h>
 
+class SpliceTranslationFPInterface;
+
 class MaxDFGCmdHandler : public FabricUI::DFG::DFGUICmdHandler_QUndo
 {
 private:

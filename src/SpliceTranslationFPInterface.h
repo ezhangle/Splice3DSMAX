@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ifnpub.h>
+#include "MaxDFGCmdHandler.h"
 
 #define ISPLICE__INTERFACE Interface_ID(0x5a5f19c9, 0x25881449)
 
@@ -21,6 +22,14 @@ private:
 
 	DockableWindow* m_pDFGWidgetWindow;
 
+protected:
+
+	// Binding to a DFG graph   
+	FabricCore::DFGBinding m_binding;
+
+	// The command handler to route commands into 
+	MaxDFGCmdHandler m_fabricCmdHandler;
+
 public:
 
 	SpliceTranslationFPInterface();
@@ -31,23 +40,47 @@ public:
 		// System management callbacks
 		fn_showDFGGraphEditor,
 
+		fn_dfgRemoveNodes,
+		fn_dfgConnect,
+		fn_dfgDisconnect,
+		fn_dfgAddGraph,
+		fn_dfgAddFunc,
+		fn_dfgInstPreset,
+		fn_dfgAddVar,
+		fn_dfgAddSet,
+		fn_dfgAddGet,
+		fn_dfgAddPort,
+		fn_dfgEditPort,
+		fn_dfgRenamePort,
+		fn_dfgSetPortDefaultValue,
+		fn_dfgRemovePort,
+		fn_dfgResizeBackdrop,
+		fn_dfgMoveNodes,
+		fn_dfgImplodeNodes,
+		fn_dfgExplodeNodes,
+		fn_dfgAddBackdrop,
+		fn_dfgSetNodeTitle,
+		fn_dfgSetNodeComment,
+		fn_dfgSetCode,
+		fn_dfgPaste,
+		fn_dfgSetArgType,
+		fn_dfgSetArgValue,
+		fn_dfgSetRefVarPath,
+		fn_dfgReorderPorts,
+		fn_dfgSetExtDeps,
+		fn_dfgSplitFromPreset,
+
 		fn_loadFromFile,
 		fn_saveToFile,
 
 		fn_restoreFromJson,
 		fn_exportToJson,
-		
-		fn_addInputPort,
-		fn_addOutputPort,
-		fn_addIOPort,
 
-		fn_removePortName,
+
+		fn_getPortCount,
 		fn_getPortName,
-		fn_setPortName,
 		fn_getPortType,
-		fn_isPortArray,
-
-		fn_connectPorts,
+		fn_getPortValue,
 
 		fn_getMaxConnectedType,
 		fn_setMaxConnectedType,
@@ -56,164 +89,193 @@ public:
 		fn_setPortMetaData,
 		fn_getPortMetaData,
 		fn_setPortMinMax,
-		fn_setPortValue,
-		fn_getPortValue,
 
-		// DFG-Specific functionality
-		fn_newEmptyGraph,
-		fn_newEmptyFunc,
-		fn_addNodeFromPreset,
 
-		fn_getFuncKLCode,
-		fn_setFuncKLCode,
-
-		prop_getPortCount,
-		prop_portNames,
+		fn_connectArgs,
 
 		prop_getOutPortName,
-		prop_SetOutPort,
+		prop_SetOutPortName,
 
-		//prop_getOutPortArrayIdx,
-		//prop_setOutPortArrayIdx,
+		num_params,
 
-		//prop_getAllPortSignature,
-
-		prop_klEditor,
-
-		num_params
+		port_mode_enum
 	};
 
 	BEGIN_FUNCTION_MAP	
 		FN_0(fn_showDFGGraphEditor, TYPE_BOOL, ShowDFGGraphEditor);
 
+		VFN_2(fn_dfgRemoveNodes,						DFGRemoveNodes,			TYPE_TSTR_TAB_BV,	TYPE_TSTR_BV);
+		VFN_3(fn_dfgConnect,							DFGConnect,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
+		VFN_3(fn_dfgDisconnect,							DFGDisconnect,			TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
+		FN_3(fn_dfgAddGraph,		TYPE_TSTR_BV,		DFGAddGraph,			TYPE_TSTR_BV,		TYPE_POINT2, TYPE_TSTR_BV);
+		FN_4(fn_dfgAddFunc,			TYPE_TSTR_BV,		DFGAddFunc,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_POINT2, TYPE_TSTR_BV);
+		FN_3(fn_dfgInstPreset,		TYPE_TSTR_BV,		DFGInstPreset,			TYPE_FILENAME,		TYPE_POINT2, TYPE_TSTR_BV);
+		FN_5(fn_dfgAddVar,			TYPE_TSTR_BV,		DFGAddVar,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_POINT2, TYPE_TSTR_BV);
+		FN_4(fn_dfgAddGet,			TYPE_TSTR_BV,		DFGAddGet,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_POINT2, TYPE_TSTR_BV);
+		FN_4(fn_dfgAddSet,			TYPE_TSTR_BV,		DFGAddSet,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_POINT2, TYPE_TSTR_BV);
+		FN_7(fn_dfgAddPort,			TYPE_TSTR_BV,		DFGAddPort,				TYPE_TSTR_BV,		TYPE_ENUM, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV);
+		FN_6(fn_dfgEditPort,		TYPE_TSTR_BV,		DFGEditPort,			TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV);
+		VFN_2(fn_dfgRemovePort,							DFGRemovePort,			TYPE_TSTR_BV,		TYPE_TSTR_BV);
+		VFN_4(fn_dfgResizeBackdrop,						DFGResizeBackdrop,		TYPE_TSTR_BV,		TYPE_POINT2, TYPE_POINT2, TYPE_TSTR_BV);
+		VFN_3(fn_dfgMoveNodes,							DFGMoveNodes,			TYPE_TSTR_TAB_BV,	TYPE_POINT2_TAB_BR, TYPE_TSTR_BV);
+		FN_3(fn_dfgImplodeNodes,	TYPE_TSTR_BV,		DFGImplodeNodes,		TYPE_TSTR_TAB_BV,	TYPE_TSTR_BV, TYPE_TSTR_BV);
+		FN_2(fn_dfgExplodeNodes,	TYPE_TSTR_TAB_BV,	DFGExplodeNodes,		TYPE_TSTR_BV,		TYPE_TSTR_BV);
+		VFN_3(fn_dfgAddBackdrop,						DFGAddBackdrop,			TYPE_TSTR_BV,		TYPE_POINT2, TYPE_TSTR_BV);
+		VFN_3(fn_dfgSetNodeTitle,						DFGSetNodeTitle,		TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
+		VFN_3(fn_dfgSetNodeComment,						DFGSetNodeComment,		TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
+		VFN_2(fn_dfgSetCode,							DFGSetCode,				TYPE_TSTR_BV,		TYPE_TSTR_BV);
+		FN_3(fn_dfgRenamePort,		TYPE_TSTR_BV,		DFGRenamePort,			TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
+		FN_3(fn_dfgPaste,			TYPE_TSTR_TAB_BV,	DFGPaste,				TYPE_TSTR_BV,		TYPE_POINT2, TYPE_TSTR_BV);
+		VFN_2(fn_dfgSetArgType,							DFGSetArgType,			TYPE_TSTR_BV,		TYPE_TSTR_BV);
+		VFN_2(fn_dfgSetArgValue,						DFGSetArgValue,			TYPE_TSTR_BV,		TYPE_FPVALUE);
+		VFN_3(fn_dfgSetPortDefaultValue,				DFGSetPortDefaultValue,	TYPE_TSTR_BV,		TYPE_FPVALUE, TYPE_TSTR_BV);
+		VFN_3(fn_dfgSetRefVarPath,						DFGSetRefVarPath,		TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
+		VFN_2(fn_dfgReorderPorts,						DFGReorderPorts,		TYPE_INT_TAB_BR,	TYPE_TSTR_BV);
+		VFN_2(fn_dfgSetExtDeps,							DFGSetExtDeps,			TYPE_TSTR_TAB_BV,	TYPE_TSTR_BV);
+		VFN_1(fn_dfgSplitFromPreset,					DFGSplitFromPreset,		TYPE_TSTR_BV)		
+
+
 		FN_2(fn_loadFromFile, TYPE_bool, LoadFromFile, TYPE_FILENAME, TYPE_bool);
 		FN_1(fn_saveToFile, TYPE_bool, SaveToFile, TYPE_FILENAME);
 
-		FN_2(fn_restoreFromJson, TYPE_bool, RestoreFromJSONMSTR, TYPE_TSTR_BV, TYPE_bool);
-		FN_0(fn_exportToJson, TYPE_TSTR_BV, ExportToJSONMSTR);
+		FN_2(fn_restoreFromJson, TYPE_bool, RestoreFromJSON, TYPE_TSTR_BR, TYPE_bool);
+		FN_0(fn_exportToJson, TYPE_TSTR_BV, ExportToJSON);
 
-		FN_5(fn_addInputPort, TYPE_TSTR_BV, AddInputPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_INT, TYPE_BOOL, TYPE_TSTR_BV);
-		FN_4(fn_addOutputPort, TYPE_TSTR_BV, AddOutputPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_BOOL, TYPE_TSTR_BV);
-		FN_5(fn_addIOPort, TYPE_TSTR_BV, AddIOPortMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_INT, TYPE_BOOL, TYPE_TSTR_BV);
-
-		FN_1(fn_removePortName, TYPE_bool, RemovePortMSTR, TYPE_TSTR_BV);
-		FN_1(fn_getPortName, TYPE_TSTR_BV, GetPortNameMSTR, TYPE_INT);
-		FN_2(fn_setPortName, TYPE_TSTR_BV, SetPortNameMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
-		FN_1(fn_getPortType, TYPE_TSTR_BV, GetPortTyeMSTR, TYPE_TSTR_BV);
-		FN_1(fn_isPortArray, TYPE_bool, IsPortArrayMSTR, TYPE_TSTR_BV);
-
-		FN_5(fn_connectPorts, TYPE_bool, ConnectPortMSTR, TYPE_TSTR_BV, TYPE_REFTARG, TYPE_TSTR_BV, TYPE_INT, TYPE_bool);
+		FN_1(fn_getPortCount, TYPE_INT, GetPortCount, TYPE_TSTR_BV);
+		FN_2(fn_getPortName, TYPE_TSTR_BV, GetPortName, TYPE_INDEX, TYPE_TSTR_BV);
+		FN_2(fn_getPortType, TYPE_TSTR_BV, GetPortType, TYPE_TSTR_BR, TYPE_TSTR_BV);
+		FN_2(fn_getPortValue, TYPE_FPVALUE, GetPortValue, TYPE_TSTR_BR, TYPE_TSTR_BV);
 		
-		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxConnectedTypeMSTR, TYPE_TSTR_BV);
-		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxConnectedTypeMSTR, TYPE_TSTR_BV, TYPE_INT);
-		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypesMSTR, TYPE_TSTR_BV);
+		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxTypeForArg, TYPE_TSTR_BV);
+		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxTypeForArg, TYPE_TSTR_BV, TYPE_INT);
+		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypesForArg, TYPE_TSTR_BV);
 
-		FN_4(fn_setPortMetaData, TYPE_bool, SetPortMetaDataMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_bool);
-		FN_2(fn_getPortMetaData, TYPE_TSTR_BV, GetPortMetaDataMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
+		FN_4(fn_setPortMetaData, TYPE_bool, SetPortMetaData, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV);
+		FN_3(fn_getPortMetaData, TYPE_TSTR_BV, GetPortMetaData, TYPE_TSTR_BR, TYPE_TSTR_BR, TYPE_TSTR_BV);
 
-		FN_2(fn_setPortValue, TYPE_bool, SetPortValueMSTR, TYPE_TSTR_BV, TYPE_FPVALUE);
-		FN_1(fn_getPortValue, TYPE_FPVALUE_BR, GetPortValueMSTR, TYPE_TSTR_BV);
+		FN_4(fn_setPortMinMax, TYPE_bool, SetPortUIMinMax, TYPE_TSTR_BR, TYPE_FPVALUE, TYPE_FPVALUE, TYPE_TSTR_BR);
 
-		FN_1(fn_newEmptyGraph, TYPE_TSTR_BV, AddNewEmptyGraphMSTR, TYPE_TSTR_BV);
-		FN_1(fn_newEmptyFunc, TYPE_TSTR_BV, AddNewEmptyFuncMSTR, TYPE_TSTR_BV);
-		FN_2(fn_addNodeFromPreset, TYPE_TSTR_BV, AddNodeFromPresetMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
-
-		FN_1(fn_getFuncKLCode, TYPE_TSTR_BV, GetKLCodeForFuncMSTR, TYPE_TSTR_BV);
-		FN_2(fn_setFuncKLCode, TYPE_bool, SetKLCodeForFuncMSTR, TYPE_TSTR_BV, TYPE_TSTR_BV);
-
-		FN_3(fn_setPortMinMax, TYPE_bool, SetPortUIMinMaxMSTR, TYPE_TSTR_BV, TYPE_FPVALUE, TYPE_FPVALUE);
-
+		FN_5(fn_connectArgs, TYPE_bool, ConnectArgs, TYPE_TSTR_BR, TYPE_REFTARG, TYPE_TSTR_BR, TYPE_INT, TYPE_bool);
+		
 		// Properties 
-
-		RO_PROP_FN(prop_getPortCount, GetPortCount, TYPE_INT);
-		PROP_FNS(prop_getOutPortName, GetOutPortNameMSTR, prop_SetOutPort, SetOutPortMSTR, TYPE_TSTR_BV);
-		RO_PROP_FN(prop_klEditor, GetKLEditor, TYPE_VALUE);
+		PROP_FNS(prop_getOutPortName, GetOutPortName, prop_SetOutPortName, SetOutPortName, TYPE_TSTR_BV);
 		
 	END_FUNCTION_MAP
 
 	// Implement the functions exposed above
 	BOOL ShowDFGGraphEditor();
 
-	virtual MSTR GetGraphName();
-	// Get the fabric graph driving this max class.
-	virtual FabricCore::DFGBinding& GetBinding() = 0;
-	// Get the command handler (mostly for sending to the UI)
-	virtual FabricUI::DFG::DFGUICmdHandler* GetCmdHandler() = 0;
+	// The following are direct mappers to the commands defined by the DFGCmdHandler classed.
+	void DFGRemoveNodes(const Tab<TSTR*>& nodeNames, const MSTR& execPath);
+	void DFGConnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath);
+	void DFGDisconnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath);
+	MSTR DFGAddGraph(const MSTR& title, Point2 pos, const MSTR& execPath);
+	MSTR DFGAddFunc(const MSTR& title, const MSTR& initialCode, Point2 pos, const MSTR& execPath);
+	MSTR DFGInstPreset(const MSTR& filename, Point2 pos, const MSTR& execPath);
+	MSTR DFGAddVar(const MSTR& desiredNodeName, const MSTR& dataType, const MSTR& extDep, Point2 pos, const MSTR& execPath);
+	MSTR DFGAddGet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath);
+	MSTR DFGAddSet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath);
+	MSTR DFGAddPort(const MSTR& desiredPortName, int portType, const MSTR& portSpec, const MSTR& portToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath);
+	MSTR DFGEditPort(const MSTR& portName, const MSTR& desiredNewPortName, const MSTR& typeSpec, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath);
+	void DFGRemovePort(const MSTR& portName, const MSTR& execPath);
+	void DFGResizeBackdrop(const MSTR& backDropNodeName, Point2 topLeft, Point2 size, const MSTR& execPath);
+	void DFGMoveNodes(Tab<TSTR*> nodeNames, Tab<Point2*> topLeftPoss, const MSTR& execPath);
+	MSTR DFGImplodeNodes(Tab<TSTR*> nodeNames, const MSTR& desiredNewNodeName, const MSTR& execPath);
+	Tab<TSTR*> DFGExplodeNodes(const MSTR& nodeName, const MSTR& execPath);
+	void DFGAddBackdrop(const MSTR& title, Point2 pos, const MSTR& execPath);
+	void DFGSetNodeTitle(const MSTR& nodeName, const MSTR& newTitle, const MSTR& execPath);
+	void DFGSetNodeComment(const MSTR& nodeName, const MSTR& comment, const MSTR& execPath);
+	void DFGSetCode(const MSTR& code, const MSTR& execPath);
+	MSTR DFGRenamePort(const MSTR& oldName, const MSTR& newDesiredName, const MSTR& execPath);
+	Tab<TSTR*> DFGPaste(const MSTR& json, Point2 pos, const MSTR& execPath);
+	void DFGSetArgType(const MSTR& argName, const MSTR& argType);
+	void DFGSetArgValue(const MSTR& argName, const FPValue* argValue);
+	void DFGSetPortDefaultValue(const MSTR& portName, const FPValue* value, const MSTR& execPath);
+	void DFGSetRefVarPath(const MSTR& refName, const MSTR& varPath, const MSTR& execPath);
+	void DFGReorderPorts(Tab<int> indices, const MSTR& execPath);
+	void DFGSetExtDeps(Tab<TSTR*> extDeps, const MSTR& execPath);
+	void DFGSplitFromPreset(const MSTR& execPath);
 
-	// Port creation/management
-
-	// Get the number of ports on this graph
-	virtual int GetPortCount() = 0;
-
-	// Splice port management
-	// Create a new port.  A matching Max parameter 
-	// will be added as well of maxType, if MaxType is -1 
-	virtual const char* AddInputPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=nullptr) = 0;
-	virtual const char* AddOutputPort(const char* klType, const char* name, bool isArray=false, const char* inExtension=nullptr) = 0;
-	virtual const char* AddIOPort(const char* klType, const char* name, int maxType=-1, bool isArray=false, const char* inExtension=nullptr) = 0;
-
-	// Remove specified port and matching max parameter
-	virtual bool RemovePort(const char* portName) = 0;
-
-	// Reset any auto-generated ports.
-	virtual void ResetPorts()=0;
-
-	// Get name of port
-	virtual const char* GetPortName(int i) = 0;
-	virtual const char* SetPortName(const char* oldName, const char* newName) = 0;
-	virtual const char* GetPortType(const char* port) = 0;
+	// Allow introspecting the ports on this graph
+	int GetPortCount(const MSTR& execPath);
+	MSTR GetPortName(int i, const MSTR& execPath);
+	MSTR GetPortType(const MSTR& portName, const MSTR& execPath);
+	FPValue GetPortValue(const MSTR& portName, const MSTR& execPath);
 	// Returns if the in port is an array type or not
-	virtual bool IsPortArray(const char* port)=0;
+	//virtual bool IsPortArray(const char* port)=0;
 
-	virtual const char* GetOutPortName() = 0;
-	virtual bool SetOutPort(const char* name) = 0;
 
-	virtual int GetMaxConnectedType(const char* portName) = 0;
-	virtual int SetMaxConnectedType(const char* portName, int type) = 0;
-	virtual BitArray GetLegalMaxTypes(const char* portName) = 0;
+	int GetMaxTypeForArg(const MSTR& argName);
+	int SetMaxTypeForArg(const MSTR& argName, int type);
+	BitArray GetLegalMaxTypesForArg(const MSTR& argName);
 
 	// Allow setting various options on our ports
-	bool SetPortMetaData(const char* port, const char* option, const char* value, bool canUndo);
-	const char* GetPortMetaData(const char* port, const char* option);
-	// Allow setting values directly on our ports
-	bool SetPortValue(const char* port, FPValue* value);
-	FPValue& GetPortValue(const char* port);
+	bool SetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& value, const MSTR& execPath);
+	MSTR GetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& execPath);
 
 	// Convenience functions
-	virtual bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax)=0;
+	bool SetPortUIMinMax(const MSTR& port, FPValue* uiMin, FPValue* uiMax, const MSTR& execPath);
 
-	virtual const char* AddNewEmptyGraph(const char* name) = 0;
-	virtual const char* AddNewEmptyFunc(const char* name) = 0;
-	virtual const char* AddNodeFromPreset(const char* name, const char* path) = 0;
+	// Load the splice graph for this entity from the given filename
+	bool LoadFromFile(const MCHAR* filename, bool createMaxParams);
+	bool SaveToFile(const MCHAR* filename);
 
-	virtual bool SetKLCodeForFunc(const char* name, const char* code) = 0;
-	virtual const char* GetKLCodeForFunc(const char* name) = 0;
+	bool RestoreFromJSON(const MSTR& json, bool createMaxParams);
+	bool RestoreFromJSON(const char* json, bool createMaxParams);
+	MSTR ExportToJSON();
 
 	// Connect myPortName to the output port on pSrcContainer named srcPortName
 	// Returns true if successfully connected, false if for any reason the
 	// port was not connected.  Once connected, each evaluation the output
 	// from srcPortName will be transferred into the in-port myPortName
-	virtual bool ConnectPort(const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex, bool postConnectionsUI )=0;
+	virtual bool ConnectArgs(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI) = 0;
 	// Disconnect a previously connected port.  Returns true if the port was previously connected and
 	// has been successfully disconnected, false if disconnect failed or if no connection existed.
-	virtual bool DisconnectPort(const char* myPortName)=0;
+	virtual bool DisconnectArgs(const MSTR& myPortName) = 0;
+
+	//////////////////////////////////////////////////////////////////////////
+	// Props
+	virtual MSTR GetOutPortName() = 0;
+	virtual bool SetOutPortName(const MSTR& name) = 0;
+
+	//////////////////////////////////////////////////////////////////////////
+	// Conv easing functions
+	int GetMaxTypeForArg(const char* argName)				{ return GetMaxTypeForArg(MSTR::FromACP(argName)); }
+	int SetMaxTypeForArg(const char* argName, int type)		{ return SetMaxTypeForArg(MSTR::FromACP(argName), type); }
+
+	//////////////////////////////////////////////////////////////////////////
+	// General management functions allows different templated
+	// types to speak to each other.
+	
+	/*! Gets the type of the data evaluated by this class
+	This return value needs to match the TDataType template param */
+	virtual int GetValueType() = 0;
+
+	virtual MSTR GetGraphName();
+	// Get the fabric graph driving this max class.
+	//virtual FabricCore::DFGBinding& GetBinding() = 0;
+	// Get the command handler (mostly for sending to the UI)
+	//virtual FabricUI::DFG::DFGUICmdHandler* GetCmdHandler() = 0;
+
+	// Reset any auto-generated ports.
+	virtual void ResetPorts()=0;
+
+
+
+
+
+	// Allow setting values directly on our ports
+	//bool SetPortValue(const char* port, FPValue* value);
+
+
+	//virtual const char* AddNewEmptyGraph(const char* name) = 0;
+	//virtual const char* AddNewEmptyFunc(const char* name) = 0;
+	//virtual const char* AddNodeFromPreset(const char* name, const char* path) = 0;
+
 
 	// Allow external classes to trigger evaluations on us
 	virtual void TriggerEvaluate(TimeValue t, Interval& ivValid)=0;
 	
-	// Load the splice graph for this entity from the given filename
-	virtual bool LoadFromFile(const MCHAR* filename, bool createMaxParams)=0;
-	virtual bool SaveToFile(const MCHAR* filename)=0;
-
-	virtual bool RestoreFromJSON(const char* json, bool createMaxParams) = 0;
-	virtual void ExportToJSON(std::string& outString) = 0;
-
-	// Show the MaxScript-based editor
-	Value* GetKLEditor() { return m_klEditor; }
-	void ShowKLEditor();
-	void CloseKLEditor();
-	void UpdateKLEditor();
-
 	// After load, reconnect names.
 	virtual void ReconnectPostLoad()=0;
 
@@ -233,82 +295,86 @@ public:
 	virtual int SyncMetaDataFromPortToParam(const char* dfgPort) = 0;
 protected:
 
+	// Access a few of the internals
+	FabricCore::DFGBinding& GetBinding() { return m_binding; }
+	const FabricCore::DFGBinding& GetBinding() const { return m_binding; }
+	void SetBinding(FabricCore::DFGBinding binding) { m_binding = binding; }
 	// This function allows us to go up the other pants leg of 
 	//virtual ReferenceTarget* CastToRefTarg()=0;
-#pragma region MSTR<->CStr conversion
-
-	// Our MSTR version of the function converts to CStr and passes on to real handler
-	inline MSTR ToMSTR(const char* v, int defValue)
-	{
-		MSTR resMSTR; 
-		if (v != NULL) 
-			resMSTR = MSTR::FromACP(v, strlen(v));
-		else 
-			resMSTR = GetString(defValue);
-		return resMSTR;
-	}
-	inline MSTR ToMSTR(std::string v, int defValue) { return ToMSTR(v.data(), defValue); }
-
-#define MSTR_OUTVAL(fnName, defValue) \
-	MSTR fnName##MSTR() { \
-		return ToMSTR(fnName(), defValue); \
-	}
-#define MSTR_INVAL(retType, fnName) \
-	retType fnName##MSTR(const MSTR& inVal) { \
-		return fnName(inVal.ToACP()); \
-	}
-
-	// TODO: Add default vals for these
-	MSTR_OUTVAL(GetOutPortName, 0);
-
-	MSTR_INVAL(bool, SetOutPort);
-	
-	MSTR GetPortNameMSTR(int i)	{ return ToMSTR(GetPortName(i), 0); }
-	MSTR SetPortNameMSTR(const MSTR& oldName, const MSTR& newName)	{ return MSTR::FromACP(SetPortName(oldName.ToCStr(), newName.ToCStr())); }
-	MSTR GetPortTyeMSTR(const MSTR& port)	{ return ToMSTR(GetPortType(port.ToCStr()), 0); }
-	MSTR_INVAL(bool, IsPortArray);
-	MSTR_INVAL(bool, GetMaxConnectedType);
-	int SetMaxConnectedTypeMSTR(const MSTR& port, int type) { return SetMaxConnectedType(port.ToCStr(), type); }
-	MSTR_INVAL(BitArray, GetLegalMaxTypes);
-
-
-	MSTR AddInputPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
-	{
-		return MSTR::FromACP(AddInputPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data()));
-	}
-	MSTR AddOutputPortMSTR(const MSTR& name, const MSTR& type, bool isArray, const MSTR& inExtension)
-	{
-		return MSTR::FromACP(AddOutputPort(name.ToCStr().data(), type.ToCStr().data(), isArray, inExtension.ToCStr().data()));
-	}
-	MSTR AddIOPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
-	{
-		return MSTR::FromACP(AddIOPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data()));
-	}
-	MSTR_INVAL(bool, RemovePort);
-
-	bool ConnectPortMSTR(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI );
-	MSTR_INVAL(bool, DisconnectPort);
-
-	bool SetPortMetaDataMSTR(const MSTR& port, const MSTR& option, const MSTR& value, bool canUndo)	{ return SetPortMetaData(port.ToCStr(), option.ToCStr(), value.ToCStr(), canUndo); }
-	MSTR GetPortMetaDataMSTR(const MSTR& port, const MSTR& option)	{ return MSTR::FromACP(GetPortMetaData(port.ToCStr(), option.ToCStr())); }
-
-	bool SetPortValueMSTR(const MSTR& port, FPValue* value)							{ return SetPortValue(port.ToCStr(), value); }
-	FPValue& GetPortValueMSTR(const MSTR& port)										{ return GetPortValue(port.ToCStr()); }
-	bool SetPortUIMinMaxMSTR(const MSTR& port, FPValue* uiMin, FPValue* uiMax)		{ return SetPortUIMinMax(port.ToCStr(), uiMin, uiMax); }
-
-	MSTR AddNewEmptyGraphMSTR(MSTR& graphName)						{ return MSTR::FromACP(AddNewEmptyGraph(graphName.ToCStr())); }
-	MSTR AddNewEmptyFuncMSTR(MSTR& funcName)						{ return MSTR::FromACP(AddNewEmptyFunc(funcName.ToCStr())); }
-	MSTR AddNodeFromPresetMSTR(const MSTR& name, const MSTR& path)	{ return MSTR::FromACP(AddNodeFromPreset(name.ToCStr(), path.ToCStr())); }
-
-	bool SetKLCodeForFuncMSTR(const MSTR& funcName, MSTR& code)		{ return SetKLCodeForFunc(funcName.ToCStr(), code.ToCStr());	}
-	MSTR GetKLCodeForFuncMSTR(const MSTR& name)						{ return MSTR::FromACP(GetKLCodeForFunc(name.ToCStr()));  }
-
-	bool RestoreFromJSONMSTR(const MSTR& json, bool createMaxParams) { return RestoreFromJSON(json.ToCStr(), createMaxParams);  }
-	MSTR ExportToJSONMSTR() {
-		std::string jsonData;
-		ExportToJSON(jsonData);
-		return MSTR::FromACP(jsonData.data(), jsonData.length());
-	}
+//#pragma region MSTR<->CStr conversion
+//
+//	// Our MSTR version of the function converts to CStr and passes on to real handler
+//	inline MSTR ToMSTR(const char* v, int defValue)
+//	{
+//		MSTR resMSTR; 
+//		if (v != NULL) 
+//			resMSTR = MSTR::FromACP(v, strlen(v));
+//		else 
+//			resMSTR = GetString(defValue);
+//		return resMSTR;
+//	}
+//	inline MSTR ToMSTR(std::string v, int defValue) { return ToMSTR(v.data(), defValue); }
+//
+//#define MSTR_OUTVAL(fnName, defValue) \
+//	MSTR fnName##MSTR() { \
+//		return ToMSTR(fnName(), defValue); \
+//	}
+//#define MSTR_INVAL(retType, fnName) \
+//	retType fnName##MSTR(const MSTR& inVal) { \
+//		return fnName(inVal.ToACP()); \
+//	}
+//
+//	// TODO: Add default vals for these
+//	MSTR_OUTVAL(GetOutPortName, 0);
+//
+//	MSTR_INVAL(bool, SetOutPort);
+//	
+//	MSTR GetPortNameMSTR(int i)	{ return ToMSTR(GetPortName(i), 0); }
+//	MSTR SetPortNameMSTR(const MSTR& oldName, const MSTR& newName)	{ return MSTR::FromACP(SetPortName(oldName.ToCStr(), newName.ToCStr())); }
+//	MSTR GetPortTyeMSTR(const MSTR& port)	{ return ToMSTR(GetPortType(port.ToCStr()), 0); }
+//	MSTR_INVAL(bool, IsPortArray);
+//	MSTR_INVAL(bool, GetMaxTypeForArg);
+//	int SetMaxConnectedTypeMSTR(const MSTR& port, int type) { return SetMaxTypeForArg(port.ToCStr(), type); }
+//	MSTR_INVAL(BitArray, GetLegalMaxTypesForArg);
+//
+//
+//	MSTR AddInputPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
+//	{
+//		return MSTR::FromACP(AddInputPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data()));
+//	}
+//	MSTR AddOutputPortMSTR(const MSTR& name, const MSTR& type, bool isArray, const MSTR& inExtension)
+//	{
+//		return MSTR::FromACP(AddOutputPort(name.ToCStr().data(), type.ToCStr().data(), isArray, inExtension.ToCStr().data()));
+//	}
+//	MSTR AddIOPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
+//	{
+//		return MSTR::FromACP(AddIOPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data()));
+//	}
+//	MSTR_INVAL(bool, RemovePort);
+//
+//	bool ConnectPortMSTR(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI );
+//	MSTR_INVAL(bool, DisconnectPort);
+//
+//	bool SetPortMetaDataMSTR(const MSTR& port, const MSTR& option, const MSTR& value, bool canUndo)	{ return SetPortMetaData(port.ToCStr(), option.ToCStr(), value.ToCStr(), canUndo); }
+//	MSTR GetPortMetaDataMSTR(const MSTR& port, const MSTR& option)	{ return MSTR::FromACP(GetPortMetaData(port.ToCStr(), option.ToCStr())); }
+//
+//	bool SetPortValueMSTR(const MSTR& port, FPValue* value)							{ return SetPortValue(port.ToCStr(), value); }
+//	FPValue& GetPortValueMSTR(const MSTR& port)										{ return GetPortValue(port.ToCStr()); }
+//	bool SetPortUIMinMaxMSTR(const MSTR& port, FPValue* uiMin, FPValue* uiMax)		{ return SetPortUIMinMax(port.ToCStr(), uiMin, uiMax); }
+//
+//	MSTR AddNewEmptyGraphMSTR(MSTR& graphName)						{ return MSTR::FromACP(AddNewEmptyGraph(graphName.ToCStr())); }
+//	MSTR AddNewEmptyFuncMSTR(MSTR& funcName)						{ return MSTR::FromACP(AddNewEmptyFunc(funcName.ToCStr())); }
+//	MSTR AddNodeFromPresetMSTR(const MSTR& name, const MSTR& path)	{ return MSTR::FromACP(AddNodeFromPreset(name.ToCStr(), path.ToCStr())); }
+//
+//	bool SetKLCodeForFuncMSTR(const MSTR& funcName, MSTR& code)		{ return SetKLCodeForFunc(funcName.ToCStr(), code.ToCStr());	}
+//	MSTR GetKLCodeForFuncMSTR(const MSTR& name)						{ return MSTR::FromACP(GetKLCodeForFunc(name.ToCStr()));  }
+//
+//	bool RestoreFromJSONMSTR(const MSTR& json, bool createMaxParams) { return RestoreFromJSON(json.ToCStr(), createMaxParams);  }
+//	MSTR ExportToJSONMSTR() {
+//		std::string jsonData;
+//		ExportToJSON(jsonData);
+//		return MSTR::FromACP(jsonData.data(), jsonData.length());
+//	}
 
 
 #pragma endregion
@@ -335,6 +401,159 @@ FPInterfaceDesc* GetDescriptor()
 		// Describe our function(s)
 			SpliceTranslationFPInterface::fn_showDFGGraphEditor, _T("ShowDFGGraphEditor"), 0, TYPE_BOOL, 0, 0,
 
+			//////////////////////////////////////////////////////////////////////////
+			// Fabric DFG commands
+			SpliceTranslationFPInterface::fn_dfgRemoveNodes, _T("DFGRemoveNodes"), 0, 0, 0, 2,
+				_M("nodeNames"), 0, TYPE_TSTR_TAB_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgConnect, _T("DFGConnect"), 0, 0, 0, 3,
+				_M("srcPath"), 0, TYPE_TSTR_BV,
+				_M("destPath"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgDisconnect, _T("DFGDisconnect"), 0, 0, 0, 3,
+				_M("srcPath"), 0, TYPE_TSTR_BV,
+				_M("destPath"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgAddGraph, _T("DFGAddGraph"), 0, TYPE_TSTR_BV, 0, 3,
+				_M("title"), 0, TYPE_TSTR_BV,
+				_M("pos"), 0, TYPE_POINT2, 
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgAddFunc, _T("DFGAddFunc"), 0, TYPE_TSTR_BV, 0, 4,
+				_M("title"), 0, TYPE_TSTR_BV,
+				_M("initialCode"), 0, TYPE_TSTR_BV,
+				_M("pos"), 0, TYPE_POINT2, 
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgInstPreset, _T("DFGInstPreset"), 0, TYPE_TSTR_BV, 0, 3,
+				_M("filename"), 0, TYPE_TSTR_BV,
+				_M("pos"), 0, TYPE_POINT2, 
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgAddVar, _T("DFGAddVar"), 0, TYPE_TSTR_BV, 0, 5,
+				_M("desiredNodeName"), 0, TYPE_TSTR_BV,
+				_M("dataType"), 0, TYPE_TSTR_BV,
+				_M("extDep"), 0, TYPE_TSTR_BV,
+				_M("pos"), 0, TYPE_POINT2, 
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgAddSet, _T("DFGAddSet"), 0, TYPE_TSTR_BV, 0, 4,
+				_M("desiredNodeName"), 0, TYPE_TSTR_BV,
+				_M("varPath"), 0, TYPE_TSTR_BV,
+				_M("pos"), 0, TYPE_POINT2, 
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgAddGet, _T("DFGAddGet"), 0, TYPE_TSTR_BV, 0, 4,
+				_M("desiredNodeName"), 0, TYPE_TSTR_BV,
+				_M("varPath"), 0, TYPE_TSTR_BV,
+				_M("pos"), 0, TYPE_POINT2, 
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgAddPort, _T("DFGAddPort"), 0, TYPE_TSTR_BV, 0, 7,
+				_M("desiredPortName"), 0, TYPE_TSTR_BV,
+				_M("portType"), 0, TYPE_ENUM, SpliceTranslationFPInterface::port_mode_enum,
+				_M("portSpec"), 0, TYPE_TSTR_BV,
+				_M("portToConnect"), 0, TYPE_TSTR_BV,
+				_M("extDep"), 0, TYPE_TSTR_BV,
+				_M("metaData"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgEditPort, _T("DFGEditPort"), 0, TYPE_TSTR_BV, 0, 6,
+				_M("portName"), 0, TYPE_TSTR_BV,
+				_M("desiredNewPortName"), 0, TYPE_TSTR_BV,
+				_M("typeSpec"), 0, TYPE_TSTR_BV,
+				_M("extDep"), 0, TYPE_TSTR_BV,
+				_M("metaData"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgRemovePort, _T("DFGRemovePort"), 0, 0, 0, 2,
+				_M("portName"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgResizeBackdrop, _T("DFGResizeBackdrop"), 0, 0, 0, 4,
+				_M("backDropNodeName"), 0, TYPE_TSTR_BV,
+				_M("pos"), 0, TYPE_POINT2,
+				_M("size"), 0, TYPE_POINT2,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+
+			SpliceTranslationFPInterface::fn_dfgMoveNodes, _T("DFGMoveNodes"), 0, 0, 0, 3,
+				_M("nodeNames"), 0, TYPE_TSTR_TAB_BV,
+				_M("topLeftPoss"), 0, TYPE_POINT2_TAB_BR,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgImplodeNodes, _T("DFGImplodeNodes"), 0, TYPE_TSTR_BV, 0, 3,
+				_M("nodeNames"), 0, TYPE_TSTR_TAB_BV,
+				_M("desiredNewNodeName"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgExplodeNodes, _T("DFGExplodeNodes"), 0, TYPE_TSTR_TAB_BV, 0, 2,
+				_M("nodeName"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgAddBackdrop, _T("DFGAddBackdrop"), 0, 0, 0, 3,
+				_M("title"), 0, TYPE_TSTR_BV,
+				_M("pos"), 0, TYPE_POINT2, 
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgSetNodeTitle, _T("DFGSetNodeTitle"), 0, 0, 0, 3,
+				_M("nodeName"), 0, TYPE_TSTR_BV,
+					_M("newTitle"), 0, TYPE_TSTR_BV,
+					_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgSetNodeComment, _T("DFGSetNodeComment"), 0, 0, 0, 3,
+				_M("nodeName"), 0, TYPE_TSTR_BV,
+				_M("comment"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgSetCode, _T("DFGSetCode"), 0, 0, 0, 2,
+				_M("code"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgRenamePort, _T("DFGRenamePort"), 0, TYPE_TSTR_BV, 0, 3,
+				_M("oldName"), 0, TYPE_TSTR_BV,
+				_M("newDesiredName"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgPaste, _T("DFGPaste"), 0, TYPE_TSTR_TAB_BV, 0, 3,
+				_M("json"), 0, TYPE_TSTR_BV,
+				_M("pos"), 0, TYPE_POINT2, 
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgSetArgType, _T("DFGSetArgType"), 0, 0, 0, 2,
+				_M("argName"), 0, TYPE_TSTR_BV,
+				_M("argType"), 0, TYPE_TSTR_BV,
+				
+			SpliceTranslationFPInterface::fn_dfgSetArgValue, _T("DFGSetArgValue"), 0, 0, 0, 2,
+				_M("argName"), 0, TYPE_TSTR_BV,
+				_M("argValue"), 0, TYPE_FPVALUE_BR,
+				
+			SpliceTranslationFPInterface::fn_dfgSetPortDefaultValue, _T("DFGSetPortDefaultValue"), 0, 0, 0, 3,
+				_M("portName"), 0, TYPE_TSTR_BV,
+				_M("value"), 0, TYPE_FPVALUE_BR,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgSetRefVarPath, _T("DFGSetRefVarPath"), 0, 0, 0, 3,
+				_M("refName"), 0, TYPE_TSTR_BV,
+				_M("varPath"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgReorderPorts, _T("DFGReorderPorts"), 0, 0, 0, 2,
+				_T("indices"), 0, TYPE_INT_TAB_BR,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgSetExtDeps, _T("DFGSetExtDeps"), 0, 0, 0, 2,
+				_M("extDeps"), 0, TYPE_TSTR_TAB_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_dfgSplitFromPreset, _T("DFGSplitFromPreset"), 0, 0, 0, 1,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+
+			//////////////////////////////////////////////////////////////////////////
+			// FabricMax custom functions
+
 			SpliceTranslationFPInterface::fn_loadFromFile, _T("LoadFromFile"), 0, TYPE_bool, 0, 2, 
 				_M("filename"),	0,	TYPE_FILENAME,
 				_M("createMaxParams"),	0,	TYPE_bool,
@@ -346,90 +565,57 @@ FPInterfaceDesc* GetDescriptor()
 				_M("json"), 0, TYPE_TSTR_BV,
 				_M("createMaxParams"), 0, TYPE_bool,
 
-			SpliceTranslationFPInterface::fn_addInputPort, _T("AddInputPort"), 0, TYPE_TSTR_BV, 0, 5,
-				_M("name"),			0,	TYPE_TSTR_BV,
-				_M("fabricType"),	0,	TYPE_TSTR_BV,
-				_M("maxType"),		0,	TYPE_INT,
-				_M("isArray"),		0,	TYPE_bool, f_keyArgDefault, false,
-				_M("Extension"),	0,	TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
-			SpliceTranslationFPInterface::fn_addOutputPort, _T("AddOutputPort"), 0, TYPE_TSTR_BV, 0, 4,
-				_M("name"),			0,	TYPE_TSTR_BV,
-				_M("fabricType"),	0,	TYPE_TSTR_BV,
-				_M("isArray"),		0,	TYPE_bool, f_keyArgDefault, false,
-				_M("Extension"),	0,	TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
-			SpliceTranslationFPInterface::fn_addIOPort, _T("AddIOPort"), 0, TYPE_TSTR_BV, 0, 5,
-				_M("name"),			0,	TYPE_TSTR_BV,
-				_M("fabricType"),	0,	TYPE_TSTR_BV,
-				_M("maxType"),		0,	TYPE_INT,
-				_M("isArray"),		0,	TYPE_bool, f_keyArgDefault, false,
-				_M("Extension"),	0,	TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
 
-			SpliceTranslationFPInterface::fn_removePortName, _T("RemovePort"), 0, TYPE_bool, 0, 1,
-				_M("portName"),		0,	TYPE_TSTR_BV,
-
-			SpliceTranslationFPInterface::fn_getPortName, _T("GetPortName"), 0, TYPE_TSTR_BV, 0, 1,
+			SpliceTranslationFPInterface::fn_getPortName, _T("GetPortCount"), 0, TYPE_TSTR_BV, 0, 1,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+			SpliceTranslationFPInterface::fn_getPortName, _T("GetPortName"), 0, TYPE_TSTR_BV, 0, 2,
 				_M("portIndex"),	0,	TYPE_INDEX,
-			SpliceTranslationFPInterface::fn_setPortName, _T("SetPortName"), 0, TYPE_TSTR_BV, 0, 2,
-				_M("oldName"),			0,	TYPE_TSTR_BV,
-				_M("newName"),			0,	TYPE_TSTR_BV,
-			SpliceTranslationFPInterface::fn_getPortType, _T("GetPortType"), 0, TYPE_TSTR_BV, 0, 1,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+			SpliceTranslationFPInterface::fn_getPortType, _T("GetPortType"), 0, TYPE_TSTR_BV, 0, 2,
 				_M("portName"),		0,	TYPE_TSTR_BV,
-			SpliceTranslationFPInterface::fn_isPortArray, _T("IsPortArray"), 0, TYPE_bool, 0, 1,
-				_M("portName"),		0,	TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+			SpliceTranslationFPInterface::fn_getPortValue, _T("GetPortValue"), 0, TYPE_FPVALUE_BR, 0, 2,
+				_M("portName"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
 
-			SpliceTranslationFPInterface::fn_connectPorts, _T("ConnectPorts"), 0, TYPE_bool, 0, 5,
+			SpliceTranslationFPInterface::fn_getMaxConnectedType, _T("GetMaxTypeForArg"), 0, TYPE_INT, 0, 1,
+				_M("argName"),	0,	TYPE_TSTR_BV, 
+			SpliceTranslationFPInterface::fn_setMaxConnectedType, _T("SetMaxTypeForArg"), 0, TYPE_INT, 0, 2,
+				_M("argName"),	0,	TYPE_TSTR_BV, 
+				_M("maxType"),	0,	TYPE_INT,
+			SpliceTranslationFPInterface::fn_getLegalMaxTypes, _T("GetLegalMaxTypesForArg"), 0, TYPE_BITARRAY, 0, 1,
+				_M("argName"),	0,	TYPE_TSTR_BV, 
+
+			SpliceTranslationFPInterface::fn_setPortMetaData, _T("SetPortMetaData"), 0, TYPE_bool, 0, 4,
+				_M("portName"),	0,	TYPE_TSTR_BV, 
+				_M("option"),	0,	TYPE_TSTR_BV, 
+				_M("value"),	0,	TYPE_TSTR_BV, 
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+			SpliceTranslationFPInterface::fn_getPortMetaData, _T("GetPortMetaData"), 0, TYPE_TSTR_BV, 0, 3,
+				_M("portName"), 0, TYPE_TSTR_BV,
+				_M("option"), 	0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				
+			SpliceTranslationFPInterface::fn_setPortMinMax, _T("SetArgMinMax"), 0, TYPE_bool, 0, 3,
+				_M("argName"),		0,	TYPE_TSTR_BV, 
+				_M("uiMin"),	0,	TYPE_FPVALUE, 
+				_M("uiMax"),	0,	TYPE_FPVALUE, 
+
+			SpliceTranslationFPInterface::fn_connectArgs, _T("ConnectArgs"), 0, TYPE_bool, 0, 5,
 				_M("myPortName"),	0,	TYPE_TSTR_BV,
 				_M("srcSpliceGraph"),	0,	TYPE_REFTARG,
 				_M("srcPortName"),	0,	TYPE_TSTR_BV,
 				_M("srcPortIndex"),	0,	TYPE_INT, f_keyArgDefault, -1,
 				_M("postUI"),		0,	TYPE_bool, f_keyArgDefault, true,
 
-			SpliceTranslationFPInterface::fn_getMaxConnectedType, _T("GetMaxType"), 0, TYPE_INT, 0, 1,
-				_M("port"),		0,	TYPE_TSTR_BV, 
-			SpliceTranslationFPInterface::fn_setMaxConnectedType, _T("SetMaxType"), 0, TYPE_INT, 0, 2,
-				_M("port"),		0,	TYPE_TSTR_BV, 
-				_M("maxType"),	0,	TYPE_INT,
-			SpliceTranslationFPInterface::fn_getLegalMaxTypes, _T("GetLegalMaxTypes"), 0, TYPE_BITARRAY, 0, 1,
-				_M("port"),		0,	TYPE_TSTR_BV, 
-
-			SpliceTranslationFPInterface::fn_setPortMetaData, _T("SetPortMetaData"), 0, TYPE_bool, 0, 4,
-				_M("port"),		0,	TYPE_TSTR_BV, 
-				_M("option"),	0,	TYPE_TSTR_BV, 
-				_M("value"),	0,	TYPE_TSTR_BV, 
-				_M("canUndo"),	0, TYPE_bool, f_keyArgDefault, true,
-
-			SpliceTranslationFPInterface::fn_getPortMetaData, _T("GetPortMetaData"), 0, TYPE_TSTR_BV, 0, 2,
-				_M("port"), 0, TYPE_TSTR_BV,
-				_M("option"), 0, TYPE_TSTR_BV,
-
-			SpliceTranslationFPInterface::fn_setPortValue, _T("SetPortValue"), 0, TYPE_bool, 0, 2,
-				_M("port"),		0,	TYPE_TSTR_BV, 
-				_M("value"),	0,	TYPE_FPVALUE, 
-			SpliceTranslationFPInterface::fn_getPortValue, _T("GetPortValue"), 0, TYPE_FPVALUE_BR, 0, 1,
-				_M("port"), 0, TYPE_TSTR_BV,
-
-			SpliceTranslationFPInterface::fn_setPortMinMax, _T("SetPortMinMax"), 0, TYPE_bool, 0, 3,
-				_M("port"),		0,	TYPE_TSTR_BV, 
-				_M("uiMin"),	0,	TYPE_FPVALUE, 
-				_M("uiMax"),	0,	TYPE_FPVALUE, 
-
-			SpliceTranslationFPInterface::fn_newEmptyFunc, _T("AddNewEmptyFunc"), 0, TYPE_TSTR_BV, 0, 1,
-				_M("name"), 0, TYPE_TSTR_BV,
-			SpliceTranslationFPInterface::fn_newEmptyGraph, _T("AddNewEmptyGraph"), 0, TYPE_TSTR_BV, 0, 1,
-				_M("name"), 0, TYPE_TSTR_BV,
-			SpliceTranslationFPInterface::fn_addNodeFromPreset, _T("AddNodeFromPreset"), 0, TYPE_TSTR_BV, 0, 2,
-				_M("name"), 0, TYPE_TSTR_BV,
-				_M("presetPath"), 0, TYPE_TSTR_BV,
-
-			SpliceTranslationFPInterface::fn_getFuncKLCode, _T("GetFuncKLCode"), 0, TYPE_TSTR_BV, 0, 1,
-				_M("funcPath"), 0, TYPE_TSTR_BV,
-			SpliceTranslationFPInterface::fn_setFuncKLCode, _T("SetFuncKLCode"), 0, TYPE_bool, 0, 2,
-				_M("funcPath"), 0, TYPE_TSTR_BV,
-				_M("code"), 0, TYPE_TSTR_BV,
 		properties,
-			SpliceTranslationFPInterface::prop_getPortCount, FP_NO_FUNCTION, _T("PortCount"), 0, TYPE_INT,
-			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_SetOutPort, _T("OutPort"), 0, TYPE_TSTR_BV,
-			SpliceTranslationFPInterface::prop_klEditor,	FP_NO_FUNCTION,		_T("KLEditor"),		0,	TYPE_VALUE,
+			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_SetOutPortName, _T("OutPort"), 0, TYPE_TSTR_BV,
+
+		enums,
+			SpliceTranslationFPInterface::port_mode_enum, 3,
+				_T("IN"), FabricCore::DFGPortType_In,
+				_T("IO"), FabricCore::DFGPortType_IO,
+				_T("OUT"), FabricCore::DFGPortType_Out,
 		p_end
 		);
 	return &_ourDesc;

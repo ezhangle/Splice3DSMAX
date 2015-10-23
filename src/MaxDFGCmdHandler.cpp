@@ -111,7 +111,7 @@ void MaxDFGCmdHandler::dfgDoRemovePort(FabricCore::DFGBinding const &binding, FT
 		int pid = GetPortParamID(binding, execPath.c_str());
 		if (pid >= 0)
 		{
-			m_pTranslationLayer->SetMaxConnectedType(execPath.c_str(), -1);
+			m_pTranslationLayer->SetMaxTypeForArg(MSTR::FromACP(execPath.c_str()), -1);
 		}
 	}
 
@@ -185,10 +185,10 @@ void MaxDFGCmdHandler::dfgDoSetArgType(FabricCore::DFGBinding const &binding, FT
 	//	HoldActions hold(_M("Splice Port Type Changed"));
 	if (binding.getExec().getExecPortType(argName.c_str()) == FabricCore::DFGPortType_In)
 	{
-		int type = m_pTranslationLayer->GetMaxConnectedType(argName.c_str());
+		int type = m_pTranslationLayer->GetMaxTypeForArg(argName.c_str());
 		// Attempt to set the same type back.  If the max type is no
 		// longer legitimate, the type will be reset to default.
-		m_pTranslationLayer->SetMaxConnectedType(argName.c_str(), type);
+		m_pTranslationLayer->SetMaxTypeForArg(argName.c_str(), type);
 	}
 	return __super::dfgDoSetArgType(binding, argName, typeName);
 }

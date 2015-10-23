@@ -650,7 +650,7 @@ int GetPortParamID(const FabricCore::DFGBinding& binding, const char* argName)
 	return -1;
 }
 
-void SetPortParamID(FabricCore::DFGBinding& binding, const char* argName, ParamID id) 
+void SetPortParamID(FabricCore::DFGBinding& binding, const char* argName, int id) 
 {
 	char buff[20];
 	_itoa_s(id, buff, 10);

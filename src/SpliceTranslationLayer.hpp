@@ -26,8 +26,7 @@ SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(BOOL loa
 	,	m_paramMap(NULL)
 	,	m_pblock(NULL)
 	,	m_valid(NEVER)
-	,	m_notificationHandler(this)
-	,	m_maxCmdHandler(this)
+//	,	m_notificationHandler(this)
 {
 	InstanceCreated();
 
@@ -173,7 +172,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::CreateParamBlock( ParamBlo
 //---------------------------------------------------------------------------------------------------------------
 // Parameter block dynamic dialog creation methods
 //---------------------------------------------------------------------------------------------------------------
-#pragma region //Dynamic UI methods
+#pragma region // UI methods
 
 
 template<typename TBaseClass, typename TResultType>
@@ -192,8 +191,6 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::UpdateUISpec()
 	SAFE_DELETE(m_dialogTemplate);
 	MaybePostParamUI();
 }
-
-#pragma endregion
 
 //---------------------------------------------------------------------------------------------------------------
 // Inherited methods - UI related
@@ -424,14 +421,14 @@ RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged(cons
 
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::RefDeleted() {
-	// If we have no nodes referencing this class, then kill our UI
-	//if (GetKLEditor() != nullptr)
-	//{
-		ULONG handle = 0;
-		NotifyDependents(FOREVER, (PartID)&handle, REFMSG_GET_NODE_HANDLE);
-		if (handle == 0)
-			CloseKLEditor();
-	//}
+	//// If we have no nodes referencing this class, then kill our UI
+	////if (GetKLEditor() != nullptr)
+	////{
+	//	ULONG handle = 0;
+	//	NotifyDependents(FOREVER, (PartID)&handle, REFMSG_GET_NODE_HANDLE);
+	//	if (handle == 0)
+	//		CloseKLEditor();
+	////}
 }
 
 
@@ -522,7 +519,7 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
 
 	// Save the value port.
 	isave->BeginChunk(PARAM_VALUE_NAME);
-	const char* outName = GetOutPortName();
+	const char* outName = m_outArgName.c_str();
 	isave->WriteCString(outName);
 	isave->EndChunk();
 
@@ -593,7 +590,7 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 	// Reset/reconnect our time/parent ports
 	//ResetPorts();
 	// Get our output port
-	SetOutPort(outName.data());
+	SetOutPortName(MSTR::FromACP(outName.data()));
 
 	return IO_OK;
 }
@@ -621,414 +618,594 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 //---------------------------------------------------------------------------------------------------------------
 // MaxScript-exposed functions.
 //---------------------------------------------------------------------------------------------------------------
-#pragma region MaxScript function
+
+#pragma region FabricCommandInterface functions
+
+#pragma endregion
+//
+//// The following are direct mappers to the commands defined by the DFGCmdHandler classed.
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGRemoveNodes(const Tab<TSTR*>& nodeNames, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGConnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGDisconnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddGraph(const MSTR& title, Point2 pos, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddFunc(const MSTR& title, const MSTR& initialCode, Point2 pos, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGInstPreset(const MSTR& filename, Point2 pos, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddVar(const MSTR& desiredNodeName, const MSTR& dataType, const MSTR& extDep, Point2 pos, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddGet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddSet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddPort(const MSTR& desiredPortName, int portType, const MSTR& portSpec, const MSTR& portToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGEditPort(const MSTR& portName, const MSTR& desiredNewPortName, const MSTR& typeSpec, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGRemovePort(const MSTR& portName, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGResizeBackdrop(const MSTR& backDropNodeName, Point2 topLeft, Point2 size, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGMoveNodes(Tab<TSTR*> nodeNames, Tab<Point2*> topLeftPoss, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGImplodeNodes(Tab<TSTR*> nodeNames, const MSTR& desiredNewNodeName, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//Tab<TSTR*> SpliceTranslationLayer<TBaseClass, TResultType>::DFGExplodeNodes(const MSTR& nodeName, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddBackdrop(const MSTR& title, Point2 pos, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetNodeTitle(const MSTR& nodeName, const MSTR& newTitle, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetNodeComment(const MSTR& nodeName, const MSTR& comment, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetCode(const MSTR& code, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGRenamePort(const MSTR& oldName, const MSTR& newDesiredName, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//Tab<TSTR*> SpliceTranslationLayer<TBaseClass, TResultType>::DFGPaste(const MSTR& json, Point2 pos, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetArgType(const MSTR& argName, const MSTR& argType)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetArgValue(const MSTR& argName, const FPValue* argValue)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetPortDefaultValue(const MSTR& portName, const FPValue* value, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetRefVarPath(const MSTR& refName, const MSTR& varPath, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGReorderPorts(Tab<int> indices, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetExtDeps(Tab<TSTR*> extDeps, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSplitFromPreset(const MSTR& execPath)
+//{
+//}
+//
+//// Load the splice graph for this entity from the given filename
+//template<typename TBaseClass, typename TResultType>
+//bool SpliceTranslationLayer<TBaseClass, TResultType>::LoadFromFile(const MCHAR* filename, bool createMaxParams)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//bool SpliceTranslationLayer<TBaseClass, TResultType>::SaveToFile(const MCHAR* filename)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//bool SpliceTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const MSTR& json, bool createMaxParams)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::ExportToJSON()
+//{
+//}
+//
+//// Allow introspecting the ports on this graph
+//template<typename TBaseClass, typename TResultType>
+//int SpliceTranslationLayer<TBaseClass, TResultType>::GetPortCount(const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::GetPortName(int i, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::GetPortType(const MSTR& portName, const MSTR& execPath)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//FPValue SpliceTranslationLayer<TBaseClass, TResultType>::GetPortValue(const MSTR& portName, const MSTR& execPath)
+//{
+//}
+
+// Returns if the in port is an array type or not
+//virtual bool IsPortArray(const char* port)=0;
+
+
+//template<typename TBaseClass, typename TResultType>
+//int SpliceTranslationLayer<TBaseClass, TResultType>::GetMaxTypeForArg(const MSTR& argName)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxTypeForArg(const MSTR& argName, int type)
+//{
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//BitArray SpliceTranslationLayer<TBaseClass, TResultType>::GetLegalMaxTypesForArg(const MSTR& argName)
+//{
+//}
+//
+//// Allow setting various options on our ports
+//template<typename TBaseClass, typename TResultType>
+//bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& value, bool canUndo, const MSTR& execPath);
+//template<typename TBaseClass, typename TResultType>
+//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::GetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& execPath);
+
+//// Convenience functions
+//template<typename TBaseClass, typename TResultType>
+//bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortUIMinMax(const MSTR& port, FPValue* uiMin, FPValue* uiMax, const MSTR& execPath)
+//{
+//}
+
+// Connect myPortName to the output port on pSrcContainer named srcPortName
+// Returns true if successfully connected, false if for any reason the
+// port was not connected.  Once connected, each evaluation the output
+// from srcPortName will be transferred into the in-port myPortName
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectArgs(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI)
+{
+	return false;
+}
+// Disconnect a previously connected port.  Returns true if the port was previously connected and
+// has been successfully disconnected, false if disconnect failed or if no connection existed.
+template<typename TBaseClass, typename TResultType>
+bool SpliceTranslationLayer<TBaseClass, TResultType>::DisconnectArgs(const MSTR& myPortName)
+{
+	return false;
+}
 
 //////////////////////////////////////////////////////////////////////////
-// Add Ports
+// Props
 template<typename TBaseClass, typename TResultType>
-const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
+MSTR SpliceTranslationLayer<TBaseClass, TResultType>::GetOutPortName()
 {
-	std::string realName = m_maxCmdHandler.dfgDoAddPort(m_binding, "", m_binding.getExec(), name, FabricCore::DFGPortType_In, spliceType, "", inExtension, "");
-	// Because of memory issues, we can't return string here?
-	return name;
+	return MSTR::FromACP(m_outArgName.c_str());
 }
 
 template<typename TBaseClass, typename TResultType>
-const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddOutputPort(const char* name, const char* spliceType, bool isArray/*=false*/, const char* inExtension)
-{
-	HoldActions hold(_M("Add Output Port"));
-	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_Out, isArray, inExtension);
-}
-
-template<typename TBaseClass, typename TResultType>
-const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddIOPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
-{
-	HoldActions hold(_M("Add IO Port"));
-	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_IO, isArray, inExtension);
-}
-
-template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::RemovePort(const char* argName)
-{
-	m_binding.getExec().removeExecPort(argName);
-	return true;
-}
-
-template<typename TBaseClass, typename TResultType>
-const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetPortName(int i)
-{
-	return m_binding.getExec().getExecPortName(i);
-}
-
-template<typename TBaseClass, typename TResultType>
-const char* SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(const char* oldName, const char* newName)
-{
-	MAXSPLICE_CATCH_BEGIN()
-
-	if (strcmp(oldName, newName) == 0)
-		return newName;
-
-	// A rename will attempt the desired name, but in the case of a name-clash will return the new name
-	const char* res = m_binding.getExec().renameExecPort(oldName, newName);
-	return res;
-
-	MAXSPLICE_CATCH_RETURN("*Exception*");
-}
-
-template<typename TBaseClass, typename TResultType>
-const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetPortType(const char* argName)
-{
-	return ::GetPortType(m_binding.getExec(), argName);
-}
-
-
-template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::IsPortArray(const char* argName)
-{
-	FabricCore::RTVal rtVal = m_binding.getArgValue(argName);
-	return rtVal.isValid() && rtVal.isArray();
-}
-
-
-template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPort(const char* argName)
+bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR& name)
 {
 	MAXSPLICE_CATCH_BEGIN()
 
 	// can this port be translated to our out-type?
-	BitArray legalTypes = SpliceTypeToMaxTypes(GetPortType(argName));
+	CStr cname = name.ToCStr();
+	const char* portType = ::GetPortType(GetBinding().getExec(), cname.data());
+	BitArray legalTypes = SpliceTypeToMaxTypes(portType);
 	if (!legalTypes[GetValueType()])
 		return false;
-
+	
 	// Everything checks out - this port is now our value
-	m_outArgName = argName;
+	m_outArgName = cname;
 	Invalidate();
 	NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
 	return true;
-
+	
 	MAXSPLICE_CATCH_RETURN(false);
 }
 
+#pragma region MaxScript function
+
 //////////////////////////////////////////////////////////////////////////
-template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectPort( const char* myargName, ReferenceTarget* pSrcContainer, const char* srcargName, int srcPortIndex, bool postConnectionsUI )
-{
-	//if (pSrcContainer == nullptr)
-	//	return false;
+// Add Ports
+//template<typename TBaseClass, typename TResultType>
+//const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
+//{
+//	std::string realName = m_maxCmdHandler.dfgDoAddPort(m_binding, "", m_binding.getExec(), name, FabricCore::DFGPortType_In, spliceType, "", inExtension, "");
+//	// Because of memory issues, we can't return string here?
+//	return name;
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddOutputPort(const char* name, const char* spliceType, bool isArray/*=false*/, const char* inExtension)
+//{
+//	HoldActions hold(_M("Add Output Port"));
+//	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_Out, isArray, inExtension);
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddIOPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
+//{
+//	HoldActions hold(_M("Add IO Port"));
+//	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_IO, isArray, inExtension);
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//bool SpliceTranslationLayer<TBaseClass, TResultType>::RemovePort(const char* argName)
+//{
+//	m_binding.getExec().removeExecPort(argName);
+//	return true;
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetPortName(int i)
+//{
+//	return m_binding.getExec().getExecPortName(i);
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//const char* SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(const char* oldName, const char* newName)
+//{
+//	MAXSPLICE_CATCH_BEGIN()
+//
+//	if (strcmp(oldName, newName) == 0)
+//		return newName;
+//
+//	// A rename will attempt the desired name, but in the case of a name-clash will return the new name
+//	const char* res = m_binding.getExec().renameExecPort(oldName, newName);
+//	return res;
+//
+//	MAXSPLICE_CATCH_RETURN("*Exception*");
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetPortType(const char* argName)
+//{
+//	return ::GetPortType(m_binding.getExec(), argName);
+//}
+//
+//
+//template<typename TBaseClass, typename TResultType>
+//bool SpliceTranslationLayer<TBaseClass, TResultType>::IsPortArray(const char* argName)
+//{
+//	FabricCore::RTVal rtVal = m_binding.getArgValue(argName);
+//	return rtVal.isValid() && rtVal.isArray();
+//}
+//
+//
+//template<typename TBaseClass, typename TResultType>
+//bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPort(const char* argName)
+//{
+//	MAXSPLICE_CATCH_BEGIN()
+//
+//	// can this port be translated to our out-type?
+//	BitArray legalTypes = SpliceTypeToMaxTypes(GetPortType(argName));
+//	if (!legalTypes[GetValueType()])
+//		return false;
+//
+//	// Everything checks out - this port is now our value
+//	m_outArgName = argName;
+//	Invalidate();
+//	NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
+//	return true;
+//
+//	MAXSPLICE_CATCH_RETURN(false);
+//}
 
-	//SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
-	//if (pSrcContInterface == nullptr)
-	// return false;
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//template<typename TBaseClass, typename TResultType>
+//int SpliceTranslationLayer<TBaseClass, TResultType>::GetMaxConnectedType(const char* argName)
+//{
+//	int pid = ::GetPortParamID(m_binding, argName);
+//	if (pid >= 0)
+//	{
+//		return m_pblock->GetParameterType((ParamID)pid);
+//	}
+//	return -2;
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(const char* argName, int maxType)
+//{
+//	// The user has requested the default type (-2)
+//	const char* spliceType = GetPortType(argName);
+//	if (maxType == -2)
+//		maxType = SpliceTypeToDefaultMaxType(spliceType);
+//	else if (maxType == -1)
+//	{
+//		/* do nothing here, delete was requested */
+//	}
+//	else
+//	{
+//		// Figure out what kind of parameter
+//		// we can/will create on the max side
+//		BitArray legalTypes = SpliceTypeToMaxTypes(spliceType);
+//		// The requested max type is not legal for this splice type
+//		if (!legalTypes[maxType])
+//			maxType = SpliceTypeToDefaultMaxType(spliceType); // Reset to default
+//	}
+//
+//	// Cache the type being set
+//	SetPort3dsMaxType(m_binding, argName, maxType);
+//
+//	// -1 means no max connection, remove one if exists
+//	int pid = ::GetPortParamID(m_binding, argName);
+//	if (maxType == -1)
+//	{
+//		if (pid >= 0)
+//			DeleteMaxParameter((ParamID)pid);
+//		// Set -1 as the param id so we no longer look for a max param for this port.
+//		::SetPortParamID(m_binding, argName, -1);
+//		return -1;
+//	}
+//
+//	// Do we have an existing Max parameter?
+//	if (pid >= 0 && m_pblock != nullptr)
+//	{
+//		// Check that its not the correct type already
+//		if (m_pblock->GetParamDef((ParamID)pid).type == maxType)
+//			return pid;
+//
+//		// Wrong type, remove original
+//		DeleteMaxParameter((ParamID)pid);
+//	}
+//
+//	// If this is a legal type for this parameter, then go ahead
+//	ParamBlockDesc2* pNewDesc = CopyPBDescriptor();
+//	ParamID newId = AddMaxParameter(pNewDesc, maxType, argName);
+//	SetMaxParamLimits(pNewDesc, m_binding, argName);
+//	SetMaxParamDefault(pNewDesc, newId, m_binding, argName);
+//	::SetPortParamID(m_binding, argName, newId);
+//	CreateParamBlock(pNewDesc);
+//
+//	// Set the value to the current port value
+//	SetMaxParamFromSplice(m_pblock, newId, m_binding, argName);
+//	return newId;
+//}
 
-	//MAXSPLICE_CATCH_BEGIN()
+//
+//template<typename TBaseClass, typename TResultType>
+//bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectArgs( const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI )
+//{
+//	//if (pSrcContainer == nullptr)
+//	//	return false;
+//
+//	//SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
+//	//if (pSrcContInterface == nullptr)
+//	// return false;
+//
+//	//MAXSPLICE_CATCH_BEGIN()
+//
+//	//// First, do our ports exist?
+//	//DFGWrapper::ExecPortPtr srcPort = pSrcContInterface->GetPort(srcargName);
+//	//if (!srcPort || srcPort.getMode() == FabricCore::DFGPortType_In)
+//	//	return false;
+//	//DFGWrapper::ExecPortPtr destPort = GetPort(myargName);
+//	//if (!destPort || destPort.getMode() != FabricCore::DFGPortType_In)
+//	//	return false;
+//
+//	//// Are they of the same type?
+//	//if (strcmp(srcPort.getDataType(), destPort.getDataType()) != 0)
+//	//	return false;
+//
+//	//// Are we connecting to an array, and is that expected?
+//	//if ((srcPortIndex >= 0) && !srcPort.isArray())
+//	//	return false;
+//
+//	//if (theHold.Holding())
+//	//	theHold.Put(new SplicePortChangeObject(this));
+//
+//	//// Ok - these ports are good to go.  Connect 'em up.
+//	//int res = SetMaxConnectedType(destPort, TYPE_REFTARG);
+//	//if (res < 0)
+//	//	return false;
+//	//m_pblock->SetValue((ParamID)res, 0, pSrcContainer);
+//	//SetPortConnection(destPort, srcargName);
+//	//SetPortConnectionIndex(destPort, srcPortIndex);
+//	//SetPortPostConnectionUI(destPort, postConnectionsUI);
+//
+//	//// Ensure there are enough indices in the RTVal array
+//	//if (srcPortIndex >= 0) 
+//	//{
+//	//	FabricCore::RTVal rtVal = srcPort.getRTVal();
+//	//	if (rtVal.getArraySize() <= (uint32_t)srcPortIndex)
+//	//		rtVal.setArraySize(srcPortIndex + 1);
+//	//}
+//
+//	//MAXSPLICE_CATCH_RETURN(false)
+//
+//	return true;
+//}
+//
+//
+//template<typename TBaseClass, typename TResultType>
+//bool SpliceTranslationLayer<TBaseClass, TResultType>::DisconnectArgs(const MSTR& myPortName)
+//{
+//	//DFGWrapper::ExecPortPtr connectedPort = GetPort(myargName);
+//	//if (connectedPort) 
+//	//{
+//	//	std::string connection = GetPortConnection(connectedPort);
+//	//	if (connection == "") 
+//	//	{
+//	//		if (theHold.Holding())
+//	//			theHold.Put(new SplicePortChangeObject(this));
+//
+//	//		SetMaxConnectedType(connectedPort, -1);
+//	//		connectedPort.setOption(MAX_SRC_OPT, FabricCore::Variant());
+//	//		return true;
+//	//	}
+//	//}
+//	return false;
+//}
 
-	//// First, do our ports exist?
-	//DFGWrapper::ExecPortPtr srcPort = pSrcContInterface->GetPort(srcargName);
-	//if (!srcPort || srcPort.getMode() == FabricCore::DFGPortType_In)
-	//	return false;
-	//DFGWrapper::ExecPortPtr destPort = GetPort(myargName);
-	//if (!destPort || destPort.getMode() != FabricCore::DFGPortType_In)
-	//	return false;
-
-	//// Are they of the same type?
-	//if (strcmp(srcPort.getDataType(), destPort.getDataType()) != 0)
-	//	return false;
-
-	//// Are we connecting to an array, and is that expected?
-	//if ((srcPortIndex >= 0) && !srcPort.isArray())
-	//	return false;
-
-	//if (theHold.Holding())
-	//	theHold.Put(new SplicePortChangeObject(this));
-
-	//// Ok - these ports are good to go.  Connect 'em up.
-	//int res = SetMaxConnectedType(destPort, TYPE_REFTARG);
-	//if (res < 0)
-	//	return false;
-	//m_pblock->SetValue((ParamID)res, 0, pSrcContainer);
-	//SetPortConnection(destPort, srcargName);
-	//SetPortConnectionIndex(destPort, srcPortIndex);
-	//SetPortPostConnectionUI(destPort, postConnectionsUI);
-
-	//// Ensure there are enough indices in the RTVal array
-	//if (srcPortIndex >= 0) 
-	//{
-	//	FabricCore::RTVal rtVal = srcPort.getRTVal();
-	//	if (rtVal.getArraySize() <= (uint32_t)srcPortIndex)
-	//		rtVal.setArraySize(srcPortIndex + 1);
-	//}
-
-	//MAXSPLICE_CATCH_RETURN(false)
-
-	return true;
-}
-
-
-template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::DisconnectPort(const char* myargName)
-{
-	//DFGWrapper::ExecPortPtr connectedPort = GetPort(myargName);
-	//if (connectedPort) 
-	//{
-	//	std::string connection = GetPortConnection(connectedPort);
-	//	if (connection == "") 
-	//	{
-	//		if (theHold.Holding())
-	//			theHold.Put(new SplicePortChangeObject(this));
-
-	//		SetMaxConnectedType(connectedPort, -1);
-	//		connectedPort.setOption(MAX_SRC_OPT, FabricCore::Variant());
-	//		return true;
-	//	}
-	//}
-	return false;
-}
-
-template<typename TBaseClass, typename TResultType>
-int SpliceTranslationLayer<TBaseClass, TResultType>::GetMaxConnectedType( const char* argName )
-{
-	int pid = ::GetPortParamID(m_binding, argName);
-	if (pid >= 0)
-	{
-		return m_pblock->GetParameterType((ParamID)pid);
-	}
-	return -2;
-}
-
-template<typename TBaseClass, typename TResultType>
-int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(const char* argName, int maxType)
-{
-	// The user has requested the default type (-2)
-	const char* spliceType = GetPortType(argName);
-	if (maxType == -2)
-		maxType = SpliceTypeToDefaultMaxType(spliceType);
-	else if (maxType == -1) 
-	{ 
-		/* do nothing here, delete was requested */ 
-	}
-	else
-	{
-		// Figure out what kind of parameter
-		// we can/will create on the max side
-		BitArray legalTypes = SpliceTypeToMaxTypes(spliceType);
-		// The requested max type is not legal for this splice type
-		if (!legalTypes[maxType])
-			maxType = SpliceTypeToDefaultMaxType(spliceType); // Reset to default
-	}
-
-	// Cache the type being set
-	SetPort3dsMaxType(m_binding, argName, maxType);
-
-	// -1 means no max connection, remove one if exists
-	int pid = ::GetPortParamID(m_binding, argName);
-	if (maxType == -1) 
-	{
-		if (pid >= 0)
-			DeleteMaxParameter((ParamID)pid);
-		// Set -1 as the param id so we no longer look for a max param for this port.
-		::SetPortParamID(m_binding, argName, -1);
-		return -1;
-	}
-
-	// Do we have an existing Max parameter?
-	if (pid >= 0 && m_pblock != nullptr)
-	{
-		// Check that its not the correct type already
-		if (m_pblock->GetParamDef((ParamID)pid).type == maxType)
-			return pid;
-
-		// Wrong type, remove original
-		DeleteMaxParameter((ParamID)pid);
-	}
-
-	// If this is a legal type for this parameter, then go ahead
-	ParamBlockDesc2* pNewDesc = CopyPBDescriptor();
-	ParamID newId = AddMaxParameter(pNewDesc, maxType, argName);
-	SetMaxParamLimits(pNewDesc, m_binding, argName);
-	SetMaxParamDefault(pNewDesc, newId, m_binding, argName);
-	::SetPortParamID(m_binding, argName, newId);
-	CreateParamBlock(pNewDesc);
-
-	// Set the value to the current port value
-	SetMaxParamFromSplice(m_pblock, newId, m_binding, argName);
-	return newId;
-}
-
-template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortUIMinMax(const char* argName, FPValue* uiMin, FPValue* uiMax)
-{
-	// For now, we only support Float/Int max types
-	if ((uiMin->type == TYPE_FLOAT && uiMax->type == TYPE_FLOAT) ||
-		(uiMin->type == TYPE_INT && uiMax->type == TYPE_INT))
-	{
-		char buffer[128];
-		if (uiMax->type == TYPE_FLOAT)
-		{
-			float min = uiMin->f;
-			float max = uiMax->f;
-			sprintf_s(buffer, "(%f,%f)", min, max);
-		}
-		else
-		{
-			int min = uiMin->i;
-			int max = uiMax->i;
-			sprintf_s(buffer, "(%i,%i)", min, max);
-		}
-		return SetPortMetaData(argName, "uiRange", buffer, theHold.Holding());
-	}
-	return false;
-}
-
-template<typename TBaseClass, typename TResultType>
-const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddNewEmptyGraph(const char* name)
-{
-	FabricCore::DFGExec graph = m_binding.getExec();
-	const char* newItem = graph.addInstWithNewGraph(name);
-	graph.setInstTitle(newItem, name);
-	return newItem;
-}
-
-template<typename TBaseClass, typename TResultType>
-const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddNewEmptyFunc(const char* name)
-{
-	FabricCore::DFGExec graph = m_binding.getExec();
-	const char* newItem = graph.addInstWithNewFunc(name);
-	graph.setInstTitle(newItem, name);
-
-	return newItem;
-}
-
-template<typename TBaseClass, typename TResultType>
-const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddNodeFromPreset(const char* name, const char* path)
-{
-
-	FabricCore::DFGExec graph = m_binding.getExec();
-	const char* newItem = graph.addInstFromPreset(path);
-	graph.setInstTitle(newItem, name);
-	return newItem;
-}
-
-template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCodeForFunc(const char* funcPath, const char* code)
-{
-	FabricCore::DFGExec graph = m_binding.getExec();
-	
-	FabricCore::DFGExec subExec = graph.getSubExec(funcPath);
-	if (!subExec.isValid())
-		return false;
-
-	subExec.setCode(code);
-	return true;
-}
-
-template<typename TBaseClass, typename TResultType>
-const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetKLCodeForFunc(const char* funcPath)
-{
-	//MAXSPLICE_CATCH_BEGIN
-
-		FabricCore::DFGExec graph = m_binding.getExec();
-		FabricCore::DFGExec subExec = graph.getSubExec(funcPath);
-		if (!subExec.isValid())
-			return "";
-
-		return subExec.getCode();
-
-	//MAXSPLICE_CATCH_END
-	//return "";
-}
-
-template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::LoadFromFile(const MCHAR* filename, bool createMaxParams) 
-{ 
-	
-	FILE * file = nullptr;
-	errno_t erno = _tfopen_s(&file, filename, _T("rb"));
-	if (!file)
-	{
-		erno;
-		//log()
-		// TODO - Fix logging!
-	}
-
-	fseek(file, 0, SEEK_END);
-	int fileSize = ftell(file);
-	rewind(file);
-
-	char * buffer = (char*)malloc(fileSize + 1);
-	buffer[fileSize] = '\0';
-
-	size_t readBytes = fread(buffer, 1, fileSize, file);
-	assert(readBytes == fileSize);
-
-	fclose(file);
-
-	RestoreFromJSON(buffer, createMaxParams);
-	free(buffer);
-	return true;
-};
-
-template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::SaveToFile(const MCHAR* filename) 
-{ 
-
-	std::string json;
-	ExportToJSON(json);
-
-	FILE * file = nullptr;
-	errno_t erno = _tfopen_s(&file, filename, _T("w"));
-	if (!file)
-	{
-		erno;
-		//log()
-		// TODO - Fix logging!
-		return false;
-	}
-
-	fwrite(json.data(), sizeof(char), json.size(), file);
-	fclose(file);
-
-	return true;
-};
-
-template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const char* json, bool createMaxParams)
-{
-	// The KL Editor has pointers to the current graph
-	CloseKLEditor();
-
-	FabricCore::DFGBinding binding = GetHost().createBindingFromJSON(json);
-	SetBinding(binding);
-
-	// Setup port connections
-	if (createMaxParams)
-	{
-		FabricCore::DFGExec exec = binding.getExec();
-
-		for (unsigned int i = 0; i < exec.getExecPortCount(); i++)
-		{
-			// If this could be our out port?
-			if (exec.getExecPortType(i) == FabricCore::DFGPortType_Out)
-			{
-				const char* portName = exec.getExecPortName(i);
-				exec.getExecPortResolvedType(i);
-				BitArray compatibleTypes = SpliceTypeToMaxTypes(GetPortType(portName));
-				// If this splice type is compatible with this classes output,
-				// set this port as our outport
-				if (compatibleTypes[GetValueType()]) {
-					m_outArgName = portName;
-				}
-			}
-		}
-	}
-	InvalidateAll();
-	return true;
-}
-
-template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::ExportToJSON(std::string &outJson)
-{
-	outJson = m_binding.exportJSON();
-}
+//template<typename TBaseClass, typename TResultType>
+//bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortUIMinMax(const char* argName, FPValue* uiMin, FPValue* uiMax)
+//{
+//	// For now, we only support Float/Int max types
+//	if ((uiMin->type == TYPE_FLOAT && uiMax->type == TYPE_FLOAT) ||
+//		(uiMin->type == TYPE_INT && uiMax->type == TYPE_INT))
+//	{
+//		char buffer[128];
+//		if (uiMax->type == TYPE_FLOAT)
+//		{
+//			float min = uiMin->f;
+//			float max = uiMax->f;
+//			sprintf_s(buffer, "(%f,%f)", min, max);
+//		}
+//		else
+//		{
+//			int min = uiMin->i;
+//			int max = uiMax->i;
+//			sprintf_s(buffer, "(%i,%i)", min, max);
+//		}
+//		return SetPortMetaData(argName, "uiRange", buffer, theHold.Holding());
+//	}
+//	return false;
+//}
+////
+//template<typename TBaseClass, typename TResultType>
+//const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddNewEmptyGraph(const char* name)
+//{
+//	FabricCore::DFGExec graph = m_binding.getExec();
+//	const char* newItem = graph.addInstWithNewGraph(name);
+//	graph.setInstTitle(newItem, name);
+//	return newItem;
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddNewEmptyFunc(const char* name)
+//{
+//	FabricCore::DFGExec graph = m_binding.getExec();
+//	const char* newItem = graph.addInstWithNewFunc(name);
+//	graph.setInstTitle(newItem, name);
+//
+//	return newItem;
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddNodeFromPreset(const char* name, const char* path)
+//{
+//
+//	FabricCore::DFGExec graph = m_binding.getExec();
+//	const char* newItem = graph.addInstFromPreset(path);
+//	graph.setInstTitle(newItem, name);
+//	return newItem;
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//bool SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCodeForFunc(const char* funcPath, const char* code)
+//{
+//	FabricCore::DFGExec graph = m_binding.getExec();
+//	
+//	FabricCore::DFGExec subExec = graph.getSubExec(funcPath);
+//	if (!subExec.isValid())
+//		return false;
+//
+//	subExec.setCode(code);
+//	return true;
+//}
+//
+//template<typename TBaseClass, typename TResultType>
+//const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetKLCodeForFunc(const char* funcPath)
+//{
+//	//MAXSPLICE_CATCH_BEGIN
+//
+//		FabricCore::DFGExec graph = m_binding.getExec();
+//		FabricCore::DFGExec subExec = graph.getSubExec(funcPath);
+//		if (!subExec.isValid())
+//			return "";
+//
+//		return subExec.getCode();
+//
+//	//MAXSPLICE_CATCH_END
+//	//return "";
+//}
 
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
@@ -1038,12 +1215,12 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
 }
 
 
-template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::SetBinding(FabricCore::DFGBinding& binding)
-{
-	m_binding = binding;
-	m_notificationHandler.updateBinding(binding);
-}
+//template<typename TBaseClass, typename TResultType>
+//void SpliceTranslationLayer<TBaseClass, TResultType>::SetBinding(FabricCore::DFGBinding& binding)
+//{
+//	m_binding = binding;
+//	m_notificationHandler.updateBinding(binding);
+//}
 
 bool GetISVisibleInUI(const FabricCore::DFGBinding& binding, const char* portName) {
 	return true;

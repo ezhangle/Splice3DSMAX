@@ -17,8 +17,6 @@
 
 #include <vector>
 #include "SpliceTranslationFPInterface.h"
-#include "MaxDFGNotificationHandler.h"
-#include "MaxDFGCmdHandler.h"
 #include "MaxConversionFns.h"
 
 namespace DynamicDialog
@@ -27,8 +25,6 @@ namespace DynamicDialog
 };
 class IParamBlock2;
 class DynPBCustAttrClassDesc;
-class MaxDFGNotificationHandler;
-class MaxDFGController;
 
 
 // Stores a connection between Max data (ParamID) and Splice data (DGPort)
@@ -161,9 +157,8 @@ protected:
 
 #pragma region Splice Connections
 
-	// Binding to a DFG
-	//FabricCore::DFGBinding m_binding;
-
+	// Store the name of the port/arg who
+	// returns the value this class retursn to max
 	std::string	m_outArgName;
 
 	// We store a vector recording the Max validity
@@ -173,12 +168,6 @@ protected:
 
 	//! The eval context is responsible for sending host info to the graph (eg time, filepath etc)
 	FabricCore::RTVal m_evalContext;
-
-	//! The callback from the DFG graph is responsible for updating this class
-	//! in response to changes at the DFG level (ie, new params, etc)
-	//MaxDFGNotificationHandler m_notificationHandler;
-
-	//MaxDFGCmdHandler m_maxCmdHandler;
 
 #pragma endregion
 

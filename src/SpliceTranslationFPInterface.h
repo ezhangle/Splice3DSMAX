@@ -109,7 +109,7 @@ public:
 		VFN_3(fn_dfgDisconnect,							DFGDisconnect,			TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
 		FN_3(fn_dfgAddGraph,		TYPE_TSTR_BV,		DFGAddGraph,			TYPE_TSTR_BV,		TYPE_POINT2, TYPE_TSTR_BV);
 		FN_4(fn_dfgAddFunc,			TYPE_TSTR_BV,		DFGAddFunc,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_POINT2, TYPE_TSTR_BV);
-		FN_3(fn_dfgInstPreset,		TYPE_TSTR_BV,		DFGInstPreset,			TYPE_FILENAME,		TYPE_POINT2, TYPE_TSTR_BV);
+		FN_3(fn_dfgInstPreset,		TYPE_TSTR_BV,		DFGInstPreset,			TYPE_TSTR_BV,		TYPE_POINT2, TYPE_TSTR_BV);
 		FN_5(fn_dfgAddVar,			TYPE_TSTR_BV,		DFGAddVar,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_POINT2, TYPE_TSTR_BV);
 		FN_4(fn_dfgAddGet,			TYPE_TSTR_BV,		DFGAddGet,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_POINT2, TYPE_TSTR_BV);
 		FN_4(fn_dfgAddSet,			TYPE_TSTR_BV,		DFGAddSet,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_POINT2, TYPE_TSTR_BV);
@@ -456,17 +456,17 @@ FPInterfaceDesc* GetDescriptor()
 				_M("desiredPortName"), 0, TYPE_TSTR_BV,
 				_M("portType"), 0, TYPE_ENUM, SpliceTranslationFPInterface::port_mode_enum,
 				_M("portSpec"), 0, TYPE_TSTR_BV,
-				_M("portToConnect"), 0, TYPE_TSTR_BV,
-				_M("extDep"), 0, TYPE_TSTR_BV,
-				_M("metaData"), 0, TYPE_TSTR_BV,
+				_M("portToConnect"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("extDep"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("metaData"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
 				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
 				
 			SpliceTranslationFPInterface::fn_dfgEditPort, _T("DFGEditPort"), 0, TYPE_TSTR_BV, 0, 6,
 				_M("portName"), 0, TYPE_TSTR_BV,
-				_M("desiredNewPortName"), 0, TYPE_TSTR_BV,
-				_M("typeSpec"), 0, TYPE_TSTR_BV,
-				_M("extDep"), 0, TYPE_TSTR_BV,
-				_M("metaData"), 0, TYPE_TSTR_BV,
+				_M("desiredNewPortName"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("typeSpec"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("extDep"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("metaData"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
 				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
 				
 			SpliceTranslationFPInterface::fn_dfgRemovePort, _T("DFGRemovePort"), 0, 0, 0, 2,
@@ -500,8 +500,8 @@ FPInterfaceDesc* GetDescriptor()
 				
 			SpliceTranslationFPInterface::fn_dfgSetNodeTitle, _T("DFGSetNodeTitle"), 0, 0, 0, 3,
 				_M("nodeName"), 0, TYPE_TSTR_BV,
-					_M("newTitle"), 0, TYPE_TSTR_BV,
-					_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("newTitle"), 0, TYPE_TSTR_BV,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
 				
 			SpliceTranslationFPInterface::fn_dfgSetNodeComment, _T("DFGSetNodeComment"), 0, 0, 0, 3,
 				_M("nodeName"), 0, TYPE_TSTR_BV,

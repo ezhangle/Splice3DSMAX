@@ -81,11 +81,13 @@ void SpliceTranslationFPInterface::DFGRemoveNodes(const Tab<TSTR*>& nodeNames, c
 
 void SpliceTranslationFPInterface::DFGConnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath)
 {
+	InvalidateAll();
 	return m_fabricCmdHandler.dfgDoConnect(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(srcPath), TO_CSTR(destPath));
 }
 
 void SpliceTranslationFPInterface::DFGDisconnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath)
 {
+	InvalidateAll();
 	return m_fabricCmdHandler.dfgDoDisconnect(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(srcPath), TO_CSTR(destPath));
 }
 MSTR SpliceTranslationFPInterface::DFGAddGraph(const MSTR& title, Point2 pos, const MSTR& execPath)
@@ -96,9 +98,9 @@ MSTR SpliceTranslationFPInterface::DFGAddFunc(const MSTR& title, const MSTR& ini
 {
 	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddFunc(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(title), TO_CSTR(initialCode), Convert(pos)).c_str());
 }
-MSTR SpliceTranslationFPInterface::DFGInstPreset(const MSTR& filename, Point2 pos, const MSTR& execPath)
+MSTR SpliceTranslationFPInterface::DFGInstPreset(const MSTR& presetPath, Point2 pos, const MSTR& execPath)
 {
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoInstPreset(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(filename), Convert(pos)).c_str());
+	return MSTR::FromACP(m_fabricCmdHandler.dfgDoInstPreset(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(presetPath), Convert(pos)).c_str());
 }
 MSTR SpliceTranslationFPInterface::DFGAddVar(const MSTR& desiredNodeName, const MSTR& dataType, const MSTR& extDep, Point2 pos, const MSTR& execPath)
 {
@@ -119,10 +121,13 @@ MSTR SpliceTranslationFPInterface::DFGAddPort(const MSTR& desiredPortName, int p
 }
 MSTR SpliceTranslationFPInterface::DFGEditPort(const MSTR& portName, const MSTR& desiredNewPortName, const MSTR& typeSpec, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
 {
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoEditPort(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(portName), TO_CSTR(desiredNewPortName), TO_CSTR(typeSpec), TO_CSTR(extDep), TO_CSTR(metaData)).c_str());
+	std::string res = m_fabricCmdHandler.dfgDoEditPort(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(portName), TO_CSTR(desiredNewPortName), TO_CSTR(typeSpec), TO_CSTR(extDep), TO_CSTR(metaData));
+	SyncMetaDataFromPortToParam(TO_CSTR(portName));
+	return  MSTR::FromACP(res.data());
 }
 void SpliceTranslationFPInterface::DFGRemovePort(const MSTR& portName, const MSTR& execPath)
 {
+	InvalidateAll();
 	return m_fabricCmdHandler.dfgDoRemovePort(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(portName));
 }
 void SpliceTranslationFPInterface::DFGResizeBackdrop(const MSTR& backDropNodeName, Point2 topLeft, Point2 size, const MSTR& execPath)
@@ -167,7 +172,11 @@ void SpliceTranslationFPInterface::DFGSetCode(const MSTR& code, const MSTR& exec
 }
 MSTR SpliceTranslationFPInterface::DFGRenamePort(const MSTR& oldName, const MSTR& newDesiredName, const MSTR& execPath)
 {
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoRenamePort(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(oldName), TO_CSTR(newDesiredName)).c_str());
+	int id = GetPortParamID(m_binding, TO_CSTR(oldName));
+	std::string res = m_fabricCmdHandler.dfgDoRenamePort(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(oldName), TO_CSTR(newDesiredName));
+	if (id >= 0)
+		SetMaxParamName(GetPBlock()->GetDesc(), (ParamID)id, newDesiredName);
+	return MSTR::FromACP(res.c_str());
 }
 Tab<TSTR*> SpliceTranslationFPInterface::DFGPaste(const MSTR& json, Point2 pos, const MSTR& execPath)
 {
@@ -177,18 +186,30 @@ Tab<TSTR*> SpliceTranslationFPInterface::DFGPaste(const MSTR& json, Point2 pos, 
 }
 void SpliceTranslationFPInterface::DFGSetArgType(const MSTR& argName, const MSTR& argType)
 {
-	return m_fabricCmdHandler.dfgDoSetArgType(m_binding, TO_CSTR(argName), TO_CSTR(argType));
+	m_fabricCmdHandler.dfgDoSetArgType(m_binding, TO_CSTR(argName), TO_CSTR(argType));
+	SyncMetaDataFromPortToParam(TO_CSTR(argName));
 }
 void SpliceTranslationFPInterface::DFGSetArgValue(const MSTR& argName, const FPValue* argValue)
 {
-	// TODO
-	//return m_fabricCmdHandler.dfgDoSetArgValue(m_binding, TO_CSTR(argName) argValue,);
+	CStr cArgName = argName.ToCStr();
+	FabricCore::RTVal rtVal = m_binding.getArgValue(cArgName.data());
+	if (rtVal.isValid())
+	{
+		ConvertToRTVal(*argValue, rtVal);
+		m_fabricCmdHandler.dfgDoSetArgValue(m_binding, cArgName.data(), rtVal);
+		InvalidateAll();
+	}
 }
 void SpliceTranslationFPInterface::DFGSetPortDefaultValue(const MSTR& portName, const FPValue* fpvalue, const MSTR& execPath)
 {
-	FabricCore::RTVal rtval;
-	ConvertToRTVal(*fpvalue, rtval);
-	return m_fabricCmdHandler.dfgDoSetPortDefaultValue(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(portName), rtval);
+	CStr cPortName = portName.ToCStr();
+	FabricCore::RTVal rtVal = m_binding.getArgValue(cPortName.data());
+	if (rtVal.isValid())
+	{
+		ConvertToRTVal(*fpvalue, rtVal);
+		m_fabricCmdHandler.dfgDoSetPortDefaultValue(m_binding, TO_CSTR(execPath), m_binding.getExec(), cPortName.data(), rtVal);
+		SyncMetaDataFromPortToParam(cPortName.data());
+	}
 }
 void SpliceTranslationFPInterface::DFGSetRefVarPath(const MSTR& refName, const MSTR& varPath, const MSTR& execPath)
 {

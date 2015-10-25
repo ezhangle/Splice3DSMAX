@@ -46,9 +46,7 @@ class DynPBCustAttrClassDesc;
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const MCHAR* sName, ParamID desiredId = -1);
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName);
 void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name);
-void SetMaxParamLimits(ParamBlockDesc2* pDesc, FabricCore::DFGBinding& binding, const char* argName);
-void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::DFGBinding& binding, const char* argName);
-void SetMaxParamFromSplice(IParamBlock2* pblock, ParamID pid, FabricCore::DFGBinding& binding, const char* argName);
+void SetMaxParamFromSplice(SpliceTranslationFPInterface* pOwner, ParamID pid, const char* argName);
 
 /*! Generate a Win32 dialog for the passed pblok
 	\param pblock - The list of parameters to generate UI for
@@ -77,28 +75,20 @@ int SpliceTypeToDefaultMaxType(const char* cType);
 	\type - The Max type that will be set
 	\pName - The name of the parameter
 	\mode - whether this is a read/write variable */
-const char* AddSpliceParameter(FabricCore::DFGBinding& rBinding, const char* type, const char* cName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension = "");
-const char* AddSpliceParameter(FabricCore::DFGBinding& rBinding, int type, const MCHAR* pName, FabricCore::DFGPortType mode);
-const char* AddSpliceParameter(FabricCore::DFGBinding& rBinding, int type, const char* pName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension = "");
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension = "");
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode);
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const char* pName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension = "");
 
-/** Get various useful info's from fabric Ports */
+/** Get various useful info's from fabric Ports 
+	These functions are defined here and don't depend
+	on the Translation class to enable them to be used
+	from the UI layer */
 int GetPortParamID(const FabricCore::DFGBinding& binding, const char* argName);
-void SetPortParamID(FabricCore::DFGBinding& binding, const char* argName, int id);
-std::string GetPortConnection(FabricCore::DFGBinding& binding, const char* argName);
-void SetPortConnection(FabricCore::DFGBinding& binding, const char* argName, const char* name);
-//int GetPortConnectionIndex(DFGWrapper::ExecPortPtr& aPort);
-//void SetPortConnectionIndex(DFGWrapper::ExecPortPtr& aPort, int index);
-//bool GetPortPostConnectionUI(DFGWrapper::ExecPortPtr& aPort);
-//void SetPortPostConnectionUI(DFGWrapper::ExecPortPtr& aPort, bool postUi);
-//const char* GetPortName(DFGWrapper::ExecPortPtr& aPort);
-const char* GetPortType(FabricCore::DFGExec binding, const char* argName);
+int GetPort3dsMaxType(const FabricCore::DFGBinding& binding, const char* argName);
+const char* GetPortType(const FabricCore::DFGBinding& binding, const char* argName);
 
-int GetPort3dsMaxType(FabricCore::DFGExec binding, const char* argName);
-void SetPort3dsMaxType(FabricCore::DFGBinding& binding, const char* argName, int type);
-
-bool SetPortOption(FabricCore::DFGBinding& binding, const char* argName, const char* option, FPValue* value);
-bool SetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue* value);
-bool GetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue& outValue);
+std::string GetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName);
+void SetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName, const char* name);
 
 /** Given a Max value, send it to the dgPort in the appropriate fashion */
 
@@ -107,6 +97,8 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 
 // DlgCallback for our static UI
 INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+#define MACROREC_GUARD MacroRecorder::MacroRecorderDisable _guard
 
 #pragma endregion
 
@@ -168,6 +160,9 @@ protected:
 
 	//! The eval context is responsible for sending host info to the graph (eg time, filepath etc)
 	FabricCore::RTVal m_evalContext;
+
+	//! this switch prevents infinite recursion when synching Ports/Params
+	bool _m_isSyncing;
 
 #pragma endregion
 
@@ -449,6 +444,8 @@ public:
 	IParamBlock2* GetPBlock() { return m_pblock;  }
 
 	int SyncMetaDataFromPortToParam(const char* portName);
+	void SyncMaxParamLimits(const char* dfgPort, int paramId);
+	void SyncMaxParamDefault(const char* dfgPort, int paramId);
 
 #pragma endregion
 

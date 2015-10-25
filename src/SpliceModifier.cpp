@@ -136,13 +136,15 @@ void SpliceModifier::GetLocalBoundBox(TimeValue t, INode *mat, ViewExp * /*vpt*/
 
 void SpliceModifier::ResetPorts()
 {
+	MACROREC_GUARD;
+
 	ParentClass::ResetPorts();
 
 	// Our value is an IO port as we can set data in and 
-	if (AddSpliceParameter(GetBinding(), GetValueType(), "inputMesh", FabricCore::DFGPortType_In))
+	m_inMeshPort = AddSpliceParameter(this, GetValueType(), "inputMesh", FabricCore::DFGPortType_In);
+	if (!m_inMeshPort.empty())
 	{
-		m_inMeshPort = "inputMesh";
-		m_binding.getExec().setExecPortMetadata(m_inMeshPort.c_str(), "uiHidden", "true", false);
+		SetPortMetaData(m_inMeshPort.c_str(), "uiHidden", "true", "");
 	}
 
 	// By default, hook up the ports to create a valid graph.

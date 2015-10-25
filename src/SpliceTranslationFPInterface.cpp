@@ -21,7 +21,7 @@ SpliceTranslationFPInterface::SpliceTranslationFPInterface()
 
 SpliceTranslationFPInterface::~SpliceTranslationFPInterface()
 {
-//	CloseKLEditor();
+	CloseDFGGraphEditor();
 }
 
 BOOL SpliceTranslationFPInterface::ShowDFGGraphEditor()
@@ -36,6 +36,11 @@ BOOL SpliceTranslationFPInterface::ShowDFGGraphEditor()
 
 	m_pDFGWidgetWindow->SetWidget(dlg);
 	return TRUE;
+}
+
+void SpliceTranslationFPInterface::CloseDFGGraphEditor()
+{
+	SAFE_DELETE(m_pDFGWidgetWindow);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -172,7 +177,7 @@ void SpliceTranslationFPInterface::DFGSetCode(const MSTR& code, const MSTR& exec
 }
 MSTR SpliceTranslationFPInterface::DFGRenamePort(const MSTR& oldName, const MSTR& newDesiredName, const MSTR& execPath)
 {
-	int id = GetPortParamID(m_binding, TO_CSTR(oldName));
+	int id = GetPortParamID(TO_CSTR(oldName));
 	std::string res = m_fabricCmdHandler.dfgDoRenamePort(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(oldName), TO_CSTR(newDesiredName));
 	if (id >= 0)
 		SetMaxParamName(GetPBlock()->GetDesc(), (ParamID)id, newDesiredName);
@@ -249,9 +254,110 @@ MSTR SpliceTranslationFPInterface::GetPortName(int i, const MSTR& execPath)
 	return MSTR::FromACP(m_binding.getExec().getExecPortName(i));
 }
 
+const char* SpliceTranslationFPInterface::GetPortType(const char* portName, const char* execPath)
+{
+	return ::GetPortType(GetBinding(), portName);
+}
+
 MSTR SpliceTranslationFPInterface::GetPortType(const MSTR& portName, const MSTR& execPath)
 {
-	return MSTR::FromACP(m_binding.getExec().getExecPortTypeSpec(TO_CSTR(portName)));
+	return MSTR::FromACP(GetPortType(TO_CSTR(portName), TO_CSTR(execPath)));
+}
+
+
+bool SpliceTranslationFPInterface::GetPortValue(const char* argName, FPValue& value)
+{
+	MAXSPLICE_CATCH_BEGIN()
+
+	FabricCore::RTVal rtVal = m_binding.getArgValue(argName);
+	const char* cType = GetPortType(argName);
+	int type = SpliceTypeToMaxType(cType);
+
+	switch (type)
+	{
+	case TYPE_INT:
+	{
+		int i;
+		SpliceToMaxValue(rtVal, i);
+		value.Load(TYPE_INT, i);
+	}
+	break;
+	case TYPE_BOOL:
+	{
+		bool b;
+		SpliceToMaxValue(rtVal, b);
+		value.Load(TYPE_BOOL, b);
+		break;
+	}
+	case TYPE_FLOAT:
+	{
+		float f;
+		SpliceToMaxValue(rtVal, f);
+		value.Load(TYPE_FLOAT, f);
+		break;
+	}
+	case TYPE_FRGBA:
+	{
+		Point4 p4;
+		SpliceToMaxValue(rtVal, p4);
+		value.Load(TYPE_FRGBA, p4);
+		break;
+	}
+	case TYPE_POINT2:
+	{
+		Point2 p2;
+		SpliceToMaxValue(rtVal, p2);
+		value.Load(TYPE_POINT2, p2);
+		break;
+	}
+	case TYPE_POINT3:
+	{
+		Point3 v;
+		SpliceToMaxValue(rtVal, v);
+		value.Load(TYPE_POINT3, v);
+		break;
+	}
+	case TYPE_POINT4:
+	{
+		Point4 p4;
+		SpliceToMaxValue(rtVal, p4);
+		value.Load(TYPE_POINT4, p4);
+		break;
+	}
+	case TYPE_MATRIX3:
+	{
+		Matrix3 m;
+		SpliceToMaxValue(rtVal, m);
+		value.Load(TYPE_MATRIX3, m);
+		break;
+	}
+	case TYPE_QUAT:
+	{
+		Quat q;
+		SpliceToMaxValue(rtVal, q);
+		value.Load(TYPE_QUAT, q);
+		break;
+	}
+	case TYPE_STRING:
+	{
+		TSTR tstr;
+		SpliceToMaxValue(rtVal, tstr);
+		value.Load(TYPE_TSTR, tstr);
+		break;
+	}
+	case TYPE_MESH:
+	{
+		Mesh mesh;
+		SpliceToMaxValue(rtVal, mesh);
+		value.Load(TYPE_MESH, mesh);
+		break;
+	}
+
+	}
+	return true;
+#pragma message("TEST THIS")
+	MAXSPLICE_CATCH_END
+		return false;
 }
 
 FPValue SpliceTranslationFPInterface::GetPortValue(const MSTR& portName, const MSTR& execPath)
@@ -260,13 +366,13 @@ FPValue SpliceTranslationFPInterface::GetPortValue(const MSTR& portName, const M
 	static FPValue val;
 	// Free whatever memory was assigned last time
 	val.Free();
-	::GetPortValue(GetBinding(), TO_CSTR(portName), val);
+	GetPortValue(TO_CSTR(portName), val);
 	return val;
 }
 
-int SpliceTranslationFPInterface::GetMaxTypeForArg(const MSTR& argName)
+int SpliceTranslationFPInterface::GetMaxTypeForArg(const char* argName)
 {
-	int pid = ::GetPortParamID(m_binding, TO_CSTR(argName));
+	int pid = GetPortParamID(argName);
 	if (pid >= 0)
 	{
 		IParamBlock2* pblock = GetPBlock();
@@ -276,35 +382,55 @@ int SpliceTranslationFPInterface::GetMaxTypeForArg(const MSTR& argName)
 	return -2;
 }
 
+int SpliceTranslationFPInterface::GetMaxTypeForArg(const MSTR& argName)
+{
+	return GetMaxTypeForArg(TO_CSTR(argName));
+}
+
+int SpliceTranslationFPInterface::SetMaxTypeForArg(const char* argName, int type)
+{
+	char buff[20];
+	_itoa_s(type, buff, 10);
+	SetPortMetaData(argName, MAX_PARM_TYPE_OPT, buff);
+	SyncMetaDataFromPortToParam(argName);
+	return -1;
+
+}
 int SpliceTranslationFPInterface::SetMaxTypeForArg(const MSTR& argName, int type)
 {
-	// Cache the type being set
-	CStr cArgName = argName.ToCStr();
-	SetPort3dsMaxType(m_binding, cArgName.data(), type);
-	SyncMetaDataFromPortToParam(cArgName.data());
-	return -1;
+	return SetMaxTypeForArg(TO_CSTR(argName), type);
 }
 
 BitArray SpliceTranslationFPInterface::GetLegalMaxTypesForArg(const MSTR& argName)
 {
-	return SpliceTypeToMaxTypes(::GetPortType(m_binding.getExec(), TO_CSTR(argName)));
+	return SpliceTypeToMaxTypes(GetPortType(TO_CSTR(argName)));
 }
 
-bool SpliceTranslationFPInterface::SetPortMetaData(const MSTR& argName, const MSTR& option, const MSTR& value, const MSTR& execPath)
+bool SpliceTranslationFPInterface::SetPortMetaData(const char* argName, const char* option, const char* value, const char* execPath)
 {
 	bool canUndo = theHold.Holding();
 	if (canUndo) {
 		theHold.Put(new FabricCoreRestoreObj());
 	}
-	CStr cArgName = argName.ToCStr();
-	GetBinding().getExec().setExecPortMetadata(cArgName.data(), TO_CSTR(option), TO_CSTR(value), canUndo);
-	SyncMetaDataFromPortToParam(cArgName.data());
+	GetBinding().getExec().setExecPortMetadata(argName, option, value, canUndo);
+	SyncMetaDataFromPortToParam(argName);
 	return true;
+}
+
+bool SpliceTranslationFPInterface::SetPortMetaData(const MSTR& argName, const MSTR& option, const MSTR& value, const MSTR& execPath)
+{
+	SetPortMetaData(TO_CSTR(argName), TO_CSTR(option), TO_CSTR(value), TO_CSTR(execPath));
+	return true;
+}
+
+const char* SpliceTranslationFPInterface::GetPortMetaData(const char* port, const char* option, const char* execPath /* = "" */)
+{
+	return GetBinding().getExec().getExecPortMetadata(port, option);
 }
 
 MSTR SpliceTranslationFPInterface::GetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& execPath)
 {
-	return MSTR::FromACP(GetBinding().getExec().getExecPortMetadata(TO_CSTR(port), TO_CSTR(option)));
+	return MSTR::FromACP(GetPortMetaData(TO_CSTR(port), TO_CSTR(option), TO_CSTR(execPath)));
 }
 
 bool SpliceTranslationFPInterface::SetPortUIMinMax(const MSTR& argName, FPValue* uiMin, FPValue* uiMax, const MSTR& execPath)
@@ -334,6 +460,31 @@ bool SpliceTranslationFPInterface::SetPortUIMinMax(const MSTR& argName, FPValue*
 	}
 	return false;
 }
+
+int SpliceTranslationFPInterface::GetPortParamID(const char* argName)
+{
+	return ::GetPortParamID(GetBinding(), argName);
+}
+bool SpliceTranslationFPInterface::SetPortParamID(const char* argName, int id)
+{
+	char buff[20];
+	_itoa_s(id, buff, 10);
+	SetPortMetaData(argName, MAX_PID_OPT, buff, "");
+	return true;
+}
+
+int SpliceTranslationFPInterface::GetPort3dsMaxType(const char* argName)
+{
+	return ::GetPort3dsMaxType(GetBinding(), argName);
+}
+bool SpliceTranslationFPInterface::SetPort3dsMaxType(const char* argName, int type)
+{
+	char buff[20];
+	_itoa_s(type, buff, 10);
+	SetPortMetaData(argName, MAX_PID_OPT, buff, "");
+	return true;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //
 
@@ -411,7 +562,7 @@ bool SpliceTranslationFPInterface::RestoreFromJSON(const char* json, bool create
 			if (exec.getExecPortType(i) == FabricCore::DFGPortType_Out)
 			{
 				exec.getExecPortResolvedType(i);
-				BitArray compatibleTypes = SpliceTypeToMaxTypes(::GetPortType(m_binding.getExec(), portName));
+				BitArray compatibleTypes = SpliceTypeToMaxTypes(GetPortType(portName));
 				// If this splice type is compatible with this classes output,
 				// set this port as our outport
 				if (compatibleTypes[GetValueType()]) {
@@ -462,6 +613,11 @@ MSTR SpliceTranslationFPInterface::GetGraphName()
 	return MSTR::FromACP(title);
 }
 
+
+MaxDFGCmdHandler* SpliceTranslationFPInterface::GetCommandHandler()
+{
+	return &m_fabricCmdHandler;
+}
 
 /*
 Value* CallMaxScriptFunction(MCHAR* function, ReferenceTarget* fnArgument, bool returnResult) 

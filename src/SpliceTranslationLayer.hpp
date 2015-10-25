@@ -26,6 +26,7 @@ SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(BOOL loa
 	,	m_paramMap(NULL)
 	,	m_pblock(NULL)
 	,	m_valid(NEVER)
+	,	_m_isSyncing(false)
 //	,	m_notificationHandler(this)
 {
 	InstanceCreated();
@@ -119,8 +120,8 @@ ParamBlockDesc2* SpliceTranslationLayer<TBaseClass, TResultType>::CopyPBDescript
 
 			// Ensure we copy available options
 			CStr argName = CStr::FromMCHAR(pbDef.int_name);
-			SetMaxParamLimits(pNewDesc, m_binding, argName);
-			SetMaxParamDefault(pNewDesc, newPid, m_binding, argName);
+			SyncMaxParamLimits(argName, newPid);
+			SyncMaxParamDefault(argName, newPid);
 		}
 	}
 	// Return the new descriptor. This object is now the
@@ -421,14 +422,14 @@ RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged(cons
 
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::RefDeleted() {
-	//// If we have no nodes referencing this class, then kill our UI
-	////if (GetKLEditor() != nullptr)
-	////{
-	//	ULONG handle = 0;
-	//	NotifyDependents(FOREVER, (PartID)&handle, REFMSG_GET_NODE_HANDLE);
-	//	if (handle == 0)
-	//		CloseKLEditor();
-	////}
+	// If we have no nodes referencing this class, then kill our UI
+	//if (GetKLEditor() != nullptr)
+	//{
+		ULONG handle = 0;
+		NotifyDependents(FOREVER, (PartID)&handle, REFMSG_GET_NODE_HANDLE);
+		if (handle == 0)
+			CloseDFGGraphEditor();
+	//}
 }
 
 
@@ -603,7 +604,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 	int nPorts = exec.getExecPortCount();
 	for (int i = 0; i < nPorts; i++) {
 		const char* argName = exec.getExecPortName(i);
-		int pid = GetPortParamID(m_binding, argName);
+		int pid = GetPortParamID(argName);
 		if (pid >= 0)
 		{
 			MSTR str = MSTR::FromACP(argName);
@@ -874,7 +875,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 
 	// can this port be translated to our out-type?
 	CStr cname = name.ToCStr();
-	const char* portType = ::GetPortType(GetBinding().getExec(), cname.data());
+	const char* portType = GetPortType(cname.data());
 	BitArray legalTypes = SpliceTypeToMaxTypes(portType);
 	if (!legalTypes[GetValueType()])
 		return false;
@@ -1210,17 +1211,11 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
 {
+	MACROREC_GUARD;
+
 	// Setup any necessary ports for the current graph
-	m_outArgName = AddSpliceParameter(GetBinding(), GetValueType(), "outputValue", FabricCore::DFGPortType_Out);
+	m_outArgName = AddSpliceParameter(this, GetValueType(), "outputValue", FabricCore::DFGPortType_Out);
 }
-
-
-//template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::SetBinding(FabricCore::DFGBinding& binding)
-//{
-//	m_binding = binding;
-//	m_notificationHandler.updateBinding(binding);
-//}
 
 bool GetISVisibleInUI(const FabricCore::DFGBinding& binding, const char* portName) {
 	return true;
@@ -1230,10 +1225,10 @@ template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam(const char* argName)
 {
 	// Does this type already exist?
-	int paramId = GetPortParamID(m_binding, argName);
+	int paramId = GetPortParamID(argName);
 	
 	// What type _should_ be set?
-	int maxType = GetPort3dsMaxType(m_binding.getExec(), argName);
+	int maxType = GetPort3dsMaxType(argName);
 
 	// If we should not have a type, bail
 	if (maxType < 0)
@@ -1269,16 +1264,170 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
 		if (m_pblock != nullptr)
 		{
 			// Sync meta data
-			ParamBlockDesc2* pDesc = m_pblock->GetDesc();
-			SetMaxParamLimits(pDesc, m_binding, argName);
-			SetMaxParamDefault(pDesc, (ParamID)paramId, m_binding, argName);
+			//ParamBlockDesc2* pDesc = m_pblock->GetDesc();
+			SyncMaxParamLimits(argName, paramId);
+			SyncMaxParamDefault(argName, paramId);
 
 			// Set the value to the current port value
-			SetMaxParamFromSplice(m_pblock, (ParamID)paramId, m_binding, argName);
+			//SetMaxParamFromSplice(m_pblock, (ParamID)paramId, m_binding, argName);
 		}
 	}
-	SetPortParamID(m_binding, argName, paramId);
+	// Technically we shouldnt call functions that can trigger
+	// calling a sync, but in this case its just easier to call
+	// SetPortParamID (which recurses to this function) than
+	// writing all that code again.
+	if (_m_isSyncing)
+		return -1;
+	_m_isSyncing = true;
+	MACROREC_GUARD;
+	SetPortParamID(argName, paramId);
+	_m_isSyncing = false;
 	return paramId;
+}
+
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::SyncMaxParamLimits(const char* argName, int id)
+{
+	if (id < 0)
+		return;
+	ParamID pid = ParamID(id);
+
+	std::string rangeStr = GetPortMetaData(argName, "uiRange");
+	if (rangeStr.empty())
+		return;
+
+	ParamBlockDesc2* pDesc = m_pblock->GetDesc();
+	ParamDef& def = pDesc->GetParamDef(pid);
+	int baseType = base_type(def.type);
+
+	if (rangeStr.length() < 2)
+		return;
+	DbgAssert(rangeStr[0] == '(' && rangeStr[rangeStr.length() - 1] == ')');
+	//rangeStr = rangeStr.substr(1, rangeStr.length() - 1);
+	size_t splitIdx = rangeStr.find(',');
+	std::string firstValStr = rangeStr.substr(1, splitIdx - 1);
+	std::string secondValStr = rangeStr.substr(splitIdx + 1, rangeStr.length() - (splitIdx + 2));
+
+	switch ((int)baseType)
+	{
+	case TYPE_FLOAT:
+	case TYPE_ANGLE:
+	case TYPE_PCNT_FRAC:
+	case TYPE_WORLD:
+	{
+		float vMin = (float)atof(firstValStr.c_str());
+		float vMax = (float)atof(secondValStr.c_str());;
+		pDesc->ParamOption(pid, p_range, vMin, vMax, p_end);
+		break;
+	}
+	case TYPE_INT:
+	{
+		int vMin = atoi(firstValStr.c_str());
+		int vMax = atoi(secondValStr.c_str());
+		pDesc->ParamOption(pid, p_range, vMin, vMax, p_end);
+		break;
+	}
+	//case TYPE_RGBA:		pDesc->ParamOption(pid, p_ui, TYPE_COLORSWATCH, 0, p_end); break;
+	case TYPE_POINT3:
+	{
+		//Point3 uiMin = port.getOption()
+		break;
+	}
+	//case TYPE_POINT4:	pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); break;
+	//case TYPE_BOOL:		pDesc->ParamOption(pid, p_ui, TYPE_SINGLECHEKBOX, 0, p_end); break;
+	//case TYPE_INODE:	pDesc->ParamOption(pid, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
+	//case TYPE_MTL:		pDesc->ParamOption(pid, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
+	//case TYPE_TEXMAP:	pDesc->ParamOption(pid, p_ui, TYPE_TEXMAPBUTTON, 0, p_end); break;
+	//case TYPE_STRING:	pDesc->ParamOption(pid, p_ui, TYPE_EDITBOX, 0, p_end); break;
+	}
+}
+
+template<typename TType>
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::Variant& defaultVal) {
+	TType def;
+	SpliceToMaxValue(defaultVal, def);
+	pDesc->ParamOption(pid, p_default, def, p_end);
+}
+
+template<typename TType>
+void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::RTVal& defaultVal) {
+	TType def;
+	SpliceToMaxValue(defaultVal, def);
+	pDesc->ParamOption(pid, p_default, def, p_end);
+}
+
+template<typename TBaseClass, typename TResultType>
+void SpliceTranslationLayer<TBaseClass, TResultType>::SyncMaxParamDefault(const char* argName, int pid)
+{
+	if (pid < 0)
+		return;
+
+	char const *resolvedType = GetPortType(argName);
+	if (!resolvedType)
+		return;
+
+	FabricCore::RTVal defaultVal = m_binding.getExec().getPortDefaultValue(argName, resolvedType);
+	if (!defaultVal.isValid())
+		return;
+
+	ParamID paramId = (ParamID)pid;
+	ParamBlockDesc2* pDesc = m_pblock->GetDesc();
+	ParamDef& def = pDesc->GetParamDef((ParamID)paramId);
+	int baseType = base_type(def.type);
+	switch ((int)baseType)
+	{
+	case TYPE_BOOL:
+	case TYPE_INT:
+	{
+		SetMaxParamDefault<int>(pDesc, paramId, defaultVal);
+		break;
+	}
+	case TYPE_FLOAT:
+	case TYPE_ANGLE:
+	case TYPE_PCNT_FRAC:
+	case TYPE_WORLD:
+	{
+		SetMaxParamDefault<float>(pDesc, paramId, defaultVal);
+		break;
+	}
+	case TYPE_RGBA:
+	{
+		SetMaxParamDefault<Color>(pDesc, paramId, defaultVal);
+		break;
+	}
+	case TYPE_POINT3:
+	{
+		SetMaxParamDefault<Point3>(pDesc, paramId, defaultVal);
+		break;
+	}
+	case TYPE_FRGBA:
+	case TYPE_POINT4:
+	{
+		SetMaxParamDefault<Point4>(pDesc, paramId, defaultVal);
+		break;
+	}
+	case TYPE_MATRIX3:
+	{
+		SetMaxParamDefault<Matrix3>(pDesc, paramId, defaultVal);
+		break;
+	}
+	case TYPE_STRING:
+	{
+		SetMaxParamDefault<MSTR>(pDesc, paramId, defaultVal);
+		break;
+	}
+	case TYPE_INODE:
+	case TYPE_REFTARG:
+	{
+		// No default possible for this type.
+		break;
+	}
+	default:
+		DbgAssert(0 && "Implment me");
+		//case TYPE_INODE:	pDesc->ParamOption(paramId, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
+		//case TYPE_MTL:		pDesc->ParamOption(paramId, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
+		//case TYPE_TEXMAP:	pDesc->ParamOption(paramId, p_ui, TYPE_TEXMAPBUTTON, 0, p_end); break;
+	}
 }
 
 #pragma endregion

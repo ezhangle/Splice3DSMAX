@@ -17,7 +17,8 @@ MaxDFGCmdHandler::~MaxDFGCmdHandler()
 
 }
 
-#pragma region converters
+#pragma region <T> -> MSTR converters
+
 MSTR ToMSTR(const Point2& v) {
 	MSTR r;
 	r.printf(_M("[%f,%f]"), v.x, v.y);
@@ -106,16 +107,13 @@ void doEmit(const MCHAR* fn, const T1& t1, const T2& t2, const T3& t3, const T4&
 void MaxDFGCmdHandler::dfgDoRemoveNodes(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::ArrayRef<FTL::StrRef> nodeNames)
 {
 	EMIT1(_M("DFGRemoveNodes"), nodeNames, execPath);
-
 	DFGHoldActions hold(_M("DFG Remove Nodes"));
-
 	return __super::dfgDoRemoveNodes(binding, execPath, exec, nodeNames);
 }
 
 void MaxDFGCmdHandler::dfgDoConnect(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef srcPath, FTL::CStrRef dstPath)
 {
 	EMIT2(_M("DFGConnect"), srcPath, dstPath, execPath);
-
 	DFGHoldActions hold(_M("DFG Connect"));
 	return __super::dfgDoConnect(binding, execPath, exec, srcPath, dstPath);
 }
@@ -183,15 +181,6 @@ std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding
 	macroRecorder->ScriptString(cmd.data());
 	macroRecorder->EmitScript();
 
-	//macroRecorder->FunctionCall(_M("DFGAddPort"), 2, 4,
-	//	mr_string, TO_MSTR(desiredPortName),
-	//	mr_int, portType,
-	//	_M("typeSpec"), mr_string, TO_MSTR(typeSpec),
-	//	_M("portToConnect"), mr_string, TO_MSTR(portToConnect),
-	//	_M("extDep"), mr_string, TO_MSTR(extDep),
-	//	_M("execPath"), mr_string, TO_MSTR(execPath));
-	//macroRecorder->EmitScript();
-
 	DFGHoldActions hold(_M("DFG Add Port"));
 
 	if (portType == FabricCore::DFGPortType_In)
@@ -213,7 +202,7 @@ std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding
 	std::string res = __super::dfgDoAddPort(binding, execPath, exec, desiredPortName, portType, typeSpec, portToConnect, extDep, metaData);
 
 	// If we have add a new 'in' port, by default we create a matching 3ds max port.
-	m_pTranslationLayer->SyncMetaDataFromPortToParam(res.c_str());
+	m_pTranslationLayer->SyncMetaDataFromPortToParam(desiredPortName.c_str());
 	return res;
 }
 
@@ -230,14 +219,6 @@ std::string MaxDFGCmdHandler::dfgDoEditPort(FabricCore::DFGBinding const &bindin
 		TO_MSTR(execPath));
 	macroRecorder->ScriptString(cmd.data());
 	macroRecorder->EmitScript();
-
-	//macroRecorder->FunctionCall(_M("DFGAddPort"), 1, 5,
-	//	mr_string, TO_MSTR(oldPortName),
-	//	_M("desiredNewPortName"), mr_string, TO_MSTR(desiredNewPortName),
-	//	_M("typeSpec"), mr_string, TO_MSTR(typeSpec),
-	//	_M("extDep"), mr_string, TO_MSTR(extDep),
-	//	_M("metaData"), mr_string, TO_MSTR(uiMetadata),
-	//	_M("execPath"), mr_string, TO_MSTR(execPath));
 
 	DFGHoldActions hold(_M("DFG Edit Port"));
 	return __super::dfgDoEditPort(binding, execPath, exec, oldPortName, desiredNewPortName, typeSpec, extDep, uiMetadata);
@@ -332,8 +313,6 @@ std::vector<std::string> MaxDFGCmdHandler::dfgDoPaste(FabricCore::DFGBinding con
 
 void MaxDFGCmdHandler::dfgDoSetArgType(FabricCore::DFGBinding const &binding, FTL::CStrRef argName, FTL::CStrRef typeName)
 {
-	//doEmit(_M("DFGSetArgType"), argName, typeName, nothing(), nothing());
-
 	macroRecorder->FunctionCall(_M("$.DFGSetArgType"), 2, 0,
 		mr_string, TO_MSTR(argName),
 		mr_string, TO_MSTR(typeName)
@@ -341,7 +320,6 @@ void MaxDFGCmdHandler::dfgDoSetArgType(FabricCore::DFGBinding const &binding, FT
 
 	DFGHoldActions hold(_M("DFG Set Arg Type"));
 
-	//	HoldActions hold(_M("Splice Port Type Changed"));
 	if (binding.getExec().getExecPortType(argName.c_str()) == FabricCore::DFGPortType_In)
 	{
 		int type = m_pTranslationLayer->GetMaxTypeForArg(argName.c_str());

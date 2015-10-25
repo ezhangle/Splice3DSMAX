@@ -26,6 +26,7 @@
 #include "istdplug.h"
 #include "iparamb2.h"
 #include "iparamm2.h"
+#include "macrorec.h"
 
 // Max 2010 changes a lot of SDK functions to be const CHAR* instead of CHAR* 
 #if MAX_VERSION_MAJOR > 12

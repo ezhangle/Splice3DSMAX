@@ -39,12 +39,11 @@ SpliceControl<TResultType>::~SpliceControl()
 template<typename TResultType>
 void SpliceControl<TResultType>::ResetPorts()
 {
+	MACROREC_GUARD;
+
 	m_parentArgName = "parentValue";
-	bool success = AddSpliceParameter(GetBinding(), GetValueType(), m_parentArgName.c_str(), FabricCore::DFGPortType_In);
-	if (success)
-	{
-		m_binding.getExec().setExecPortMetadata(m_parentArgName.c_str(), "uiHidden", "true", false);
-	}
+	AddSpliceParameter(this, GetValueType(), m_parentArgName.c_str(), FabricCore::DFGPortType_In);
+	SetPortMetaData(m_parentArgName.c_str(), "uiHidden", "true", "");
 	__super::ResetPorts();
 }
 

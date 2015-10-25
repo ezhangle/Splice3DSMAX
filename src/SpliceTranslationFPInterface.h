@@ -7,10 +7,6 @@
 
 class DockableWindow;
 
-// Call the given function name, passing a single argument pTarger, and optionally returning it's result
-extern Value* CallMaxScriptFunction(MCHAR* function, ReferenceTarget* fnArgument, bool returnResult);
-extern Value* CallMaxScriptFunction(MCHAR* function, Value* fnArgument, bool returnResult);
-
 // We need to make this function a templated type, just so
 // we can get multiple compilations for our different clients.
 // This is necessary, as there needs to be a unique instance of
@@ -39,6 +35,7 @@ public:
 	enum FN_IDS {
 		// System management callbacks
 		fn_showDFGGraphEditor,
+		fn_closeDFGGraphEditor,
 
 		fn_dfgRemoveNodes,
 		fn_dfgConnect,
@@ -103,6 +100,7 @@ public:
 
 	BEGIN_FUNCTION_MAP	
 		FN_0(fn_showDFGGraphEditor, TYPE_BOOL, ShowDFGGraphEditor);
+		VFN_0(fn_closeDFGGraphEditor, CloseDFGGraphEditor);
 
 		VFN_2(fn_dfgRemoveNodes,						DFGRemoveNodes,			TYPE_TSTR_TAB_BV,	TYPE_TSTR_BV);
 		VFN_3(fn_dfgConnect,							DFGConnect,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
@@ -164,6 +162,7 @@ public:
 
 	// Implement the functions exposed above
 	BOOL ShowDFGGraphEditor();
+	void CloseDFGGraphEditor();
 
 	// The following are direct mappers to the commands defined by the DFGCmdHandler classed.
 	void DFGRemoveNodes(const Tab<TSTR*>& nodeNames, const MSTR& execPath);
@@ -196,25 +195,40 @@ public:
 	void DFGSetExtDeps(Tab<TSTR*> extDeps, const MSTR& execPath);
 	void DFGSplitFromPreset(const MSTR& execPath);
 
+	//////////////////////////////////////////////////////////////////////////
 	// Allow introspecting the ports on this graph
 	int GetPortCount(const MSTR& execPath);
 	MSTR GetPortName(int i, const MSTR& execPath);
+
+	const char* GetPortType(const char* portName, const char* execPath = "");
 	MSTR GetPortType(const MSTR& portName, const MSTR& execPath);
+
+	bool GetPortValue(const char* argName, FPValue& value);
 	FPValue GetPortValue(const MSTR& portName, const MSTR& execPath);
 	// Returns if the in port is an array type or not
 	//virtual bool IsPortArray(const char* port)=0;
 
-
+	int GetMaxTypeForArg(const char* argName);
 	int GetMaxTypeForArg(const MSTR& argName);
+
+	int SetMaxTypeForArg(const char* argName, int type);
 	int SetMaxTypeForArg(const MSTR& argName, int type);
+
 	BitArray GetLegalMaxTypesForArg(const MSTR& argName);
 
 	// Allow setting various options on our ports
+	bool SetPortMetaData(const char* port, const char* option, const char* value, const char* execPath="");
 	bool SetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& value, const MSTR& execPath);
+
+	const char* GetPortMetaData(const char* port, const char* option, const char* execPath = "");
 	MSTR GetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& execPath);
 
 	// Convenience functions
 	bool SetPortUIMinMax(const MSTR& port, FPValue* uiMin, FPValue* uiMax, const MSTR& execPath);
+	int GetPortParamID(const char* argName);
+	bool SetPortParamID(const char* argName, int id);
+	int GetPort3dsMaxType(const char* argName);
+	bool SetPort3dsMaxType(const char* argName, int type);
 
 	// Load the splice graph for this entity from the given filename
 	bool LoadFromFile(const MCHAR* filename, bool createMaxParams);
@@ -239,11 +253,6 @@ public:
 	virtual bool SetOutPortName(const MSTR& name) = 0;
 
 	//////////////////////////////////////////////////////////////////////////
-	// Conv easing functions
-	int GetMaxTypeForArg(const char* argName)				{ return GetMaxTypeForArg(MSTR::FromACP(argName)); }
-	int SetMaxTypeForArg(const char* argName, int type)		{ return SetMaxTypeForArg(MSTR::FromACP(argName), type); }
-
-	//////////////////////////////////////////////////////////////////////////
 	// General management functions allows different templated
 	// types to speak to each other.
 	
@@ -252,26 +261,9 @@ public:
 	virtual int GetValueType() = 0;
 
 	virtual MSTR GetGraphName();
-	// Get the fabric graph driving this max class.
-	//virtual FabricCore::DFGBinding& GetBinding() = 0;
-	// Get the command handler (mostly for sending to the UI)
-	//virtual FabricUI::DFG::DFGUICmdHandler* GetCmdHandler() = 0;
 
 	// Reset any auto-generated ports.
 	virtual void ResetPorts()=0;
-
-
-
-
-
-	// Allow setting values directly on our ports
-	//bool SetPortValue(const char* port, FPValue* value);
-
-
-	//virtual const char* AddNewEmptyGraph(const char* name) = 0;
-	//virtual const char* AddNewEmptyFunc(const char* name) = 0;
-	//virtual const char* AddNodeFromPreset(const char* name, const char* path) = 0;
-
 
 	// Allow external classes to trigger evaluations on us
 	virtual void TriggerEvaluate(TimeValue t, Interval& ivValid)=0;
@@ -293,89 +285,15 @@ public:
 	// value limits etc.
 	//
 	virtual int SyncMetaDataFromPortToParam(const char* dfgPort) = 0;
-protected:
+	virtual void SyncMaxParamLimits(const char* dfgPort, int paramId) = 0;
+	virtual void SyncMaxParamDefault(const char* dfgPort, int paramId) = 0;
 
+	//////////////////////////////////////////////////////////////////////////
 	// Access a few of the internals
 	FabricCore::DFGBinding& GetBinding() { return m_binding; }
 	const FabricCore::DFGBinding& GetBinding() const { return m_binding; }
 	void SetBinding(FabricCore::DFGBinding binding) { m_binding = binding; }
-	// This function allows us to go up the other pants leg of 
-	//virtual ReferenceTarget* CastToRefTarg()=0;
-//#pragma region MSTR<->CStr conversion
-//
-//	// Our MSTR version of the function converts to CStr and passes on to real handler
-//	inline MSTR ToMSTR(const char* v, int defValue)
-//	{
-//		MSTR resMSTR; 
-//		if (v != NULL) 
-//			resMSTR = MSTR::FromACP(v, strlen(v));
-//		else 
-//			resMSTR = GetString(defValue);
-//		return resMSTR;
-//	}
-//	inline MSTR ToMSTR(std::string v, int defValue) { return ToMSTR(v.data(), defValue); }
-//
-//#define MSTR_OUTVAL(fnName, defValue) \
-//	MSTR fnName##MSTR() { \
-//		return ToMSTR(fnName(), defValue); \
-//	}
-//#define MSTR_INVAL(retType, fnName) \
-//	retType fnName##MSTR(const MSTR& inVal) { \
-//		return fnName(inVal.ToACP()); \
-//	}
-//
-//	// TODO: Add default vals for these
-//	MSTR_OUTVAL(GetOutPortName, 0);
-//
-//	MSTR_INVAL(bool, SetOutPort);
-//	
-//	MSTR GetPortNameMSTR(int i)	{ return ToMSTR(GetPortName(i), 0); }
-//	MSTR SetPortNameMSTR(const MSTR& oldName, const MSTR& newName)	{ return MSTR::FromACP(SetPortName(oldName.ToCStr(), newName.ToCStr())); }
-//	MSTR GetPortTyeMSTR(const MSTR& port)	{ return ToMSTR(GetPortType(port.ToCStr()), 0); }
-//	MSTR_INVAL(bool, IsPortArray);
-//	MSTR_INVAL(bool, GetMaxTypeForArg);
-//	int SetMaxConnectedTypeMSTR(const MSTR& port, int type) { return SetMaxTypeForArg(port.ToCStr(), type); }
-//	MSTR_INVAL(BitArray, GetLegalMaxTypesForArg);
-//
-//
-//	MSTR AddInputPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
-//	{
-//		return MSTR::FromACP(AddInputPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data()));
-//	}
-//	MSTR AddOutputPortMSTR(const MSTR& name, const MSTR& type, bool isArray, const MSTR& inExtension)
-//	{
-//		return MSTR::FromACP(AddOutputPort(name.ToCStr().data(), type.ToCStr().data(), isArray, inExtension.ToCStr().data()));
-//	}
-//	MSTR AddIOPortMSTR(const MSTR& name, const MSTR& type, int maxType, bool isArray, const MSTR& inExtension)
-//	{
-//		return MSTR::FromACP(AddIOPort(name.ToCStr().data(), type.ToCStr().data(), maxType, isArray, inExtension.ToCStr().data()));
-//	}
-//	MSTR_INVAL(bool, RemovePort);
-//
-//	bool ConnectPortMSTR(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI );
-//	MSTR_INVAL(bool, DisconnectPort);
-//
-//	bool SetPortMetaDataMSTR(const MSTR& port, const MSTR& option, const MSTR& value, bool canUndo)	{ return SetPortMetaData(port.ToCStr(), option.ToCStr(), value.ToCStr(), canUndo); }
-//	MSTR GetPortMetaDataMSTR(const MSTR& port, const MSTR& option)	{ return MSTR::FromACP(GetPortMetaData(port.ToCStr(), option.ToCStr())); }
-//
-//	bool SetPortValueMSTR(const MSTR& port, FPValue* value)							{ return SetPortValue(port.ToCStr(), value); }
-//	FPValue& GetPortValueMSTR(const MSTR& port)										{ return GetPortValue(port.ToCStr()); }
-//	bool SetPortUIMinMaxMSTR(const MSTR& port, FPValue* uiMin, FPValue* uiMax)		{ return SetPortUIMinMax(port.ToCStr(), uiMin, uiMax); }
-//
-//	MSTR AddNewEmptyGraphMSTR(MSTR& graphName)						{ return MSTR::FromACP(AddNewEmptyGraph(graphName.ToCStr())); }
-//	MSTR AddNewEmptyFuncMSTR(MSTR& funcName)						{ return MSTR::FromACP(AddNewEmptyFunc(funcName.ToCStr())); }
-//	MSTR AddNodeFromPresetMSTR(const MSTR& name, const MSTR& path)	{ return MSTR::FromACP(AddNodeFromPreset(name.ToCStr(), path.ToCStr())); }
-//
-//	bool SetKLCodeForFuncMSTR(const MSTR& funcName, MSTR& code)		{ return SetKLCodeForFunc(funcName.ToCStr(), code.ToCStr());	}
-//	MSTR GetKLCodeForFuncMSTR(const MSTR& name)						{ return MSTR::FromACP(GetKLCodeForFunc(name.ToCStr()));  }
-//
-//	bool RestoreFromJSONMSTR(const MSTR& json, bool createMaxParams) { return RestoreFromJSON(json.ToCStr(), createMaxParams);  }
-//	MSTR ExportToJSONMSTR() {
-//		std::string jsonData;
-//		ExportToJSON(jsonData);
-//		return MSTR::FromACP(jsonData.data(), jsonData.length());
-//	}
-
+	MaxDFGCmdHandler* GetCommandHandler();
 
 #pragma endregion
 };
@@ -400,6 +318,7 @@ FPInterfaceDesc* GetDescriptor()
 		0,
 		// Describe our function(s)
 			SpliceTranslationFPInterface::fn_showDFGGraphEditor, _T("ShowDFGGraphEditor"), 0, TYPE_BOOL, 0, 0,
+			SpliceTranslationFPInterface::fn_closeDFGGraphEditor, _T("CloseDFGGraphEditor"), 0, TYPE_BOOL, 0, 0,
 
 			//////////////////////////////////////////////////////////////////////////
 			// Fabric DFG commands

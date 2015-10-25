@@ -158,18 +158,20 @@ void SpliceWSModifier::GetLocalBoundBox(TimeValue t, INode *mat, ViewExp * /*vpt
 
 void SpliceWSModifier::ResetPorts()
 {
+	MACROREC_GUARD;
+
 	// We add a transform value so that our Splice operator can evaluate relative to the input matrix
-	m_nodeTransformArgName = "nodeTransform";
-	if (AddSpliceParameter(m_binding, TYPE_MATRIX3, _M("nodeTransform"), FabricCore::DFGPortType_In))
+	m_nodeTransformArgName = AddSpliceParameter(this, TYPE_MATRIX3, "nodeTransform", FabricCore::DFGPortType_In);
+	if (!m_nodeTransformArgName.empty())
 	{
-		m_binding.getExec().setExecPortMetadata(m_nodeTransformArgName.c_str(), "uiHidden", "true", false);
+		SetPortMetaData(m_nodeTransformArgName.c_str(), "uiHidden", "true", "");
 	}
 
 	// Our value is an IO port as we can set data in and 
-	if (AddSpliceParameter(GetBinding(), GetValueType(), "inputMesh", FabricCore::DFGPortType_In))
+	m_inMeshArgName = AddSpliceParameter(this, GetValueType(), "inputMesh", FabricCore::DFGPortType_In);
+	if (!m_inMeshArgName.empty())
 	{
-		m_inMeshArgName = "inputMesh";
-		m_binding.getExec().setExecPortMetadata(m_nodeTransformArgName.c_str(), "uiHidden", "true", false);
+		SetPortMetaData(m_nodeTransformArgName.c_str(), "uiHidden", "true", "");
 	}
 
 	ParentClass::ResetPorts();

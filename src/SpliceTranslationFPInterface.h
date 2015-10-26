@@ -79,6 +79,10 @@ public:
 		fn_getPortType,
 		fn_getPortValue,
 
+		fn_getNodeCount,
+		fn_getNodeName,
+		fn_getNodeType,
+
 		fn_getMaxConnectedType,
 		fn_setMaxConnectedType,
 		fn_getLegalMaxTypes,
@@ -144,6 +148,10 @@ public:
 		FN_2(fn_getPortName, TYPE_TSTR_BV, GetPortName, TYPE_INDEX, TYPE_TSTR_BV);
 		FN_2(fn_getPortType, TYPE_TSTR_BV, GetPortType, TYPE_TSTR_BR, TYPE_TSTR_BV);
 		FN_2(fn_getPortValue, TYPE_FPVALUE, GetPortValue, TYPE_TSTR_BR, TYPE_TSTR_BV);
+
+		FN_1(fn_getNodeCount, TYPE_INT, GetNodeCount, TYPE_TSTR_BV);
+		FN_2(fn_getNodeName, TYPE_TSTR_BV, GetNodeName, TYPE_INDEX, TYPE_TSTR_BV);
+		FN_2(fn_getNodeType, TYPE_INT, GetNodeType, TYPE_TSTR_BR, TYPE_TSTR_BV);
 		
 		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxTypeForArg, TYPE_TSTR_BV);
 		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxTypeForArg, TYPE_TSTR_BV, TYPE_INT);
@@ -154,7 +162,7 @@ public:
 
 		FN_4(fn_setPortMinMax, TYPE_bool, SetPortUIMinMax, TYPE_TSTR_BR, TYPE_FPVALUE, TYPE_FPVALUE, TYPE_TSTR_BR);
 
-		FN_1(fn_getExecCode, TYPE_INT, GetExecCode, TYPE_TSTR);
+		FN_1(fn_getExecCode, TYPE_TSTR, GetExecCode, TYPE_TSTR);
 
 		FN_5(fn_connectArgs, TYPE_bool, ConnectArgs, TYPE_TSTR_BR, TYPE_REFTARG, TYPE_TSTR_BR, TYPE_INT, TYPE_bool);
 		
@@ -202,9 +210,12 @@ public:
 	// Allow introspecting the ports on this graph
 	int GetPortCount(const MSTR& execPath);
 	MSTR GetPortName(int i, const MSTR& execPath);
-
 	const char* GetPortType(const char* portName, const char* execPath = "");
 	MSTR GetPortType(const MSTR& portName, const MSTR& execPath);
+
+	int GetNodeCount(const MSTR& execPath);
+	MSTR GetNodeName(int i, const MSTR& execPath);
+	int GetNodeType(const MSTR& nodeName, const MSTR& execPath);
 
 	bool GetPortValue(const char* argName, FPValue& value);
 	FPValue GetPortValue(const MSTR& portName, const MSTR& execPath);
@@ -505,6 +516,15 @@ FPInterfaceDesc* GetDescriptor()
 				_M("portName"), 0, TYPE_TSTR_BV,
 				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
 
+			SpliceTranslationFPInterface::fn_getNodeCount, _T("GetNodeCount"), 0, TYPE_TSTR_BV, 0, 1,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+			SpliceTranslationFPInterface::fn_getNodeName, _T("GetNodeName"), 0, TYPE_TSTR_BV, 0, 2,
+				_M("nodeIndex"),	0,	TYPE_INDEX,
+				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+			SpliceTranslationFPInterface::fn_getNodeType, _T("GetNodeType"), 0, TYPE_INT, 0, 2,
+				_M("nodeName"),		0,	TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, MSTR(),
+
 			SpliceTranslationFPInterface::fn_getMaxConnectedType, _T("GetMaxTypeForArg"), 0, TYPE_INT, 0, 1,
 				_M("argName"),	0,	TYPE_TSTR_BV, 
 			SpliceTranslationFPInterface::fn_setMaxConnectedType, _T("SetMaxTypeForArg"), 0, TYPE_INT, 0, 2,
@@ -528,7 +548,7 @@ FPInterfaceDesc* GetDescriptor()
 				_M("uiMin"),	0,	TYPE_FPVALUE, 
 				_M("uiMax"),	0,	TYPE_FPVALUE, 
 
-			SpliceTranslationFPInterface::fn_getExecCode, _T("GetExecCode"), 0, TYPE_TSTR, 0, 1,
+			SpliceTranslationFPInterface::fn_getExecCode, _T("GetExecCode"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("execPath"), 0, TYPE_TSTR,
 				
 			SpliceTranslationFPInterface::fn_connectArgs, _T("ConnectArgs"), 0, TYPE_bool, 0, 5,

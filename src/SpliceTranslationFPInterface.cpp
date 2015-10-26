@@ -322,6 +322,24 @@ MSTR SpliceTranslationFPInterface::GetPortType(const MSTR& portName, const MSTR&
 }
 
 
+// Introspect nodes as well
+int SpliceTranslationFPInterface::GetNodeCount(const MSTR& execPath)
+{
+	return GetExec(execPath).getNodeCount();
+}
+
+MSTR SpliceTranslationFPInterface::GetNodeName(int i, const MSTR& execPath)
+{
+	return MSTR::FromACP(GetExec(execPath).getNodeName(i));
+}
+
+int SpliceTranslationFPInterface::GetNodeType(const MSTR& NodeName, const MSTR& execPath)
+{
+	FabricCore::DFGNodeType nodeType = GetExec(execPath).getNodeType(TO_CSTR(NodeName));
+	return nodeType;
+}
+
+
 bool SpliceTranslationFPInterface::GetPortValue(const char* argName, FPValue& value)
 {
 	MAXSPLICE_CATCH_BEGIN

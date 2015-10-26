@@ -33,5 +33,12 @@ FAssert($.GetNodeType "EmptyPolygonMesh" == 0) "Erroring getting node type"
 
 $.DFGConnect "EmptyPolygonMesh.mesh" "func.inVal"  execPath:""
 
+res = $.DFGAddPort "aport" 0 "UInt32" portToConnect:"" extDep:"" execPath:""
+FAssert($.GetPortType res == "UInt32") "Error creating port type"
+FAssert($.GetMaxTypeForArg res
+FAssert($.GetPortCount() == 2) "Error in port count"
+$.DFGRenamePort res "aDiffPort"  execPath:""
+FAssert($.GetPortName 2 == "aDiffPort") "Error in port name"
+$.DFGRemovePort "aDiffPort"   execPath:""
 
 sm.CloseDFGGraphEditor()

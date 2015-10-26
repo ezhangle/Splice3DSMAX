@@ -104,44 +104,44 @@ MSTR SpliceTranslationFPInterface::DFGAddGraph(const MSTR& title, Point2 pos, co
 {
 	MAXSPLICE_CATCH_BEGIN
 	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddGraph(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(title), Convert(pos)).c_str());
-	MAXSPLICE_CATCH_RETURN("Exception occured")
+	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGAddFunc(const MSTR& title, const MSTR& initialCode, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddFunc(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(title), TO_CSTR(initialCode), Convert(pos)).c_str());
-	MAXSPLICE_CATCH_RETURN("Exception occured")
+	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGInstPreset(const MSTR& presetPath, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	return MSTR::FromACP(m_fabricCmdHandler.dfgDoInstPreset(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(presetPath), Convert(pos)).c_str());
-	MAXSPLICE_CATCH_RETURN("Exception occured")
+	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGAddVar(const MSTR& desiredNodeName, const MSTR& dataType, const MSTR& extDep, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddVar(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(desiredNodeName), TO_CSTR(dataType), TO_CSTR(extDep), Convert(pos)).c_str());
-	MAXSPLICE_CATCH_RETURN("Exception occured")
+	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGAddGet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddGet(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(desiredNodeName), TO_CSTR(varPath), Convert(pos)).c_str());
-	MAXSPLICE_CATCH_RETURN("Exception occured")
+	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGAddSet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddSet(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(desiredNodeName), TO_CSTR(varPath), Convert(pos)).c_str());
-	MAXSPLICE_CATCH_RETURN("Exception occured")
+	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGAddPort(const MSTR& desiredPortName, int portType, const MSTR& portSpec, const MSTR& portToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	FabricCore::DFGPortType fType = static_cast<FabricCore::DFGPortType>(portType);
 	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddPort(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(desiredPortName), fType, TO_CSTR(portSpec), TO_CSTR(portToConnect), TO_CSTR(extDep), TO_CSTR(metaData)).c_str());
-	MAXSPLICE_CATCH_RETURN("Exception occured")
+	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGEditPort(const MSTR& portName, const MSTR& desiredNewPortName, const MSTR& typeSpec, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
 {
@@ -149,7 +149,7 @@ MSTR SpliceTranslationFPInterface::DFGEditPort(const MSTR& portName, const MSTR&
 	std::string res = m_fabricCmdHandler.dfgDoEditPort(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(portName), TO_CSTR(desiredNewPortName), TO_CSTR(typeSpec), TO_CSTR(extDep), TO_CSTR(metaData));
 	SyncMetaDataFromPortToParam(TO_CSTR(portName));
 	return  MSTR::FromACP(res.data());
-	MAXSPLICE_CATCH_RETURN("Exception occured")
+	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 void SpliceTranslationFPInterface::DFGRemovePort(const MSTR& portName, const MSTR& execPath)
 {
@@ -181,7 +181,7 @@ MSTR SpliceTranslationFPInterface::DFGImplodeNodes(Tab<TSTR*> nodeNames, const M
 	std::vector<FTL::StrRef> cNodeNames;
 	Convert(nodeNames, cNodeNames);
 	return MSTR::FromACP(m_fabricCmdHandler.dfgDoImplodeNodes(m_binding, TO_CSTR(execPath), m_binding.getExec(), cNodeNames, TO_CSTR(desiredNewNodeName)).c_str());
-	MAXSPLICE_CATCH_RETURN("Exception occured")
+	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 Tab<TSTR*> SpliceTranslationFPInterface::DFGExplodeNodes(const MSTR& nodeName, const MSTR& execPath)
 {
@@ -222,7 +222,7 @@ MSTR SpliceTranslationFPInterface::DFGRenamePort(const MSTR& oldName, const MSTR
 	if (id >= 0)
 		SetMaxParamName(GetPBlock()->GetDesc(), (ParamID)id, newDesiredName);
 	return MSTR::FromACP(res.c_str());
-	MAXSPLICE_CATCH_RETURN("Exception occured")
+	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 Tab<TSTR*> SpliceTranslationFPInterface::DFGPaste(const MSTR& json, Point2 pos, const MSTR& execPath)
 {

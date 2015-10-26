@@ -183,7 +183,7 @@ std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding
 
 	DFGHoldActions hold(_M("DFG Add Port"));
 
-	bool isPossibleMaxPort = portType != FabricCore::DFGPortType_Out && !execPath.empty();
+	bool isPossibleMaxPort = portType != FabricCore::DFGPortType_Out && execPath.empty();
 	if (isPossibleMaxPort)
 	{
 		int maxPortType = SpliceTypeToDefaultMaxType(typeSpec.c_str());

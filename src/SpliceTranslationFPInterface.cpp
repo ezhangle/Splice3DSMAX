@@ -82,7 +82,7 @@ void SpliceTranslationFPInterface::DFGRemoveNodes(const Tab<TSTR*>& nodeNames, c
 	MAXSPLICE_CATCH_BEGIN;
 		std::vector<FTL::StrRef> cNodeNames;
 		Convert(nodeNames, cNodeNames);
-		m_fabricCmdHandler.dfgDoRemoveNodes(m_binding, TO_CSTR(execPath), m_binding.getExec(), cNodeNames);
+		m_fabricCmdHandler.dfgDoRemoveNodes(m_binding, TO_CSTR(execPath), GetExec(execPath), cNodeNames);
 	MAXSPLICE_CATCH_END;
 }
 
@@ -90,63 +90,64 @@ void SpliceTranslationFPInterface::DFGConnect(const MSTR& srcPath, const MSTR& d
 {
 	MAXSPLICE_CATCH_BEGIN
 	InvalidateAll();
-	return m_fabricCmdHandler.dfgDoConnect(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(srcPath), TO_CSTR(destPath));
+	return m_fabricCmdHandler.dfgDoConnect(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(srcPath), TO_CSTR(destPath));
 	MAXSPLICE_CATCH_END
 }
 void SpliceTranslationFPInterface::DFGDisconnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	InvalidateAll();
-	return m_fabricCmdHandler.dfgDoDisconnect(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(srcPath), TO_CSTR(destPath));
+	return m_fabricCmdHandler.dfgDoDisconnect(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(srcPath), TO_CSTR(destPath));
 	MAXSPLICE_CATCH_END
 }
 MSTR SpliceTranslationFPInterface::DFGAddGraph(const MSTR& title, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddGraph(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(title), Convert(pos)).c_str());
+	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddGraph(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(title), Convert(pos)).c_str());
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGAddFunc(const MSTR& title, const MSTR& initialCode, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddFunc(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(title), TO_CSTR(initialCode), Convert(pos)).c_str());
+	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddFunc(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(title), TO_CSTR(initialCode), Convert(pos)).c_str());
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGInstPreset(const MSTR& presetPath, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoInstPreset(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(presetPath), Convert(pos)).c_str());
+	return MSTR::FromACP(m_fabricCmdHandler.dfgDoInstPreset(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(presetPath), Convert(pos)).c_str());
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGAddVar(const MSTR& desiredNodeName, const MSTR& dataType, const MSTR& extDep, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddVar(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(desiredNodeName), TO_CSTR(dataType), TO_CSTR(extDep), Convert(pos)).c_str());
+	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddVar(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(desiredNodeName), TO_CSTR(dataType), TO_CSTR(extDep), Convert(pos)).c_str());
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGAddGet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddGet(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(desiredNodeName), TO_CSTR(varPath), Convert(pos)).c_str());
+	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddGet(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(desiredNodeName), TO_CSTR(varPath), Convert(pos)).c_str());
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGAddSet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddSet(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(desiredNodeName), TO_CSTR(varPath), Convert(pos)).c_str());
+	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddSet(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(desiredNodeName), TO_CSTR(varPath), Convert(pos)).c_str());
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGAddPort(const MSTR& desiredPortName, int portType, const MSTR& portSpec, const MSTR& portToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	FabricCore::DFGPortType fType = static_cast<FabricCore::DFGPortType>(portType);
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddPort(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(desiredPortName), fType, TO_CSTR(portSpec), TO_CSTR(portToConnect), TO_CSTR(extDep), TO_CSTR(metaData)).c_str());
+	CStr cExecPath = execPath.ToCStr();
+	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddPort(m_binding, cExecPath.data(), GetExec(cExecPath.data()), TO_CSTR(desiredPortName), fType, TO_CSTR(portSpec), TO_CSTR(portToConnect), TO_CSTR(extDep), TO_CSTR(metaData)).c_str());
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR SpliceTranslationFPInterface::DFGEditPort(const MSTR& portName, const MSTR& desiredNewPortName, const MSTR& typeSpec, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	std::string res = m_fabricCmdHandler.dfgDoEditPort(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(portName), TO_CSTR(desiredNewPortName), TO_CSTR(typeSpec), TO_CSTR(extDep), TO_CSTR(metaData));
+	std::string res = m_fabricCmdHandler.dfgDoEditPort(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(portName), TO_CSTR(desiredNewPortName), TO_CSTR(typeSpec), TO_CSTR(extDep), TO_CSTR(metaData));
 	SyncMetaDataFromPortToParam(TO_CSTR(portName));
 	return  MSTR::FromACP(res.data());
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
@@ -155,14 +156,14 @@ void SpliceTranslationFPInterface::DFGRemovePort(const MSTR& portName, const MST
 {
 	MAXSPLICE_CATCH_BEGIN
 	InvalidateAll();
-	return m_fabricCmdHandler.dfgDoRemovePort(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(portName));
+	return m_fabricCmdHandler.dfgDoRemovePort(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(portName));
 	MAXSPLICE_CATCH_END
 }
 void SpliceTranslationFPInterface::DFGResizeBackdrop(const MSTR& backDropNodeName, Point2 topLeft, Point2 size, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	QSizeF qSize(size.x, size.y);
-	return m_fabricCmdHandler.dfgDoResizeBackDrop(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(backDropNodeName), Convert(topLeft), qSize);
+	return m_fabricCmdHandler.dfgDoResizeBackDrop(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(backDropNodeName), Convert(topLeft), qSize);
 	MAXSPLICE_CATCH_END
 }
 void SpliceTranslationFPInterface::DFGMoveNodes(Tab<TSTR*> nodeNames, Tab<Point2*> topLeftPoss, const MSTR& execPath)
@@ -172,7 +173,7 @@ void SpliceTranslationFPInterface::DFGMoveNodes(Tab<TSTR*> nodeNames, Tab<Point2
 	Convert(nodeNames, cNodeNames);
 	std::vector<QPointF> qTopLeftPoss;
 	Convert(topLeftPoss, qTopLeftPoss);
-	return m_fabricCmdHandler.dfgDoMoveNodes(m_binding, TO_CSTR(execPath), m_binding.getExec(), cNodeNames, qTopLeftPoss);
+	return m_fabricCmdHandler.dfgDoMoveNodes(m_binding, TO_CSTR(execPath), GetExec(execPath), cNodeNames, qTopLeftPoss);
 	MAXSPLICE_CATCH_END
 }
 MSTR SpliceTranslationFPInterface::DFGImplodeNodes(Tab<TSTR*> nodeNames, const MSTR& desiredNewNodeName, const MSTR& execPath)
@@ -180,45 +181,45 @@ MSTR SpliceTranslationFPInterface::DFGImplodeNodes(Tab<TSTR*> nodeNames, const M
 	MAXSPLICE_CATCH_BEGIN
 	std::vector<FTL::StrRef> cNodeNames;
 	Convert(nodeNames, cNodeNames);
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoImplodeNodes(m_binding, TO_CSTR(execPath), m_binding.getExec(), cNodeNames, TO_CSTR(desiredNewNodeName)).c_str());
+	return MSTR::FromACP(m_fabricCmdHandler.dfgDoImplodeNodes(m_binding, TO_CSTR(execPath), GetExec(execPath), cNodeNames, TO_CSTR(desiredNewNodeName)).c_str());
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 Tab<TSTR*> SpliceTranslationFPInterface::DFGExplodeNodes(const MSTR& nodeName, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	std::vector<std::string> res = m_fabricCmdHandler.dfgDoExplodeNode(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(nodeName));
+	std::vector<std::string> res = m_fabricCmdHandler.dfgDoExplodeNode(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(nodeName));
 	return Convert(res);
 	MAXSPLICE_CATCH_RETURN(Tab<TSTR*>());
 }
 void SpliceTranslationFPInterface::DFGAddBackdrop(const MSTR& title, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoAddBackDrop(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(title), Convert(pos));
+	return m_fabricCmdHandler.dfgDoAddBackDrop(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(title), Convert(pos));
 	MAXSPLICE_CATCH_END
 }
 void SpliceTranslationFPInterface::DFGSetNodeTitle(const MSTR& nodeName, const MSTR& newTitle, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoSetNodeTitle(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(nodeName), TO_CSTR(newTitle));
+	return m_fabricCmdHandler.dfgDoSetNodeTitle(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(nodeName), TO_CSTR(newTitle));
 	MAXSPLICE_CATCH_END
 }
 void SpliceTranslationFPInterface::DFGSetNodeComment(const MSTR& nodeName, const MSTR& comment, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoSetNodeComment(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(nodeName), TO_CSTR(comment));
+	return m_fabricCmdHandler.dfgDoSetNodeComment(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(nodeName), TO_CSTR(comment));
 	MAXSPLICE_CATCH_END
 }
 void SpliceTranslationFPInterface::DFGSetCode(const MSTR& code, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoSetCode(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(code));
+	return m_fabricCmdHandler.dfgDoSetCode(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(code));
 	MAXSPLICE_CATCH_END
 }
 MSTR SpliceTranslationFPInterface::DFGRenamePort(const MSTR& oldName, const MSTR& newDesiredName, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	int id = GetPortParamID(TO_CSTR(oldName));
-	std::string res = m_fabricCmdHandler.dfgDoRenamePort(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(oldName), TO_CSTR(newDesiredName));
+	std::string res = m_fabricCmdHandler.dfgDoRenamePort(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(oldName), TO_CSTR(newDesiredName));
 	if (id >= 0)
 		SetMaxParamName(GetPBlock()->GetDesc(), (ParamID)id, newDesiredName);
 	return MSTR::FromACP(res.c_str());
@@ -227,7 +228,7 @@ MSTR SpliceTranslationFPInterface::DFGRenamePort(const MSTR& oldName, const MSTR
 Tab<TSTR*> SpliceTranslationFPInterface::DFGPaste(const MSTR& json, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	std::vector<std::string> res = m_fabricCmdHandler.dfgDoPaste(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(json), Convert(pos));
+	std::vector<std::string> res = m_fabricCmdHandler.dfgDoPaste(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(json), Convert(pos));
 	return Convert(res);
 	MAXSPLICE_CATCH_RETURN(Tab<TSTR*>())
 }
@@ -259,7 +260,7 @@ void SpliceTranslationFPInterface::DFGSetPortDefaultValue(const MSTR& portName, 
 	if (rtVal.isValid())
 	{
 		ConvertToRTVal(*fpvalue, rtVal);
-		m_fabricCmdHandler.dfgDoSetPortDefaultValue(m_binding, TO_CSTR(execPath), m_binding.getExec(), cPortName.data(), rtVal);
+		m_fabricCmdHandler.dfgDoSetPortDefaultValue(m_binding, TO_CSTR(execPath), GetExec(execPath), cPortName.data(), rtVal);
 		SyncMetaDataFromPortToParam(cPortName.data());
 	}
 	MAXSPLICE_CATCH_END
@@ -267,14 +268,14 @@ void SpliceTranslationFPInterface::DFGSetPortDefaultValue(const MSTR& portName, 
 void SpliceTranslationFPInterface::DFGSetRefVarPath(const MSTR& refName, const MSTR& varPath, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoSetRefVarPath(m_binding, TO_CSTR(execPath), m_binding.getExec(), TO_CSTR(refName), TO_CSTR(varPath));
+	return m_fabricCmdHandler.dfgDoSetRefVarPath(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(refName), TO_CSTR(varPath));
 	MAXSPLICE_CATCH_END
 }
 void SpliceTranslationFPInterface::DFGReorderPorts(Tab<int> indices, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	std::vector<unsigned int> vindices(indices.Addr(0), indices.Addr(0) + indices.Count());
-	return m_fabricCmdHandler.dfgDoReorderPorts(m_binding, TO_CSTR(execPath), m_binding.getExec(), vindices);
+	return m_fabricCmdHandler.dfgDoReorderPorts(m_binding, TO_CSTR(execPath), GetExec(execPath), vindices);
 	MAXSPLICE_CATCH_END
 }
 void SpliceTranslationFPInterface::DFGSetExtDeps(Tab<TSTR*> extDeps, const MSTR& execPath)
@@ -282,13 +283,13 @@ void SpliceTranslationFPInterface::DFGSetExtDeps(Tab<TSTR*> extDeps, const MSTR&
 	MAXSPLICE_CATCH_BEGIN
 	std::vector<FTL::StrRef> cExtDeps;
 	Convert(extDeps, cExtDeps);
-	return m_fabricCmdHandler.dfgDoSetExtDeps(m_binding, TO_CSTR(execPath), m_binding.getExec(), cExtDeps);
+	return m_fabricCmdHandler.dfgDoSetExtDeps(m_binding, TO_CSTR(execPath), GetExec(execPath), cExtDeps);
 	MAXSPLICE_CATCH_END
 }
 void SpliceTranslationFPInterface::DFGSplitFromPreset(const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoSplitFromPreset(m_binding, TO_CSTR(execPath), m_binding.getExec());
+	return m_fabricCmdHandler.dfgDoSplitFromPreset(m_binding, TO_CSTR(execPath), GetExec(execPath));
 	MAXSPLICE_CATCH_END
 }
 
@@ -302,17 +303,17 @@ void SpliceTranslationFPInterface::DFGSplitFromPreset(const MSTR& execPath)
 // Allow introspecting the ports on this graph
 int SpliceTranslationFPInterface::GetPortCount(const MSTR& execPath)
 {
-	return m_binding.getExec().getExecPortCount();
+	return GetExec(execPath).getExecPortCount();
 }
 
 MSTR SpliceTranslationFPInterface::GetPortName(int i, const MSTR& execPath)
 {
-	return MSTR::FromACP(m_binding.getExec().getExecPortName(i));
+	return MSTR::FromACP(GetExec(execPath).getExecPortName(i));
 }
 
 const char* SpliceTranslationFPInterface::GetPortType(const char* portName, const char* execPath)
 {
-	return ::GetPortType(GetBinding(), portName);
+	return ::GetPortType(GetExec(execPath), portName);
 }
 
 MSTR SpliceTranslationFPInterface::GetPortType(const MSTR& portName, const MSTR& execPath)
@@ -519,7 +520,7 @@ bool SpliceTranslationFPInterface::SetPortUIMinMax(const MSTR& argName, FPValue*
 
 int SpliceTranslationFPInterface::GetPortParamID(const char* argName)
 {
-	return ::GetPortParamID(GetBinding(), argName);
+	return ::GetPortParamID(GetExec(nullptr), argName);
 }
 bool SpliceTranslationFPInterface::SetPortParamID(const char* argName, int id)
 {
@@ -531,7 +532,7 @@ bool SpliceTranslationFPInterface::SetPortParamID(const char* argName, int id)
 
 int SpliceTranslationFPInterface::GetPort3dsMaxType(const char* argName)
 {
-	return ::GetPort3dsMaxType(GetBinding(), argName);
+	return ::GetPort3dsMaxType(GetExec(nullptr), argName);
 }
 bool SpliceTranslationFPInterface::SetPort3dsMaxType(const char* argName, int type)
 {
@@ -690,6 +691,10 @@ FabricCore::DFGExec SpliceTranslationFPInterface::GetExec(const char* execPath)
 		MAXSPLICE_CATCH_END
 	}
 	return exec;
+}
+FabricCore::DFGExec SpliceTranslationFPInterface::GetExec(const MSTR& execPath)
+{
+	return GetExec(TO_CSTR(execPath));
 }
 
 /*

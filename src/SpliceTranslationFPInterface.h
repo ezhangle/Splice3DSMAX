@@ -301,6 +301,7 @@ public:
 	MaxDFGCmdHandler* GetCommandHandler();
 
 	FabricCore::DFGExec GetExec(const char* execPath);
+	FabricCore::DFGExec GetExec(const MSTR& execPath);
 
 #pragma endregion
 };
@@ -492,7 +493,7 @@ FPInterfaceDesc* GetDescriptor()
 				_M("createMaxParams"), 0, TYPE_bool,
 
 
-			SpliceTranslationFPInterface::fn_getPortName, _T("GetPortCount"), 0, TYPE_TSTR_BV, 0, 1,
+			SpliceTranslationFPInterface::fn_getPortCount, _T("GetPortCount"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
 			SpliceTranslationFPInterface::fn_getPortName, _T("GetPortName"), 0, TYPE_TSTR_BV, 0, 2,
 				_M("portIndex"),	0,	TYPE_INDEX,

@@ -630,9 +630,9 @@ std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, c
 
 //////////////////////////////////////////////////////////////////////////
 // Helper functions for accessing options
-int GetPortParamID(const FabricCore::DFGBinding& binding, const char* argName)
+int GetPortParamID(const FabricCore::DFGExec& exec, const char* argName)
 {
-	const char* idstr = binding.getExec().getExecPortMetadata(argName, MAX_PID_OPT);
+	const char* idstr = const_cast<FabricCore::DFGExec&>(exec).getExecPortMetadata(argName, MAX_PID_OPT);
 	if (idstr != nullptr && idstr[0] != '\0') {
 		return atoi(idstr);
 	}
@@ -693,21 +693,21 @@ void SetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName
 //	return aPort->getName();
 //}
 //
-const char* GetPortType( const FabricCore::DFGBinding& binding, const char* argName )
+const char* GetPortType( const FabricCore::DFGExec& exec, const char* argName )
 {
-	return binding.getExec().getExecPortResolvedType(argName);
+	return const_cast<FabricCore::DFGExec&>(exec).getExecPortResolvedType(argName);
 }
 //
 
-int GetPort3dsMaxType(const FabricCore::DFGBinding& binding, const char* argName)
+int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName)
 {
-	const char* idstr = binding.getExec().getExecPortMetadata(argName, MAX_PARM_TYPE_OPT);
+	const char* idstr = const_cast<FabricCore::DFGExec&>(exec).getExecPortMetadata(argName, MAX_PARM_TYPE_OPT);
 	int maxType = -2;
 	if (idstr != nullptr && idstr[0] != '\0') {
 		maxType = atoi(idstr);
 	}
 
-	const char* portType = GetPortType(binding, argName);
+	const char* portType = GetPortType(exec, argName);
 	if (maxType > 0)
 	{
 		// If our type is not legal for our current port type,
@@ -1290,7 +1290,7 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 	for (size_t i = 0; i < nPorts; i++)
 	{
 		const char* argName = exec.getExecPortName(i);
-		ParamID pid = ParamID(::GetPortParamID(binding, argName));
+		ParamID pid = ParamID(::GetPortParamID(exec, argName));
 		// Its possible some params are not supported by Max.
 		if (pid == -1)
 			continue;

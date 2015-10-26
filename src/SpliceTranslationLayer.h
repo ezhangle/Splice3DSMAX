@@ -83,9 +83,9 @@ std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, c
 	These functions are defined here and don't depend
 	on the Translation class to enable them to be used
 	from the UI layer */
-int GetPortParamID(const FabricCore::DFGBinding& binding, const char* argName);
-int GetPort3dsMaxType(const FabricCore::DFGBinding& binding, const char* argName);
-const char* GetPortType(const FabricCore::DFGBinding& binding, const char* argName);
+int GetPortParamID(const FabricCore::DFGExec& exec, const char* argName);
+int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName);
+const char* GetPortType(const FabricCore::DFGExec& exec, const char* argName);
 
 std::string GetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName);
 void SetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName, const char* name);

@@ -235,10 +235,10 @@ void MaxDFGCmdHandler::dfgDoRemovePort(FabricCore::DFGBinding const &binding, FT
 	DFGHoldActions hold(_M("DFG Remove Port"));
 	if (!theHold.RestoreOrRedoing())
 	{
-		int pid = GetPortParamID(binding, execPath.c_str());
+		int pid = GetPortParamID(exec, portName.c_str());
 		if (pid >= 0)
 		{
-			m_pTranslationLayer->SetMaxTypeForArg(MSTR::FromACP(execPath.c_str()), -1);
+			m_pTranslationLayer->SetMaxTypeForArg(MSTR::FromACP(portName.c_str()), -1);
 		}
 	}
 

@@ -14,6 +14,7 @@ code =  "dfgEntry {
 res = $.DFGAddFunc "func" code [412,167] execPath:""
 FAssert(res == "func") ("Error creating empy func")
 
+$.DFGAddPort "inVal" 0 "$TYPE$" portToConnect:"" extDep:"" execPath:"func"
 
 code = "dfgEntry {
   report(lhs);

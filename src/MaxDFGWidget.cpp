@@ -193,13 +193,13 @@ void MaxDFGWidget::onPortEditDialogCreated(DFG::DFGBaseDialog * dialog)
 	{
 		FabricCore::DFGExec exec = m_binding.getExec();
 		QByteArray asName = title.toUtf8();
-		const char* fabricType = GetPortType(m_binding, asName.constData());
+		const char* fabricType = GetPortType(exec, asName.constData());
 
 		BitArray br = SpliceTypeToMaxTypes(fabricType);
 
 		if (br.AnyBitSet())
 		{
-			int maxType = GetPort3dsMaxType(m_binding, asName.constData());
+			int maxType = GetPort3dsMaxType(exec, asName.constData());
 			FillComboBox filler(comboBox, maxType);
 			br.EnumSet(filler);
 		}

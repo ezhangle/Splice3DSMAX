@@ -8,7 +8,7 @@
 
 #ifndef _DEBUG
 
-#define MAXSPLICE_CATCH_BEGIN() \
+#define MAXSPLICE_CATCH_BEGIN \
 	try {
 
 #define MAXSPLICE_CATCH_END \
@@ -37,7 +37,7 @@
 
 #else
 // In debug mode, we do not want exceptions to be caught.  Ever...
-#define MAXSPLICE_CATCH_BEGIN()
+#define MAXSPLICE_CATCH_BEGIN
 #define MAXSPLICE_CATCH_END
 #define MAXSPLICE_CATCH_RETURN(value)
 #endif

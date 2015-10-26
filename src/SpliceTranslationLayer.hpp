@@ -54,7 +54,7 @@ SpliceTranslationLayer<TBaseClass, TResultType>::~SpliceTranslationLayer()
 template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
 {
-	MAXSPLICE_CATCH_BEGIN();
+	MAXSPLICE_CATCH_BEGIN;
 
 	//if (!loading)
 	{
@@ -441,7 +441,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::RefAdded(	RefMakerHandle 	
 
 	//if (m_binding.isValid())
 	//{
-	//	MAXSPLICE_CATCH_BEGIN();
+	//	MAXSPLICE_CATCH_BEGIN;
 
 	//	// Set static context values
 	//	//MSTR filepath = GetCOREInterface()->GetCurFilePath();
@@ -871,7 +871,7 @@ MSTR SpliceTranslationLayer<TBaseClass, TResultType>::GetOutPortName()
 template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR& name)
 {
-	MAXSPLICE_CATCH_BEGIN()
+	MAXSPLICE_CATCH_BEGIN
 
 	// can this port be translated to our out-type?
 	CStr cname = name.ToCStr();
@@ -931,7 +931,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //template<typename TBaseClass, typename TResultType>
 //const char* SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(const char* oldName, const char* newName)
 //{
-//	MAXSPLICE_CATCH_BEGIN()
+//	MAXSPLICE_CATCH_BEGIN
 //
 //	if (strcmp(oldName, newName) == 0)
 //		return newName;
@@ -961,7 +961,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //template<typename TBaseClass, typename TResultType>
 //bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPort(const char* argName)
 //{
-//	MAXSPLICE_CATCH_BEGIN()
+//	MAXSPLICE_CATCH_BEGIN
 //
 //	// can this port be translated to our out-type?
 //	BitArray legalTypes = SpliceTypeToMaxTypes(GetPortType(argName));
@@ -1061,7 +1061,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //	//if (pSrcContInterface == nullptr)
 //	// return false;
 //
-//	//MAXSPLICE_CATCH_BEGIN()
+//	//MAXSPLICE_CATCH_BEGIN
 //
 //	//// First, do our ports exist?
 //	//DFGWrapper::ExecPortPtr srcPort = pSrcContInterface->GetPort(srcargName);
@@ -1480,7 +1480,7 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 	// If our value is valid, do not re-evaluate
 	if (!m_valid.InInterval(t))
 	{
-		MAXSPLICE_CATCH_BEGIN();
+		MAXSPLICE_CATCH_BEGIN;
 
 		SetupEvalContext(t);
 

@@ -734,7 +734,7 @@ int GetPort3dsMaxType(const FabricCore::DFGBinding& binding, const char* argName
 
 //bool SetPortOption(FabricCore::DFGBinding& binding, const char* argName, const char* option, FPValue* value)
 //{
-//	MAXSPLICE_CATCH_BEGIN()
+//	MAXSPLICE_CATCH_BEGIN
 //
 //	//if (value == nullptr)
 //	//	return false;
@@ -747,7 +747,7 @@ int GetPort3dsMaxType(const FabricCore::DFGBinding& binding, const char* argName
 
 bool SetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue* value)
 {
-	MAXSPLICE_CATCH_BEGIN()
+	MAXSPLICE_CATCH_BEGIN
 	if (value == nullptr)
 		return false;
 	FabricCore::RTVal rtVal = binding.getArgValue(argName);
@@ -1216,7 +1216,7 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 template<typename TResultType, typename TConvertType>
 void ParameterBlockValuesToSplice(FabricCore::DFGBinding& binding, const char* argName, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
 {
-	MAXSPLICE_CATCH_BEGIN()
+	MAXSPLICE_CATCH_BEGIN
 
 	int type = pblock->GetParameterType(pid);
 	int nParams = 1;

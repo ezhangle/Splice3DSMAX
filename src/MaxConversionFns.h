@@ -61,7 +61,7 @@ void MaxValuesToSplice(FabricCore::DFGBinding & binding, const char* argName, Ti
 	if (!binding.getExec().haveExecPort(argName))
 		return;
 
-	MAXSPLICE_CATCH_BEGIN()
+	MAXSPLICE_CATCH_BEGIN
 
 	// Initialize handle to splice values
 	//FabricCore::Variant spliceVal;

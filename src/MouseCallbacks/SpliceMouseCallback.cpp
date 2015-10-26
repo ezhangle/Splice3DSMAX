@@ -144,7 +144,7 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	if (msg == MOUSE_IDLE)
 		return TRUE;
 
-	MAXSPLICE_CATCH_BEGIN()
+	MAXSPLICE_CATCH_BEGIN
 
 	FabricCore::Client& client = GetClient();
 	FabricCore::RTVal klevent = FabricCore::RTVal::Construct(client, "MouseEvent", 0, nullptr);
@@ -245,7 +245,7 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 
 void SpliceMouseCallback::EnterMode()
 {
-	MAXSPLICE_CATCH_BEGIN();
+	MAXSPLICE_CATCH_BEGIN;
 
 	if (!AnyInstances()) {
 		logMessage("Fabric Client not constructed yet. A Splice Node must be created before the manipulation tool can be activated.");
@@ -272,7 +272,7 @@ void SpliceMouseCallback::EnterMode()
 
 void SpliceMouseCallback::ExitMode()
 {
-	MAXSPLICE_CATCH_BEGIN()
+	MAXSPLICE_CATCH_BEGIN
 
 	DbgAssert(!theHold.Holding());
 	if (theHold.Holding())

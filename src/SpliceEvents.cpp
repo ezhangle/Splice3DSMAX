@@ -54,7 +54,7 @@ void doSpliceDrawing(void *data)
 {
 	// Invoke the Splice Drawing now that we have the OpenGL context bound.
 
-	MAXSPLICE_CATCH_BEGIN();
+	MAXSPLICE_CATCH_BEGIN;
 
 		if (SpliceEvents::s_DrawContext.isValid())
 		{
@@ -89,7 +89,7 @@ public:
 
 	virtual void Display( TimeValue t, ViewExp *vpt, int flags )
 	{
-		MAXSPLICE_CATCH_BEGIN();
+		MAXSPLICE_CATCH_BEGIN;
 
 		if (!AnyInstances())
 			return;

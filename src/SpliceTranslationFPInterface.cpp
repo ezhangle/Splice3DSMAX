@@ -582,6 +582,11 @@ MSTR SpliceTranslationFPInterface::ExportToJSON()
 	return MSTR::FromACP(m_binding.exportJSON().getCStr());
 }
 
+MSTR SpliceTranslationFPInterface::GetExecCode(const MSTR& execPath) {
+	MAXSPLICE_CATCH_BEGIN()
+		return MSTR::FromACP(GetExec(TO_CSTR(execPath)).getCode());
+	MAXSPLICE_CATCH_RETURN(_M("Exception getting code"));
+}
 //////////////////////////////////////////////////////////////////////////
 
 //bool SpliceTranslationFPInterface::RemovePortMSTR(const MSTR& name) 
@@ -617,6 +622,18 @@ MSTR SpliceTranslationFPInterface::GetGraphName()
 MaxDFGCmdHandler* SpliceTranslationFPInterface::GetCommandHandler()
 {
 	return &m_fabricCmdHandler;
+}
+
+FabricCore::DFGExec SpliceTranslationFPInterface::GetExec(const char* execPath)
+{
+	FabricCore::DFGExec exec = m_binding.getExec();
+	if (execPath && execPath[0] != '\0')
+	{
+		MAXSPLICE_CATCH_BEGIN()
+			exec = exec.getSubExec(execPath);
+		MAXSPLICE_CATCH_END
+	}
+	return exec;
 }
 
 /*

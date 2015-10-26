@@ -87,6 +87,7 @@ public:
 		fn_getPortMetaData,
 		fn_setPortMinMax,
 
+		fn_getExecCode,
 
 		fn_connectArgs,
 
@@ -152,6 +153,8 @@ public:
 		FN_3(fn_getPortMetaData, TYPE_TSTR_BV, GetPortMetaData, TYPE_TSTR_BR, TYPE_TSTR_BR, TYPE_TSTR_BV);
 
 		FN_4(fn_setPortMinMax, TYPE_bool, SetPortUIMinMax, TYPE_TSTR_BR, TYPE_FPVALUE, TYPE_FPVALUE, TYPE_TSTR_BR);
+
+		FN_1(fn_getExecCode, TYPE_INT, GetExecCode, TYPE_TSTR);
 
 		FN_5(fn_connectArgs, TYPE_bool, ConnectArgs, TYPE_TSTR_BR, TYPE_REFTARG, TYPE_TSTR_BR, TYPE_INT, TYPE_bool);
 		
@@ -238,6 +241,8 @@ public:
 	bool RestoreFromJSON(const char* json, bool createMaxParams);
 	MSTR ExportToJSON();
 
+	MSTR GetExecCode(const MSTR& execPath);
+
 	// Connect myPortName to the output port on pSrcContainer named srcPortName
 	// Returns true if successfully connected, false if for any reason the
 	// port was not connected.  Once connected, each evaluation the output
@@ -294,6 +299,8 @@ public:
 	const FabricCore::DFGBinding& GetBinding() const { return m_binding; }
 	void SetBinding(FabricCore::DFGBinding binding) { m_binding = binding; }
 	MaxDFGCmdHandler* GetCommandHandler();
+
+	FabricCore::DFGExec GetExec(const char* execPath);
 
 #pragma endregion
 };
@@ -520,6 +527,9 @@ FPInterfaceDesc* GetDescriptor()
 				_M("uiMin"),	0,	TYPE_FPVALUE, 
 				_M("uiMax"),	0,	TYPE_FPVALUE, 
 
+			SpliceTranslationFPInterface::fn_getExecCode, _T("GetExecCode"), 0, TYPE_TSTR, 0, 1,
+				_M("execPath"), 0, TYPE_TSTR,
+				
 			SpliceTranslationFPInterface::fn_connectArgs, _T("ConnectArgs"), 0, TYPE_bool, 0, 5,
 				_M("myPortName"),	0,	TYPE_TSTR_BV,
 				_M("srcSpliceGraph"),	0,	TYPE_REFTARG,

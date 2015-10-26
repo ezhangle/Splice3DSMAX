@@ -183,7 +183,8 @@ std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding
 
 	DFGHoldActions hold(_M("DFG Add Port"));
 
-	if (portType == FabricCore::DFGPortType_In)
+	bool isPossibleMaxPort = portType != FabricCore::DFGPortType_Out && !execPath.empty();
+	if (isPossibleMaxPort)
 	{
 		int maxPortType = SpliceTypeToDefaultMaxType(typeSpec.c_str());
 		if (maxPortType >= 0)
@@ -201,8 +202,11 @@ std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding
 
 	std::string res = __super::dfgDoAddPort(binding, execPath, exec, desiredPortName, portType, typeSpec, portToConnect, extDep, metaData);
 
-	// If we have add a new 'in' port, by default we create a matching 3ds max port.
-	m_pTranslationLayer->SyncMetaDataFromPortToParam(desiredPortName.c_str());
+	if (isPossibleMaxPort)
+	{
+		// If we have add a new 'in' port, by default we create a matching 3ds max port.
+		m_pTranslationLayer->SyncMetaDataFromPortToParam(desiredPortName.c_str());
+	}
 	return res;
 }
 

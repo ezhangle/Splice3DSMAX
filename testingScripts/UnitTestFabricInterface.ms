@@ -35,7 +35,7 @@ $.DFGConnect "EmptyPolygonMesh.mesh" "func.inVal"  execPath:""
 
 res = $.DFGAddPort "aport" 0 "UInt32" portToConnect:"" extDep:"" execPath:""
 FAssert($.GetPortType res == "UInt32") "Error creating port type"
-FAssert($.GetMaxTypeForArg res == 0) "Created bad type"
+FAssert($.GetMaxTypeForArg res == 1) "Created bad Max type"
 FAssert($.GetPortCount() == 2) "Error in port count"
 $.DFGRenamePort res "aDiffPort"  execPath:""
 FAssert($.GetPortName 2 == "aDiffPort") "Error in port name"
@@ -82,7 +82,7 @@ FAssert($.GetMaxTypeForArg "aport" == 0)
 
 $.DFGImplodeNodes #("func", "get", "set") "graph"  execPath:""
 FAssert($.GetNodeCount() == 3) "imploding nodes"
-$.DFGExplodeNode "graph"   execPath:""
+$.DFGExplodeNodes "graph"   execPath:""
 FAssert($.GetNodeCount() == 5) "Explode nodes"
 
 sm.CloseDFGGraphEditor()

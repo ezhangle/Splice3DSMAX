@@ -25,7 +25,13 @@ code = "dfgEntry {
 }"
 $.DFGSetCode code execPath:"func"
 code_ = $.GetExecCode res -- TODO
+FAssert(code_ == code) "Erroring setting func code"
 
 FAssert($.GetNodeCount() == 2) "Erroring getting node count"
+FAssert($.GetNodeName 1 == "EmptyPolygonMesh") "Erroring getting node name"
+FAssert($.GetNodeType "EmptyPolygonMesh" == 0) "Erroring getting node type"
+
+$.DFGConnect "EmptyPolygonMesh.mesh" "func.inVal"  execPath:""
+
 
 sm.CloseDFGGraphEditor()

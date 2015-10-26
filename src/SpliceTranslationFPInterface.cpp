@@ -303,7 +303,9 @@ void SpliceTranslationFPInterface::DFGSplitFromPreset(const MSTR& execPath)
 // Allow introspecting the ports on this graph
 int SpliceTranslationFPInterface::GetPortCount(const MSTR& execPath)
 {
+	MAXSPLICE_CATCH_BEGIN
 	return GetExec(execPath).getExecPortCount();
+	MAXSPLICE_CATCH_RETURN(-1);
 }
 
 MSTR SpliceTranslationFPInterface::GetPortName(int i, const MSTR& execPath)

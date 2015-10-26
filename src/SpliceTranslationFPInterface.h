@@ -107,64 +107,64 @@ public:
 		FN_0(fn_showDFGGraphEditor, TYPE_BOOL, ShowDFGGraphEditor);
 		VFN_0(fn_closeDFGGraphEditor, CloseDFGGraphEditor);
 
-		VFN_2(fn_dfgRemoveNodes,						DFGRemoveNodes,			TYPE_TSTR_TAB_BV,	TYPE_TSTR_BV);
-		VFN_3(fn_dfgConnect,							DFGConnect,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
-		VFN_3(fn_dfgDisconnect,							DFGDisconnect,			TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
-		FN_3(fn_dfgAddGraph,		TYPE_TSTR_BV,		DFGAddGraph,			TYPE_TSTR_BV,		TYPE_POINT2, TYPE_TSTR_BV);
-		FN_4(fn_dfgAddFunc,			TYPE_TSTR_BV,		DFGAddFunc,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_POINT2, TYPE_TSTR_BV);
-		FN_3(fn_dfgInstPreset,		TYPE_TSTR_BV,		DFGInstPreset,			TYPE_TSTR_BV,		TYPE_POINT2, TYPE_TSTR_BV);
-		FN_5(fn_dfgAddVar,			TYPE_TSTR_BV,		DFGAddVar,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_POINT2, TYPE_TSTR_BV);
-		FN_4(fn_dfgAddGet,			TYPE_TSTR_BV,		DFGAddGet,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_POINT2, TYPE_TSTR_BV);
-		FN_4(fn_dfgAddSet,			TYPE_TSTR_BV,		DFGAddSet,				TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_POINT2, TYPE_TSTR_BV);
-		FN_7(fn_dfgAddPort,			TYPE_TSTR_BV,		DFGAddPort,				TYPE_TSTR_BV,		TYPE_ENUM, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV);
-		FN_6(fn_dfgEditPort,		TYPE_TSTR_BV,		DFGEditPort,			TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV);
-		VFN_2(fn_dfgRemovePort,							DFGRemovePort,			TYPE_TSTR_BV,		TYPE_TSTR_BV);
-		VFN_4(fn_dfgResizeBackdrop,						DFGResizeBackdrop,		TYPE_TSTR_BV,		TYPE_POINT2, TYPE_POINT2, TYPE_TSTR_BV);
-		VFN_3(fn_dfgMoveNodes,							DFGMoveNodes,			TYPE_TSTR_TAB_BV,	TYPE_POINT2_TAB_BR, TYPE_TSTR_BV);
-		FN_3(fn_dfgImplodeNodes,	TYPE_TSTR_BV,		DFGImplodeNodes,		TYPE_TSTR_TAB_BV,	TYPE_TSTR_BV, TYPE_TSTR_BV);
-		FN_2(fn_dfgExplodeNodes,	TYPE_TSTR_TAB_BV,	DFGExplodeNodes,		TYPE_TSTR_BV,		TYPE_TSTR_BV);
-		VFN_3(fn_dfgAddBackdrop,						DFGAddBackdrop,			TYPE_TSTR_BV,		TYPE_POINT2, TYPE_TSTR_BV);
-		VFN_3(fn_dfgSetNodeTitle,						DFGSetNodeTitle,		TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
-		VFN_3(fn_dfgSetNodeComment,						DFGSetNodeComment,		TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
-		VFN_2(fn_dfgSetCode,							DFGSetCode,				TYPE_TSTR_BV,		TYPE_TSTR_BV);
-		FN_3(fn_dfgRenamePort,		TYPE_TSTR_BV,		DFGRenamePort,			TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
-		FN_3(fn_dfgPaste,			TYPE_TSTR_TAB_BV,	DFGPaste,				TYPE_TSTR_BV,		TYPE_POINT2, TYPE_TSTR_BV);
-		VFN_2(fn_dfgSetArgType,							DFGSetArgType,			TYPE_TSTR_BV,		TYPE_TSTR_BV);
-		VFN_2(fn_dfgSetArgValue,						DFGSetArgValue,			TYPE_TSTR_BV,		TYPE_FPVALUE);
-		VFN_3(fn_dfgSetPortDefaultValue,				DFGSetPortDefaultValue,	TYPE_TSTR_BV,		TYPE_FPVALUE, TYPE_TSTR_BV);
-		VFN_3(fn_dfgSetRefVarPath,						DFGSetRefVarPath,		TYPE_TSTR_BV,		TYPE_TSTR_BV, TYPE_TSTR_BV);
-		VFN_2(fn_dfgReorderPorts,						DFGReorderPorts,		TYPE_INT_TAB_BR,	TYPE_TSTR_BV);
-		VFN_2(fn_dfgSetExtDeps,							DFGSetExtDeps,			TYPE_TSTR_TAB_BV,	TYPE_TSTR_BV);
-		VFN_1(fn_dfgSplitFromPreset,					DFGSplitFromPreset,		TYPE_TSTR_BV)		
+		VFN_2(fn_dfgRemoveNodes,						DFGRemoveNodes,			TYPE_TSTR_TAB_BV,	TYPE_TSTR);
+		VFN_3(fn_dfgConnect,							DFGConnect,				TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
+		VFN_3(fn_dfgDisconnect,							DFGDisconnect,			TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
+		FN_3(fn_dfgAddGraph,		TYPE_TSTR_BV,		DFGAddGraph,			TYPE_TSTR,		TYPE_POINT2, TYPE_TSTR);
+		FN_4(fn_dfgAddFunc,			TYPE_TSTR_BV,		DFGAddFunc,				TYPE_TSTR,		TYPE_TSTR, TYPE_POINT2, TYPE_TSTR);
+		FN_3(fn_dfgInstPreset,		TYPE_TSTR_BV,		DFGInstPreset,			TYPE_TSTR,		TYPE_POINT2, TYPE_TSTR);
+		FN_5(fn_dfgAddVar,			TYPE_TSTR_BV,		DFGAddVar,				TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR, TYPE_POINT2, TYPE_TSTR);
+		FN_4(fn_dfgAddGet,			TYPE_TSTR_BV,		DFGAddGet,				TYPE_TSTR,		TYPE_TSTR, TYPE_POINT2, TYPE_TSTR);
+		FN_4(fn_dfgAddSet,			TYPE_TSTR_BV,		DFGAddSet,				TYPE_TSTR,		TYPE_TSTR, TYPE_POINT2, TYPE_TSTR);
+		FN_7(fn_dfgAddPort,			TYPE_TSTR_BV,		DFGAddPort,				TYPE_TSTR,		TYPE_ENUM, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR);
+		FN_6(fn_dfgEditPort,		TYPE_TSTR_BV,		DFGEditPort,			TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR);
+		VFN_2(fn_dfgRemovePort,							DFGRemovePort,			TYPE_TSTR,		TYPE_TSTR);
+		VFN_4(fn_dfgResizeBackdrop,						DFGResizeBackdrop,		TYPE_TSTR,		TYPE_POINT2, TYPE_POINT2, TYPE_TSTR);
+		VFN_3(fn_dfgMoveNodes,							DFGMoveNodes,			TYPE_TSTR_TAB_BV,	TYPE_POINT2_TAB_BR, TYPE_TSTR);
+		FN_3(fn_dfgImplodeNodes,	TYPE_TSTR_BV,		DFGImplodeNodes,		TYPE_TSTR_TAB_BV,	TYPE_TSTR, TYPE_TSTR);
+		FN_2(fn_dfgExplodeNodes,	TYPE_TSTR_TAB_BV,	DFGExplodeNodes,		TYPE_TSTR,		TYPE_TSTR);
+		VFN_3(fn_dfgAddBackdrop,						DFGAddBackdrop,			TYPE_TSTR,		TYPE_POINT2, TYPE_TSTR);
+		VFN_3(fn_dfgSetNodeTitle,						DFGSetNodeTitle,		TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
+		VFN_3(fn_dfgSetNodeComment,						DFGSetNodeComment,		TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
+		VFN_2(fn_dfgSetCode,							DFGSetCode,				TYPE_TSTR,		TYPE_TSTR);
+		FN_3(fn_dfgRenamePort,		TYPE_TSTR_BV,		DFGRenamePort,			TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
+		FN_3(fn_dfgPaste,			TYPE_TSTR_TAB_BV,	DFGPaste,				TYPE_TSTR,		TYPE_POINT2, TYPE_TSTR);
+		VFN_2(fn_dfgSetArgType,							DFGSetArgType,			TYPE_TSTR,		TYPE_TSTR);
+		VFN_2(fn_dfgSetArgValue,						DFGSetArgValue,			TYPE_TSTR,		TYPE_FPVALUE);
+		VFN_3(fn_dfgSetPortDefaultValue,				DFGSetPortDefaultValue,	TYPE_TSTR,		TYPE_FPVALUE, TYPE_TSTR);
+		VFN_3(fn_dfgSetRefVarPath,						DFGSetRefVarPath,		TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
+		VFN_2(fn_dfgReorderPorts,						DFGReorderPorts,		TYPE_INT_TAB_BR,	TYPE_TSTR);
+		VFN_2(fn_dfgSetExtDeps,							DFGSetExtDeps,			TYPE_TSTR_TAB_BV,	TYPE_TSTR);
+		VFN_1(fn_dfgSplitFromPreset,					DFGSplitFromPreset,		TYPE_TSTR)		
 
 
 		FN_2(fn_loadFromFile, TYPE_bool, LoadFromFile, TYPE_FILENAME, TYPE_bool);
 		FN_1(fn_saveToFile, TYPE_bool, SaveToFile, TYPE_FILENAME);
 
-		FN_2(fn_restoreFromJson, TYPE_bool, RestoreFromJSON, TYPE_TSTR_BR, TYPE_bool);
+		FN_2(fn_restoreFromJson, TYPE_bool, RestoreFromJSON, TYPE_TSTR, TYPE_bool);
 		FN_0(fn_exportToJson, TYPE_TSTR_BV, ExportToJSON);
 
-		FN_1(fn_getPortCount, TYPE_INT, GetPortCount, TYPE_TSTR_BV);
-		FN_2(fn_getPortName, TYPE_TSTR_BV, GetPortName, TYPE_INDEX, TYPE_TSTR_BV);
-		FN_2(fn_getPortType, TYPE_TSTR_BV, GetPortType, TYPE_TSTR_BR, TYPE_TSTR_BV);
-		FN_2(fn_getPortValue, TYPE_FPVALUE, GetPortValue, TYPE_TSTR_BR, TYPE_TSTR_BV);
+		FN_1(fn_getPortCount, TYPE_INT, GetPortCount, TYPE_TSTR);
+		FN_2(fn_getPortName, TYPE_TSTR_BV, GetPortName, TYPE_INDEX, TYPE_TSTR);
+		FN_2(fn_getPortType, TYPE_TSTR_BV, GetPortType, TYPE_TSTR, TYPE_TSTR);
+		FN_2(fn_getPortValue, TYPE_FPVALUE, GetPortValue, TYPE_TSTR, TYPE_TSTR);
 
-		FN_1(fn_getNodeCount, TYPE_INT, GetNodeCount, TYPE_TSTR_BV);
-		FN_2(fn_getNodeName, TYPE_TSTR_BV, GetNodeName, TYPE_INDEX, TYPE_TSTR_BV);
-		FN_2(fn_getNodeType, TYPE_INT, GetNodeType, TYPE_TSTR_BR, TYPE_TSTR_BV);
+		FN_1(fn_getNodeCount, TYPE_INT, GetNodeCount, TYPE_TSTR);
+		FN_2(fn_getNodeName, TYPE_TSTR_BV, GetNodeName, TYPE_INDEX, TYPE_TSTR);
+		FN_2(fn_getNodeType, TYPE_INT, GetNodeType, TYPE_TSTR, TYPE_TSTR);
 		
-		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxTypeForArg, TYPE_TSTR_BV);
-		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxTypeForArg, TYPE_TSTR_BV, TYPE_INT);
-		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypesForArg, TYPE_TSTR_BV);
+		FN_1(fn_getMaxConnectedType, TYPE_INT, GetMaxTypeForArg, TYPE_TSTR);
+		FN_2(fn_setMaxConnectedType, TYPE_INT, SetMaxTypeForArg, TYPE_TSTR, TYPE_INT);
+		FN_1(fn_getLegalMaxTypes, TYPE_BITARRAY_BV, GetLegalMaxTypesForArg, TYPE_TSTR);
 
-		FN_4(fn_setPortMetaData, TYPE_bool, SetPortMetaData, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV, TYPE_TSTR_BV);
-		FN_3(fn_getPortMetaData, TYPE_TSTR_BV, GetPortMetaData, TYPE_TSTR_BR, TYPE_TSTR_BR, TYPE_TSTR_BV);
+		FN_4(fn_setPortMetaData, TYPE_bool, SetPortMetaData, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR);
+		FN_3(fn_getPortMetaData, TYPE_TSTR_BV, GetPortMetaData, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR);
 
-		FN_4(fn_setPortMinMax, TYPE_bool, SetPortUIMinMax, TYPE_TSTR_BR, TYPE_FPVALUE, TYPE_FPVALUE, TYPE_TSTR_BR);
+		FN_4(fn_setPortMinMax, TYPE_bool, SetPortUIMinMax, TYPE_TSTR, TYPE_FPVALUE, TYPE_FPVALUE, TYPE_TSTR);
 
-		FN_1(fn_getExecCode, TYPE_TSTR, GetExecCode, TYPE_TSTR);
+		FN_1(fn_getExecCode, TYPE_TSTR_BV, GetExecCode, TYPE_TSTR);
 
-		FN_5(fn_connectArgs, TYPE_bool, ConnectArgs, TYPE_TSTR_BR, TYPE_REFTARG, TYPE_TSTR_BR, TYPE_INT, TYPE_bool);
+		FN_5(fn_connectArgs, TYPE_bool, ConnectArgs, TYPE_TSTR, TYPE_REFTARG, TYPE_TSTR, TYPE_INT, TYPE_bool);
 		
 		// Properties 
 		PROP_FNS(prop_getOutPortName, GetOutPortName, prop_SetOutPortName, SetOutPortName, TYPE_TSTR_BV);
@@ -343,151 +343,151 @@ FPInterfaceDesc* GetDescriptor()
 			// Fabric DFG commands
 			SpliceTranslationFPInterface::fn_dfgRemoveNodes, _T("DFGRemoveNodes"), 0, 0, 0, 2,
 				_M("nodeNames"), 0, TYPE_TSTR_TAB_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgConnect, _T("DFGConnect"), 0, 0, 0, 3,
-				_M("srcPath"), 0, TYPE_TSTR_BV,
-				_M("destPath"), 0, TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("srcPath"), 0, TYPE_TSTR,
+				_M("destPath"), 0, TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgDisconnect, _T("DFGDisconnect"), 0, 0, 0, 3,
-				_M("srcPath"), 0, TYPE_TSTR_BV,
-				_M("destPath"), 0, TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("srcPath"), 0, TYPE_TSTR,
+				_M("destPath"), 0, TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgAddGraph, _T("DFGAddGraph"), 0, TYPE_TSTR_BV, 0, 3,
-				_M("title"), 0, TYPE_TSTR_BV,
+				_M("title"), 0, TYPE_TSTR,
 				_M("pos"), 0, TYPE_POINT2, 
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgAddFunc, _T("DFGAddFunc"), 0, TYPE_TSTR_BV, 0, 4,
-				_M("title"), 0, TYPE_TSTR_BV,
-				_M("initialCode"), 0, TYPE_TSTR_BV,
+				_M("title"), 0, TYPE_TSTR,
+				_M("initialCode"), 0, TYPE_TSTR,
 				_M("pos"), 0, TYPE_POINT2, 
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgInstPreset, _T("DFGInstPreset"), 0, TYPE_TSTR_BV, 0, 3,
-				_M("filename"), 0, TYPE_TSTR_BV,
+				_M("filename"), 0, TYPE_TSTR,
 				_M("pos"), 0, TYPE_POINT2, 
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgAddVar, _T("DFGAddVar"), 0, TYPE_TSTR_BV, 0, 5,
-				_M("desiredNodeName"), 0, TYPE_TSTR_BV,
-				_M("dataType"), 0, TYPE_TSTR_BV,
-				_M("extDep"), 0, TYPE_TSTR_BV,
+				_M("desiredNodeName"), 0, TYPE_TSTR,
+				_M("dataType"), 0, TYPE_TSTR,
+				_M("extDep"), 0, TYPE_TSTR,
 				_M("pos"), 0, TYPE_POINT2, 
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgAddSet, _T("DFGAddSet"), 0, TYPE_TSTR_BV, 0, 4,
-				_M("desiredNodeName"), 0, TYPE_TSTR_BV,
-				_M("varPath"), 0, TYPE_TSTR_BV,
+				_M("desiredNodeName"), 0, TYPE_TSTR,
+				_M("varPath"), 0, TYPE_TSTR,
 				_M("pos"), 0, TYPE_POINT2, 
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgAddGet, _T("DFGAddGet"), 0, TYPE_TSTR_BV, 0, 4,
-				_M("desiredNodeName"), 0, TYPE_TSTR_BV,
-				_M("varPath"), 0, TYPE_TSTR_BV,
+				_M("desiredNodeName"), 0, TYPE_TSTR,
+				_M("varPath"), 0, TYPE_TSTR,
 				_M("pos"), 0, TYPE_POINT2, 
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgAddPort, _T("DFGAddPort"), 0, TYPE_TSTR_BV, 0, 7,
-				_M("desiredPortName"), 0, TYPE_TSTR_BV,
+				_M("desiredPortName"), 0, TYPE_TSTR,
 				_M("portType"), 0, TYPE_ENUM, SpliceTranslationFPInterface::port_mode_enum,
-				_M("portSpec"), 0, TYPE_TSTR_BV,
-				_M("portToConnect"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
-				_M("extDep"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
-				_M("metaData"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("portSpec"), 0, TYPE_TSTR,
+				_M("portToConnect"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
+				_M("extDep"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
+				_M("metaData"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgEditPort, _T("DFGEditPort"), 0, TYPE_TSTR_BV, 0, 6,
-				_M("portName"), 0, TYPE_TSTR_BV,
-				_M("desiredNewPortName"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
-				_M("typeSpec"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
-				_M("extDep"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
-				_M("metaData"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("portName"), 0, TYPE_TSTR,
+				_M("desiredNewPortName"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
+				_M("typeSpec"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
+				_M("extDep"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
+				_M("metaData"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgRemovePort, _T("DFGRemovePort"), 0, 0, 0, 2,
-				_M("portName"), 0, TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("portName"), 0, TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgResizeBackdrop, _T("DFGResizeBackdrop"), 0, 0, 0, 4,
-				_M("backDropNodeName"), 0, TYPE_TSTR_BV,
+				_M("backDropNodeName"), 0, TYPE_TSTR,
 				_M("pos"), 0, TYPE_POINT2,
 				_M("size"), 0, TYPE_POINT2,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 
 			SpliceTranslationFPInterface::fn_dfgMoveNodes, _T("DFGMoveNodes"), 0, 0, 0, 3,
 				_M("nodeNames"), 0, TYPE_TSTR_TAB_BV,
 				_M("topLeftPoss"), 0, TYPE_POINT2_TAB_BR,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgImplodeNodes, _T("DFGImplodeNodes"), 0, TYPE_TSTR_BV, 0, 3,
 				_M("nodeNames"), 0, TYPE_TSTR_TAB_BV,
-				_M("desiredNewNodeName"), 0, TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("desiredNewNodeName"), 0, TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgExplodeNodes, _T("DFGExplodeNodes"), 0, TYPE_TSTR_TAB_BV, 0, 2,
-				_M("nodeName"), 0, TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("nodeName"), 0, TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgAddBackdrop, _T("DFGAddBackdrop"), 0, 0, 0, 3,
-				_M("title"), 0, TYPE_TSTR_BV,
+				_M("title"), 0, TYPE_TSTR,
 				_M("pos"), 0, TYPE_POINT2, 
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgSetNodeTitle, _T("DFGSetNodeTitle"), 0, 0, 0, 3,
-				_M("nodeName"), 0, TYPE_TSTR_BV,
-				_M("newTitle"), 0, TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("nodeName"), 0, TYPE_TSTR,
+				_M("newTitle"), 0, TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgSetNodeComment, _T("DFGSetNodeComment"), 0, 0, 0, 3,
-				_M("nodeName"), 0, TYPE_TSTR_BV,
-				_M("comment"), 0, TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("nodeName"), 0, TYPE_TSTR,
+				_M("comment"), 0, TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgSetCode, _T("DFGSetCode"), 0, 0, 0, 2,
-				_M("code"), 0, TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("code"), 0, TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgRenamePort, _T("DFGRenamePort"), 0, TYPE_TSTR_BV, 0, 3,
-				_M("oldName"), 0, TYPE_TSTR_BV,
-				_M("newDesiredName"), 0, TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("oldName"), 0, TYPE_TSTR,
+				_M("newDesiredName"), 0, TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgPaste, _T("DFGPaste"), 0, TYPE_TSTR_TAB_BV, 0, 3,
-				_M("json"), 0, TYPE_TSTR_BV,
+				_M("json"), 0, TYPE_TSTR,
 				_M("pos"), 0, TYPE_POINT2, 
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgSetArgType, _T("DFGSetArgType"), 0, 0, 0, 2,
-				_M("argName"), 0, TYPE_TSTR_BV,
-				_M("argType"), 0, TYPE_TSTR_BV,
+				_M("argName"), 0, TYPE_TSTR,
+				_M("argType"), 0, TYPE_TSTR,
 				
 			SpliceTranslationFPInterface::fn_dfgSetArgValue, _T("DFGSetArgValue"), 0, 0, 0, 2,
-				_M("argName"), 0, TYPE_TSTR_BV,
+				_M("argName"), 0, TYPE_TSTR,
 				_M("argValue"), 0, TYPE_FPVALUE_BR,
 				
 			SpliceTranslationFPInterface::fn_dfgSetPortDefaultValue, _T("DFGSetPortDefaultValue"), 0, 0, 0, 3,
-				_M("portName"), 0, TYPE_TSTR_BV,
+				_M("portName"), 0, TYPE_TSTR,
 				_M("value"), 0, TYPE_FPVALUE_BR,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgSetRefVarPath, _T("DFGSetRefVarPath"), 0, 0, 0, 3,
-				_M("refName"), 0, TYPE_TSTR_BV,
-				_M("varPath"), 0, TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("refName"), 0, TYPE_TSTR,
+				_M("varPath"), 0, TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgReorderPorts, _T("DFGReorderPorts"), 0, 0, 0, 2,
 				_T("indices"), 0, TYPE_INT_TAB_BR,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgSetExtDeps, _T("DFGSetExtDeps"), 0, 0, 0, 2,
 				_M("extDeps"), 0, TYPE_TSTR_TAB_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_dfgSplitFromPreset, _T("DFGSplitFromPreset"), 0, 0, 0, 1,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 
 			//////////////////////////////////////////////////////////////////////////
 			// FabricMax custom functions
@@ -500,51 +500,51 @@ FPInterfaceDesc* GetDescriptor()
 
 			SpliceTranslationFPInterface::fn_exportToJson, _T("ExportToJSON"), 0, TYPE_TSTR_BV, 0, 0,
 			SpliceTranslationFPInterface::fn_restoreFromJson, _T("RestoreFromJSON"), 0, TYPE_bool, 0, 2,
-				_M("json"), 0, TYPE_TSTR_BV,
+				_M("json"), 0, TYPE_TSTR,
 				_M("createMaxParams"), 0, TYPE_bool,
 
 
 			SpliceTranslationFPInterface::fn_getPortCount, _T("GetPortCount"), 0, TYPE_TSTR_BV, 0, 1,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 			SpliceTranslationFPInterface::fn_getPortName, _T("GetPortName"), 0, TYPE_TSTR_BV, 0, 2,
 				_M("portIndex"),	0,	TYPE_INDEX,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 			SpliceTranslationFPInterface::fn_getPortType, _T("GetPortType"), 0, TYPE_TSTR_BV, 0, 2,
-				_M("portName"),		0,	TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("portName"),		0,	TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 			SpliceTranslationFPInterface::fn_getPortValue, _T("GetPortValue"), 0, TYPE_FPVALUE_BR, 0, 2,
-				_M("portName"), 0, TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("portName"), 0, TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 
 			SpliceTranslationFPInterface::fn_getNodeCount, _T("GetNodeCount"), 0, TYPE_TSTR_BV, 0, 1,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 			SpliceTranslationFPInterface::fn_getNodeName, _T("GetNodeName"), 0, TYPE_TSTR_BV, 0, 2,
 				_M("nodeIndex"),	0,	TYPE_INDEX,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 			SpliceTranslationFPInterface::fn_getNodeType, _T("GetNodeType"), 0, TYPE_INT, 0, 2,
 				_M("nodeName"),		0,	TYPE_TSTR,
-				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, MSTR(),
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 
 			SpliceTranslationFPInterface::fn_getMaxConnectedType, _T("GetMaxTypeForArg"), 0, TYPE_INT, 0, 1,
-				_M("argName"),	0,	TYPE_TSTR_BV, 
+				_M("argName"),	0,	TYPE_TSTR, 
 			SpliceTranslationFPInterface::fn_setMaxConnectedType, _T("SetMaxTypeForArg"), 0, TYPE_INT, 0, 2,
-				_M("argName"),	0,	TYPE_TSTR_BV, 
+				_M("argName"),	0,	TYPE_TSTR, 
 				_M("maxType"),	0,	TYPE_INT,
 			SpliceTranslationFPInterface::fn_getLegalMaxTypes, _T("GetLegalMaxTypesForArg"), 0, TYPE_BITARRAY, 0, 1,
-				_M("argName"),	0,	TYPE_TSTR_BV, 
+				_M("argName"),	0,	TYPE_TSTR, 
 
 			SpliceTranslationFPInterface::fn_setPortMetaData, _T("SetPortMetaData"), 0, TYPE_bool, 0, 4,
-				_M("portName"),	0,	TYPE_TSTR_BV, 
-				_M("option"),	0,	TYPE_TSTR_BV, 
-				_M("value"),	0,	TYPE_TSTR_BV, 
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("portName"),	0,	TYPE_TSTR, 
+				_M("option"),	0,	TYPE_TSTR, 
+				_M("value"),	0,	TYPE_TSTR, 
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 			SpliceTranslationFPInterface::fn_getPortMetaData, _T("GetPortMetaData"), 0, TYPE_TSTR_BV, 0, 3,
-				_M("portName"), 0, TYPE_TSTR_BV,
-				_M("option"), 	0, TYPE_TSTR_BV,
-				_M("execPath"), 0, TYPE_TSTR_BV, f_keyArgDefault, MSTR(),
+				_M("portName"), 0, TYPE_TSTR,
+				_M("option"), 	0, TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
 			SpliceTranslationFPInterface::fn_setPortMinMax, _T("SetArgMinMax"), 0, TYPE_bool, 0, 3,
-				_M("argName"),		0,	TYPE_TSTR_BV, 
+				_M("argName"),		0,	TYPE_TSTR, 
 				_M("uiMin"),	0,	TYPE_FPVALUE, 
 				_M("uiMax"),	0,	TYPE_FPVALUE, 
 
@@ -552,14 +552,14 @@ FPInterfaceDesc* GetDescriptor()
 				_M("execPath"), 0, TYPE_TSTR,
 				
 			SpliceTranslationFPInterface::fn_connectArgs, _T("ConnectArgs"), 0, TYPE_bool, 0, 5,
-				_M("myPortName"),	0,	TYPE_TSTR_BV,
+				_M("myPortName"),	0,	TYPE_TSTR,
 				_M("srcSpliceGraph"),	0,	TYPE_REFTARG,
-				_M("srcPortName"),	0,	TYPE_TSTR_BV,
+				_M("srcPortName"),	0,	TYPE_TSTR,
 				_M("srcPortIndex"),	0,	TYPE_INT, f_keyArgDefault, -1,
 				_M("postUI"),		0,	TYPE_bool, f_keyArgDefault, true,
 
 		properties,
-			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_SetOutPortName, _T("OutPort"), 0, TYPE_TSTR_BV,
+			SpliceTranslationFPInterface::prop_getOutPortName, SpliceTranslationFPInterface::prop_SetOutPortName, _T("OutPort"), 0, TYPE_TSTR,
 
 		enums,
 			SpliceTranslationFPInterface::port_mode_enum, 3,

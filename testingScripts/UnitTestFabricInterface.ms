@@ -50,7 +50,8 @@ FAssert($.GetNodeCount() == 4) "Erroring making new nodes"
 $.DFGRemoveNodes #("backdrop", "graph")  execPath:""
 FAssert($.GetNodeCount() == 2) "Erroring deleting new nodes"
 
-$.DFGAddVar "myVar" "UInt32" "" execPath:""
+res = $.DFGAddPort "aport" 0 "UInt32" portToConnect:"" extDep:"" execPath:""
+$.DFGAddVar "myVar" "UInt32" "" [255.000000,267.000000] execPath:""
 FAssert($.GetNodeCount() == 3) "Erroring deleting new nodes"
 $.DFGSetNodeComment "myVar" "This is a variable"  execPath:""
 $.DFGDisconnect "EmptyPolygonMesh.mesh" "func.inVal"  execPath:""
@@ -63,26 +64,29 @@ $.DFGAddSet "set" "myVar" [171.000000,312.000000] execPath:""
 $.DFGMoveNodes ("set") ([58.000000,152.000000])  execPath:""
 FAssert($.GetNodeCount() == 5) "Erroring deleting new nodes"
 
-$.aport = 17
-
 $.DFGSetNodeTitle "func" "PrintFunc"  execPath:""
 
+$.DFGSetArgType "aport" "Float32"
+FAssert($.GetMaxTypeForArg "aport" == 0) "Resetting port type"
+
 -- Test this
-$.DFGEditPort "aport" desiredNewPortName:"aport" typeSpec:"UInt32" portToConnect:"" uiMetadata:"{
+$.DFGEditPort "aport" desiredNewPortName:"aport" typeSpec:"Float32" metadata:"{
   \"uiHidden\" : \"\",
   \"uiOpaque\" : \"\",
   \"uiPersistValue\" : \"\",
   \"uiRange\" : \"(0, 10)\",
   \"uiCombo\" : \"\",
-  \"MaxType : 1
+  \"MaxType\" : 1
   }" execPath:""
-
-$.DFGSetArgType "aport" "Float32" -- TODO - Verify this
-FAssert($.GetMaxTypeForArg "aport" == 0)
 
 $.DFGImplodeNodes #("func", "get", "set") "graph"  execPath:""
 FAssert($.GetNodeCount() == 3) "imploding nodes"
-$.DFGExplodeNodes "graph"   execPath:""
+$.DFGExplodeNode "graph"   execPath:""
 FAssert($.GetNodeCount() == 5) "Explode nodes"
+
+$.DFGSetExtDeps ("Geometry")    execPath:""
+
+$.aport = 17
+FAssert($.GetPortValue "inVal" == 17) "Getting val"
 
 sm.CloseDFGGraphEditor()

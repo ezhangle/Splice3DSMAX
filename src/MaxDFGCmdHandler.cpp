@@ -92,7 +92,7 @@ template<typename T1, typename T2, typename T3, typename T4>
 void doEmit(const MCHAR* fn, const T1& t1, const T2& t2, const T3& t3, const T4& t4, FTL::CStrRef& execPath)
 {
 	MSTR cmd;
-	cmd.printf(_M("$.%s %s %s %s execPath:%s"), fn, TO_MSTR(t1), TO_MSTR(t2), TO_MSTR(t3), TO_MSTR(t4), TO_MSTR(execPath));
+	cmd.printf(_M("$.%s %s %s %s %s execPath:%s"), fn, TO_MSTR(t1), TO_MSTR(t2), TO_MSTR(t3), TO_MSTR(t4), TO_MSTR(execPath));
 	macroRecorder->ScriptString(cmd.data());
 	macroRecorder->EmitScript();
 }
@@ -213,7 +213,7 @@ std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding
 std::string MaxDFGCmdHandler::dfgDoEditPort(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::StrRef oldPortName, FTL::StrRef desiredNewPortName, FTL::StrRef typeSpec, FTL::StrRef extDep, FTL::StrRef uiMetadata)
 {
 	MSTR cmd;
-	cmd.printf(_M("$.%s %s desiredNewPortName:%s typeSpec:%s portToConnect:%s extDep:%s execPath:%s"),
+	cmd.printf(_M("$.%s %s desiredNewPortName:%s typeSpec:%s extDep:%s metadata:%s execPath:%s"),
 		_M("DFGEditPort"),
 		TO_MSTR(oldPortName),
 		TO_MSTR(desiredNewPortName),

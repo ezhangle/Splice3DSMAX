@@ -1224,6 +1224,13 @@ bool GetISVisibleInUI(const FabricCore::DFGBinding& binding, const char* portNam
 template<typename TBaseClass, typename TResultType>
 int SpliceTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam(const char* argName)
 {
+	// Technically we shouldnt call functions that can trigger
+	// calling a sync, but in this case its just easier to call
+	// SetPortParamID (which recurses to this function) than
+	// writing all that code again.
+	if (_m_isSyncing)
+		return -1;
+
 	// Does this type already exist?
 	int paramId = GetPortParamID(argName);
 	
@@ -1272,12 +1279,6 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
 			//SetMaxParamFromSplice(m_pblock, (ParamID)paramId, m_binding, argName);
 		}
 	}
-	// Technically we shouldnt call functions that can trigger
-	// calling a sync, but in this case its just easier to call
-	// SetPortParamID (which recurses to this function) than
-	// writing all that code again.
-	if (_m_isSyncing)
-		return -1;
 	_m_isSyncing = true;
 	MACROREC_GUARD;
 	SetPortParamID(argName, paramId);
@@ -1340,6 +1341,8 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SyncMaxParamLimits(const c
 	//case TYPE_TEXMAP:	pDesc->ParamOption(pid, p_ui, TYPE_TEXMAPBUTTON, 0, p_end); break;
 	//case TYPE_STRING:	pDesc->ParamOption(pid, p_ui, TYPE_EDITBOX, 0, p_end); break;
 	}
+
+	UpdateUISpec();
 }
 
 template<typename TType>

@@ -225,7 +225,16 @@ std::string MaxDFGCmdHandler::dfgDoEditPort(FabricCore::DFGBinding const &bindin
 	macroRecorder->EmitScript();
 
 	DFGHoldActions hold(_M("DFG Edit Port"));
-	return __super::dfgDoEditPort(binding, execPath, exec, oldPortName, desiredNewPortName, typeSpec, extDep, uiMetadata);
+	std::string res = __super::dfgDoEditPort(binding, execPath, exec, oldPortName, desiredNewPortName, typeSpec, extDep, uiMetadata);
+
+	FabricCore::DFGPortType portMode = const_cast<FabricCore::DFGExec&>(exec).getExecPortType(res.c_str());
+	bool isPossibleMaxPort = portMode != FabricCore::DFGPortType_Out && execPath.empty();
+	if (isPossibleMaxPort)
+	{
+		// If we have add a new 'in' port, by default we create a matching 3ds max port.
+		m_pTranslationLayer->SyncMetaDataFromPortToParam(res.c_str());
+	}
+	return res;
 }
 
 void MaxDFGCmdHandler::dfgDoRemovePort(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef portName)

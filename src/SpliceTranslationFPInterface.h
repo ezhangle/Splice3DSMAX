@@ -427,7 +427,7 @@ FPInterfaceDesc* GetDescriptor()
 				_M("desiredNewNodeName"), 0, TYPE_TSTR,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
-			SpliceTranslationFPInterface::fn_dfgExplodeNodes, _T("DFGExplodeNodes"), 0, TYPE_TSTR_TAB_BV, 0, 2,
+			SpliceTranslationFPInterface::fn_dfgExplodeNodes, _T("DFGExplodeNode"), 0, TYPE_TSTR_TAB_BV, 0, 2,
 				_M("nodeName"), 0, TYPE_TSTR,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				

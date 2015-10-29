@@ -750,9 +750,10 @@ bool SetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue*
 	MAXSPLICE_CATCH_BEGIN
 	if (value == nullptr)
 		return false;
-	FabricCore::RTVal rtVal = binding.getArgValue(argName);
-	ConvertToRTVal(*value, rtVal);
-	binding.setArgValue(argName, rtVal);
+
+	Interval iv;
+	TimeValue t = GetCOREInterface()->GetTime();
+	MaxValueToSplice(binding, argName, t, iv, *value);
 	return true;
 #pragma message("TEST THIS")
 	MAXSPLICE_CATCH_END
@@ -761,6 +762,29 @@ bool SetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue*
 
 //////////////////////////////////////////////////////////////////////////
 // Converting types to/from Fabric
+
+static const std::string _array_denom("Array");
+bool is_array(const std::string& value)
+{
+	if (_array_denom.size() > value.size()) return false;
+	return std::equal(_array_denom.rbegin(), _array_denom.rend(), value.rbegin());
+
+}
+bool IsPortArray(const FabricCore::DFGExec& exec, const char* argName)
+{
+	return is_array(GetPortType(exec, argName));
+}
+// If the 'value' string is an array type, remove the Array
+// denominator and return true, else false;
+inline bool sub_array(std::string& type)
+{
+	if (is_array(type)) {
+		type.resize(type.size() - _array_denom.size());
+		return true;
+	}
+	return false;
+}
+
 BitArray SpliceTypeToMaxTypes(const char* cType)
 {
 	BitArray res(TYPE_DOUBLE);
@@ -768,119 +792,126 @@ BitArray SpliceTypeToMaxTypes(const char* cType)
 	if (cType == NULL)
 		return res;
 
-	if (strcmp(cType, "Integer") == 0 ||
-		strcmp(cType, "Size") == 0 ||
-		strcmp(cType, "UInt32") == 0 ||
-		strcmp(cType, "UInt16") == 0 ||
-		strcmp(cType, "UInt8") == 0 ||
-		strcmp(cType, "UInt64") == 0 ||
-		strcmp(cType, "SInt32") == 0 ||
-		strcmp(cType, "SInt16") == 0 ||
-		strcmp(cType, "SInt8") == 0 ||
-		strcmp(cType, "SInt64") == 0)
+	int arr_mod = 0;
+	std::string sType = cType;
+	if (sub_array(sType))
+		arr_mod = TYPE_TAB;
+
+	if (sType == "Integer" ||
+		sType == "Size" ||
+		sType == "UInt32" ||
+		sType == "UInt16" ||
+		sType == "UInt8" ||
+		sType == "UInt64" ||
+		sType == "SInt32" ||
+		sType == "SInt16" ||
+		sType == "SInt8" ||
+		sType == "SInt64")
 	{
-		res.Set(TYPE_INT);
+		res.Set(TYPE_INT + arr_mod);
 	}
-	else if (strcmp(cType, "Scalar") == 0 || 
-		strcmp(cType, "Float32") == 0 || 
-		strcmp(cType, "Float64") == 0)
+	else if (sType == "Scalar" || 
+		sType == "Float32" || 
+		sType == "Float64")
 	{
-		res.Set(TYPE_FLOAT);
-		res.Set(TYPE_ANGLE);
-		res.Set(TYPE_WORLD);
-		res.Set(TYPE_PCNT_FRAC);
+		res.Set(TYPE_FLOAT + arr_mod);
+		res.Set(TYPE_ANGLE + arr_mod);
+		res.Set(TYPE_WORLD + arr_mod);
+		res.Set(TYPE_PCNT_FRAC + arr_mod);
 	}
-	else if (strcmp(cType, "Color") == 0)
+	else if (sType == "Color")
 	{
-		res.Set(TYPE_POINT3);
-		res.Set(TYPE_POINT4);
-		res.Set(TYPE_FRGBA);
+		res.Set(TYPE_POINT3 + arr_mod);
+		res.Set(TYPE_POINT4 + arr_mod);
+		res.Set(TYPE_FRGBA + arr_mod);
 	}
-	else if (strcmp(cType, "Vec3") == 0)
+	else if (sType == "Vec3")
 	{
-		res.Set(TYPE_POINT3);
-		res.Set(TYPE_INODE);	// Devolves to position
+		res.Set(TYPE_POINT3 + arr_mod);
+		res.Set(TYPE_INODE + arr_mod);	// Devolves to position
 	}
-	else if (strcmp(cType, "Vec4") == 0)
+	else if (sType == "Vec4")
 	{
-		res.Set(TYPE_POINT4);
-		res.Set(TYPE_FRGBA);
+		res.Set(TYPE_POINT4 + arr_mod);
+		res.Set(TYPE_FRGBA + arr_mod);
 	}
-	else if (strcmp(cType, "Boolean") == 0)
-		res.Set(TYPE_BOOL);
-	else if (strcmp(cType, "Mat44") == 0)
+	else if (sType == "Boolean")
+		res.Set(TYPE_BOOL + arr_mod);
+	else if (sType == "Mat44")
 	{
-		res.Set(TYPE_MATRIX3);
-		res.Set(TYPE_INODE);
+		res.Set(TYPE_MATRIX3 + arr_mod);
+		res.Set(TYPE_INODE + arr_mod);
 	}
-	else if (strcmp(cType, "Quat") == 0)
+	else if (sType == "Quat")
 	{
 		// There is no Type QUAT in PB2 land
-		res.Set(TYPE_INODE); // devolves to rotation
-		res.Set(TYPE_POINT4);
-		res.Set(TYPE_REFTARG); // Can only be type Rotation Controller.
-		res.Set(TYPE_QUAT);
+		res.Set(TYPE_INODE + arr_mod); // devolves to rotation
+		res.Set(TYPE_POINT4 + arr_mod);
+		res.Set(TYPE_REFTARG + arr_mod); // Can only be type Rotation Controller.
+		res.Set(TYPE_QUAT + arr_mod);
 	}
-	else if (strcmp(cType, "String") == 0)
+	else if (sType == "String")
 	{
-		res.Set(TYPE_STRING);
-		res.Set(TYPE_FILENAME);
+		res.Set(TYPE_STRING + arr_mod);
+		res.Set(TYPE_FILENAME + arr_mod);
 	}
-	else if (strcmp(cType, "PolygonMesh") == 0)
+	else if (sType == "PolygonMesh")
 	{
-		res.Set(TYPE_INODE);
-		res.Set(TYPE_REFTARG); // Can only be type Object
-		res.Set(TYPE_MESH);
+		res.Set(TYPE_INODE + arr_mod);
+		res.Set(TYPE_REFTARG + arr_mod); // Can only be type Object
+		res.Set(TYPE_MESH + arr_mod);
 	}
 	// All param types can be set to a reference target when connecting ports.
-	res.Set(TYPE_REFTARG);
+	res.Set(TYPE_REFTARG + arr_mod);
 	return res;
 }
 
-int SpliceTypeToMaxType(const char* cType, bool isArray /*=false*/)
+int SpliceTypeToMaxType(const char* cType)
 {
+	std::string sType = cType;
+	bool isArray = sub_array(sType);
 	int res = -1;
 	// Max only supports 1 type of int, boring old SInt32
 	// We'll accept the rest though, and hope we don't 
 	// overflow anywhere
-	if (strcmp(cType, "Integer") == 0 || 
-		strcmp(cType, "Size") == 0 || 
-		strcmp(cType, "SInt32") == 0 || 
-		strcmp(cType, "SInt16") == 0 || 
-		strcmp(cType, "UInt32") == 0 ||
-		strcmp(cType, "UInt64") == 0 || 
-		strcmp(cType, "UInt16") == 0)
+	if (sType == "Integer" || 
+		sType == "Size" || 
+		sType == "SInt32" || 
+		sType == "SInt16" || 
+		sType == "UInt32" ||
+		sType == "UInt64" || 
+		sType == "UInt16")
 		res = TYPE_INT;
-	else if (strcmp(cType, "Boolean") == 0)
+	else if (sType == "Boolean")
 		res = TYPE_BOOL;
 	// Similarily, we only support a single FP type
-	else if (strcmp(cType, "Scalar") == 0 ||
-		strcmp(cType, "Float16") == 0 ||
-		strcmp(cType, "Float32") == 0 ||
-		strcmp(cType, "Float64") == 0)
+	else if (sType == "Scalar" ||
+		sType == "Float16" ||
+		sType == "Float32" ||
+		sType == "Float64")
 		res = TYPE_FLOAT;
-	else if (strcmp(cType, "Color") == 0)
+	else if (sType == "Color")
 		res =  TYPE_FRGBA;
-	else if (strcmp(cType, "Vec2") == 0)
+	else if (sType == "Vec2")
 		res =  TYPE_POINT2;
-	else if (strcmp(cType, "Vec3") == 0)
+	else if (sType == "Vec3")
 		res =  TYPE_POINT3;
-	else if (strcmp(cType, "Vec4") == 0)
+	else if (sType == "Vec4")
 		res =  TYPE_POINT4;
-	else if (strcmp(cType, "Mat44") == 0)
+	else if (sType == "Mat44")
 		res =  TYPE_MATRIX3;
-	else if (strcmp(cType, "Quat") == 0)
+	else if (sType == "Quat")
 		res =  TYPE_QUAT;
-	else if (strcmp(cType, "String") == 0)
+	else if (sType == "String")
 		res =  TYPE_STRING;
-	else if (strcmp(cType, "PolygonMesh") == 0)
+	else if (sType == "PolygonMesh")
 		res =  TYPE_MESH;
 	else 
 	{
 		// DbgAssert(0 && "NOTE: Add Default translation Type for this Splice Type");
 	}
 
-	if (isArray)
+	if (res >= 0 && isArray)
 		res |= TYPE_TAB;
 
 	return res;
@@ -1037,21 +1068,11 @@ int SpliceTypeToDefaultMaxType(const char* cType)
 //	return false;
 //}
 
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, bool isArray/*=false*/, const char* inExtension)
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension)
 {
-	std::string spliceType(type);
-	if (isArray)
-		spliceType = spliceType + "[]";
-
-	const char* res = nullptr;
-	try {
-		pOwner->GetCommandHandler()->dfgDoAddPort(pOwner->GetBinding(), "", pOwner->GetBinding().getExec(), cName, mode, type, "", inExtension, "");
-		//m_fabricCmdHandler.dfgDoAddPort(m_binding, "", m_binding.getExec(), m_parentArgName.c_str(), FabricCore::DFGPortType_In, Convert(pos)).c_str());
-
-		//res = exec.addExecPort(cName, mode, type);
-		// Does this port support custom persistence?  If so, mark it as persisted
-		//if (IsPortPersistable(port)) 
-		//	rGraph.setMemberPersistence(cName, true);
+	try
+	{
+		std::string res = pOwner->GetCommandHandler()->dfgDoAddPort(pOwner->GetBinding(), "", pOwner->GetBinding().getExec(), cName, mode, type, "", inExtension, "");
 		return cName;
 	}
 	catch(FabricCore::Exception e) 
@@ -1062,7 +1083,7 @@ std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char*
 	}
 }
 
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const char* cName, FabricCore::DFGPortType mode, bool isArray/*=false*/, const char* inExtension)
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension)
 {
 	std::string strType;
 	switch ((int)type)
@@ -1107,16 +1128,16 @@ std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, c
 	case TYPE_MESH:
 		strType = "PolygonMesh";
 		break;
-	case TYPE_INODE:		break;
-	case TYPE_MTL:			break;
-	case TYPE_TEXMAP:		break;
+	case TYPE_INODE:
+	case TYPE_MTL:
+	case TYPE_TEXMAP:
 
 	default:
 		DbgAssert(false); // What do we have here?
-		break;
+		return std::string();
 	}
 
-	return AddSpliceParameter(pOwner, strType.data(), cName, mode, isArray);
+	return AddSpliceParameter(pOwner, strType.data(), cName, mode);
 }
 
 #pragma endregion

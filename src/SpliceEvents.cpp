@@ -163,7 +163,6 @@ public:
 		
 		//////////////////////////
 		// Setup the viewport
-		int id = pView->GetViewID();
 		FabricCore::RTVal& inlineViewport = GetSpliceViewport(pView);
 		FabricCore::RTVal args[3];
 		args[0] = drawContext;

@@ -66,31 +66,36 @@ void MaxValuesToSplice(FabricCore::DFGBinding & binding, const char* argName, Ti
 	// Initialize handle to splice values
 	//FabricCore::Variant spliceVal;
 	TConvertType convert;
-	//if (dgPort.isArray())
-	/*{
-		FabricCore::RTVal spliceVal = dgPort.getRTVal();
-		spliceVal.setArraySize(nParams);
+
+	// Is resetting the value necessary?
+	bool canUndo = theHold.Holding();
+
+	FabricCore::RTVal rtVal = binding.getArgValue(argName);
+	if (rtVal.isArray())
+	{
+		rtVal.setArraySize(nParams);
 		for (int i = 0; i < nParams; i++)
 		{
 			Convert(params[i], t, ivValid, convert);
-			FabricCore::RTVal aVal = spliceVal.getArrayElement(i);
+			FabricCore::RTVal aVal = rtVal.getArrayElement(i);
 			ConvertToRTVal(convert, aVal);
-			spliceVal.setArrayElement(i, aVal);
+			rtVal.setArrayElement(i, aVal);
 		}
 	}
-	else*/
+	else
 	{
 		DbgAssert(nParams == 1);
-		//if (nParams > 0)
 		{
 			Convert(*params, t, ivValid, convert);
-			FabricCore::RTVal aVal = binding.getArgValue(argName);
-			ConvertToRTVal(convert, aVal);
-			// Is resetting the value necessary?
-			//port->setArgValue(aVal);
-			binding.setArgValue(argName, aVal);
+			ConvertToRTVal(convert, rtVal);
 		}
 	}
+	binding.setArgValue(argName, rtVal, canUndo);
+
+	// Is resetting the value necessary?
+	if (canUndo)
+		theHold.Put(new FabricCoreRestoreObj());
+
 	MAXSPLICE_CATCH_END
 }
 

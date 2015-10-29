@@ -60,8 +60,9 @@ IParamBlock2* CreateParamBlock(ParamBlockDesc2* pDesc, IParamBlock2* pCopyThis, 
 /** Get all Max types that can be converted to the given Splice type */
 BitArray SpliceTypeToMaxTypes(const char* spliceType);
 
-/** Returns the Max ParamType2 that matches the named Splice type (NOTE - may not be legal for PB2) */
-int SpliceTypeToMaxType(const char* cType, bool isArray = false);
+/** Returns the Max ParamType2 that matches the named Splice type
+	if the type is not legal for PB2, returns -1 */
+int SpliceTypeToMaxType(const char* cType);
 
 /** Returns the default Max ParamType2 that matches the named Splice type */
 int SpliceTypeToDefaultMaxType(const char* cType);
@@ -75,9 +76,9 @@ int SpliceTypeToDefaultMaxType(const char* cType);
 	\type - The Max type that will be set
 	\pName - The name of the parameter
 	\mode - whether this is a read/write variable */
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension = "");
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension = "");
 std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode);
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const char* pName, FabricCore::DFGPortType mode, bool isArray = false, const char* inExtension = "");
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const char* pName, FabricCore::DFGPortType mode, const char* inExtension = "");
 
 /** Get various useful info's from fabric Ports 
 	These functions are defined here and don't depend
@@ -86,6 +87,7 @@ std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, c
 int GetPortParamID(const FabricCore::DFGExec& exec, const char* argName);
 int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName);
 const char* GetPortType(const FabricCore::DFGExec& exec, const char* argName);
+bool IsPortArray(const FabricCore::DFGExec& exec, const char* argName);
 
 std::string GetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName);
 void SetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName, const char* name);

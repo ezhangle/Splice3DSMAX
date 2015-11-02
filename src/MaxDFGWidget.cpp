@@ -69,75 +69,75 @@ public:
 
 	virtual void proc(int n) override
 	{
-
-		switch (n)
+		QString arr = is_tab(n) ? tr(" Array") : "";
+		switch ((int)base_type(n))
 		{
 		case TYPE_FLOAT: 
-			m_box->addItem(tr("Float"), QVariant(n));
+			m_box->addItem(tr("Float") + arr, QVariant(n));
 			break;
 		case TYPE_INT:
-			m_box->addItem(tr("Int"), QVariant(n));
+			m_box->addItem(tr("Int") + arr, QVariant(n));
 			break;
 		case TYPE_RGBA:
-			m_box->addItem(tr("RGB"), QVariant(n));
+			m_box->addItem(tr("RGB") + arr, QVariant(n));
 			break;
 		case TYPE_POINT3:
-			m_box->addItem(tr("Point3"), QVariant(n));
+			m_box->addItem(tr("Point3") + arr, QVariant(n));
 			break;
 		case TYPE_BOOL:
-			m_box->addItem(tr("BOOL"), QVariant(n));
+			m_box->addItem(tr("BOOL") + arr, QVariant(n));
 			break;
 		case TYPE_ANGLE:
-			m_box->addItem(tr("Angle"), QVariant(n));
+			m_box->addItem(tr("Angle") + arr, QVariant(n));
 			break;
 		case TYPE_PCNT_FRAC:
-			m_box->addItem(tr("Percent"), QVariant(n));
+			m_box->addItem(tr("Percent") + arr, QVariant(n));
 			break;
 		case TYPE_WORLD:
-			m_box->addItem(tr("World"), QVariant(n));
+			m_box->addItem(tr("World") + arr, QVariant(n));
 			break;
 		case TYPE_STRING:
-			m_box->addItem(tr("String"), QVariant(n));
+			m_box->addItem(tr("String") + arr, QVariant(n));
 			break;
 		case TYPE_FILENAME:
-			m_box->addItem(tr("Filename"), QVariant(n));
+			m_box->addItem(tr("Filename") + arr, QVariant(n));
 			break;
 		case TYPE_HSV:
-			m_box->addItem(tr("HSV"), QVariant(n));
+			m_box->addItem(tr("HSV") + arr, QVariant(n));
 			break;
 		case TYPE_COLOR_CHANNEL:
-			m_box->addItem(tr("Color"), QVariant(n));
+			m_box->addItem(tr("Color") + arr, QVariant(n));
 			break;
 		case TYPE_TIMEVALUE:
-			m_box->addItem(tr("TimeValue"), QVariant(n));
+			m_box->addItem(tr("TimeValue") + arr, QVariant(n));
 			break;
 		case TYPE_RADIOBTN_INDEX:
-			m_box->addItem(tr("Radio Idx"), QVariant(n));
+			m_box->addItem(tr("Radio Idx") + arr, QVariant(n));
 			break;
 //		case TYPE_MTL:
 //		case TYPE_TEXMAP:
 //		case TYPE_BITMAP:
 		case TYPE_INODE:
-			m_box->addItem(tr("MaxNode"), QVariant(n));
+			m_box->addItem(tr("MaxNode") + arr, QVariant(n));
 			break;
 		case TYPE_REFTARG:
-			m_box->addItem(tr("MaxClass"), QVariant(n));
+			m_box->addItem(tr("MaxClass") + arr, QVariant(n));
 			break;
 		case TYPE_INDEX:
-			m_box->addItem(tr("Index"), QVariant(n));
+			m_box->addItem(tr("Index") + arr, QVariant(n));
 			break;
 		case TYPE_MATRIX3:
-			m_box->addItem(tr("Matrix"), QVariant(n));
+			m_box->addItem(tr("Matrix") + arr, QVariant(n));
 			break;
 //		case TYPE_PBLOCK2:
 		case TYPE_POINT4:
-			m_box->addItem(tr("Point4"), QVariant(n));
+			m_box->addItem(tr("Point4") + arr, QVariant(n));
 			break;
 		case TYPE_FRGBA:
-			m_box->addItem(tr("RGBA"), QVariant(n));
+			m_box->addItem(tr("RGBA") + arr, QVariant(n));
 			break;
 		case TYPE_ENUM:
-			m_box->addItem(tr("Enum"), QVariant(n));
+			m_box->addItem(tr("Enum") + arr, QVariant(n));
 			break;
 
 		//case TYPE_VOID:

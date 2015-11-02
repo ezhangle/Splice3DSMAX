@@ -787,16 +787,16 @@ inline bool sub_array(std::string& type)
 
 BitArray SpliceTypeToMaxTypes(const char* cType)
 {
-	BitArray res(TYPE_DOUBLE);
-
+	
 	if (cType == NULL)
-		return res;
+		return BitArray();
 
 	int arr_mod = 0;
 	std::string sType = cType;
 	if (sub_array(sType))
 		arr_mod = TYPE_TAB;
 
+	BitArray res(TYPE_DOUBLE + arr_mod);
 	if (sType == "Integer" ||
 		sType == "Size" ||
 		sType == "UInt32" ||

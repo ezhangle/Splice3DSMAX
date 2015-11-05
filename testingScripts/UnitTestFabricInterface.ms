@@ -91,7 +91,7 @@ uiRange = $.GetPortMetaData "aport" "uiRange"
 FAssert (uiRange == "(0, 10)") "Set UIRange"
 $.SetArgMinMax "aport" 0 5
 uiRange = $.GetPortMetaData "aport" "uiRange"
-FAssert (uiRange == "(0, 5)") "ReSet UIRange"
+FAssert (uiRange == "(0,5)") "ReSet UIRange"
 
 $.DFGImplodeNodes #("func", "get", "set") "graph"  execPath:""
 FAssert($.GetNodeCount() == 3) "imploding nodes"

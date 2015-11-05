@@ -77,7 +77,10 @@ public:
 		fn_getPortCount,
 		fn_getPortName,
 		fn_getPortType,
-		fn_getPortValue,
+		fn_getArgValue,
+
+		fn_hasSrcPort,
+		fn_hasDstPort,
 
 		fn_getNodeCount,
 		fn_getNodeName,
@@ -89,7 +92,7 @@ public:
 
 		fn_setPortMetaData,
 		fn_getPortMetaData,
-		fn_setPortMinMax,
+		fn_setArgMinMax,
 
 		fn_getExecCode,
 
@@ -147,7 +150,10 @@ public:
 		FN_1(fn_getPortCount, TYPE_INT, GetPortCount, TYPE_TSTR);
 		FN_2(fn_getPortName, TYPE_TSTR_BV, GetPortName, TYPE_INDEX, TYPE_TSTR);
 		FN_2(fn_getPortType, TYPE_TSTR_BV, GetPortType, TYPE_TSTR, TYPE_TSTR);
-		FN_2(fn_getPortValue, TYPE_FPVALUE, GetPortValue, TYPE_TSTR, TYPE_TSTR);
+		FN_2(fn_getArgValue, TYPE_FPVALUE, GetArgValue, TYPE_TSTR, TYPE_TSTR);
+
+		FN_1(fn_hasSrcPort, TYPE_bool, HasSrcPort, TYPE_TSTR);
+		FN_1(fn_hasDstPort, TYPE_bool, HasDstPort, TYPE_TSTR);
 
 		FN_1(fn_getNodeCount, TYPE_INT, GetNodeCount, TYPE_TSTR);
 		FN_2(fn_getNodeName, TYPE_TSTR_BV, GetNodeName, TYPE_INDEX, TYPE_TSTR);
@@ -160,11 +166,11 @@ public:
 		FN_4(fn_setPortMetaData, TYPE_bool, SetPortMetaData, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR);
 		FN_3(fn_getPortMetaData, TYPE_TSTR_BV, GetPortMetaData, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR);
 
-		FN_4(fn_setPortMinMax, TYPE_bool, SetPortUIMinMax, TYPE_TSTR, TYPE_FPVALUE, TYPE_FPVALUE, TYPE_TSTR);
+		FN_3(fn_setArgMinMax, TYPE_bool, SetArgUIMinMax, TYPE_TSTR, TYPE_FPVALUE, TYPE_FPVALUE);
 
 		FN_1(fn_getExecCode, TYPE_TSTR_BV, GetExecCode, TYPE_TSTR);
 
-		FN_5(fn_connectArgs, TYPE_bool, ConnectArgs, TYPE_TSTR, TYPE_REFTARG, TYPE_TSTR, TYPE_INT, TYPE_bool);
+		FN_4(fn_connectArgs, TYPE_bool, ConnectArgs, TYPE_TSTR, TYPE_REFTARG, TYPE_TSTR, TYPE_bool);
 		
 		// Properties 
 		PROP_FNS(prop_getOutPortName, GetOutPortName, prop_SetOutPortName, SetOutPortName, TYPE_TSTR_BV);
@@ -213,12 +219,18 @@ public:
 	const char* GetPortType(const char* portName, const char* execPath = "");
 	MSTR GetPortType(const MSTR& portName, const MSTR& execPath);
 
+	bool HasSrcPort(const MSTR& portName);
+	bool HasSrcPort(const char* portName);
+	bool HasDstPort(const MSTR& portName);
+	bool HasDstPort(const char* portName);
+
+
 	int GetNodeCount(const MSTR& execPath);
 	MSTR GetNodeName(int i, const MSTR& execPath);
 	int GetNodeType(const MSTR& nodeName, const MSTR& execPath);
 
-	bool GetPortValue(const char* argName, FPValue& value);
-	FPValue GetPortValue(const MSTR& portName, const MSTR& execPath);
+	bool GetArgValue(const char* argName, FPValue& value);
+	FPValue GetArgValue(const MSTR& portName, const MSTR& execPath);
 	// Returns if the in port is an array type or not
 	//virtual bool IsPortArray(const char* port)=0;
 
@@ -238,7 +250,7 @@ public:
 	MSTR GetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& execPath);
 
 	// Convenience functions
-	bool SetPortUIMinMax(const MSTR& port, FPValue* uiMin, FPValue* uiMax, const MSTR& execPath);
+	bool SetArgUIMinMax(const MSTR& port, FPValue* uiMin, FPValue* uiMax);
 	int GetPortParamID(const char* argName);
 	bool SetPortParamID(const char* argName, int id);
 	int GetPort3dsMaxType(const char* argName);
@@ -258,7 +270,7 @@ public:
 	// Returns true if successfully connected, false if for any reason the
 	// port was not connected.  Once connected, each evaluation the output
 	// from srcPortName will be transferred into the in-port myPortName
-	virtual bool ConnectArgs(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI) = 0;
+	virtual bool ConnectArgs(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, bool postConnectionsUI) = 0;
 	// Disconnect a previously connected port.  Returns true if the port was previously connected and
 	// has been successfully disconnected, false if disconnect failed or if no connection existed.
 	virtual bool DisconnectArgs(const MSTR& myPortName) = 0;
@@ -512,9 +524,14 @@ FPInterfaceDesc* GetDescriptor()
 			SpliceTranslationFPInterface::fn_getPortType, _T("GetPortType"), 0, TYPE_TSTR_BV, 0, 2,
 				_M("portName"),		0,	TYPE_TSTR,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
-			SpliceTranslationFPInterface::fn_getPortValue, _T("GetPortValue"), 0, TYPE_FPVALUE_BR, 0, 2,
+			SpliceTranslationFPInterface::fn_getArgValue, _T("GetArgValue"), 0, TYPE_FPVALUE_BR, 0, 2,
 				_M("portName"), 0, TYPE_TSTR,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
+
+			SpliceTranslationFPInterface::fn_hasSrcPort, _T("HasSrcPort"), 0, TYPE_bool, 0, 1,
+				_M("portName"), 0, TYPE_TSTR,
+			SpliceTranslationFPInterface::fn_hasDstPort, _T("HasDstPort"), 0, TYPE_bool, 0, 1,
+				_M("portName"), 0, TYPE_TSTR,
 
 			SpliceTranslationFPInterface::fn_getNodeCount, _T("GetNodeCount"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
@@ -543,7 +560,7 @@ FPInterfaceDesc* GetDescriptor()
 				_M("option"), 	0, TYPE_TSTR,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, _M(""),
 				
-			SpliceTranslationFPInterface::fn_setPortMinMax, _T("SetArgMinMax"), 0, TYPE_bool, 0, 3,
+			SpliceTranslationFPInterface::fn_setArgMinMax, _T("SetArgMinMax"), 0, TYPE_bool, 0, 3,
 				_M("argName"),		0,	TYPE_TSTR, 
 				_M("uiMin"),	0,	TYPE_FPVALUE, 
 				_M("uiMax"),	0,	TYPE_FPVALUE, 
@@ -551,11 +568,10 @@ FPInterfaceDesc* GetDescriptor()
 			SpliceTranslationFPInterface::fn_getExecCode, _T("GetExecCode"), 0, TYPE_TSTR_BV, 0, 1,
 				_M("execPath"), 0, TYPE_TSTR,
 				
-			SpliceTranslationFPInterface::fn_connectArgs, _T("ConnectArgs"), 0, TYPE_bool, 0, 5,
+			SpliceTranslationFPInterface::fn_connectArgs, _T("ConnectArgs"), 0, TYPE_bool, 0, 4,
 				_M("myPortName"),	0,	TYPE_TSTR,
 				_M("srcSpliceGraph"),	0,	TYPE_REFTARG,
 				_M("srcPortName"),	0,	TYPE_TSTR,
-				_M("srcPortIndex"),	0,	TYPE_INT, f_keyArgDefault, -1,
 				_M("postUI"),		0,	TYPE_bool, f_keyArgDefault, true,
 
 		properties,

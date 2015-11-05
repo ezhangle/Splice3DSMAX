@@ -35,9 +35,12 @@ MSTR ToMSTR(const QSizeF& v) {
 	r.printf(_M("[%f,%f]"), v.width(), v.height());
 	return r;
 }
+
 MSTR ToMSTR(const FabricCore::RTVal& v) {
-	return _M("<RTVal:TODO>");
+	FabricCore::RTVal cjson = v.getJSON();
+	return  MSTR::FromACP(cjson.getStringCString());
 }
+
 MSTR ToMSTR(unsigned int v) {
 	MSTR s;
 	s.printf(_M("%i"), v);
@@ -55,7 +58,7 @@ MSTR ToMSTR(const FTL::ArrayRef<T>& v) {
 		MSTR item = comma + ToMSTR(v[i]);
 		contents += item;
 	}
-	r.printf(_M("(%s)"), contents.data());
+	r.printf(_M("#(%s)"), contents.data());
 	return r;
 }
 
@@ -70,7 +73,7 @@ MSTR ToMSTR(const std::vector<T>& v) {
 		MSTR item = comma + ToMSTR(v[i]);
 		contents += item;
 	}
-	r.printf(_M("(%s)"), contents.data());
+	r.printf(_M("#(%s)"), contents.data());
 	return r;
 }
 
@@ -108,21 +111,24 @@ void MaxDFGCmdHandler::dfgDoRemoveNodes(FabricCore::DFGBinding const &binding, F
 {
 	EMIT1(_M("DFGRemoveNodes"), nodeNames, execPath);
 	DFGHoldActions hold(_M("DFG Remove Nodes"));
-	return __super::dfgDoRemoveNodes(binding, execPath, exec, nodeNames);
+	__super::dfgDoRemoveNodes(binding, execPath, exec, nodeNames);
+	m_pTranslationLayer->InvalidateAll();
 }
 
 void MaxDFGCmdHandler::dfgDoConnect(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef srcPath, FTL::CStrRef dstPath)
 {
 	EMIT2(_M("DFGConnect"), srcPath, dstPath, execPath);
 	DFGHoldActions hold(_M("DFG Connect"));
-	return __super::dfgDoConnect(binding, execPath, exec, srcPath, dstPath);
+	__super::dfgDoConnect(binding, execPath, exec, srcPath, dstPath);
+	m_pTranslationLayer->InvalidateAll();
 }
 
 void MaxDFGCmdHandler::dfgDoDisconnect(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef srcPath, FTL::CStrRef dstPath)
 {
 	EMIT2(_M("DFGDisconnect"), srcPath, dstPath, execPath);
 	DFGHoldActions hold(_M("DFG Disconnect"));
-	return __super::dfgDoDisconnect(binding, execPath, exec, srcPath, dstPath);
+	__super::dfgDoDisconnect(binding, execPath, exec, srcPath, dstPath);
+	m_pTranslationLayer->InvalidateAll();
 }
 
 std::string MaxDFGCmdHandler::dfgDoAddGraph(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef title, QPointF pos)
@@ -251,7 +257,9 @@ void MaxDFGCmdHandler::dfgDoRemovePort(FabricCore::DFGBinding const &binding, FT
 		}
 	}
 
-	return __super::dfgDoRemovePort(binding, execPath, exec, portName);
+	__super::dfgDoRemovePort(binding, execPath, exec, portName);
+
+	m_pTranslationLayer->InvalidateAll();
 }
 
 void MaxDFGCmdHandler::dfgDoResizeBackDrop(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef backDropNodeName, QPointF newTopLeftPos, QSizeF newSize)
@@ -307,7 +315,9 @@ void MaxDFGCmdHandler::dfgDoSetCode(FabricCore::DFGBinding const &binding, FTL::
 {
 	EMIT1(_M("DFGSetCode"), code, execPath);
 	DFGHoldActions hold(_M("DFG Set Code"));
-	return __super::dfgDoSetCode(binding, execPath, exec, code);
+	__super::dfgDoSetCode(binding, execPath, exec, code);
+
+	m_pTranslationLayer->InvalidateAll();
 }
 
 std::string MaxDFGCmdHandler::dfgDoRenamePort(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef oldName, FTL::CStrRef desiredNewName)
@@ -352,14 +362,24 @@ void MaxDFGCmdHandler::dfgDoSetArgValue(FabricCore::DFGBinding const &binding, F
 
 	DFGHoldActions hold(_M("DFG Set Arg Value"));
 
-	return __super::dfgDoSetArgValue(binding, argName, value);
+	__super::dfgDoSetArgValue(binding, argName, value);
+
+	m_pTranslationLayer->InvalidateAll();
 }
 
 void MaxDFGCmdHandler::dfgDoSetPortDefaultValue(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef portOrPinPath, FabricCore::RTVal const &value)
 {
 	EMIT2(_M("DFGSetPortDefaultValue"), portOrPinPath, value, execPath);
 	DFGHoldActions hold(_M("DFG Set Def Value"));
-	return __super::dfgDoSetPortDefaultValue(binding, execPath, exec, portOrPinPath, value);
+	__super::dfgDoSetPortDefaultValue(binding, execPath, exec, portOrPinPath, value);
+
+	// If we have a period '.' in our port name, or our execPath is non-empty, then
+	// the port is not a max parameter, and there is no need to sync
+	if (!(portOrPinPath.contains('.') || execPath.size() > 1))
+		m_pTranslationLayer->SyncMetaDataFromPortToParam(portOrPinPath.c_str());
+
+	// Whatever happens though, we need to re-evaluate
+	m_pTranslationLayer->InvalidateAll();
 }
 
 void MaxDFGCmdHandler::dfgDoSetRefVarPath(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef refName, FTL::CStrRef varPath)

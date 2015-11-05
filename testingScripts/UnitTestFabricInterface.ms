@@ -57,6 +57,7 @@ $.DFGSetNodeComment "myVar" "This is a variable"  execPath:""
 $.DFGDisconnect "EmptyPolygonMesh.mesh" "func.inVal"  execPath:""
 $.DFGConnect "myVar.value" "func.inVal"  execPath:""
 $.DFGAddPort "inVal" 2 "UInt32" portToConnect:"func.inVal" extDep:"" execPath:""
+$.DFGSetPortDefaultValue "func.inVal" 10   execPath:""
 $.DFGConnect "aport" "myVar.value"  execPath:""
 
 $.DFGAddGet "get" "myVar" [172.000000,270.000000] execPath:""
@@ -69,6 +70,13 @@ $.DFGSetNodeTitle "func" "PrintFunc"  execPath:""
 $.DFGSetArgType "aport" "Float32"
 FAssert($.GetMaxTypeForArg "aport" == 0) "Resetting port type"
 
+legalTypes = $.GetLegalMaxTypesForArg "aport"
+FAssert legalTypes[6] "Get legal types"
+$.SetMaxTypeForArg "aport" 6
+
+maxType = $.GetPortMetaData "aport" "MaxType"
+FAssert (maxType == "6") "Set MaxType"
+
 -- Test this
 $.DFGEditPort "aport" desiredNewPortName:"aport" typeSpec:"Float32" metadata:"{
   \"uiHidden\" : \"\",
@@ -79,6 +87,12 @@ $.DFGEditPort "aport" desiredNewPortName:"aport" typeSpec:"Float32" metadata:"{
   \"MaxType\" : 1
   }" execPath:""
 
+uiRange = $.GetPortMetaData "aport" "uiRange"
+FAssert (uiRange == "(0, 10)") "Set UIRange"
+$.SetArgMinMax "aport" 0 5
+uiRange = $.GetPortMetaData "aport" "uiRange"
+FAssert (uiRange == "(0, 5)") "ReSet UIRange"
+
 $.DFGImplodeNodes #("func", "get", "set") "graph"  execPath:""
 FAssert($.GetNodeCount() == 3) "imploding nodes"
 $.DFGExplodeNode "graph"   execPath:""
@@ -86,7 +100,32 @@ FAssert($.GetNodeCount() == 5) "Explode nodes"
 
 $.DFGSetExtDeps ("Geometry")    execPath:""
 
-$.aport = 17
-FAssert($.GetPortValue "inVal" == 17) "Getting val"
+$.aport = 17 -- Note, this won't trigger an evaluate, so won't get pushed through the graph
+$.DFGSetArgValue "aport" 17
+FAssert($.GetArgValue "aport" == 17) "Getting val"
+
+$.DFGReorderPorts #(1, 2, 0)    execPath:""
+
+tmpFile = systemTools.getEnvVariable("TEMP") + "\\tmpFile.canvas"
+$.SaveToFile tmpFile
+jsonString = $.ExportToJSON()
+ -- Compare the jsonString & tmpFile to see if they are equivalent
+--fin = openFile tmpFile mode:"r"
+--seek fin #eof
+--maxlen=filepos fin
+--seek fin 0
+--res = readChars fin maxlen errorAtEOF:false
+--res == jsonString
+-- From KDIff3  Files are equivalent, but not binary equal (so our test fails)
+
+FAssert($.GetNodeCount() == 5) "InitValue"
+$.DFGRemoveNodes #("EmptyPolygonMesh", "func")    execPath:""
+FAssert($.GetNodeCount() == 3) "First Removed"
+$.LoadFromFile tmpFile true
+FAssert($.GetNodeCount() == 5) "File Restore"
+$.DFGRemoveNodes #("EmptyPolygonMesh", "func")    execPath:""
+FAssert($.GetNodeCount() == 3) "Second Removed"
+$.RestoreFromJSON jsonString true
+FAssert($.GetNodeCount() == 5) "JSON Restore"
 
 sm.CloseDFGGraphEditor()

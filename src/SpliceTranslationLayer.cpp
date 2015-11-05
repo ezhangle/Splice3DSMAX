@@ -649,6 +649,17 @@ void SetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName
 	pOwner->SetPortMetaData(argName, MAX_SRC_OPT, name, "");
 }
 
+bool GetPortPostConnectionUI(SpliceTranslationFPInterface* pOwner, const char* argName)
+{
+	const char* res = pOwner->GetPortMetaData(argName, MAX_POST_UI_OPT);
+	return strcmp(res, "0") == 0 ? false : true;
+}
+
+void SetPortPostConnectionUI(SpliceTranslationFPInterface* pOwner, const char* argName, bool postUI)
+{
+	pOwner->SetPortMetaData(argName, MAX_POST_UI_OPT, postUI ? "1" : "0", "");
+}
+
 //int GetPortConnectionIndex(FabricCore::DFGBinding& binding, const char* argName) 
 //{
 //	if (aPort)
@@ -679,13 +690,7 @@ void SetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName
 //	return false;
 //}
 //
-//void SetPortPostConnectionUI(FabricCore::DFGBinding& binding, const char* argName, bool postUI) 
-//{
-//	if (aPort)
-//	{
-//		aPort.setOption(MAX_POST_UI_OPT, GetVariant(postUI));
-//	}
-//}
+
 //
 //const char* GetPortName( FabricCore::DFGBinding& binding, const char* argName )
 //{
@@ -1395,20 +1400,11 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 						continue;
 
 					pSrcContInterface->TriggerEvaluate(t, paramValids[pidx]);
-					//DFGWrapper::ExecPortPtr srcPort = pSrcContInterface->GetPort(portConnection.data());
-					//if (srcPort)
-					//{
-					//	FabricCore::RTVal srcVal = srcPort->getArgValue();
-					//	//int srcIndex = GetPortConnectionIndex(port);
-					//	// If we are connected to an array, take only a single element
-					//	//if (srcIndex >= 0 && srcVal.isArray()) {
-					//	//	// Check for OOR
-					//	//	if ((uint32_t)srcIndex >= srcVal.getArraySize())
-					//	//		continue;
-					//	//	srcVal = srcVal.getArrayElement(srcIndex);
-					//	//}
-					//	port->setArgValue(srcVal);
-					//}
+					if (pSrcContInterface->HasDstPort(portConnection.data()))
+					{
+						FabricCore::RTVal srcVal = pSrcContInterface->GetBinding().getArgValue(portConnection.data());
+						binding.setArgValue(argName, srcVal, false);
+					}
 				}
 				else 
 				{

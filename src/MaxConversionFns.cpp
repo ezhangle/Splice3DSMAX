@@ -259,6 +259,11 @@ void ConvertToRTVal(int param, FabricCore::RTVal& rtVal)
 		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
 	else if (strcmp(spliceType, "Index") == 0)
 		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
+
+	else if (strcmp(spliceType, "Float32") == 0)
+		rtVal = FabricCore::RTVal::ConstructFloat32(GetClient(), (float)param);
+	else if (strcmp(spliceType, "Float64") == 0)
+		rtVal = FabricCore::RTVal::ConstructFloat64(GetClient(), param);
 }
 
 void ConvertToRTVal(float param, FabricCore::RTVal& val)
@@ -306,7 +311,10 @@ void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
 	if (!val.isValid())
 		return;
 
-	if (strcmp(val.getTypeName().getStringCString(), "Color") == 0)
+	FabricCore::RTVal type = val.getTypeName();
+	const char* spliceType = type.getStringCString();
+
+	if (strcmp(spliceType, "Color") == 0)
 	{
 		val.maybeGetMemberRef("r").setFloat32(param.x);
 		val.maybeGetMemberRef("g").setFloat32(param.y);
@@ -496,7 +504,20 @@ void ConvertToRTVal(const FPValue& param, FabricCore::RTVal& val)
 			return ConvertToRTVal(q, val);
 		}
 		case TYPE_TSTR:
-			return ConvertToRTVal(*param.tstr, val);
+		{
+			if (val.isData())
+			{
+				// For simple data RTVals, try to set the value directly
+				return ConvertToRTVal(*param.tstr, val);
+			}
+			else
+			{
+				// If we have a complex type, we assume we are being passed JSON
+				CStr cStr = param.tstr->ToCStr();
+				val.setJSON(cStr);
+			}
+		}
+			
 		case TYPE_MESH:
 			return ConvertToRTVal(*param.msh, val);
 		default:
@@ -674,7 +695,8 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, bool& param)
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param)
 {
 	FabricCore::RTVal& ncrtVal = const_cast<FabricCore::RTVal&>(rtVal);
-	const char* spliceType = rtVal.getTypeName().getStringCString();
+	FabricCore::RTVal type = rtVal.getTypeName();
+	const char* spliceType = type.getStringCString();
 	if (strcmp(spliceType, "SInt32") == 0)
 		param = ncrtVal.getSInt32();
 	else if (strcmp(spliceType, "UInt32") == 0)
@@ -706,7 +728,8 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param)
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param)
 {
 	FabricCore::RTVal& ncrtVal = const_cast<FabricCore::RTVal&>(rtVal);
-	const char* spliceType = rtVal.getTypeName().getStringCString();
+	FabricCore::RTVal type = rtVal.getTypeName();
+	const char* spliceType = type.getStringCString();
 
 	if (strcmp(spliceType, "Float32") == 0)
 		param = ncrtVal.getFloat32();
@@ -732,13 +755,15 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point3& param)
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param)
 {
 	FabricCore::RTVal& ncVal = const_cast<FabricCore::RTVal&>(rtVal);
-	if (strcmp(ncVal.getTypeName().getStringCString(), "Vec4") == 0) {
+	FabricCore::RTVal type = rtVal.getTypeName();
+	const char* spliceType = type.getStringCString();
+	if (strcmp(spliceType, "Vec4") == 0) {
 		param[0] = ncVal.maybeGetMemberRef("x").getFloat32();
 		param[1] = ncVal.maybeGetMemberRef("y").getFloat32();
 		param[2] = ncVal.maybeGetMemberRef("z").getFloat32();
 		param[3] = ncVal.maybeGetMemberRef("t").getFloat32();
 	}
-	else if (strcmp(ncVal.getTypeName().getStringCString(), "Color") == 0) {
+	else if (strcmp(spliceType, "Color") == 0) {
 		param[0] = ncVal.maybeGetMemberRef("r").getFloat32();
 		param[1] = ncVal.maybeGetMemberRef("g").getFloat32();
 		param[2] = ncVal.maybeGetMemberRef("b").getFloat32();

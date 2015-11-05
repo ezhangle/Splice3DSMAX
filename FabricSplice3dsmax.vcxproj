@@ -48,7 +48,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\MaxDFGCmdHandler.cpp" />
-    <ClCompile Include="src\MaxDFGNotificationHandler.cpp" />
     <ClCompile Include="src\MaxDFGWidget.cpp" />
     <ClCompile Include="src\DockableWidget.cpp" />
     <ClCompile Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.cpp" />
@@ -88,7 +87,6 @@
     <ClInclude Include="src\MaxConversionFns.h" />
     <ClInclude Include="src\MaxDFGCmdHandler.h" />
     <ClInclude Include="src\MaxDFGController.h" />
-    <ClInclude Include="src\MaxDFGNotificationHandler.h" />
     <ClInclude Include="src\MouseCallbacks\KbdTranslation.h" />
     <ClInclude Include="src\MouseCallbacks\SpliceCommandMode.h" />
     <ClInclude Include="src\MouseCallbacks\SpliceMouseCallback.h" />

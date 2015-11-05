@@ -91,6 +91,8 @@ bool IsPortArray(const FabricCore::DFGExec& exec, const char* argName);
 
 std::string GetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName);
 void SetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName, const char* name);
+bool GetPortPostConnectionUI(SpliceTranslationFPInterface* pOwner, const char* argName);
+void SetPortPostConnectionUI(SpliceTranslationFPInterface* pOwner, const char* argName, bool postUI);
 
 /** Given a Max value, send it to the dgPort in the appropriate fashion */
 
@@ -369,13 +371,13 @@ public:
 	//MSTR GetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& execPath);
 
 	// Convenience functions
-	//virtual bool SetPortUIMinMax(const MSTR& port, FPValue* uiMin, FPValue* uiMax, const MSTR& execPath) = 0;
+	//virtual bool SetArgUIMinMax(const MSTR& port, FPValue* uiMin, FPValue* uiMax, const MSTR& execPath) = 0;
 
 	// Connect myPortName to the output port on pSrcContainer named srcPortName
 	// Returns true if successfully connected, false if for any reason the
 	// port was not connected.  Once connected, each evaluation the output
 	// from srcPortName will be transferred into the in-port myPortName
-	bool ConnectArgs(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI) override;
+	bool ConnectArgs(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, bool postConnectionsUI) override;
 	// Disconnect a previously connected port.  Returns true if the port was previously connected and
 	// has been successfully disconnected, false if disconnect failed or if no connection existed.
 	bool DisconnectArgs(const MSTR& myPortName) override;
@@ -425,7 +427,7 @@ public:
 	//// Allow setting various options on ports 
 	//// Set UI limits.  This will not actually limit the value, but for sliders etc it will limit what is presented to the user.
 	//bool SetPortValue(const char* name, FPValue* value);
-	//bool SetPortUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax);
+	//bool SetArgUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax);
 
 	// Set splice values
 	//	const FabricCore::DFGBinding& GetSpliceGraph() { return getGraph(); }

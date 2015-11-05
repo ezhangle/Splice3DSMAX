@@ -244,33 +244,34 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::BeginEditParams(IObjParam 
 	// For each port, see if it wants to post a UI too
 	if (m_pblock != nullptr) 
 	{
-		//int portCount = GetPortCount();
-		//for (int i = 0; i < portCount; i++) 
-		//{
-		//	DFGWrapper::ExecPortPtr aPort = GetPort(i);
-		//	if (GetPortPostConnectionUI(aPort))
-		//	{
-		//		// UI Requested: what is the max connection for this parameter?
-		//		int pid = ::GetPortParamID(aPort);
-		//		if (pid != -1)
-		//		{
-		//			// Double check - we can only post UI for class types
-		//			if (reftarg_type(m_pblock->GetParameterType(ParamID(pid)))) 
-		//			{
-		//				ReferenceTarget* pSrcContainer = m_pblock->GetReferenceTarget(ParamID(pid));
-		//				if (pSrcContainer == nullptr)
-		//					continue;
+		FabricCore::DFGExec exec = GetExec(nullptr);
+		int portCount = exec.getExecPortCount();
+		for (int i = 0; i < portCount; i++) 
+		{
+			const char* portName = exec.getExecPortName(i);
+			if (GetPortPostConnectionUI(this, portName))
+			{
+				// UI Requested: what is the max connection for this parameter?
+				int pid = ::GetPortParamID(exec, portName);
+				if (pid != -1)
+				{
+					// Double check - we can only post UI for class types
+					if (reftarg_type(m_pblock->GetParameterType(ParamID(pid)))) 
+					{
+						ReferenceTarget* pSrcContainer = m_pblock->GetReferenceTarget(ParamID(pid));
+						if (pSrcContainer == nullptr)
+							continue;
 
-		//				//SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
-		//				//if (pSrcContInterface == nullptr)
-		//				//	continue;
+						//SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
+						//if (pSrcContInterface == nullptr)
+						//	continue;
 
-		//				// Everything checks out... go ahead and post a UI
-		//				pSrcContainer->BeginEditParams(ip, flags, nullptr);
-		//			}
-		//		}
-		//	}
-		//}
+						// Everything checks out... go ahead and post a UI
+						pSrcContainer->BeginEditParams(ip, flags, nullptr);
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -848,16 +849,51 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 // port was not connected.  Once connected, each evaluation the output
 // from srcPortName will be transferred into the in-port myPortName
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectArgs(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI)
+bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectArgs(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, bool postConnectionsUI)
 {
-	return false;
+	if (pSrcContainer == nullptr)
+		return false;
+	
+	SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
+	if (pSrcContInterface == nullptr)
+		return false;
+	
+	MAXSPLICE_CATCH_BEGIN
+
+		CStr cSrcPort = srcPortName.ToCStr();
+		CStr cDstPort = myPortName.ToCStr();
+		// First, do our ports exist?
+		bool srcExists = pSrcContInterface->HasDstPort(cSrcPort);
+		bool dstExists = HasSrcPort(cDstPort);
+		if (!srcExists || !dstExists)
+			return false;
+
+		// Are they of the same type?
+		if (strcmp(pSrcContInterface->GetPortType(cSrcPort), GetPortType(cDstPort)) != 0)
+			return false;
+	
+		// Ok - these ports are good to go.  Connect 'em up.
+		int res = SetMaxTypeForArg(cDstPort, TYPE_REFTARG);
+		if (res < 0)
+			return false;
+		m_pblock->SetValue((ParamID)res, 0, pSrcContainer);
+		SetPortConnection(this, cDstPort, cSrcPort);
+		SetPortPostConnectionUI(this, cDstPort, postConnectionsUI);
+	
+	MAXSPLICE_CATCH_RETURN(false)
+	
+	return true;
 }
 // Disconnect a previously connected port.  Returns true if the port was previously connected and
 // has been successfully disconnected, false if disconnect failed or if no connection existed.
 template<typename TBaseClass, typename TResultType>
 bool SpliceTranslationLayer<TBaseClass, TResultType>::DisconnectArgs(const MSTR& myPortName)
 {
-	return false;
+	MAXSPLICE_CATCH_BEGIN
+	SetPortConnection(this, myPortName.ToCStr().data(), "");
+	SetMaxTypeForArg(myPortName, -2);
+	MAXSPLICE_CATCH_RETURN(false)
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1511,7 +1547,8 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 		m_binding.execute();
 
 		// Get our value back!
-		if (m_binding.getExec().haveExecPort(m_outArgName.c_str()))
+		FabricCore::DFGExec exec = m_binding.getExec();
+		if (exec.haveExecPort(m_outArgName.c_str()) && exec.hasSrcPort(m_outArgName.c_str()))
 		{
 			FabricCore::RTVal rtOutVal = m_binding.getArgValue(m_outArgName.c_str());
 			SpliceToMaxValue(rtOutVal, m_value);

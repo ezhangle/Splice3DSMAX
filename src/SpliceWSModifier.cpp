@@ -164,14 +164,14 @@ void SpliceWSModifier::ResetPorts()
 	m_nodeTransformArgName = AddSpliceParameter(this, TYPE_MATRIX3, "nodeTransform", FabricCore::DFGPortType_In);
 	if (!m_nodeTransformArgName.empty())
 	{
-		SetPortMetaData(m_nodeTransformArgName.c_str(), "uiHidden", "true", "");
+		SetPortMetaData(m_nodeTransformArgName.c_str(), FABRIC_UI_HIDDEN, "true", "");
 	}
 
 	// Our value is an IO port as we can set data in and 
 	m_inMeshArgName = AddSpliceParameter(this, GetValueType(), "inputMesh", FabricCore::DFGPortType_In);
 	if (!m_inMeshArgName.empty())
 	{
-		SetPortMetaData(m_nodeTransformArgName.c_str(), "uiHidden", "true", "");
+		SetPortMetaData(m_nodeTransformArgName.c_str(), FABRIC_UI_HIDDEN, "true", "");
 	}
 
 	ParentClass::ResetPorts();

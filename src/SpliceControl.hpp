@@ -43,7 +43,7 @@ void SpliceControl<TResultType>::ResetPorts()
 
 	m_parentArgName = "parentValue";
 	AddSpliceParameter(this, GetValueType(), m_parentArgName.c_str(), FabricCore::DFGPortType_In);
-	SetPortMetaData(m_parentArgName.c_str(), "uiHidden", "true", "");
+	SetPortMetaData(m_parentArgName.c_str(), FABRIC_UI_HIDDEN, "true", "");
 	__super::ResetPorts();
 }
 

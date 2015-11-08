@@ -85,9 +85,10 @@ public:
 
 private:
 	// From SpliceTranslationLayer
-	int GetValueType() { return TYPE_MESH; }
+	void ResetPorts() override;
+	int GetValueType() override { return TYPE_MESH; }
 
-	bool CloneSpliceData(ParentClass* pMyClone) { return true; }
+	bool CloneSpliceData(ParentClass* pMyClone) override { return true; }
 };
 
 class SpliceMeshClassDesc: public DynPBCustAttrClassDesc {
@@ -341,9 +342,7 @@ int SpliceMesh::CanConvertToType(Class_ID obtype)
 	if (obtype==defObjectClassID) return TRUE;
 	if (obtype==mapObjectClassID) return TRUE;
 	if (obtype==triObjectClassID) return TRUE;
-#ifndef NO_PATCHES
 	if (obtype==patchObjectClassID) return TRUE;
-#endif
 	if (Object::CanConvertToType(obtype)) return TRUE;
 	// need way to find out if Mesh can be converted to type...
 	if (CanConvertTriObject(obtype)) return TRUE;
@@ -362,6 +361,24 @@ int SpliceMesh::IntersectRay(
 
 void SpliceMesh::GetCollapseTypes(Tab<Class_ID> &clist,Tab<TSTR*> &nlist)
 {
-    Object::GetCollapseTypes(clist, nlist);
+	Object::GetCollapseTypes(clist, nlist);
 	//#pragma message(TODO("Append any any other collapse type the plugin supports"))
+}
+
+/////////////////////////////////////////////////////////////////////////
+// SpliceTranslationLayer
+
+void SpliceMesh::ResetPorts() {
+
+	// Set a default value on the outport, this is to prevent an exception that
+	// is thrown if the user creates a graph that doesn't use the outport and
+	// no value is assigned to it.
+	MAXSPLICE_CATCH_BEGIN
+	
+	GetClient().loadExtension("Geometry", nullptr, false);
+	__super::ResetPorts();
+	FabricCore::RTVal defVal = FabricCore::RTVal::Create(GetClient(), "PolygonMesh", 0, nullptr);
+	GetBinding().setArgValue(m_outArgName.c_str(), defVal, false);
+
+	MAXSPLICE_CATCH_END
 }

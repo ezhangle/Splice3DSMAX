@@ -27,9 +27,10 @@ SpliceModifier::~SpliceModifier()
 void SpliceModifier::RefAdded(RefMakerHandle rm)
 {
 	if (!m_binding.isValid())
+	{
 		Init(false);
-
-	ResetPorts();
+		ResetPorts();
+	}
 }
 
 Interval SpliceModifier::LocalValidity(TimeValue t)
@@ -52,29 +53,44 @@ void SpliceModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os,
 	if (!m_binding.isValid())
 		return;
 
+	// If our graph won't evaluate, then we don't do anything
+	if (!GraphCanEvaluate())
+		return;
+
 	TriObject* pTriObj = static_cast<TriObject*>(os->obj);
 	// If our cached value is valid, just use that and return
 	Interval ivValid = FOREVER;
-	if (m_valid.InInterval(t)) {
+	if (m_valid.InInterval(t)) 
+	{
 		pTriObj->GetMesh() = m_value;
 		ivValid = m_valid;
 	}
-	else {
-		// Send our input to Max	
-		// A modifier is a special kind of mesh, in that we pipe our
-		// mesh into the output port as an IO port
+	else
+	{
+		// Send our input to Fabric
+		// A modifier is a special kind of mesh, it
+		// takes an input mesh and modifies it
 		if (!m_inputValid.InInterval(t)) 
 		{
+			HoldSuspend hs; // Suspend undo, there is no need for FE to record this action
 			m_inputValid.SetInfinite();
 			MaxValuesToSplice<Object*, Mesh>(m_binding, m_inMeshPort.c_str(), t, m_inputValid, &os->obj, 1);
 			ivValid &= m_inputValid;
 
+			// If Fabric does not have an output value for us, then
+			// nothing will be read into our cached value.  In this
+			// case we don't want to change the base mesh, so ensure
+			// that is what is in the cache.
+			FabricCore::DFGExec exec = GetExec(nullptr);
+			if (!(exec.haveExecPort(m_outArgName.c_str()) && exec.hasSrcPort(m_outArgName.c_str()))) {
+				m_value = pTriObj->GetMesh();
+			}
 		}
 
 		// Evaluate the graph, get our results
-		if (GraphCanEvaluate())
-			pTriObj->GetMesh() = Evaluate(t, ivValid);;
+		pTriObj->GetMesh() = Evaluate(t, ivValid);
 	}
+
 	// We may have changed any of these attributes.
 	// OPTIMIZE: We should not invalidate things we haven't changed
 	// Perhaps we should add the ability to set channels via MxS
@@ -138,17 +154,28 @@ void SpliceModifier::ResetPorts()
 {
 	MACROREC_GUARD;
 
-	ParentClass::ResetPorts();
+	MAXSPLICE_CATCH_BEGIN
 
-	// Our value is an IO port as we can set data in and 
-	m_inMeshPort = AddSpliceParameter(this, GetValueType(), "inputMesh", FabricCore::DFGPortType_In);
-	if (!m_inMeshPort.empty())
-	{
-		SetPortMetaData(m_inMeshPort.c_str(), "uiHidden", "true", "");
-	}
+		ParentClass::ResetPorts();
+		// For a modifier, we create an IO port in order to more accurately represent max's method of working
+		// with meshes.
 
-	// By default, hook up the ports to create a valid graph.
-	// This prevents our mesh from dissappearing on assigning SpliceMod
-	//m_inMeshPort->connectTo(m_valuePort);
+		const char* metadata = "{ \n\
+			\"uiHidden\" : \"true\", \n\
+			\"uiPersistValue\" : \"false\" \n \
+		}";
 
+		m_inMeshPort = AddSpliceParameter(this, GetValueType(), "BaseMesh", FabricCore::DFGPortType_In, "Geometry", metadata);
+
+		// We want to ensure this value does not show up as a parameter in Max
+		if (!m_outArgName.empty())
+		{
+			// Ensure we have constructed a valid input value for Fabric
+			FabricCore::RTVal defInVal = FabricCore::RTVal::Create(GetClient(), "PolygonMesh", 0, nullptr);
+			GetBinding().setArgValue(m_inMeshPort.c_str(), defInVal, false);
+			// Ensure we have constructed a valid input value for Fabric
+			FabricCore::RTVal defOutVal = FabricCore::RTVal::Create(GetClient(), "PolygonMesh", 0, nullptr);
+			GetBinding().setArgValue(m_outArgName.c_str(), defOutVal, false);
+		}
+	MAXSPLICE_CATCH_END
 }

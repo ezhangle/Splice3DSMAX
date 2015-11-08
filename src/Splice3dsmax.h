@@ -12,11 +12,11 @@
 	try {
 
 #define MAXSPLICE_CATCH_END \
-    } \
+	} \
 	catch (FabricCore::Exception e) { \
 		logMessage(e.getDesc_cstr()); \
 		DBGONLYMSG(MSTR::FromACP(e.getDesc_cstr()), _M("FabricException")); \
-    } \
+	} \
 	catch (...) \
 	{ \
 		logMessage("ERROR: Unhandled exception."); \
@@ -24,7 +24,7 @@
 	}
 
 #define MAXSPLICE_CATCH_RETURN(value) \
-	    } \
+		} \
 	catch (FabricCore::Exception e) { \
 		logMessage(e.getDesc_cstr()); \
 		return value; \

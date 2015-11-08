@@ -1,40 +1,43 @@
-fn CompArray a b = (a as string == b as string)
-fn CompBB anode expSize = (
-	bb = (nodeLocalBoundingBox anode)
-	size = length (bb[1] - bb[2])
-	res =abs(size - expSize) < 0.001
-)
-
 m = plane()
 m.length = 200
 m.width = 50
 m.lengthSegs = 100
 m.widthSegs = 100
 
-spliceMod = FabricModifier()
-spliceMod.AddInputPort "amplitude" "Scalar" -2
-spliceMod.AddInputPort "frequency" "Scalar" -2
-spliceMod.AddInputPort "phaseOffset" "Scalar" -2
+dfgMod = FabricModifier()
+addmodifier m dfgMod
 
-addmodifier m spliceMod
+dfgMod.DFGAddFunc "waveMod" "
+dfgEntry {
+  // TODO
+}
+" [573.000000,187.000000]
 
-entryPt = "FabricModifier";
-klCode = "
-require Math;
-require Geometry;
+dfgMod.DFGAddPort "inMesh" 1 "PolygonMesh" portToConnect:"" extDep:"" metaData:"" execPath:"waveMod"
+dfgMod.DFGAddPort "phaseOffset" 0 "Float32" portToConnect:"" extDep:"" metaData:"" execPath:"waveMod"
+dfgMod.DFGAddPort "frequency" 0 "Float32" portToConnect:"" extDep:"" metaData:"" execPath:"waveMod"
+dfgMod.DFGAddPort "amplitude" 0 "Float32" portToConnect:"" extDep:"" metaData:"" execPath:"waveMod"
 
-operator FabricModifier(io PolygonMesh modifierMesh, in Scalar amplitude, in Scalar frequency, in Scalar phaseOffset, in EvalContext context) {
-  for (Integer i = 0; i < modifierMesh.pointCount(); i++)
+dfgMod.DFGSetCode "dfgEntry {
+  for (UInt32 i = 0; i < inMesh.pointCount(); i++)
   {
-		Vec3 v = modifierMesh.getPointPosition(i);
-		v.z = sin(context.time + phaseOffset + v.y * frequency / 10) * amplitude;
-		modifierMesh.setPointPosition(i, v);
+    Float32 time = 0; //context.time
+		Vec3 v = inMesh.getPointPosition(i);
+		v.z = sin(time + phaseOffset + v.y * frequency / 10) * amplitude;
+		inMesh.setPointPosition(i, v);
   }
-}";
-spliceMod.SetKLCode entryPt klCode
+}
+"    execPath:"waveMod"
 
-spliceMod.frequency = 1;
-spliceMod.amplitude  = 10;
+dfgMod.DFGConnect "BaseMesh" "waveMod.inMesh"   execPath:""
+dfgMod.DFGAddPort "phaseOffset" 0 "Float32" portToConnect:"waveMod.phaseOffset" extDep:"" metaData:"" execPath:""
+dfgMod.DFGAddPort "frequency" 0 "Float32" portToConnect:"waveMod.frequency" extDep:"" metaData:"" execPath:""
+dfgMod.DFGAddPort "amplitude" 0 "Float32" portToConnect:"waveMod.amplitude" extDep:"" metaData:"" execPath:""
+
+dfgMod.DFGConnect "waveMod.inMesh" "outputValue"   execPath:""
+
+dfgMod.frequency = 1;
+dfgMod.amplitude  = 10;
 
 assert (CompBB m 207.122) message:"Incorrect modifier BB" options:#(#dialog)
 

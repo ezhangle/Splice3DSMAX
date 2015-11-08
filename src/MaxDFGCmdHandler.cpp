@@ -176,13 +176,14 @@ std::string MaxDFGCmdHandler::dfgDoAddSet(FabricCore::DFGBinding const &binding,
 std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef desiredPortName, FabricCore::DFGPortType portType, FTL::CStrRef typeSpec, FTL::CStrRef portToConnect, FTL::StrRef extDep, FTL::CStrRef metaData)
 {
 	MSTR cmd;
-	cmd.printf(_M("$.%s %s %i %s portToConnect:%s extDep:%s execPath:%s"),
+	cmd.printf(_M("$.%s %s %i %s portToConnect:%s extDep:%s metaData:%s execPath:%s"),
 		_M("DFGAddPort"),
 		TO_MSTR(desiredPortName),
 		portType,
 		TO_MSTR(typeSpec),
 		TO_MSTR(portToConnect),
 		TO_MSTR(extDep),
+		TO_MSTR(metaData),
 		TO_MSTR(execPath));
 	macroRecorder->ScriptString(cmd.data());
 	macroRecorder->EmitScript();
@@ -190,28 +191,28 @@ std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding
 	DFGHoldActions hold(_M("DFG Add Port"));
 
 	bool isPossibleMaxPort = portType != FabricCore::DFGPortType_Out && execPath.empty();
-	if (isPossibleMaxPort)
-	{
-		int maxPortType = SpliceTypeToDefaultMaxType(typeSpec.c_str());
-		if (maxPortType >= 0)
-		{
-			std::string sMetaData = metaData;
-			FTL::JSONEnc<> enc(sMetaData);
-			FTL::JSONObjectEnc<> objEnc(enc);
-			{
-				FTL::JSONEnc<> maxTypeEnc(objEnc, FTL_STR(MAX_PARM_TYPE_OPT));
-				FTL::JSONFloat64Enc<> xS32Enc(maxTypeEnc, -2);
-			}
-			metaData = sMetaData;
-		}
-	}
+	//if (isPossibleMaxPort && metaData.empty())
+	//{
+	//	int maxPortType = SpliceTypeToDefaultMaxType(typeSpec.c_str());
+	//	if (maxPortType >= 0)
+	//	{
+	//		std::string sMetaData = metaData;
+	//		FTL::JSONEnc<> enc(sMetaData);
+	//		FTL::JSONObjectEnc<> objEnc(enc);
+	//		{
+	//			FTL::JSONEnc<> maxTypeEnc(objEnc, FTL_STR(MAX_PARM_TYPE_OPT));
+	//			FTL::JSONFloat64Enc<> xS32Enc(maxTypeEnc, -2);
+	//		}
+	//		metaData = sMetaData;
+	//	}
+	//}
 
 	std::string res = __super::dfgDoAddPort(binding, execPath, exec, desiredPortName, portType, typeSpec, portToConnect, extDep, metaData);
 
 	if (isPossibleMaxPort)
 	{
 		// If we have add a new 'in' port, by default we create a matching 3ds max port.
-		m_pTranslationLayer->SyncMetaDataFromPortToParam(desiredPortName.c_str());
+		m_pTranslationLayer->SyncMetaDataFromPortToParam(res.c_str());
 	}
 	return res;
 }

@@ -71,14 +71,14 @@ FabricCore::RTVal SetupViewport(ViewExp* pView)
 
 	//////////////////////////
 	// Setup the viewport
-	FabricCore::RTVal inlineViewport = FabricCore::RTVal::Construct(client, "InlineViewport", 0, nullptr);
+	FabricCore::RTVal inlineViewport = FabricCore::RTVal::Create(client, "InlineViewport", 0, nullptr);
 	FabricCore::RTVal viewportDim = FabricCore::RTVal::Construct(client, "Vec2", 0, nullptr);
 	viewportDim.setMember("x", FabricCore::RTVal::ConstructFloat64(client, width));
 	viewportDim.setMember("y", FabricCore::RTVal::ConstructFloat64(client, height));
 	inlineViewport.setMember("dimensions", viewportDim);
 
 	{
-		FabricCore::RTVal inlineCamera = FabricCore::RTVal::Construct(client, "InlineCamera", 0, nullptr);
+		FabricCore::RTVal inlineCamera = FabricCore::RTVal::Create(client, "InlineCamera", 0, nullptr);
 
 		bool isOrthographic = gw->isPerspectiveView() == FALSE;
 		inlineCamera.setMember("isOrthographic", FabricCore::RTVal::ConstructBoolean(client, isOrthographic));
@@ -107,7 +107,7 @@ FabricCore::RTVal SetupViewport(ViewExp* pView)
 		inlineCamera.setMember("farDistance", FabricCore::RTVal::ConstructFloat64(client, yon));
 
 
-        FabricCore::RTVal cameraMat = FabricCore::RTVal::Construct(client, "Mat44", 0, nullptr);
+		FabricCore::RTVal cameraMat = FabricCore::RTVal::Construct(client, "Mat44", 0, nullptr);
 		FabricCore::RTVal cameraMatData = cameraMat.callMethod("Data", "data", 0, 0);
 
 		float * cameraMatFloats = (float*)cameraMatData.getData();
@@ -147,7 +147,7 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 	MAXSPLICE_CATCH_BEGIN
 
 	FabricCore::Client& client = GetClient();
-	FabricCore::RTVal klevent = FabricCore::RTVal::Construct(client, "MouseEvent", 0, nullptr);
+	FabricCore::RTVal klevent = FabricCore::RTVal::Create(client, "MouseEvent", 0, nullptr);
 
 	int eventType;
 
@@ -256,9 +256,10 @@ void SpliceMouseCallback::EnterMode()
 	//DbgAssert(!mEventDispatcher.isValid());
 
 	FabricCore::Client& client = GetClient();
+	client.loadExtension("Manipulation", "", false);
 
 	FabricCore::RTVal eventDispatcherHandle = FabricCore::RTVal::Construct(client, "EventDispatcherHandle", 0, nullptr);
-    mEventDispatcher = eventDispatcherHandle.callMethod("EventDispatcher", "getEventDispatcher", 0, 0);
+	mEventDispatcher = eventDispatcherHandle.callMethod("EventDispatcher", "getEventDispatcher", 0, 0);
 	if (mEventDispatcher.isValid())
 	{
 		mEventDispatcher.callMethod("", "activateManipulation", 0, 0);
@@ -303,7 +304,7 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 			FabricCore::Client& client = GetClient();
 
 			eventType = Event_KeyRelease;
-			klevent = FabricCore::RTVal::Construct(client, "KeyEvent", 0, nullptr);
+			klevent = FabricCore::RTVal::Create(client, "KeyEvent", 0, nullptr);
 			klevent.setMember("key", FabricCore::RTVal::ConstructUInt32(client, KeyTbl[wParam&0xFF]));
 			klevent.setMember("count", FabricCore::RTVal::ConstructUInt32(client, 0xFFFF & lParam));
 		}
@@ -311,7 +312,7 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 			FabricCore::Client& client = GetClient();
 
 			eventType = Event_KeyPress;
-			klevent = FabricCore::RTVal::Construct(client, "KeyEvent", 0, nullptr);
+			klevent = FabricCore::RTVal::Create(client, "KeyEvent", 0, nullptr);
 			klevent.setMember("key", FabricCore::RTVal::ConstructUInt32(client, KeyTbl[wParam & 0xFF]));
 			klevent.setMember("count", FabricCore::RTVal::ConstructUInt32(client, 0xFFFF & lParam));
 			klevent.setMember("isAutoRepeat", FabricCore::RTVal::ConstructBoolean(client, HIWORD(lParam) & KF_REPEAT));
@@ -338,7 +339,7 @@ bool SendKLEvent(FabricCore::RTVal& klevent, ViewExp& pView, int eventType)
 	//////////////////////////
 	// Setup the Host
 	// We cannot set an interface value via RTVals.
-	FabricCore::RTVal host = FabricCore::RTVal::Construct(client, "Host", 0, nullptr);
+	FabricCore::RTVal host = FabricCore::RTVal::Create(client, "Host", 0, nullptr);
 	host.setMember("hostName", FabricCore::RTVal::ConstructString(client, "3dsMax"));
 
 	long modifiers = 0;
@@ -353,12 +354,14 @@ bool SendKLEvent(FabricCore::RTVal& klevent, ViewExp& pView, int eventType)
 
 	//////////////////////////
 	// Configure the event...
-	std::vector<FabricCore::RTVal> args(4);
-	args[0] = host;
-	args[1] = inlineViewport;
-	args[2] = FabricCore::RTVal::ConstructUInt32(client, eventType);
-	args[3] = FabricCore::RTVal::ConstructUInt32(client, modifiers);
-	klevent.callMethod("", "init", 4, &args[0]);
+	{
+		FabricCore::RTVal args[4];
+		args[0] = host;
+		args[1] = inlineViewport;
+		args[2] = FabricCore::RTVal::ConstructUInt32(client, eventType);
+		args[3] = FabricCore::RTVal::ConstructUInt32(client, modifiers);
+		klevent.callMethod("", "init", 4, args);
+	}
 	//klevent.setMember("modifiers", FabricCore::RTVal::ConstructUInt32(client, modifiers));
 
 	SpliceMouseCallback::GetEventDispatcher().callMethod("Boolean", "onEvent", 1, &klevent);
@@ -389,7 +392,7 @@ bool SendKLEvent(FabricCore::RTVal& klevent, ViewExp& pView, int eventType)
 				// No args
 				// e.g. 
 				// theHold.Begin()
-				bool found = customCommand.find(std::string("(")) !=std::wstring::npos;
+				found = customCommand.find(std::string("(")) !=std::wstring::npos;
 				if(found)
 					cmdSuccess = ExecuteMAXScriptScript(TSTR::FromCStr(customCommand.data()), quietErrors);
 				else

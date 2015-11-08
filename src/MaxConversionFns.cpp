@@ -260,10 +260,17 @@ void ConvertToRTVal(int param, FabricCore::RTVal& rtVal)
 	else if (strcmp(spliceType, "Index") == 0)
 		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
 
+	// These can come through sometimes
 	else if (strcmp(spliceType, "Float32") == 0)
 		rtVal = FabricCore::RTVal::ConstructFloat32(GetClient(), (float)param);
 	else if (strcmp(spliceType, "Float64") == 0)
 		rtVal = FabricCore::RTVal::ConstructFloat64(GetClient(), param);
+	else
+	{
+		// Set a default val
+		rtVal = FabricCore::RTVal::ConstructSInt32(GetClient(), param);
+		DbgAssert(false && "Missing translation when setting int to Fabric");
+	}
 }
 
 void ConvertToRTVal(float param, FabricCore::RTVal& val)
@@ -274,10 +281,10 @@ void ConvertToRTVal(float param, FabricCore::RTVal& val)
 	FabricCore::RTVal type = val.getTypeName();
 	const char* spliceType = type.getStringCString();
 
-	if (strcmp(spliceType, "Float32") == 0)
-		val.setFloat32(param);
 	if (strcmp(spliceType, "Float64") == 0)
 		val = FabricCore::RTVal::ConstructFloat64(GetClient(), param);
+	else
+		val.setFloat32(param);
 }
 
 void ConvertToRTVal(bool param, FabricCore::RTVal& val)
@@ -371,8 +378,8 @@ void ConvertToRTVal(const MCHAR* param, FabricCore::RTVal& val)
 
 void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 {
-	if(!rtMesh.isValid() || rtMesh.isNullObject())
-		return;
+	if (!rtMesh.isValid() || rtMesh.isNullObject())
+		rtMesh = FabricCore::RTVal::Create(GetClient(), "PolygonMesh", 0, nullptr);
 	
 	UINT nbPolygons = rtMesh.callMethod("UInt32", "polygonCount", 0, 0).getUInt32();
 	bool rebuildMesh = nbPolygons != (UINT)param.numFaces;
@@ -719,7 +726,8 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, int& param)
 	else if (strcmp(spliceType, "Index") == 0)
 		param = (int)ncrtVal.getUInt64();
 
-	//param = const_cast<FabricCore::RTVal&>(rtVal).getSInt32();
+	else // default
+		param = ncrtVal.getSInt32();
 }
 
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param)
@@ -728,12 +736,10 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, float& param)
 	FabricCore::RTVal type = rtVal.getTypeName();
 	const char* spliceType = type.getStringCString();
 
-	if (strcmp(spliceType, "Float32") == 0)
-		param = ncrtVal.getFloat32();
 	if (strcmp(spliceType, "Float64") == 0)
 		param = (float)ncrtVal.getFloat64();
-
-	//param = static_cast<float>(const_cast<FabricCore::RTVal&>(rtVal).getFloat32());
+	else // default
+		param = ncrtVal.getFloat32();
 }
 
 void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point2& param)
@@ -754,17 +760,17 @@ void SpliceToMaxValue(const FabricCore::RTVal& rtVal, Point4& param)
 	FabricCore::RTVal& ncVal = const_cast<FabricCore::RTVal&>(rtVal);
 	FabricCore::RTVal type = rtVal.getTypeName();
 	const char* spliceType = type.getStringCString();
-	if (strcmp(spliceType, "Vec4") == 0) {
-		param[0] = ncVal.maybeGetMemberRef("x").getFloat32();
-		param[1] = ncVal.maybeGetMemberRef("y").getFloat32();
-		param[2] = ncVal.maybeGetMemberRef("z").getFloat32();
-		param[3] = ncVal.maybeGetMemberRef("t").getFloat32();
-	}
-	else if (strcmp(spliceType, "Color") == 0) {
+	if (strcmp(spliceType, "Color") == 0) {
 		param[0] = ncVal.maybeGetMemberRef("r").getFloat32();
 		param[1] = ncVal.maybeGetMemberRef("g").getFloat32();
 		param[2] = ncVal.maybeGetMemberRef("b").getFloat32();
 		param[3] = ncVal.maybeGetMemberRef("a").getFloat32();
+	}
+	else { // Assumed type == "Vec4"
+		param[0] = ncVal.maybeGetMemberRef("x").getFloat32();
+		param[1] = ncVal.maybeGetMemberRef("y").getFloat32();
+		param[2] = ncVal.maybeGetMemberRef("z").getFloat32();
+		param[3] = ncVal.maybeGetMemberRef("t").getFloat32();
 	}
 }
 

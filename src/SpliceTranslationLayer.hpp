@@ -1250,11 +1250,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
 	MACROREC_GUARD;
 
 	// Setup any necessary ports for the current graph
-	m_outArgName = AddSpliceParameter(this, GetValueType(), "outputValue", FabricCore::DFGPortType_Out);
-}
-
-bool GetISVisibleInUI(const FabricCore::DFGBinding& binding, const char* portName) {
-	return true;
+	m_outArgName = AddSpliceParameter(this, GetValueType(), "outputValue", FabricCore::DFGPortType_Out, "", "{ \"uiPersistValue\": \"false\" }");
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -1322,20 +1318,40 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
 	return paramId;
 }
 
+
 template<typename TBaseClass, typename TResultType>
 void SpliceTranslationLayer<TBaseClass, TResultType>::SyncMaxParamLimits(const char* argName, int id)
 {
 	if (id < 0)
 		return;
 	ParamID pid = ParamID(id);
-
-	std::string rangeStr = GetPortMetaData(argName, "uiRange");
-	if (rangeStr.empty())
-		return;
-
 	ParamBlockDesc2* pDesc = m_pblock->GetDesc();
 	ParamDef& def = pDesc->GetParamDef(pid);
 	int baseType = base_type(def.type);
+
+	std::string rangeStr = GetPortMetaData(argName, "uiRange");
+	if (rangeStr.empty())
+	{
+		// If nothing set, reset to default.
+		switch (baseType)
+		{
+		case TYPE_FLOAT:
+		case TYPE_ANGLE:
+		case TYPE_PCNT_FRAC:
+		case TYPE_WORLD:
+		{
+			pDesc->ParamOption(pid, p_range, FLT_MIN, FLT_MAX, p_end);
+			break;
+		}
+		case TYPE_INT:
+		{
+			pDesc->ParamOption(pid, p_range, INT_MIN, INT_MAX, p_end);
+			break;
+		}
+		}
+		return;
+	}
+
 
 	if (rangeStr.length() < 2)
 		return;
@@ -1463,9 +1479,6 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SyncMaxParamDefault(const 
 	}
 	default:
 		DbgAssert(0 && "Implment me");
-		//case TYPE_INODE:	pDesc->ParamOption(paramId, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
-		//case TYPE_MTL:		pDesc->ParamOption(paramId, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
-		//case TYPE_TEXMAP:	pDesc->ParamOption(paramId, p_ui, TYPE_TEXMAPBUTTON, 0, p_end); break;
 	}
 }
 

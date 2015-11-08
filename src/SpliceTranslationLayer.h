@@ -34,6 +34,7 @@ class DynPBCustAttrClassDesc;
 #define MAX_SRC_IDX_OPT "SrcIdx"
 #define MAX_POST_UI_OPT "SrcPostUI"
 #define MAX_PARM_TYPE_OPT "MaxType"
+#define FABRIC_UI_HIDDEN "uiHidden"
 //////////////////////////////////////////////////////////////////////////
 #pragma region Utility functions
 /** Add a new parameter definition to the given pblock descriptor
@@ -76,9 +77,9 @@ int SpliceTypeToDefaultMaxType(const char* cType);
 	\type - The Max type that will be set
 	\pName - The name of the parameter
 	\mode - whether this is a read/write variable */
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension = "");
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode);
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const char* pName, FabricCore::DFGPortType mode, const char* inExtension = "");
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension = "", const char* metadata = "");
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode, const char* inExtension = "", const char* metadata = "");
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const char* pName, FabricCore::DFGPortType mode, const char* inExtension = "", const char* metadata = "");
 
 /** Get various useful info's from fabric Ports 
 	These functions are defined here and don't depend
@@ -121,11 +122,6 @@ protected:
 	// block.  The parameters are evaluated and passed to the
 	// splice graph for evaluation.
 	IParamBlock2* m_pblock;
-
-	//! Stores the parameter connection data between Max and Splice.
-	//! The ParamID identifies the parameter in the Max parameter block,
-	//! and the DGPort connects to the port in Splice
-	//std::vector<ConnData>						m_dParamData;
 
 	//! a handle to our static UI.  This UI panel contains the controls to modify the parameter block
 	HWND										m_hPanel;

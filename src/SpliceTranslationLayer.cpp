@@ -623,9 +623,9 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 }
 
 // Add a parameter to the splice graph
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode)
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
 {
-	return AddSpliceParameter(pOwner, type, CStr::FromMCHAR(pName).data(), mode);
+	return AddSpliceParameter(pOwner, type, CStr::FromMCHAR(pName).data(), mode, inExtension, metadata);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -706,6 +706,11 @@ const char* GetPortType( const FabricCore::DFGExec& exec, const char* argName )
 
 int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName)
 {
+	// If the port is hidden, then we have no UI (and no Max port) for it
+	const char* hidden = const_cast<FabricCore::DFGExec&>(exec).getExecPortMetadata(argName, FABRIC_UI_HIDDEN);
+	if (hidden != nullptr && strcmp(hidden, "true") == 0)
+		return -1;
+
 	const char* idstr = const_cast<FabricCore::DFGExec&>(exec).getExecPortMetadata(argName, MAX_PARM_TYPE_OPT);
 	int maxType = -2;
 	if (idstr != nullptr && idstr[0] != '\0') {
@@ -1073,11 +1078,11 @@ int SpliceTypeToDefaultMaxType(const char* cType)
 //	return false;
 //}
 
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension)
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
 {
 	try
 	{
-		std::string res = pOwner->GetCommandHandler()->dfgDoAddPort(pOwner->GetBinding(), "", pOwner->GetBinding().getExec(), cName, mode, type, "", inExtension, "");
+		std::string res = pOwner->GetCommandHandler()->dfgDoAddPort(pOwner->GetBinding(), "", pOwner->GetBinding().getExec(), cName, mode, type, "", inExtension, metadata);
 		return cName;
 	}
 	catch(FabricCore::Exception e) 
@@ -1088,7 +1093,7 @@ std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char*
 	}
 }
 
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension)
+std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
 {
 	std::string strType;
 	switch ((int)type)
@@ -1142,7 +1147,7 @@ std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, c
 		return std::string();
 	}
 
-	return AddSpliceParameter(pOwner, strType.data(), cName, mode);
+	return AddSpliceParameter(pOwner, strType.data(), cName, mode, inExtension, metadata);
 }
 
 #pragma endregion
@@ -1183,11 +1188,10 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			else if (wParam == IDC_SAVE)
 			{
 				MSTR filename = curInstance->GetGraphName();
-				filename += _M(".dfg.json");
-
+				
 				FilterList filterList;
-				filterList.Append(_M("DFG Preset files(*.dfg.json)"));
-				filterList.Append(_M("*.dfg.json"));
+				filterList.Append(_M("Canvas files(*.canvas)"));
+				filterList.Append(_M("*.canvas"));
 
 				filterList.Append(_M("All Files (*.*)"));
 				filterList.Append(_M("*.*"));
@@ -1203,11 +1207,11 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			else if (wParam == IDC_LOAD)
 			{
 				MSTR filename = curInstance->GetGraphName();
-				filename += _M(".dfg.json");
+				filename += _M(".canvas");
 
 				FilterList filterList;
-				filterList.Append(_M("DFG Preset files(*.dfg.json)"));
-				filterList.Append(_M("*.dfg.json"));
+				filterList.Append(_M("Canvas files(*.canvas)"));
+				filterList.Append(_M("*.canvas"));
 
 				filterList.Append(_M("All Files (*.*)"));
 				filterList.Append(_M("*.*"));
@@ -1328,16 +1332,18 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 			continue;
 		}
 
+#pragma message("TODO: Figure out how to match Max's caching with Splices")
 		// Has this parameter already been translated?  Test 
 		// the validity of the value currently in Splice
 		if (pidx >= paramValids.size())
 			paramValids.resize(pidx + 1);
 		else
 		{
-			if (paramValids[pidx].InInterval(t))
-				continue;
+			//if (paramValids[pidx].ininterval(t))
+			//	continue;
 		}
 		paramValids[pidx].SetInfinite();
+
 
 		int type = pblock->GetParameterType(pid);
 		switch ((int)base_type(type))

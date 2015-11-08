@@ -294,7 +294,7 @@ void MaxDFGCmdHandler::dfgDoSetNodeComment(FabricCore::DFGBinding const &binding
 {
 	EMIT2(_M("DFGSetNodeComment"), nodeName, comment, execPath);
 	DFGHoldActions hold(_M("DFG Set Node Comment"));
-	return __super::dfgDoSetNodeComment(binding, execPath, exec, nodeName, comment);
+	__super::dfgDoSetNodeComment(binding, execPath, exec, nodeName, comment);
 }
 
 void MaxDFGCmdHandler::dfgDoSetCode(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef code)
@@ -302,7 +302,6 @@ void MaxDFGCmdHandler::dfgDoSetCode(FabricCore::DFGBinding const &binding, FTL::
 	EMIT1(_M("DFGSetCode"), code, execPath);
 	DFGHoldActions hold(_M("DFG Set Code"));
 	__super::dfgDoSetCode(binding, execPath, exec, code);
-
 	m_pTranslationLayer->InvalidateAll();
 }
 
@@ -310,7 +309,9 @@ std::string MaxDFGCmdHandler::dfgDoRenamePort(FabricCore::DFGBinding const &bind
 {
 	EMIT2(_M("DFGRenamePort"), oldName, desiredNewName, execPath);
 	DFGHoldActions hold(_M("DFG Rename Port"));
-	return __super::dfgDoRenamePort(binding, execPath, exec, oldName, desiredNewName);
+	std::string res = __super::dfgDoRenamePort(binding, execPath, exec, oldName, desiredNewName);
+	m_pTranslationLayer->SyncMetaDataFromPortToParam(res.c_str());
+	return res;
 }
 
 std::vector<std::string> MaxDFGCmdHandler::dfgDoPaste(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef json, QPointF cursorPos)

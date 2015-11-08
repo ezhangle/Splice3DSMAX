@@ -769,6 +769,11 @@ int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
 			paramId = AddMaxParameter(pNewDesc, maxType, argName);
 			CreateParamBlock(pNewDesc);
 		}
+		else
+		{
+			// Existing type, but name might have changed:
+			SyncMaxParamName(argName, paramId);
+		}
 
 		if (m_pblock != nullptr)
 		{
@@ -784,6 +789,17 @@ int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
 	return paramId;
 }
 
+template<typename TBaseClass, typename TResultType>
+void FabricTranslationLayer<TBaseClass, TResultType>::SyncMaxParamName(const char* argName, int id)
+{
+	if (id < 0 || m_pblock == nullptr)
+		return;
+
+	// Assume argName is valid, and matches id
+	MSTR v = MSTR::FromACP(argName);
+	SetMaxParamName(m_pblock->GetDesc(), ParamID(id), v.data());
+	UpdateUISpec();
+}
 
 template<typename TBaseClass, typename TResultType>
 void FabricTranslationLayer<TBaseClass, TResultType>::SyncMaxParamLimits(const char* argName, int id)

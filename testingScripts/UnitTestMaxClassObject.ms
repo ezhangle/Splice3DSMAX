@@ -1,101 +1,34 @@
-fn CompArray a b = (a as string == b as string)
-fn CompBB anode expSize = (
-	bb = (nodeLocalBoundingBox anode)
-	size = length (bb[1] - bb[2])
-	res =abs(size - expSize) < 1
-)
-fn FindPort sm name = (
-	for i = 1 to sm.PortCount do (
-		if (sm.GetPortName i) == name do return true
-	)
-	return false
-)
+rootFolder = systemTools.getEnvVariable("SPLICE3DSMAXDIR")
+--fileIn "C:\\src\\FabricEngine\\Fabric3dsMax\\testingScripts\\UnitTestUtilFns.ms"
+fileIn (rootFolder + "UnitTestUtilFns.ms")
 
 sm = FabricMesh()
 -- Init required params
 nodeName = sm.name
-sm.OutPort = nodeName + "Val"
 initTriCounts = #(506, 255)
 
--- Init base compilation
-klCode =  "
-require Math;
-require PolygonMesh;
+-- Create a sphere
+sm.DFGInstPreset "Fabric.Exts.Geometry.Func.AddSphere" [487.000000,183.000000]   execPath:""
+sm.DFGInstPreset "Fabric.Exts.Geometry.PolygonMesh.EmptyPolygonMesh" [56.000000,178.000000]   execPath:""
+sm.DFGConnect "EmptyPolygonMesh.mesh" "AddSphere.this"   execPath:""
+sm.DFGAddPort "radius" 0 "Scalar" portToConnect:"AddSphere.radius" extDep:"" metaData:"" execPath:""
+sm.DFGAddPort "detail" 0 "Size" portToConnect:"AddSphere.detail" extDep:"" metaData:"" execPath:""
+sm.DFGConnect "AddSphere.this" "outputValue"   execPath:""
 
-operator " + nodeName + "(io PolygonMesh " + sm.OutPort + ") {
-	Xfo init;
-	init.setIdentity();
-	" + sm.OutPort + " = PolygonMesh();
-	" + sm.OutPort + ".addSphere(init, 32, 10, true, true);
-}"
-sm.SetKLCode nodeName klCode
+sm.detail = 10
+sm.radius= 32
+
 assert (CompArray (GetTriMeshFaceCount sm) initTriCounts) message:"Bad Init Tri Count" options:#(#dialog)
 assert (CompBB sm 110.851) message:"Bad init size" options:#(#dialog)
-	
--- Add segments parameter, test setting it
-sm.AddInputPort "inSegments" "Size" 1
-assert (FindPort sm "inSegments") message:"Failed Creating inSegments" options:#(#dialog)
-assert (hasProperty sm "inSegments") message:"Failed creading Max param for inSegments" options:#(#dialog)
 
-klCode =  "
-require Math;
-require PolygonMesh;
-
-operator " + nodeName + "(io PolygonMesh " + sm.OutPort + ", in Size inSegments) {
-	Xfo init;
-	init.setIdentity();
-	" + sm.OutPort + " = PolygonMesh();
-	" + sm.OutPort + ".addSphere(init, 32, inSegments, true, true);
-}"
-sm.SetKLCode nodeName klCode
-sm.inSegments = 20
-assert (CompArray (GetTriMeshFaceCount sm) #(1806, 905)) message:"Bad Tri Count on Set Segements" options:#(#dialog)
-
--- Create unsupported parameter.  This parameter has no matching Max data
-hasNewPort = false
-sm.AddInputPort "inMesh" "PolygonMesh" -1
-assert (FindPort sm "inMesh") message:"Failed Creating inMesh" options:#(#dialog)
--- Assert no matching parameter was created
-assert (hasProperty sm "inMesh" == false) message: "Error: Created invalid max param inMesh" options:#(#dialog)
-
--- Create scalar with default type 
-sm.AddInputPort "inRadius" "Scalar" -2
-assert (FindPort sm "inRadius") message:"Failed Creating inRadius" options:#(#dialog)
-assert (hasProperty sm "inRadius") message: "Error: Created invalid max param inMesh" options:#(#dialog)
-
--- Pipe new radius parameter into sphere
-klCode =  "
-require Math;
-require PolygonMesh;
-
-operator " + nodeName + "(io PolygonMesh " + sm.OutPort + ", in Size inSegments, in Scalar inRadius) {
-	Xfo init;
-	init.setIdentity();
-	" + sm.OutPort + " = PolygonMesh();
-	" + sm.OutPort + ".addSphere(init, inRadius, inSegments, true, true);
-}"
-sm.SetKLCode nodeName klCode
-assert (CompBB sm 0) message:"Bad 0 size" options:#(#dialog)
 -- Validate radius is being set correctly
-sm.inRadius = 50
-assert (CompBB sm 173.205) message:"Bad 5 size" options:#(#dialog)
+sm.radius = 50
+assert (CompBB sm 172.802) message:"Bad 5 size" options:#(#dialog)
 
 -- Change input type for PolyMesh from none to INode
-sm.SetMaxType "inMesh" 17
-assert (hasProperty sm "inMesh") message: "Error: Did not convert inMesh" options:#(#dialog)
-
--- Pipe new in mesh
-klCode =  "
-require Math;
-require PolygonMesh;
-
-operator " + nodeName + "(io PolygonMesh " + sm.OutPort + ", in PolygonMesh inMesh, in Size inSegments, in Scalar inRadius) {
-	Xfo init;
-	init.setIdentity();
-	" + sm.OutPort + " = inMesh;
-	" + sm.OutPort + ".addSphere(init, inRadius, inSegments, true, true);
-}"
-sm.SetKLCode nodeName klCode
+sm.DFGAddPort "this" 0 "PolygonMesh" portToConnect:"AddSphere.this"
+sm.DFGRemoveNodes #("EmptyPolygonMesh")
+sm.DFGRenamePort "this" "inMesh"
 
 -- Pipe in a teapot to copy
 tp = Teapot()
@@ -103,7 +36,7 @@ tp.radius = 50
 tp.position = Point3 10 10 0
 
 sm.inMesh = tp
-assert (CompArray (GetTriMeshFaceCount sm) #(2830, 1435)) message:"Bad Tri Count on Set Mesh" options:#(#dialog)
+assert (CompArray (GetTriMeshFaceCount sm) #(1530, 785)) message:"Bad Tri Count on Set Mesh" options:#(#dialog)
 assert (CompBB sm 228.915) message:"Bad 5 size" options:#(#dialog)
 	
 print "all tests passed!"

@@ -313,6 +313,7 @@ public:
 	// value limits etc.
 	//
 	virtual int SyncMetaDataFromPortToParam(const char* dfgPort) = 0;
+	virtual void SyncMaxParamName(const char* dfgPort, int paramId) = 0;
 	virtual void SyncMaxParamLimits(const char* dfgPort, int paramId) = 0;
 	virtual void SyncMaxParamDefault(const char* dfgPort, int paramId) = 0;
 

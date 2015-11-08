@@ -333,6 +333,7 @@ public:
 	IParamBlock2* GetPBlock() { return m_pblock;  }
 
 	int SyncMetaDataFromPortToParam(const char* portName);
+	void SyncMaxParamName(const char* dfgPort, int paramId);
 	void SyncMaxParamLimits(const char* dfgPort, int paramId);
 	void SyncMaxParamDefault(const char* dfgPort, int paramId);
 

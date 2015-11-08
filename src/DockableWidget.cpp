@@ -130,16 +130,16 @@ QWidget* DockableWindow::GetWidget()
 	return w;
 }
 
-void DockableWindow::SetWidget(QWidget* w)
+void DockableWindow::SetWidget(QWidget* widget)
 {
 	delete(this->w);
-	this->w = w;
-	if (w == NULL) return;
-	w->move(0, 0);
+	this->w = widget;
+	if (widget == NULL) return;
+	widget->move(0, 0);
 	ResizeFrameToContent();
 	// Just to verify - reframe our content as well
 	ResizeContentToFrame();
-	w->show();
+	widget->show();
 }
 
 void DockableWindow::Dock(DWORD location)

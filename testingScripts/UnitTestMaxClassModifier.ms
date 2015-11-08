@@ -1,3 +1,7 @@
+rootFolder = systemTools.getEnvVariable("SPLICE3DSMAXDIR")
+fileIn (rootFolder + "UnitTestUtilFns.ms")
+
+
 m = plane()
 m.length = 200
 m.width = 50

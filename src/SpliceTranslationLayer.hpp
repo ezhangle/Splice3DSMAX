@@ -413,9 +413,23 @@ RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged(cons
 		// If our structure changes, then erase all validities
 		m_portValidities.clear();
 
-		// If we are here, we _must_ be in between BeginEditParams
-		// and EndEditParams.  Remove the current UI and repost
-		UpdateUISpec();
+		// If our structure is changing, its probably due to the
+		// number/type of parameters we have changing.  In this
+		// case we want to we want to show the new UI, so repost.
+		if (m_pblock != nullptr)
+		{
+			// However, we also recieve this message for changes to
+			// a parameters value (eg, when we add a reference to a node).
+			// In these cases, the change could have been triggered by
+			// a button in our UI, so we cannot remove the UI
+			// or it will delete an object that is currently sitting
+			// a few spots up on our stack.
+			ParamID pid = m_pblock->LastNotifyParamID();
+			if (pid == -1)
+			{
+				UpdateUISpec();
+			}
+		}
 	}
 
 	return REF_SUCCEED;

@@ -383,10 +383,12 @@ void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 	FabricCore::Client client = GetClient();
 
 	// Send all vertices to Splice
-	std::vector<FabricCore::RTVal> args(2);
-	args[0] = FabricCore::RTVal::ConstructExternalArray(client, "Float32", param.numVerts * 3, param.verts);
-	args[1] = FabricCore::RTVal::ConstructUInt32(client, 3); // components
-	rtMesh.callMethod("", "setPointsFromExternalArray", 2, &args[0]);
+	{
+		FabricCore::RTVal args[2];
+		args[0] = FabricCore::RTVal::ConstructExternalArray(client, "Float32", param.numVerts * 3, param.verts);
+		args[1] = FabricCore::RTVal::ConstructUInt32(client, 3); // components
+		rtMesh.callMethod("", "setPointsFromExternalArray", 2, args);
+	}
 
 	if(rebuildMesh){
 		// Send all indices to Splice
@@ -405,10 +407,10 @@ void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 				dVertIndex.push_back(pFaces[f].getVert(i));
 		}
 	
-
+		FabricCore::RTVal args[2];
 		args[0] = FabricCore::RTVal::ConstructExternalArray(client, "UInt32", dPolyCounts.size(), &dPolyCounts[0]);
 		args[1] = FabricCore::RTVal::ConstructExternalArray(client, "UInt32", dVertIndex.size(), &dVertIndex[0]);
-		rtMesh.callMethod("", "setTopologyFromCountsIndicesExternalArrays", 2, &args[0]);
+		rtMesh.callMethod("", "setTopologyFromCountsIndicesExternalArrays", 2, args);
 	}
 
 	// Set normals
@@ -418,7 +420,7 @@ void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 #pragma message("TODO: Fix this!")
 	if (false && pNormalSpec != NULL && pNormalSpec->GetNumNormals() > 0)
 	{
-		std::vector<FabricCore::RTVal> args(3);
+		FabricCore::RTVal args[3];
 		args[0] = FabricCore::RTVal::ConstructString(client, "normals");
 
 		// 1 normal per index
@@ -443,16 +445,11 @@ void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 			//			memcpy(&dNormalIndices[f*3], pFaces[f].GetNormalIDArray(), sizeof(int) * 3);
 		}
 		args[2] = FabricCore::RTVal::ConstructExternalArray(client, "UInt64", nFaces * 3, &dNormalIndices[0]);
-		rtMesh.callMethod("", "setAttributeFromPolygonPackedData", 3, &args[0]);
+		rtMesh.callMethod("", "setAttributeFromPolygonPackedData", 3, args);
 	}
 	else
 	{
 		rtMesh.callMethod("", "recomputePointNormals", 0, NULL);
-
-		std::vector<Point3> dNormals;
-		dNormals.resize(param.numFaces);
-		for (int i = 0; i < param.numFaces; i++)
-			dNormals[i] = pNonConstMesh->getFaceNormal(i);
 	}
 
 	return;

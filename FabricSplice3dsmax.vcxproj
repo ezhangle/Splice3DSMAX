@@ -29,23 +29,17 @@
       <Configuration>Release 2015</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Release 2016|x64">
+      <Configuration>Release 2016</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{771FD8D0-EE9B-442E-9D32-B2C60B807FEF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CP3dsmaxIntegration</RootNamespace>
   </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug 2015|x64'">
-    <CLRSupport>false</CLRSupport>
-    <PlatformToolset>v120</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug 2016|x64'" />
   <Import Project="ProjectProperties.props" />
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2016|x64'">
-    <ClCompile>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-    </ClCompile>
-  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\MaxDFGCmdHandler.cpp" />
     <ClCompile Include="src\MaxDFGWidget.cpp" />

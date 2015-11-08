@@ -1,19 +1,19 @@
 #include "StdAfx.h"
-#include "SpliceEvents.h"
+#include "FabricEvents.h"
 #include <maxapi.h>
 #include <GraphicsWindow.h>
-#include "SpliceLogging.h"
+#include "FabricLogging.h"
 #include <map>
 #include "Graphics\IDisplayManager.h"
 
-SpliceEvents* SpliceEvents::s_Instance = nullptr;
+FabricEvents* FabricEvents::s_Instance = nullptr;
 
-SpliceEvents::SpliceEvents()
+FabricEvents::FabricEvents()
 	: m_VptCallback(nullptr)
 {
 }
 
-SpliceEvents::~SpliceEvents()
+FabricEvents::~FabricEvents()
 {
 	UnHookMouseEvents();
 	UnHookViewportRender();
@@ -22,19 +22,19 @@ SpliceEvents::~SpliceEvents()
 //////////////////////////////////////////////////////////////////////////
 #pragma region Mouse Events
 
-void SpliceEvents::HookMouseEvents()
+void FabricEvents::HookMouseEvents()
 {
 	if (!MouseEventsHooked())
 		GetCOREInterface()->PushCommandMode(&m_MouseCommandMode);
 }
 
-void SpliceEvents::UnHookMouseEvents()
+void FabricEvents::UnHookMouseEvents()
 {
 	Interface* pCore = GetCOREInterface();
 	pCore->DeleteMode(&m_MouseCommandMode);
 }
 
-bool SpliceEvents::MouseEventsHooked()
+bool FabricEvents::MouseEventsHooked()
 {
 	Interface* pCore = GetCOREInterface();
 	return (pCore->GetCommandMode() == &m_MouseCommandMode);
@@ -45,26 +45,26 @@ bool SpliceEvents::MouseEventsHooked()
 //////////////////////////////////////////////////////////////////////////
 #pragma region Viewport Rendering event
 
-//FabricCore::RTVal SpliceEvents::s_DrawContexts[MAX_VPTS];
-FabricCore::RTVal SpliceEvents::s_DrawContext;
-FabricCore::RTVal SpliceEvents::s_InlineViewports[MAX_VPTS];
+//FabricCore::RTVal FabricEvents::s_DrawContexts[MAX_VPTS];
+FabricCore::RTVal FabricEvents::s_DrawContext;
+FabricCore::RTVal FabricEvents::s_InlineViewports[MAX_VPTS];
 FabricCore::RTVal s_viewportIds[MAX_VPTS];
 
-void doSpliceDrawing(void *data)
+void doFabricDrawing(void *data)
 {
-	// Invoke the Splice Drawing now that we have the OpenGL context bound.
+	// Invoke the Fabric Drawing now that we have the OpenGL context bound.
 
 	MAXSPLICE_CATCH_BEGIN;
 
-		if (SpliceEvents::s_DrawContext.isValid())
+		if (FabricEvents::s_DrawContext.isValid())
 		{
 			ViewExp *vpt = reinterpret_cast<ViewExp*>(data);
 			int id = vpt->GetViewID();
-			if (SpliceEvents::s_InlineViewports[id].isValid())
+			if (FabricEvents::s_InlineViewports[id].isValid())
 			{
 				FabricCore::RTVal args[2];
 				args[0] = s_viewportIds[id];
-				args[1] = SpliceEvents::s_DrawContext;
+				args[1] = FabricEvents::s_DrawContext;
 				FabricCore::RTVal success = GetDrawing().callMethod("Boolean", "drawViewport", 2, args);
 				if (!success.getBoolean())
 				{
@@ -76,13 +76,13 @@ void doSpliceDrawing(void *data)
 	MAXSPLICE_CATCH_END
 }
 
-class SpliceViewportDrawCallback : public ViewportDisplayCallback
+class FabricViewportDrawCallback : public ViewportDisplayCallback
 {
 public:
-	SpliceViewportDrawCallback()
+	FabricViewportDrawCallback()
 	{
 	}
-	~SpliceViewportDrawCallback() 
+	~FabricViewportDrawCallback() 
 	{
 		ReleaseAllDrawContexts();
 	}
@@ -123,7 +123,7 @@ public:
 			// and it is passed by reference, we can't use a stack variable 
 			// (it might get deallocated before the render thread renders)
 			static StripTab stab; 
-			gw->processStrips(id, stripCt, &stab, doSpliceDrawing);
+			gw->processStrips(id, stripCt, &stab, doFabricDrawing);
 		}
 
 		MAXSPLICE_CATCH_END;
@@ -149,7 +149,7 @@ public:
 		else
 			return false;
 
-		FabricCore::RTVal drawContext = GetSpliceDrawContext(pView);
+		FabricCore::RTVal drawContext = GetFabricDrawContext(pView);
 		if (!drawContext.isValid())
 			return false;
 
@@ -163,7 +163,7 @@ public:
 		
 		//////////////////////////
 		// Setup the viewport
-		FabricCore::RTVal& inlineViewport = GetSpliceViewport(pView);
+		FabricCore::RTVal& inlineViewport = GetFabricViewport(pView);
 		FabricCore::RTVal args[3];
 		args[0] = drawContext;
 		args[1] = FabricCore::RTVal::ConstructFloat64(client, width);
@@ -232,10 +232,10 @@ public:
 		return true;
 	}
 
-	FabricCore::RTVal& GetSpliceViewport(ViewExp* pView)
+	FabricCore::RTVal& GetFabricViewport(ViewExp* pView)
 	{
 		int id = pView->GetViewID();
-		FabricCore::RTVal& rtViewport = SpliceEvents::s_InlineViewports[id];
+		FabricCore::RTVal& rtViewport = FabricEvents::s_InlineViewports[id];
 		DbgAssert(id < MAX_VPTS);
 		if (rtViewport.isValid())
 			return rtViewport;
@@ -251,7 +251,7 @@ public:
 			throw FabricCore::Exception("Cannot create Fabric Viewport (Extension loaded?)");
 
 		rtViewport.callMethod("", "setName", 1, &s_viewportIds[id]);
-		rtViewport.callMethod("", "setup", 1, &GetSpliceDrawContext(pView));
+		rtViewport.callMethod("", "setup", 1, &GetFabricDrawContext(pView));
 
 		// Register viewport with drawing system
 		FabricCore::RTVal args[2];
@@ -262,12 +262,12 @@ public:
 		return rtViewport;
 	}
 
-	FabricCore::RTVal GetSpliceDrawContext(ViewExp* pView)
+	FabricCore::RTVal GetFabricDrawContext(ViewExp* pView)
 	{
-		if (!SpliceEvents::s_DrawContext.isValid() || SpliceEvents::s_DrawContext.isNullObject())
+		if (!FabricEvents::s_DrawContext.isValid() || FabricEvents::s_DrawContext.isNullObject())
 		{
 			try {
-				SpliceEvents::s_DrawContext = FabricCore::RTVal::Construct(GetClient(), "DrawContext", 0, nullptr);
+				FabricEvents::s_DrawContext = FabricCore::RTVal::Construct(GetClient(), "DrawContext", 0, nullptr);
 			}
 			catch (FabricCore::Exception e) {
 				// Empty catch.  This will happen if the user has not loaded InlineDrawing yet
@@ -275,26 +275,26 @@ public:
 			}
 
 			// We may get an invalid RTValue here if InlineDrawing hasn't been loaded yet.
-			if (SpliceEvents::s_DrawContext.isValid())
+			if (FabricEvents::s_DrawContext.isValid())
 			{
-				SpliceEvents::s_DrawContext = SpliceEvents::s_DrawContext.callMethod("DrawContext", "getInstance", 0, 0);
+				FabricEvents::s_DrawContext = FabricEvents::s_DrawContext.callMethod("DrawContext", "getInstance", 0, 0);
 			}
 		}
-		return SpliceEvents::s_DrawContext;
+		return FabricEvents::s_DrawContext;
 	}
 
 	void ReleaseAllDrawContexts() 
 	{
-		SpliceEvents::s_DrawContext = FabricCore::RTVal();
+		FabricEvents::s_DrawContext = FabricCore::RTVal();
 		for (int i = 0; i < MAX_VPTS; i++) {
 			// We release our draw contexts by assigning blank RTVals over them
-			SpliceEvents::s_InlineViewports[i] = FabricCore::RTVal();
+			FabricEvents::s_InlineViewports[i] = FabricCore::RTVal();
 			s_viewportIds[i] = FabricCore::RTVal();
 		}
 	}
 };
 
-void SpliceEvents::HookViewportRender()
+void FabricEvents::HookViewportRender()
 {
 	// Ideally, we'd like to detect if we are in OGL mode.
 	// Unfortunately, its curiously difficult to figure this out (no API I can find)
@@ -314,13 +314,13 @@ void SpliceEvents::HookViewportRender()
 	{
 		if (m_VptCallback == nullptr) 
 		{
-			m_VptCallback = new SpliceViewportDrawCallback();
+			m_VptCallback = new FabricViewportDrawCallback();
 			GetCOREInterface()->RegisterViewportDisplayCallback(FALSE, m_VptCallback) ;
 		}
 	}
 }
 
-void SpliceEvents::UnHookViewportRender()
+void FabricEvents::UnHookViewportRender()
 {
 	if (m_VptCallback != nullptr)
 	{
@@ -329,12 +329,12 @@ void SpliceEvents::UnHookViewportRender()
 	}
 }
 
-bool SpliceEvents::ViewportRenderHooked()
+bool FabricEvents::ViewportRenderHooked()
 {
 	return m_VptCallback != nullptr;
 }
 
-void SpliceEvents::TriggerRedraw()
+void FabricEvents::TriggerRedraw()
 {
 	if (m_VptCallback != nullptr)
 	{
@@ -344,16 +344,16 @@ void SpliceEvents::TriggerRedraw()
 #pragma endregion
 
 //////////////////////////////////////////////////////////////////////////
-SpliceEvents* SpliceEvents::GetInstance()
+FabricEvents* FabricEvents::GetInstance()
 {
 	if (s_Instance == nullptr)
 	{
-		s_Instance = new SpliceEvents();
+		s_Instance = new FabricEvents();
 	}
 	return s_Instance;
 }
 
-void SpliceEvents::ReleaseInstance()
+void FabricEvents::ReleaseInstance()
 {
 	SAFE_DELETE(s_Instance);
 }

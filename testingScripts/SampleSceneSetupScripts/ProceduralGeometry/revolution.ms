@@ -1,6 +1,6 @@
 
 
-spheresMesh = SpliceMesh()
+spheresMesh = FabricMesh()
 spheresMesh.AddInputPort "fraction" "Scalar" -2
 spheresMesh.AddInputPort "close" "Boolean" -2
 spheresMesh.AddInputPort "size" "Scalar" -2

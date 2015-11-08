@@ -12,30 +12,30 @@
  **********************************************************************/
 
 
-#include "FabricSplice3dsmax.h"
-#include "SpliceMesh.h"
+#include "Fabric3dsmax.h"
+#include "FabricMesh.h"
 
-// class variable for SpliceMesh class.
-IObjParam *SpliceMesh::ip = NULL;
-SpliceMesh *SpliceMesh::editOb = NULL;
+// class variable for FabricMesh class.
+IObjParam *FabricMesh::ip = NULL;
+FabricMesh *FabricMesh::editOb = NULL;
 
 
-class SpliceMeshClassDesc:public ClassDesc2 {
+class FabricMeshClassDesc:public ClassDesc2 {
 	public:
 	int 			IsPublic() { return 1; }
-	void *			Create(BOOL /*loading*/ = FALSE) { return new SpliceMesh; }
+	void *			Create(BOOL /*loading*/ = FALSE) { return new FabricMesh; }
 	const MCHAR *	ClassName() { static MSTR className = GetString(IDS_DB_SPLICEMESH_CLASS); return className.data(); }
 	SClass_ID		SuperClassID() { return HELPER_CLASS_ID; }
 	Class_ID		ClassID() { return SPLICEMESH_CLASS_ID; }
 	 
-	const TCHAR* 	Category() { return _T("FabricSplice");  }
-	const TCHAR*	InternalName() {return _T("SpliceMesh");}
+	const TCHAR* 	Category() { return _T("Fabric");  }
+	const TCHAR*	InternalName() {return _T("FabricMesh");}
 	HINSTANCE		HInstance() { return MaxSDK::GetHInstance(); }			// returns owning module handle
 };
 
-static SpliceMeshClassDesc spliceMeshObjDesc;
+static FabricMeshClassDesc spliceMeshObjDesc;
 
-ClassDesc* GetSpliceMeshDesc() { return &spliceMeshObjDesc; }
+ClassDesc* GetFabricMeshDesc() { return &spliceMeshObjDesc; }
 
 #define PBLOCK_REF_NO	 0
 
@@ -54,7 +54,7 @@ enum { spliceMesh_params, };
 
 ////////////////////////////////////////////////////////////////////
 
-class SpliceMeshDlgProc : public ParamMap2UserDlgProc 
+class FabricMeshDlgProc : public ParamMap2UserDlgProc 
 {
 public:
 
@@ -77,7 +77,7 @@ public:
 	void DeleteThis() {};
 };
 
-static SpliceMeshDlgProc spliceMeshDlgProc;
+static FabricMeshDlgProc spliceMeshDlgProc;
 
 #if MAX_VERSION_MAJOR < 15
 // Fix define changes for older versions of max
@@ -87,7 +87,7 @@ static SpliceMeshDlgProc spliceMeshDlgProc;
 // per instance block
 static ParamBlockDesc2 spliceMesh_param_blk( 
 	
-	spliceMesh_params, _T("SpliceMeshParameters"),  0, &spliceMeshObjDesc, P_AUTO_CONSTRUCT+P_AUTO_UI, PBLOCK_REF_NO,
+	spliceMesh_params, _T("FabricMeshParameters"),  0, &spliceMeshObjDesc, P_AUTO_CONSTRUCT+P_AUTO_UI, PBLOCK_REF_NO,
 
 	//rollout
 	IDD_SPLICEMESH_PARAM, IDS_SPLICEMESH_PARAMS, 0, 0, &spliceMeshDlgProc,
@@ -121,7 +121,7 @@ static ParamBlockDesc2 spliceMesh_param_blk(
 
 
 
-void SpliceMesh::BeginEditParams(
+void FabricMesh::BeginEditParams(
 		IObjParam *ip, ULONG flags,Animatable *prev)
 {	
 	this->ip = ip;
@@ -129,7 +129,7 @@ void SpliceMesh::BeginEditParams(
 	spliceMeshObjDesc.BeginEditParams(ip, this, flags, prev);	
 }
 
-void SpliceMesh::EndEditParams(IObjParam *ip, ULONG flags,Animatable *next)
+void FabricMesh::EndEditParams(IObjParam *ip, ULONG flags,Animatable *next)
 {	
 	editOb   = NULL;
 	this->ip = NULL;
@@ -138,7 +138,7 @@ void SpliceMesh::EndEditParams(IObjParam *ip, ULONG flags,Animatable *next)
 }
 
 
-SpliceMesh::SpliceMesh()
+FabricMesh::FabricMesh()
 {
 	pblock2 = NULL;
 	spliceMeshObjDesc.MakeAutoParamBlocks(this);
@@ -146,31 +146,31 @@ SpliceMesh::SpliceMesh()
 	SetAFlag(A_OBJ_CREATING);
 }
 
-SpliceMesh::~SpliceMesh()
+FabricMesh::~FabricMesh()
 {
 	DeleteAllRefsFromMe();
 }
 
-IParamArray *SpliceMesh::GetParamBlock()
+IParamArray *FabricMesh::GetParamBlock()
 {
 	return (IParamArray*)pblock2;
 }
 
-int SpliceMesh::GetParamBlockIndex(int id)
+int FabricMesh::GetParamBlockIndex(int id)
 {
 	if (pblock2 && id>=0 && id<pblock2->NumParams()) return id;
 	else return -1;
 }
 
 
-class SpliceMeshCreateCallBack: public CreateMouseCallBack {
-	SpliceMesh *ob;
+class FabricMeshCreateCallBack: public CreateMouseCallBack {
+	FabricMesh *ob;
 public:
 	int proc( ViewExp *vpt,int msg, int point, int flags, IPoint2 m, Matrix3& mat );
-	void SetObj(SpliceMesh *obj) { ob = obj; }
+	void SetObj(FabricMesh *obj) { ob = obj; }
 };
 
-int SpliceMeshCreateCallBack::proc(ViewExp *vpt,int msg, int point, int flags, IPoint2 m, Matrix3& mat ) 
+int FabricMeshCreateCallBack::proc(ViewExp *vpt,int msg, int point, int flags, IPoint2 m, Matrix3& mat ) 
 {
 	if ( ! vpt 
 #if MAX_VERSION_MAJOR > 14
@@ -237,20 +237,20 @@ int SpliceMeshCreateCallBack::proc(ViewExp *vpt,int msg, int point, int flags, I
 	return 1;
 }
 
-static SpliceMeshCreateCallBack spliceMeshCreateCB;
+static FabricMeshCreateCallBack spliceMeshCreateCB;
 
-CreateMouseCallBack* SpliceMesh::GetCreateMouseCallBack() {
+CreateMouseCallBack* FabricMesh::GetCreateMouseCallBack() {
 	spliceMeshCreateCB.SetObj(this);
 	return(&spliceMeshCreateCB);
 }
 
-void SpliceMesh::SetExtendedDisplay(int flags)
+void FabricMesh::SetExtendedDisplay(int flags)
 {
 	extDispFlags = flags;
 }
 
 
-void SpliceMesh::GetLocalBoundBox(TimeValue t, INode* inode, ViewExp* vpt, Box3& box ) 
+void FabricMesh::GetLocalBoundBox(TimeValue t, INode* inode, ViewExp* vpt, Box3& box ) 
 {
 	if ( ! vpt 
 #if MAX_VERSION_MAJOR > 14
@@ -277,7 +277,7 @@ void SpliceMesh::GetLocalBoundBox(TimeValue t, INode* inode, ViewExp* vpt, Box3&
 	box += Point3(  0.0f,  0.0f, -size*0.5f);
 }
 
-void SpliceMesh::GetWorldBoundBox(TimeValue t, INode* inode, ViewExp* vpt, Box3& box )
+void FabricMesh::GetWorldBoundBox(TimeValue t, INode* inode, ViewExp* vpt, Box3& box )
 {
 
 	if ( ! vpt 
@@ -302,7 +302,7 @@ void SpliceMesh::GetWorldBoundBox(TimeValue t, INode* inode, ViewExp* vpt, Box3&
 }
 
 
-void SpliceMesh::Snap(TimeValue t, INode* inode, SnapInfo *snap, IPoint2 *p, ViewExp *vpt)
+void FabricMesh::Snap(TimeValue t, INode* inode, SnapInfo *snap, IPoint2 *p, ViewExp *vpt)
 {
 	if ( ! vpt 
 #if MAX_VERSION_MAJOR > 14
@@ -365,7 +365,7 @@ void SpliceMesh::Snap(TimeValue t, INode* inode, SnapInfo *snap, IPoint2 *p, Vie
 
 
 
-int SpliceMesh::DrawAndHit(TimeValue t, INode *inode, ViewExp *vpt)
+int FabricMesh::DrawAndHit(TimeValue t, INode *inode, ViewExp *vpt)
 {
 	
 	if ( ! vpt 
@@ -428,7 +428,7 @@ int SpliceMesh::DrawAndHit(TimeValue t, INode *inode, ViewExp *vpt)
 	return 1;
 }
 
-int SpliceMesh::HitTest(TimeValue t, INode *inode, int type, int crossing, int flags, IPoint2 *p, ViewExp *vpt) 
+int FabricMesh::HitTest(TimeValue t, INode *inode, int type, int crossing, int flags, IPoint2 *p, ViewExp *vpt) 
 {
 	if ( ! vpt 
 #if MAX_VERSION_MAJOR > 14
@@ -464,7 +464,7 @@ int SpliceMesh::HitTest(TimeValue t, INode *inode, int type, int crossing, int f
 }
 
 
-int SpliceMesh::Display(TimeValue t, INode* inode, ViewExp *vpt, int flags) 
+int FabricMesh::Display(TimeValue t, INode* inode, ViewExp *vpt, int flags) 
 {
 	if ( ! vpt 
 #if MAX_VERSION_MAJOR > 14
@@ -489,7 +489,7 @@ int SpliceMesh::Display(TimeValue t, INode* inode, ViewExp *vpt, int flags)
 //
 
 // This is only called if the object MAKES references to other things.
-RefResult SpliceMesh::NotifyRefChanged(
+RefResult FabricMesh::NotifyRefChanged(
 		Interval changeInt, RefTargetHandle hTarget, 
 		PartID& partID, RefMessage message ) 
 {
@@ -501,12 +501,12 @@ RefResult SpliceMesh::NotifyRefChanged(
 	return(REF_SUCCEED);
 }
 
-void SpliceMesh::InvalidateUI()
+void FabricMesh::InvalidateUI()
 {
 	spliceMesh_param_blk.InvalidateUI(pblock2->LastNotifyParamID());
 }
 
-Interval SpliceMesh::ObjectValidity(TimeValue t)
+Interval FabricMesh::ObjectValidity(TimeValue t)
 {
 	float size;
 
@@ -517,14 +517,14 @@ Interval SpliceMesh::ObjectValidity(TimeValue t)
 	return ivalid;
 }
 
-ObjectState SpliceMesh::Eval(TimeValue t)
+ObjectState FabricMesh::Eval(TimeValue t)
 {
 	return ObjectState(this);
 }
 
-RefTargetHandle SpliceMesh::Clone(RemapDir& remap) 
+RefTargetHandle FabricMesh::Clone(RemapDir& remap) 
 {
-	SpliceMesh* newob = new SpliceMesh();	
+	FabricMesh* newob = new FabricMesh();	
 	newob->ReplaceReference(0, remap.CloneRef(pblock2));
 	BaseClone(this, newob, remap);
 	return(newob);
@@ -532,26 +532,26 @@ RefTargetHandle SpliceMesh::Clone(RemapDir& remap)
 
 
 
-IOResult SpliceMesh::Load(ILoad *iload)
+IOResult FabricMesh::Load(ILoad *iload)
 {
 	return IO_OK;
 }
 
-IOResult SpliceMesh::Save(ISave *isave)
+IOResult FabricMesh::Save(ISave *isave)
 {
 	return IO_OK;
 }
 
 
 
-TSTR SpliceMesh::GetAssetPath()
+TSTR FabricMesh::GetAssetPath()
 {
 	return pblock2->GetStr(spliceMesh_asset);
 }
 
 
 
-float SpliceMesh::GetScaleFactor( TimeValue t, Interval& ivValid )
+float FabricMesh::GetScaleFactor( TimeValue t, Interval& ivValid )
 {
 	float scale;
 	pblock2->GetValue(spliceMesh_scaleFactor, t, scale, ivValid);

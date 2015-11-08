@@ -51,23 +51,23 @@
     <ClCompile Include="src\moc_MaxDFGWidget.cpp">
       <ForcedIncludeFiles>StdAfx.h</ForcedIncludeFiles>
     </ClCompile>
-    <ClCompile Include="src\MouseCallbacks\SpliceCommandMode.cpp" />
-    <ClCompile Include="src\MouseCallbacks\SpliceMouseCallback.cpp" />
-    <ClCompile Include="src\SpliceControlFloat.cpp" />
-    <ClCompile Include="src\SpliceControlMatrix.cpp" />
-    <ClCompile Include="src\SpliceControlPosition.cpp" />
-    <ClCompile Include="src\SpliceControlRotation.cpp" />
-    <ClCompile Include="src\SpliceEvents.cpp" />
-    <ClCompile Include="src\SpliceLogging.cpp" />
-    <ClCompile Include="src\SpliceMesh.cpp" />
+    <ClCompile Include="src\MouseCallbacks\FabricCommandMode.cpp" />
+    <ClCompile Include="src\MouseCallbacks\FabricMouseCallback.cpp" />
+    <ClCompile Include="src\FabricControlFloat.cpp" />
+    <ClCompile Include="src\FabricControlMatrix.cpp" />
+    <ClCompile Include="src\FabricControlPosition.cpp" />
+    <ClCompile Include="src\FabricControlRotation.cpp" />
+    <ClCompile Include="src\FabricEvents.cpp" />
+    <ClCompile Include="src\FabricLogging.cpp" />
+    <ClCompile Include="src\FabricMesh.cpp" />
     <ClCompile Include="src/DllEntry.cpp" />
-    <ClCompile Include="src\SpliceModifier.cpp" />
-    <ClCompile Include="src\SpliceReferenceTarget.cpp" />
-    <ClCompile Include="src\SpliceRestoreObjects.cpp" />
-    <ClCompile Include="src\SpliceStaticFPInterface.cpp" />
-    <ClCompile Include="src\SpliceTranslationFPInterface.cpp" />
-    <ClCompile Include="src\SpliceTranslationLayer.cpp" />
-    <ClCompile Include="src\SpliceWSModifier.cpp" />
+    <ClCompile Include="src\FabricModifier.cpp" />
+    <ClCompile Include="src\FabricReferenceTarget.cpp" />
+    <ClCompile Include="src\FabricRestoreObjects.cpp" />
+    <ClCompile Include="src\FabricStaticFPInterface.cpp" />
+    <ClCompile Include="src\FabricTranslationFPInterface.cpp" />
+    <ClCompile Include="src\FabricTranslationLayer.cpp" />
+    <ClCompile Include="src\FabricWSModifier.cpp" />
     <ClCompile Include="src\StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -82,30 +82,30 @@
     <ClInclude Include="src\MaxDFGCmdHandler.h" />
     <ClInclude Include="src\MaxDFGController.h" />
     <ClInclude Include="src\MouseCallbacks\KbdTranslation.h" />
-    <ClInclude Include="src\MouseCallbacks\SpliceCommandMode.h" />
-    <ClInclude Include="src\MouseCallbacks\SpliceMouseCallback.h" />
-    <ClInclude Include="src\Splice3dsmax.h" />
-    <ClInclude Include="src\SpliceControl.hpp" />
-    <ClInclude Include="src\SpliceEvents.h" />
-    <ClInclude Include="src\SpliceLogging.h" />
-    <ClInclude Include="src\SpliceModifier.h" />
-    <ClInclude Include="src\SpliceRestoreObjects.h" />
-    <ClInclude Include="src\SpliceStaticFPInterface.h" />
-    <ClInclude Include="src\SpliceTranslationFPInterface.h" />
-    <ClInclude Include="src\SpliceTranslationLayer.hpp">
+    <ClInclude Include="src\MouseCallbacks\FabricCommandMode.h" />
+    <ClInclude Include="src\MouseCallbacks\FabricMouseCallback.h" />
+    <ClInclude Include="src\Fabric3dsmax.h" />
+    <ClInclude Include="src\FabricControl.hpp" />
+    <ClInclude Include="src\FabricEvents.h" />
+    <ClInclude Include="src\FabricLogging.h" />
+    <ClInclude Include="src\FabricModifier.h" />
+    <ClInclude Include="src\FabricRestoreObjects.h" />
+    <ClInclude Include="src\FabricStaticFPInterface.h" />
+    <ClInclude Include="src\FabricTranslationFPInterface.h" />
+    <ClInclude Include="src\FabricTranslationLayer.hpp">
       <FileType>CppCode</FileType>
     </ClInclude>
-    <ClInclude Include="src\SpliceWSModifier.h" />
+    <ClInclude Include="src\FabricWSModifier.h" />
     <ClInclude Include="src\StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="src\DynamicParamBlocks\DynamicDialog\FabricSplice3dsmax.rc" />
+    <ResourceCompile Include="src\DynamicParamBlocks\DynamicDialog\Fabric3dsmax.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\DynamicDialogTemplate.h" />
     <ClInclude Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.h" />
     <ClInclude Include="src\DynamicParamBlocks\DynPBUndo.h" />
-    <ClInclude Include="src\SpliceTranslationLayer.h" />
+    <ClInclude Include="src\FabricTranslationLayer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SetupMenu.ms" />
@@ -118,12 +118,12 @@
     <None Include="testingScripts\StartupMeshTimer.ms" />
     <None Include="testingScripts\SurfaceAttrPaintManipulation.ms" />
     <None Include="testingScripts\UnitTestAddRemovePort.ms" />
-    <None Include="testingScripts\UnitTestLoadSaveSpliceFile.ms" />
+    <None Include="testingScripts\UnitTestLoadSaveFabricFile.ms" />
     <None Include="testingScripts\UnitTestPortConnection.ms" />
     <None Include="testingScripts\UnitTestPortOptions.ms" />
     <None Include="testingScripts\UnitTestRegisterReloadExtns.ms" />
-    <None Include="testingScripts\UnitTestSpliceControllers.ms" />
-    <None Include="testingScripts\UnitTestSpliceModifier.ms" />
-    <None Include="testingScripts\UnitTestSpliceObject.ms" />
+    <None Include="testingScripts\UnitTestFabricControllers.ms" />
+    <None Include="testingScripts\UnitTestFabricModifier.ms" />
+    <None Include="testingScripts\UnitTestFabricObject.ms" />
   </ItemGroup>
 </Project>

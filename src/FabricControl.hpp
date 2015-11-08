@@ -4,52 +4,52 @@
 #pragma once
 
 template<typename TResultType>
-class SpliceControl : public SpliceTranslationLayer < Control, TResultType > {
+class FabricControl : public FabricTranslationLayer < Control, TResultType > {
 protected:
 
-	SpliceControl(BOOL loading);
-	~SpliceControl();
+	FabricControl(BOOL loading);
+	~FabricControl();
 
 	void ResetPorts() override;
 
 	IOResult SaveImpData(ISave* isave) override;
 	IOResult LoadImpData(ILoad* isave) override;
 
-	bool CloneSpliceData(ParentClass* pMyClone) override { return true; }; // No cloning for me...
+	bool CloneFabricData(ParentClass* pMyClone) override { return true; }; // No cloning for me...
 
 	// Handle parent value port
 	std::string m_parentArgName;
-	typedef SpliceControl<TResultType> ParentClass;
+	typedef FabricControl<TResultType> ParentClass;
 };
 
 template<typename TResultType>
-SpliceControl<TResultType>::SpliceControl(BOOL loading)
-	: SpliceTranslationLayer< Control, TResultType >(loading)
+FabricControl<TResultType>::FabricControl(BOOL loading)
+	: FabricTranslationLayer< Control, TResultType >(loading)
 {
 
 }
 
 template<typename TResultType>
-SpliceControl<TResultType>::~SpliceControl()
+FabricControl<TResultType>::~FabricControl()
 {
 
 }
 
 
 template<typename TResultType>
-void SpliceControl<TResultType>::ResetPorts()
+void FabricControl<TResultType>::ResetPorts()
 {
 	MACROREC_GUARD;
 
 	m_parentArgName = "parentValue";
-	AddSpliceParameter(this, GetValueType(), m_parentArgName.c_str(), FabricCore::DFGPortType_In);
+	AddFabricParameter(this, GetValueType(), m_parentArgName.c_str(), FabricCore::DFGPortType_In);
 	SetPortMetaData(m_parentArgName.c_str(), FABRIC_UI_HIDDEN, "true", "");
 	__super::ResetPorts();
 }
 
 
 template<typename TResultType>
-IOResult SpliceControl<TResultType>::SaveImpData(ISave* isave)
+IOResult FabricControl<TResultType>::SaveImpData(ISave* isave)
 {
 	isave->WriteCString(m_parentArgName.c_str());
 	return IO_OK;
@@ -57,7 +57,7 @@ IOResult SpliceControl<TResultType>::SaveImpData(ISave* isave)
 
 
 template<typename TResultType>
-IOResult SpliceControl<TResultType>::LoadImpData(ILoad* iload)
+IOResult FabricControl<TResultType>::LoadImpData(ILoad* iload)
 {
 	char* parentName = nullptr;
 	iload->ReadCStringChunk(&parentName);

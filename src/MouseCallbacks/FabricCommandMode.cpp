@@ -1,51 +1,51 @@
 #include "StdAfx.h"
-#include "SpliceCommandMode.h"
+#include "FabricCommandMode.h"
 
 
-SpliceCommandMode::SpliceCommandMode(void)
+FabricCommandMode::FabricCommandMode(void)
 {
 }
 
 
-SpliceCommandMode::~SpliceCommandMode(void)
+FabricCommandMode::~FabricCommandMode(void)
 {
 }
 
-int SpliceCommandMode::Class()
+int FabricCommandMode::Class()
 {
 	return MANIPULATE_COMMAND;
 }
 
-int SpliceCommandMode::ID()
+int FabricCommandMode::ID()
 {
 	// Random number
 	int id = 0x22062d9a;
 	return id;
 }
 
-MouseCallBack * SpliceCommandMode::MouseProc( int *numPoints )
+MouseCallBack * FabricCommandMode::MouseProc( int *numPoints )
 {
 	if (numPoints != nullptr)
 		*numPoints = INT_MAX;
 	return &m_mouseCallback;
 }
 
-ChangeForegroundCallback * SpliceCommandMode::ChangeFGProc()
+ChangeForegroundCallback * FabricCommandMode::ChangeFGProc()
 {
 	return NULL;
 }
 
-BOOL SpliceCommandMode::ChangeFG( CommandMode* oldMode )
+BOOL FabricCommandMode::ChangeFG( CommandMode* oldMode )
 {
 	return FALSE;
 }
 
-void SpliceCommandMode::EnterMode()
+void FabricCommandMode::EnterMode()
 {
 	m_mouseCallback.EnterMode();
 }
 
-void SpliceCommandMode::ExitMode()
+void FabricCommandMode::ExitMode()
 {
 	m_mouseCallback.ExitMode();
 }

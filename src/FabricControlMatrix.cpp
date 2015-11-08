@@ -1,19 +1,19 @@
 //**************************************************************************/
-// DESCRIPTION: Generates Matrix3 values using Splice
+// DESCRIPTION: Generates Matrix3 values using Fabric
 // AUTHOR: Stephen Taylor
 //***************************************************************************/
 
 #include "StdAfx.h"
-#include "SpliceControl.hpp"
-#include "Splice3dsmax.h"
+#include "FabricControl.hpp"
+#include "Fabric3dsmax.h"
 
-#define SpliceControlMatrix_CLASS_ID	Class_ID(0x6a53772, 0x7c2c7c4b)
+#define FabricControlMatrix_CLASS_ID	Class_ID(0x6a53772, 0x7c2c7c4b)
 
-class SpliceControlMatrix : public SpliceControl<Matrix3> {
+class FabricControlMatrix : public FabricControl<Matrix3> {
 public:
 
 	//From Animatable
-	Class_ID ClassID() {return SpliceControlMatrix_CLASS_ID;}		
+	Class_ID ClassID() {return FabricControlMatrix_CLASS_ID;}		
 	SClass_ID SuperClassID() { return CTRL_MATRIX3_CLASS_ID; }
 	void GetClassName(TSTR& s) {s = GetString(IDS_SPLICE_MAT_CTRL_CLASS_NAME);}
 
@@ -22,8 +22,8 @@ public:
 	void SetValue(TimeValue,void *,int,GetSetMethod);
 
 	//Constructor/Destructor
-	SpliceControlMatrix(BOOL loading);
-	~SpliceControlMatrix();	
+	FabricControlMatrix(BOOL loading);
+	~FabricControlMatrix();	
 
 private:
 
@@ -35,25 +35,25 @@ private:
 	Matrix3 m_cachedParentVal;
 };
 
-class SpliceControlMatrixClassDesc : public DynPBCustAttrClassDesc {
+class FabricControlMatrixClassDesc : public DynPBCustAttrClassDesc {
 public:
-	SpliceControlMatrixClassDesc()
+	FabricControlMatrixClassDesc()
 	{
 	}
-	void *			Create(BOOL loading) { return new SpliceControlMatrix(loading); }
+	void *			Create(BOOL loading) { return new FabricControlMatrix(loading); }
 	const MCHAR *	ClassName() { static MSTR s = GetString(IDS_SPLICE_MAT_CTRL_CLASS_NAME); return s.data(); }
 	SClass_ID		SuperClassID() { return CTRL_MATRIX3_CLASS_ID; }
-	Class_ID		ClassID() { return SpliceControlMatrix_CLASS_ID; }
-	const TCHAR*	InternalName() {return _T("SpliceMatrixController");}
+	Class_ID		ClassID() { return FabricControlMatrix_CLASS_ID; }
+	const TCHAR*	InternalName() {return _T("FabricMatrixController");}
 };
 
-DynPBCustAttrClassDesc* SpliceTranslationLayer<Control, Matrix3>::GetClassDesc()
+DynPBCustAttrClassDesc* FabricTranslationLayer<Control, Matrix3>::GetClassDesc()
 {
-	static SpliceControlMatrixClassDesc spliceControllerDesc;
+	static FabricControlMatrixClassDesc spliceControllerDesc;
 	return &spliceControllerDesc; 
 }
 
-SpliceControlMatrix::SpliceControlMatrix(BOOL loading)
+FabricControlMatrix::FabricControlMatrix(BOOL loading)
 	: ParentClass(loading)
 {
 	m_value.IdentityMatrix();
@@ -62,11 +62,11 @@ SpliceControlMatrix::SpliceControlMatrix(BOOL loading)
 }
 
 
-SpliceControlMatrix::~SpliceControlMatrix() 
+FabricControlMatrix::~FabricControlMatrix() 
 {
 }		
 
-void SpliceControlMatrix::Copy(Control *from)
+void FabricControlMatrix::Copy(Control *from)
 {
 	m_value.IdentityMatrix();
 	TimeValue t = GetCOREInterface()->GetTime();
@@ -75,20 +75,20 @@ void SpliceControlMatrix::Copy(Control *from)
 
 }
 
-void SpliceControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
+void FabricControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
 	Invalidate();
 	Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
 	if(method == CTRL_ABSOLUTE)
 	{
-		MaxValueToSplice(m_binding, m_parentArgName.c_str(), t, interval, Matrix3::Identity);
+		MaxValueToFabric(m_binding, m_parentArgName.c_str(), t, interval, Matrix3::Identity);
 	}
 	else
 	{
 		// if our parents value has changed, invalidate our cache
 		if (!(m_cachedParentVal == *pInVal))
 			Invalidate();
-		MaxValueToSplice(m_binding, m_parentArgName.c_str(), t, interval, *pInVal);
+		MaxValueToFabric(m_binding, m_parentArgName.c_str(), t, interval, *pInVal);
 		// Cache parent transform for next eval
 		m_cachedParentVal = *pInVal;
 	}
@@ -98,10 +98,10 @@ void SpliceControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, G
 
 
 
-void SpliceControlMatrix::SetValue(TimeValue,void *value,int,GetSetMethod)
+void FabricControlMatrix::SetValue(TimeValue,void *value,int,GetSetMethod)
 {
 	// Cache input val, we will return this value until our graph evaluates
-	// This code allows us to assign the SpliceMatrix to a node, and it
+	// This code allows us to assign the FabricMatrix to a node, and it
 	// will hold it's current transform until a graph is assigned.
 	SetXFormPacket* packet = reinterpret_cast<SetXFormPacket*>(value);
 	if (packet->command == XFORM_SET)

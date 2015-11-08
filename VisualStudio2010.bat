@@ -1,7 +1,7 @@
 @echo OFF
 
 set REPODIR=%~dp0
-set SLN=%REPODIR%/FabricSplice3dsmax.sln
+set SLN=%REPODIR%/Fabric3dsmax.sln
 
 IF NOT DEFINED FABRIC_DIR (
   SET FABRIC_DIR=%REPODIR%..\..\..\stage\Windows\x86_64\Release\
@@ -16,7 +16,7 @@ IF NOT DEFINED BOOST_DIR (
   set BOOST_DIR=%REPODIR%..\..\..\ThirdParty\PreBuilt\Windows\x86_64\Release\boost\1.55.0\lib
 )
 
-set DISTDIR=%FABRIC_DIR%\SpliceIntegrations\FabricSplice3dsmax2014\
+set DISTDIR=%FABRIC_DIR%\FabricIntegrations\Fabric3dsmax2014\
 set SCINTILLANETDIR=%DISTDIR%ScintillaNET\
 
 echo Starting VS Launcher

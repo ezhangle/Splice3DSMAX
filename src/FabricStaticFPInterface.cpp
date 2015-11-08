@@ -1,7 +1,7 @@
 #include "StdAfx.h"
-#include "SpliceStaticFPInterface.h"
+#include "FabricStaticFPInterface.h"
 #include "MaxScript/MaxScript.h"
-#include "SpliceEvents.h"
+#include "FabricEvents.h"
 #include "FabricCore.h"
 #include <fstream>      // std::ifstream
 
@@ -64,7 +64,7 @@ FabricStaticFPInterface* FabricStaticFPInterface::GetInstance()
 
 BOOL FabricStaticFPInterface::ImportFabricFile(const TSTR& file)
 {
-	ClassDesc2* pCD = SpliceTranslationLayer<GeomObject, Mesh>::GetClassDesc();
+	ClassDesc2* pCD = FabricTranslationLayer<GeomObject, Mesh>::GetClassDesc();
 	BOOL res = FALSE;
 	if (pCD != NULL)
 	{
@@ -74,7 +74,7 @@ BOOL FabricStaticFPInterface::ImportFabricFile(const TSTR& file)
 		// to the Scene graph, and is the only type that really makes sense
 		Object* pRef = reinterpret_cast<Object*>(pCD->Create(TRUE));
 
-		SpliceTranslationFPInterface* pFabricInterface = GetSpliceInterface(pRef);
+		FabricTranslationFPInterface* pFabricInterface = GetFabricInterface(pRef);
 		if (pFabricInterface != NULL)
 			res = pFabricInterface->LoadFromFile(file, true);
 
@@ -93,7 +93,7 @@ BOOL FabricStaticFPInterface::ImportFabricFile(const TSTR& file)
 
 BOOL FabricStaticFPInterface::ExportFabricFile(const MSTR& file, ReferenceTarget* FabricEntity) 
 {
-	SpliceTranslationFPInterface* pFabricInterface = GetSpliceInterface(FabricEntity);
+	FabricTranslationFPInterface* pFabricInterface = GetFabricInterface(FabricEntity);
 	if (pFabricInterface == nullptr)
 		return FALSE;
 
@@ -234,39 +234,39 @@ int FabricStaticFPInterface::DisableLogging(int loggers) {
 }
 
 void FabricStaticFPInterface::DestroyClient(bool force) {
-	SpliceEvents::ReleaseInstance();
+	FabricEvents::ReleaseInstance();
 	
 	ReleaseAll();
 }
 
 bool FabricStaticFPInterface::GetFabricRendering()
 {
-	return SpliceEvents::GetInstance()->ViewportRenderHooked();
+	return FabricEvents::GetInstance()->ViewportRenderHooked();
 }
 
 void FabricStaticFPInterface::SetFabricRendering(bool isRendering)
 {
 	if (isRendering)
 	{
-		SpliceEvents::GetInstance()->HookViewportRender();
+		FabricEvents::GetInstance()->HookViewportRender();
 	}
 	else
-		SpliceEvents::GetInstance()->UnHookViewportRender();
+		FabricEvents::GetInstance()->UnHookViewportRender();
 }
 
 
 bool FabricStaticFPInterface::GetFabricManip()
 {
-	return SpliceEvents::GetInstance()->MouseEventsHooked();
+	return FabricEvents::GetInstance()->MouseEventsHooked();
 }
 
 void FabricStaticFPInterface::SetFabricManip(bool isManipulating)
 {
 	if (isManipulating)
 	{
-		SpliceEvents::GetInstance()->HookMouseEvents();
+		FabricEvents::GetInstance()->HookMouseEvents();
 	}
 	else
-		SpliceEvents::GetInstance()->UnHookMouseEvents();
+		FabricEvents::GetInstance()->UnHookMouseEvents();
 }
 

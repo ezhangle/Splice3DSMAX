@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FabricSplice3dsmax", "FabricSplice3dsmax.vcxproj", "{771FD8D0-EE9B-442E-9D32-B2C60B807FEF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fabric3dsmax", "Fabric3dsmax.vcxproj", "{771FD8D0-EE9B-442E-9D32-B2C60B807FEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

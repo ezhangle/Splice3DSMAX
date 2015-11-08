@@ -63,7 +63,7 @@ extern TCHAR *GetString(int id);
 
 // Local includes
 #include "DynamicParamBlocks\DynamicDialog\resource.h"
-#include "SpliceTranslationLayer.hpp"
-#include "Splice3dsmax.h"
+#include "FabricTranslationLayer.hpp"
+#include "Fabric3dsmax.h"
 
 

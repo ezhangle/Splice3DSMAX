@@ -8,7 +8,7 @@ max tool zoomextents all
 clearNodeSelection()
 resetxform bunny
 
-m = SpliceMesh()
+m = FabricMesh()
 -- Add a link to a scene node - pass in both the mesh and the trnasform
 m.AddInputPort "mesh0" "PolygonMesh" 17
 m.AddInputPort "mesh0Transform" "Mat44" 17
@@ -62,5 +62,5 @@ operator paintOp(io PolygonMesh mesh0, in Mat44 mesh0Transform) {
 
 m.SetKLCode entryPt klCode
 
-Splice.Rendering = true
-Splice.Manipulation = true 
+Fabric.Rendering = true
+Fabric.Manipulation = true 

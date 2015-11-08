@@ -1,17 +1,17 @@
 #pragma once
 #include "cmdmode.h"
-#include "SpliceMouseCallback.h"
+#include "FabricMouseCallback.h"
 
-class SpliceCommandMode :
+class FabricCommandMode :
 	public CommandMode
 {
 private:
 
-	SpliceMouseCallback m_mouseCallback;
+	FabricMouseCallback m_mouseCallback;
 
 public:
-	SpliceCommandMode(void);
-	~SpliceCommandMode(void);
+	FabricCommandMode(void);
+	~FabricCommandMode(void);
 
 	virtual int Class();
 

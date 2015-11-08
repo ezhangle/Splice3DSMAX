@@ -1,7 +1,7 @@
 tp = Teapot radius:40 pos:[-14.2223,31.2546,0]
 sp = Sphere radius:40 smooth:on segs:32 pos:[58.9291,-39.6191,0]
 
-spliceMod = Splice_WSModifier()
+spliceMod = Fabric_WSModifier()
 addModifier sp spliceMod
 
 spliceMod.AddInputPort "projMesh" "PolygonMesh" -2
@@ -35,7 +35,7 @@ operator ParallelShrinkWrap<<<index>>>( io PolygonMesh source, SpatialQueryable 
     }
   }
 }
-operator SpliceWSModifier(
+operator FabricWSModifier(
   io PolygonMesh modifierMesh, 
   in Mat44 nodeTransform, 
   in PolygonMesh projMesh, 
@@ -59,4 +59,4 @@ operator SpliceWSModifier(
 }
 "
 
-spliceMod.SetKLCode "SpliceWSModifier" klCode
+spliceMod.SetKLCode "FabricWSModifier" klCode

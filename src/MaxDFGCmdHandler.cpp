@@ -5,7 +5,7 @@
 
 
 
-MaxDFGCmdHandler::MaxDFGCmdHandler(SpliceTranslationFPInterface* pTranslation)
+MaxDFGCmdHandler::MaxDFGCmdHandler(FabricTranslationFPInterface* pTranslation)
 	: DFGUICmdHandler_QUndo(GetQtUndoStack())
 	, m_pTranslationLayer(pTranslation)
 {
@@ -193,7 +193,7 @@ std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding
 	bool isPossibleMaxPort = portType != FabricCore::DFGPortType_Out && execPath.empty();
 	//if (isPossibleMaxPort && metaData.empty())
 	//{
-	//	int maxPortType = SpliceTypeToDefaultMaxType(typeSpec.c_str());
+	//	int maxPortType = FabricTypeToDefaultMaxType(typeSpec.c_str());
 	//	if (maxPortType >= 0)
 	//	{
 	//		std::string sMetaData = metaData;

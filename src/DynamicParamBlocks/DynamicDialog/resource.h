@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by FabricSplice3dsmax.rc
+// Used by Fabric3dsmax.rc
 //
 #define IDS_LIBDESCRIPTION              1
 #define IDS_CATEGORY                    2
@@ -13,7 +13,7 @@
 #define IDS_SAVE_PRESET                 7
 #define IDS_SPLICEMESH_CLASS_NAME       8
 #define IDS_UNINITIALIZED_PORT          9
-#define IDS_SpliceModifier_CLASS_NAME   10
+#define IDS_FabricModifier_CLASS_NAME   10
 #define IDS_SPLICE_MAT_CTRL_CLASS_NAME  11
 #define IDS_SPLICE_POS_CTRL_CLASS_NAME  12
 #define IDS_SPLICE_ROT_CTRL_CLASS_NAME  13

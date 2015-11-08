@@ -1,15 +1,15 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-#define SpliceWSModifier_CLASS_ID	Class_ID(0x36cb2ec2, 0x5d196a8e)
+#define FabricWSModifier_CLASS_ID	Class_ID(0x36cb2ec2, 0x5d196a8e)
 
 //////////////////////////////////////////////////////////////////////////
-class SpliceWSModifier : public SpliceTranslationLayer<WSModifier, Mesh>
+class FabricWSModifier : public FabricTranslationLayer<WSModifier, Mesh>
 {
 public:
 
 	//Constructor/Destructor
-	SpliceWSModifier(BOOL loading);
-	virtual ~SpliceWSModifier();	
+	FabricWSModifier(BOOL loading);
+	virtual ~FabricWSModifier();	
 
 	virtual void DeleteThis() { delete this; }	
 
@@ -38,7 +38,7 @@ public:
 	virtual CreateMouseCallBack* GetCreateMouseCallBack() { return NULL; }
 
 	//From Animatable
-	virtual Class_ID ClassID() {return SpliceWSModifier_CLASS_ID;}		
+	virtual Class_ID ClassID() {return FabricWSModifier_CLASS_ID;}		
 	virtual void GetClassName(TSTR& s) {s = GetString(IDS_SPLICE_WSMODIFIER_CLASS);}
 
 	// From ReferenceTarget
@@ -51,9 +51,9 @@ public:
 private:
 	void ResetPorts();
 
-	// From SpliceTranslationLayer
+	// From FabricTranslationLayer
 	int GetValueType() { return TYPE_MESH; }
-	bool CloneSpliceData(ParentClass* pMyClone) { return true; }
+	bool CloneFabricData(ParentClass* pMyClone) { return true; }
 
 	std::string m_nodeTransformArgName;
 	std::string m_inMeshArgName;

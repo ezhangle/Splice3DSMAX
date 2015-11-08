@@ -1,15 +1,15 @@
 //////////////////////////////////////////////////////////////////////////
-// SpliceReference target allows us to create a generic splice node
+// FabricReference target allows us to create a generic splice node
 // Its not really meant to be made part of the scene graph, instead this
 // can be a generic data container, hosting
 #include "StdAfx.h"
 
-#define SpliceReferenceTarget_CLASS_ID Class_ID(0x7bce50e7, 0x5ddc0273)
+#define FabricReferenceTarget_CLASS_ID Class_ID(0x7bce50e7, 0x5ddc0273)
 
-class SpliceReferenceTarget : public SpliceTranslationLayer<ReferenceTarget, int> {
+class FabricReferenceTarget : public FabricTranslationLayer<ReferenceTarget, int> {
 
 	//From Animatable
-	Class_ID ClassID() {return SpliceReferenceTarget_CLASS_ID;}		
+	Class_ID ClassID() {return FabricReferenceTarget_CLASS_ID;}		
 	SClass_ID SuperClassID() { return REF_TARGET_CLASS_ID; }
 	void GetClassName(TSTR& s) {s = GetString(IDS_SPLICE_REFTARG_CLASS_NAME);}
 
@@ -20,30 +20,30 @@ class SpliceReferenceTarget : public SpliceTranslationLayer<ReferenceTarget, int
 	int GetValueType() { return TYPE_REFTARG; }
 
 	// We have no extra data to clone.
-	bool CloneSpliceData(SpliceTranslationLayer* pMyClone) { return true; }
+	bool CloneFabricData(FabricTranslationLayer* pMyClone) { return true; }
 
 public:
-	SpliceReferenceTarget(BOOL loading);
-	~SpliceReferenceTarget();
+	FabricReferenceTarget(BOOL loading);
+	~FabricReferenceTarget();
 };
 
-class SpliceReferenceTargetClassDesc : public DynPBCustAttrClassDesc {
+class FabricReferenceTargetClassDesc : public DynPBCustAttrClassDesc {
 public:
-	SpliceReferenceTargetClassDesc()
+	FabricReferenceTargetClassDesc()
 	{
 	}
-	void *			Create(BOOL loading) { return new SpliceReferenceTarget(loading); }
+	void *			Create(BOOL loading) { return new FabricReferenceTarget(loading); }
 	const MCHAR *	ClassName() { static MSTR s = GetString(IDS_SPLICE_REFTARG_CLASS_NAME); return s.data(); }
 	SClass_ID		SuperClassID() { return REF_TARGET_CLASS_ID; }
-	Class_ID		ClassID() { return SpliceReferenceTarget_CLASS_ID; }
-	const TCHAR*	InternalName() {return _T("SpliceReferenceTarget");}
+	Class_ID		ClassID() { return FabricReferenceTarget_CLASS_ID; }
+	const TCHAR*	InternalName() {return _T("FabricReferenceTarget");}
 };
 
-DynPBCustAttrClassDesc* SpliceTranslationLayer<ReferenceTarget, int>::GetClassDesc()
+DynPBCustAttrClassDesc* FabricTranslationLayer<ReferenceTarget, int>::GetClassDesc()
 {
-	static SpliceReferenceTargetClassDesc spliceControllerDesc;
+	static FabricReferenceTargetClassDesc spliceControllerDesc;
 	return &spliceControllerDesc; 
 }
 
-SpliceReferenceTarget::SpliceReferenceTarget(BOOL loading) : ParentClass(loading) { }
-SpliceReferenceTarget::~SpliceReferenceTarget() {}
+FabricReferenceTarget::FabricReferenceTarget(BOOL loading) : ParentClass(loading) { }
+FabricReferenceTarget::~FabricReferenceTarget() {}

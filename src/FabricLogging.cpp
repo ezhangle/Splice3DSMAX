@@ -1,10 +1,10 @@
 #include "StdAfx.h"
-#include "SpliceLogging.h"
+#include "FabricLogging.h"
 #include <list>
 #include <maxscript/maxscript.h>
 #include <maxscript/util/listener.h>
 #include "CriticalSection.h"
-#include "SpliceStaticFPInterface.h"
+#include "FabricStaticFPInterface.h"
 
 //////////////////////////////////////////////////////////////////////////
 #pragma region Printing to the Listener
@@ -68,8 +68,8 @@ void gatherLogErrorFunc(const char * message, unsigned int length)
 GatherCompilerResults::GatherCompilerResults()
 {
 	s_CompilerStack.push_back(this);
-	//FabricSplice::Logging::setCompilerErrorFunc(gatherCompilerErrorFunc);
-	//FabricSplice::Logging::setLogErrorFunc(gatherLogErrorFunc);
+	//Fabric::Logging::setCompilerErrorFunc(gatherCompilerErrorFunc);
+	//Fabric::Logging::setLogErrorFunc(gatherLogErrorFunc);
 }
 
 GatherCompilerResults::~GatherCompilerResults()
@@ -101,7 +101,7 @@ const std::string& GatherCompilerResults::GetGatheredResults()
 std::list<CStr> s_Messages;
 CriticalSection s_LoggingLock;
 DWORD s_MainTreadId;
-#pragma region Splice Logging fns
+#pragma region Fabric Logging fns
 
 void postMessage(const CStr& cstr)
 {
@@ -143,14 +143,14 @@ void myLogFunc(
 	uint32_t lineSize)
 {
 	CStr cstr;
-	cstr.printf("[Splice] %s\n", lineCStr);
+	cstr.printf("[Fabric] %s\n", lineCStr);
 	logMessage(cstr);
 }
 
 void myLogErrorFunc(const char * message, unsigned int length)
 {
 	CStr cstr;
-	cstr.printf("[Splice] Error: %s\n", message);
+	cstr.printf("[Fabric] Error: %s\n", message);
 	logMessage(cstr);
 }
 
@@ -162,21 +162,21 @@ void myCompilerErrorFunc(
 	const char * desc
 	) {
 	CStr cstr;
-	cstr.printf("[Splice] KL Error: %s, Line %d, Col %d: %s\n", file, (int)row, (int)col, desc);
+	cstr.printf("[Fabric] KL Error: %s, Line %d, Col %d: %s\n", file, (int)row, (int)col, desc);
 	logMessage(cstr);
 }
 
 void myKLReportFunc(const char * message, unsigned int length)
 {
 	CStr cstr;
-	cstr.printf("[Splice] KL Reports: %s\n", message);
+	cstr.printf("[Fabric] KL Reports: %s\n", message);
 	logMessage(cstr);
 }
 
 void myKLStatusFunc(const char * topic, unsigned int topicLength,  const char * message, unsigned int messageLength)
 {
 	CStr cstr;
-	cstr.printf("[Splice] KL Status for '%s': %s\n", topic, message);
+	cstr.printf("[Fabric] KL Status for '%s': %s\n", topic, message);
 	logMessage(cstr);
 }
 
@@ -206,25 +206,25 @@ void InitLoggingTimer()
 
 extern void SetGenericLoggerEnabled( bool enable )
 {
-//	FabricSplice::Logging::setLogFunc((enable) ? myLogFunc : NULL);
+//	Fabric::Logging::setLogFunc((enable) ? myLogFunc : NULL);
 }
 
 extern void SetErrorLoggerEnabled( bool enable )
 {
-//	FabricSplice::Logging::setLogErrorFunc((enable) ? myLogErrorFunc : NULL);
+//	Fabric::Logging::setLogErrorFunc((enable) ? myLogErrorFunc : NULL);
 }
 
 extern void SetCompilerLoggerEnabled( bool enable )
 {
-//	FabricSplice::Logging::setCompilerErrorFunc((enable) ? myCompilerErrorFunc : NULL);
+//	Fabric::Logging::setCompilerErrorFunc((enable) ? myCompilerErrorFunc : NULL);
 }
 
 extern void SetKLReportLoggerEnabled( bool enable )
 {
-//	FabricSplice::Logging::setKLReportFunc((enable) ? myKLReportFunc : NULL);
+//	Fabric::Logging::setKLReportFunc((enable) ? myKLReportFunc : NULL);
 }
 
 extern void SetKLStatusLoggerEnabled( bool enable )
 {
-//	FabricSplice::Logging::setKLStatusFunc((enable) ? myKLStatusFunc : NULL);
+//	Fabric::Logging::setKLStatusFunc((enable) ? myKLStatusFunc : NULL);
 }

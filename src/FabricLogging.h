@@ -17,7 +17,7 @@ public:
 };
 
 // Call this function to set the logging
-// capacity of Splice to the default
+// capacity of Fabric to the default
 extern void InitLoggingTimer();
 
 extern void myLogFunc(

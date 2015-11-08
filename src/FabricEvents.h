@@ -1,20 +1,20 @@
 #pragma once
-#include "MouseCallbacks\SpliceCommandMode.h"
+#include "MouseCallbacks\FabricCommandMode.h"
 
-class SpliceViewportDrawCallback;
+class FabricViewportDrawCallback;
 
 
 #define MAX_VPTS	4			// max 3D viewports
-class SpliceEvents 
+class FabricEvents 
 {
 private:
-	SpliceEvents();
-	~SpliceEvents();
+	FabricEvents();
+	~FabricEvents();
 
-	SpliceViewportDrawCallback* m_VptCallback;
-	static SpliceEvents* s_Instance;
+	FabricViewportDrawCallback* m_VptCallback;
+	static FabricEvents* s_Instance;
 
-	SpliceCommandMode m_MouseCommandMode;
+	FabricCommandMode m_MouseCommandMode;
 
 public:
 
@@ -23,13 +23,13 @@ public:
 	void UnHookMouseEvents();
 	bool MouseEventsHooked();
 
-	// Call this to allow Splice to render to the (OGL only) viewport
+	// Call this to allow Fabric to render to the (OGL only) viewport
 	void HookViewportRender();
 	void UnHookViewportRender();
 	bool ViewportRenderHooked();
 	void TriggerRedraw();
 
-	static SpliceEvents* GetInstance();
+	static FabricEvents* GetInstance();
 	static void ReleaseInstance();
 	
 	//static FabricCore::RTVal s_DrawContexts[MAX_VPTS];

@@ -11,19 +11,19 @@ m.width = 50
 m.lengthSegs = 100
 m.widthSegs = 100
 
-spliceMod = SpliceModifier()
+spliceMod = FabricModifier()
 spliceMod.AddInputPort "amplitude" "Scalar" -2
 spliceMod.AddInputPort "frequency" "Scalar" -2
 spliceMod.AddInputPort "phaseOffset" "Scalar" -2
 
 addmodifier m spliceMod
 
-entryPt = "SpliceModifier";
+entryPt = "FabricModifier";
 klCode = "
 require Math;
 require Geometry;
 
-operator SpliceModifier(io PolygonMesh modifierMesh, in Scalar amplitude, in Scalar frequency, in Scalar phaseOffset, in EvalContext context) {
+operator FabricModifier(io PolygonMesh modifierMesh, in Scalar amplitude, in Scalar frequency, in Scalar phaseOffset, in EvalContext context) {
   for (Integer i = 0; i < modifierMesh.pointCount(); i++)
   {
 		Vec3 v = modifierMesh.getPointPosition(i);

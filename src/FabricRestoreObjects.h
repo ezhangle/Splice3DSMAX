@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-// SpliceRestoreObjects
+// FabricRestoreObjects
 //
 // This file contains implementations of the various undo objects
 // we can register with max dealing with KL actions

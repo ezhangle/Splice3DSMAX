@@ -1,24 +1,24 @@
 #pragma once // hpp files are actually headers
 
-#include "SpliceTranslationLayer.h"
+#include "FabricTranslationLayer.h"
 #include "DynamicParamBlocks/DynPBCustAttrClassDesc.h"
 #include "DynamicParamBlocks/DynamicDialog/DynamicDialogTemplate.h"
 #include "DynamicParamBlocks/DynPBUndo.h"
-#include "SpliceLogging.h"
+#include "FabricLogging.h"
 #include "MaxConversionFns.h"
-#include "Splice3dsmax.h"
-#include "SpliceRestoreObjects.h"
+#include "Fabric3dsmax.h"
+#include "FabricRestoreObjects.h"
 #include "ASTWrapper/KLASTManager.h"
 
 //////////////////////////////////////////////////////////////////////////
-//--- SpliceTranslationLayer -------------------------------------------------------
+//--- FabricTranslationLayer -------------------------------------------------------
 
 //---------------------------------------------------------------------------------------------------------------
 // Constructor/Destructor
 //---------------------------------------------------------------------------------------------------------------
 #pragma region//Constructor/Destructor
 template<typename TBaseClass, typename TResultType>
-SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(BOOL loading)
+FabricTranslationLayer<TBaseClass, TResultType>::FabricTranslationLayer(BOOL loading)
 	:	m_hPanel(NULL)
 	,	m_pInterface(NULL)
 	,	m_pMtlInterface(NULL)
@@ -36,7 +36,7 @@ SpliceTranslationLayer<TBaseClass, TResultType>::SpliceTranslationLayer(BOOL loa
 }
 
 template<typename TBaseClass, typename TResultType>
-SpliceTranslationLayer<TBaseClass, TResultType>::~SpliceTranslationLayer()
+FabricTranslationLayer<TBaseClass, TResultType>::~FabricTranslationLayer()
 {
 	// We _must_ have been released by now
 	DbgAssert(m_pblock == NULL);
@@ -52,7 +52,7 @@ SpliceTranslationLayer<TBaseClass, TResultType>::~SpliceTranslationLayer()
 }
 
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
+bool FabricTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
 {
 	MAXSPLICE_CATCH_BEGIN;
 
@@ -90,7 +90,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
 
 // Copy the current pblocks descriptor, or return a new one
 template<typename TBaseClass, typename TResultType>
-ParamBlockDesc2* SpliceTranslationLayer<TBaseClass, TResultType>::CopyPBDescriptor()
+ParamBlockDesc2* FabricTranslationLayer<TBaseClass, TResultType>::CopyPBDescriptor()
 {
 	// Create the default new descriptor
 	ParamBlockDesc2* pNewDesc = GetClassDesc()->CreatePBDesc();
@@ -130,7 +130,7 @@ ParamBlockDesc2* SpliceTranslationLayer<TBaseClass, TResultType>::CopyPBDescript
 }
 
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::DeleteMaxParameter(ParamID pid)
+bool FabricTranslationLayer<TBaseClass, TResultType>::DeleteMaxParameter(ParamID pid)
 {
 	// No block, nothing to delete
 	if (m_pblock == nullptr)
@@ -160,7 +160,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::DeleteMaxParameter(ParamID
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::CreateParamBlock( ParamBlockDesc2* pDesc)
+void FabricTranslationLayer<TBaseClass, TResultType>::CreateParamBlock( ParamBlockDesc2* pDesc)
 {
 	IParamBlock2* pNewBlock = ::CreateParamBlock(pDesc, m_pblock, this);
 	// This line finally assigns us the new parameter block.
@@ -177,7 +177,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::CreateParamBlock( ParamBlo
 
 
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::GeneratePBlockUI()
+bool FabricTranslationLayer<TBaseClass, TResultType>::GeneratePBlockUI()
 {
 	if (m_dialogTemplate == NULL) 
 		m_dialogTemplate = ::GeneratePBlockUI(m_pblock);
@@ -186,7 +186,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::GeneratePBlockUI()
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::UpdateUISpec()
+void FabricTranslationLayer<TBaseClass, TResultType>::UpdateUISpec()
 {
 	MaybeRemoveParamUI();
 	SAFE_DELETE(m_dialogTemplate);
@@ -198,7 +198,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::UpdateUISpec()
 //---------------------------------------------------------------------------------------------------------------
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::MaybeRemoveParamUI()
+void FabricTranslationLayer<TBaseClass, TResultType>::MaybeRemoveParamUI()
 {
 	if (m_paramMap != NULL)
 	{
@@ -210,7 +210,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::MaybeRemoveParamUI()
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::MaybePostParamUI()
+void FabricTranslationLayer<TBaseClass, TResultType>::MaybePostParamUI()
 {
 	if (m_pInterface != NULL && GeneratePBlockUI())
 	{
@@ -228,7 +228,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::MaybePostParamUI()
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::BeginEditParams(IObjParam *ip, ULONG flags, Animatable *UNUSED(prev))
+void FabricTranslationLayer<TBaseClass, TResultType>::BeginEditParams(IObjParam *ip, ULONG flags, Animatable *UNUSED(prev))
 {
 	this->m_pInterface = ip;
 	m_hPanel = ip->AddRollupPage(
@@ -236,7 +236,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::BeginEditParams(IObjParam 
 		MAKEINTRESOURCE(IDD_PARAM_GENERATION_UI),
 		DlgProc,
 		GetString(IDS_PARAMS),
-		(LPARAM)static_cast<SpliceTranslationFPInterface*>(this));
+		(LPARAM)static_cast<FabricTranslationFPInterface*>(this));
 
 	// Generate our Dialog, and assign an mParamMap
 	MaybePostParamUI();
@@ -262,7 +262,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::BeginEditParams(IObjParam 
 						if (pSrcContainer == nullptr)
 							continue;
 
-						//SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
+						//FabricTranslationFPInterface* pSrcContInterface = static_cast<FabricTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
 						//if (pSrcContInterface == nullptr)
 						//	continue;
 
@@ -276,7 +276,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::BeginEditParams(IObjParam 
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::EndEditParams(IObjParam *ip, ULONG flags, Animatable *UNUSED(next))
+void FabricTranslationLayer<TBaseClass, TResultType>::EndEditParams(IObjParam *ip, ULONG flags, Animatable *UNUSED(next))
 {
 	if (m_pblock != nullptr) 
 	{
@@ -302,7 +302,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::EndEditParams(IObjParam *i
 }
 
 template<typename TBaseClass, typename TResultType>
-ParamDlg *SpliceTranslationLayer<TBaseClass, TResultType>::CreateParamDlg(HWND hwMtlEdit, IMtlParams *imp)
+ParamDlg *FabricTranslationLayer<TBaseClass, TResultType>::CreateParamDlg(HWND hwMtlEdit, IMtlParams *imp)
 {
 	m_pMtlInterface = imp;
 
@@ -312,13 +312,13 @@ ParamDlg *SpliceTranslationLayer<TBaseClass, TResultType>::CreateParamDlg(HWND h
 		MAKEINTRESOURCE(IDD_PARAM_GENERATION_UI),
 		DlgProc,
 		GetString(IDS_PARAMS).data(),
-		(LPARAM)static_cast<SpliceTranslationFPInterface*>(this));
+		(LPARAM)static_cast<FabricTranslationFPInterface*>(this));
 
 	return CreateMyAutoParamDlg(hwMtlEdit, imp);
 }
 
 template<typename TBaseClass, typename TResultType>
-ParamDlg* SpliceTranslationLayer<TBaseClass, TResultType>::CreateMyAutoParamDlg(HWND hwMtlEdit, IMtlParams* pMtlParams) 
+ParamDlg* FabricTranslationLayer<TBaseClass, TResultType>::CreateMyAutoParamDlg(HWND hwMtlEdit, IMtlParams* pMtlParams) 
 {
 	if (m_pblock && GeneratePBlockUI())
 	{
@@ -341,7 +341,7 @@ ParamDlg* SpliceTranslationLayer<TBaseClass, TResultType>::CreateMyAutoParamDlg(
 
 #pragma region//Get/SetReference
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::SetReference(int i, RefTargetHandle rtarg)
+void FabricTranslationLayer<TBaseClass, TResultType>::SetReference(int i, RefTargetHandle rtarg)
 {
 	if (i == 0)
 	{
@@ -387,10 +387,10 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetReference(int i, RefTar
 // Something has changed on our parameter block
 #if MAX_VERSION_MAJOR < 17 // Max 2015 is ver 17
 template<typename TBaseClass, typename TResultType>
-RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged( Interval , RefTargetHandle , PartID&	, RefMessage message )
+RefResult FabricTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged( Interval , RefTargetHandle , PartID&	, RefMessage message )
 #else
 template<typename TBaseClass, typename TResultType>
-RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate)
+RefResult FabricTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate)
 #endif
 {
 	// set splices dirty flag.
@@ -436,7 +436,7 @@ RefResult SpliceTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged(cons
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::RefDeleted() {
+void FabricTranslationLayer<TBaseClass, TResultType>::RefDeleted() {
 	// If we have no nodes referencing this class, then kill our UI
 	//if (GetKLEditor() != nullptr)
 	//{
@@ -450,7 +450,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::RefDeleted() {
 
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::RefAdded(	RefMakerHandle 	rm) {
+void FabricTranslationLayer<TBaseClass, TResultType>::RefAdded(	RefMakerHandle 	rm) {
 	// Note: We were using this to name our class, but it causes undo objects 
 	// to be created at the worst time.  Skip for now.
 
@@ -479,9 +479,9 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::RefAdded(	RefMakerHandle 	
 //---------------------------------------------------------------------------------------------------------------
 #pragma region//Clone
 template<typename TBaseClass, typename TResultType>
-ReferenceTarget *SpliceTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir &remap)
+ReferenceTarget *FabricTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir &remap)
 {
-	SpliceTranslationLayer *pMyClone = reinterpret_cast<SpliceTranslationLayer*>(GetClassDesc()->Create(TRUE));
+	FabricTranslationLayer *pMyClone = reinterpret_cast<FabricTranslationLayer*>(GetClassDesc()->Create(TRUE));
 
 	// If we are cloning - lets clone the parameter block
 	if (m_pblock != NULL)
@@ -496,7 +496,7 @@ ReferenceTarget *SpliceTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir
 	BaseClone( this, pMyClone, remap );
 
 	// Now, allow our derived class to clone onto the new class
-	CloneSpliceData(pMyClone);
+	CloneFabricData(pMyClone);
 
 	return pMyClone;
 }
@@ -525,7 +525,7 @@ ReferenceTarget *SpliceTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir
 
 // Save our local parameters
 template<typename TBaseClass, typename TResultType>
-IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
+IOResult FabricTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
 {	
 	// Save out all the data needed to recreate parameters
 	isave->BeginChunk(PARAM_SPLICE_DATA);
@@ -550,16 +550,16 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Save( ISave *isave )
 // Post load callback on load gives classes a chance to clean up
 class RenameMaxParamsCallback : public PostLoadCallback {
 private:
-	SpliceTranslationFPInterface* m_owner;
+	FabricTranslationFPInterface* m_owner;
 
 public:
-	RenameMaxParamsCallback(SpliceTranslationFPInterface* pOwner) : m_owner(pOwner) {}
+	RenameMaxParamsCallback(FabricTranslationFPInterface* pOwner) : m_owner(pOwner) {}
 	virtual void proc( ILoad *iload ) { m_owner->ReconnectPostLoad(); delete this; }
 };
 
 // Load our local parameters
 template<typename TBaseClass, typename TResultType>
-IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
+IOResult FabricTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 {
 	IOResult result = IO_OK;
 	std::string outName;
@@ -612,7 +612,7 @@ IOResult SpliceTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
+void FabricTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 {
 	//DFGWrapper::ExecPortList ports = m_binding.getExecutable()->getPorts();
 	FabricCore::DFGExec exec = m_binding.getExec();
@@ -641,189 +641,189 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 //
 //// The following are direct mappers to the commands defined by the DFGCmdHandler classed.
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGRemoveNodes(const Tab<TSTR*>& nodeNames, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGRemoveNodes(const Tab<TSTR*>& nodeNames, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGConnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGConnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGDisconnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGDisconnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddGraph(const MSTR& title, Point2 pos, const MSTR& execPath)
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::DFGAddGraph(const MSTR& title, Point2 pos, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddFunc(const MSTR& title, const MSTR& initialCode, Point2 pos, const MSTR& execPath)
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::DFGAddFunc(const MSTR& title, const MSTR& initialCode, Point2 pos, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGInstPreset(const MSTR& filename, Point2 pos, const MSTR& execPath)
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::DFGInstPreset(const MSTR& filename, Point2 pos, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddVar(const MSTR& desiredNodeName, const MSTR& dataType, const MSTR& extDep, Point2 pos, const MSTR& execPath)
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::DFGAddVar(const MSTR& desiredNodeName, const MSTR& dataType, const MSTR& extDep, Point2 pos, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddGet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath)
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::DFGAddGet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddSet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath)
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::DFGAddSet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddPort(const MSTR& desiredPortName, int portType, const MSTR& portSpec, const MSTR& portToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::DFGAddPort(const MSTR& desiredPortName, int portType, const MSTR& portSpec, const MSTR& portToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGEditPort(const MSTR& portName, const MSTR& desiredNewPortName, const MSTR& typeSpec, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::DFGEditPort(const MSTR& portName, const MSTR& desiredNewPortName, const MSTR& typeSpec, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGRemovePort(const MSTR& portName, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGRemovePort(const MSTR& portName, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGResizeBackdrop(const MSTR& backDropNodeName, Point2 topLeft, Point2 size, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGResizeBackdrop(const MSTR& backDropNodeName, Point2 topLeft, Point2 size, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGMoveNodes(Tab<TSTR*> nodeNames, Tab<Point2*> topLeftPoss, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGMoveNodes(Tab<TSTR*> nodeNames, Tab<Point2*> topLeftPoss, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGImplodeNodes(Tab<TSTR*> nodeNames, const MSTR& desiredNewNodeName, const MSTR& execPath)
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::DFGImplodeNodes(Tab<TSTR*> nodeNames, const MSTR& desiredNewNodeName, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//Tab<TSTR*> SpliceTranslationLayer<TBaseClass, TResultType>::DFGExplodeNodes(const MSTR& nodeName, const MSTR& execPath)
+//Tab<TSTR*> FabricTranslationLayer<TBaseClass, TResultType>::DFGExplodeNodes(const MSTR& nodeName, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGAddBackdrop(const MSTR& title, Point2 pos, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGAddBackdrop(const MSTR& title, Point2 pos, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetNodeTitle(const MSTR& nodeName, const MSTR& newTitle, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGSetNodeTitle(const MSTR& nodeName, const MSTR& newTitle, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetNodeComment(const MSTR& nodeName, const MSTR& comment, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGSetNodeComment(const MSTR& nodeName, const MSTR& comment, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetCode(const MSTR& code, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGSetCode(const MSTR& code, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::DFGRenamePort(const MSTR& oldName, const MSTR& newDesiredName, const MSTR& execPath)
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::DFGRenamePort(const MSTR& oldName, const MSTR& newDesiredName, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//Tab<TSTR*> SpliceTranslationLayer<TBaseClass, TResultType>::DFGPaste(const MSTR& json, Point2 pos, const MSTR& execPath)
+//Tab<TSTR*> FabricTranslationLayer<TBaseClass, TResultType>::DFGPaste(const MSTR& json, Point2 pos, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetArgType(const MSTR& argName, const MSTR& argType)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGSetArgType(const MSTR& argName, const MSTR& argType)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetArgValue(const MSTR& argName, const FPValue* argValue)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGSetArgValue(const MSTR& argName, const FPValue* argValue)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetPortDefaultValue(const MSTR& portName, const FPValue* value, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGSetPortDefaultValue(const MSTR& portName, const FPValue* value, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetRefVarPath(const MSTR& refName, const MSTR& varPath, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGSetRefVarPath(const MSTR& refName, const MSTR& varPath, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGReorderPorts(Tab<int> indices, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGReorderPorts(Tab<int> indices, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSetExtDeps(Tab<TSTR*> extDeps, const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGSetExtDeps(Tab<TSTR*> extDeps, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//void SpliceTranslationLayer<TBaseClass, TResultType>::DFGSplitFromPreset(const MSTR& execPath)
+//void FabricTranslationLayer<TBaseClass, TResultType>::DFGSplitFromPreset(const MSTR& execPath)
 //{
 //}
 //
 //// Load the splice graph for this entity from the given filename
 //template<typename TBaseClass, typename TResultType>
-//bool SpliceTranslationLayer<TBaseClass, TResultType>::LoadFromFile(const MCHAR* filename, bool createMaxParams)
+//bool FabricTranslationLayer<TBaseClass, TResultType>::LoadFromFile(const MCHAR* filename, bool createMaxParams)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//bool SpliceTranslationLayer<TBaseClass, TResultType>::SaveToFile(const MCHAR* filename)
+//bool FabricTranslationLayer<TBaseClass, TResultType>::SaveToFile(const MCHAR* filename)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//bool SpliceTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const MSTR& json, bool createMaxParams)
+//bool FabricTranslationLayer<TBaseClass, TResultType>::RestoreFromJSON(const MSTR& json, bool createMaxParams)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::ExportToJSON()
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::ExportToJSON()
 //{
 //}
 //
 //// Allow introspecting the ports on this graph
 //template<typename TBaseClass, typename TResultType>
-//int SpliceTranslationLayer<TBaseClass, TResultType>::GetPortCount(const MSTR& execPath)
+//int FabricTranslationLayer<TBaseClass, TResultType>::GetPortCount(const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::GetPortName(int i, const MSTR& execPath)
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::GetPortName(int i, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::GetPortType(const MSTR& portName, const MSTR& execPath)
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::GetPortType(const MSTR& portName, const MSTR& execPath)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//FPValue SpliceTranslationLayer<TBaseClass, TResultType>::GetPortValue(const MSTR& portName, const MSTR& execPath)
+//FPValue FabricTranslationLayer<TBaseClass, TResultType>::GetPortValue(const MSTR& portName, const MSTR& execPath)
 //{
 //}
 
@@ -832,29 +832,29 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 
 
 //template<typename TBaseClass, typename TResultType>
-//int SpliceTranslationLayer<TBaseClass, TResultType>::GetMaxTypeForArg(const MSTR& argName)
+//int FabricTranslationLayer<TBaseClass, TResultType>::GetMaxTypeForArg(const MSTR& argName)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxTypeForArg(const MSTR& argName, int type)
+//int FabricTranslationLayer<TBaseClass, TResultType>::SetMaxTypeForArg(const MSTR& argName, int type)
 //{
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//BitArray SpliceTranslationLayer<TBaseClass, TResultType>::GetLegalMaxTypesForArg(const MSTR& argName)
+//BitArray FabricTranslationLayer<TBaseClass, TResultType>::GetLegalMaxTypesForArg(const MSTR& argName)
 //{
 //}
 //
 //// Allow setting various options on our ports
 //template<typename TBaseClass, typename TResultType>
-//bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& value, bool canUndo, const MSTR& execPath);
+//bool FabricTranslationLayer<TBaseClass, TResultType>::SetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& value, bool canUndo, const MSTR& execPath);
 //template<typename TBaseClass, typename TResultType>
-//MSTR SpliceTranslationLayer<TBaseClass, TResultType>::GetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& execPath);
+//MSTR FabricTranslationLayer<TBaseClass, TResultType>::GetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& execPath);
 
 //// Convenience functions
 //template<typename TBaseClass, typename TResultType>
-//bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortUIMinMax(const MSTR& port, FPValue* uiMin, FPValue* uiMax, const MSTR& execPath)
+//bool FabricTranslationLayer<TBaseClass, TResultType>::SetPortUIMinMax(const MSTR& port, FPValue* uiMin, FPValue* uiMax, const MSTR& execPath)
 //{
 //}
 
@@ -863,12 +863,12 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 // port was not connected.  Once connected, each evaluation the output
 // from srcPortName will be transferred into the in-port myPortName
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectArgs(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, bool postConnectionsUI)
+bool FabricTranslationLayer<TBaseClass, TResultType>::ConnectArgs(const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, bool postConnectionsUI)
 {
 	if (pSrcContainer == nullptr)
 		return false;
 	
-	SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
+	FabricTranslationFPInterface* pSrcContInterface = static_cast<FabricTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
 	if (pSrcContInterface == nullptr)
 		return false;
 	
@@ -901,7 +901,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectArgs(const MSTR& my
 // Disconnect a previously connected port.  Returns true if the port was previously connected and
 // has been successfully disconnected, false if disconnect failed or if no connection existed.
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::DisconnectArgs(const MSTR& myPortName)
+bool FabricTranslationLayer<TBaseClass, TResultType>::DisconnectArgs(const MSTR& myPortName)
 {
 	MAXSPLICE_CATCH_BEGIN
 	SetPortConnection(this, myPortName.ToCStr().data(), "");
@@ -913,20 +913,20 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::DisconnectArgs(const MSTR&
 //////////////////////////////////////////////////////////////////////////
 // Props
 template<typename TBaseClass, typename TResultType>
-MSTR SpliceTranslationLayer<TBaseClass, TResultType>::GetOutPortName()
+MSTR FabricTranslationLayer<TBaseClass, TResultType>::GetOutPortName()
 {
 	return MSTR::FromACP(m_outArgName.c_str());
 }
 
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR& name)
+bool FabricTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR& name)
 {
 	MAXSPLICE_CATCH_BEGIN
 
 	// can this port be translated to our out-type?
 	CStr cname = name.ToCStr();
 	const char* portType = GetPortType(cname.data());
-	BitArray legalTypes = SpliceTypeToMaxTypes(portType);
+	BitArray legalTypes = FabricTypeToMaxTypes(portType);
 	if (!legalTypes[GetValueType()])
 		return false;
 	
@@ -944,7 +944,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //////////////////////////////////////////////////////////////////////////
 // Add Ports
 //template<typename TBaseClass, typename TResultType>
-//const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
+//const char* FabricTranslationLayer<TBaseClass, TResultType>::AddInputPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
 //{
 //	std::string realName = m_maxCmdHandler.dfgDoAddPort(m_binding, "", m_binding.getExec(), name, FabricCore::DFGPortType_In, spliceType, "", inExtension, "");
 //	// Because of memory issues, we can't return string here?
@@ -952,34 +952,34 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddOutputPort(const char* name, const char* spliceType, bool isArray/*=false*/, const char* inExtension)
+//const char* FabricTranslationLayer<TBaseClass, TResultType>::AddOutputPort(const char* name, const char* spliceType, bool isArray/*=false*/, const char* inExtension)
 //{
 //	HoldActions hold(_M("Add Output Port"));
-//	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_Out, isArray, inExtension);
+//	return AddFabricParameter(m_binding, spliceType, name, FabricCore::DFGPortType_Out, isArray, inExtension);
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddIOPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
+//const char* FabricTranslationLayer<TBaseClass, TResultType>::AddIOPort(const char* name, const char* spliceType, int maxType/* =-1 */, bool isArray/*=false*/, const char* inExtension)
 //{
 //	HoldActions hold(_M("Add IO Port"));
-//	return AddSpliceParameter(m_binding, spliceType, name, FabricCore::DFGPortType_IO, isArray, inExtension);
+//	return AddFabricParameter(m_binding, spliceType, name, FabricCore::DFGPortType_IO, isArray, inExtension);
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//bool SpliceTranslationLayer<TBaseClass, TResultType>::RemovePort(const char* argName)
+//bool FabricTranslationLayer<TBaseClass, TResultType>::RemovePort(const char* argName)
 //{
 //	m_binding.getExec().removeExecPort(argName);
 //	return true;
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetPortName(int i)
+//const char* FabricTranslationLayer<TBaseClass, TResultType>::GetPortName(int i)
 //{
 //	return m_binding.getExec().getExecPortName(i);
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//const char* SpliceTranslationLayer<TBaseClass, TResultType>::SetPortName(const char* oldName, const char* newName)
+//const char* FabricTranslationLayer<TBaseClass, TResultType>::SetPortName(const char* oldName, const char* newName)
 //{
 //	MAXSPLICE_CATCH_BEGIN
 //
@@ -994,14 +994,14 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetPortType(const char* argName)
+//const char* FabricTranslationLayer<TBaseClass, TResultType>::GetPortType(const char* argName)
 //{
 //	return ::GetPortType(m_binding.getExec(), argName);
 //}
 //
 //
 //template<typename TBaseClass, typename TResultType>
-//bool SpliceTranslationLayer<TBaseClass, TResultType>::IsPortArray(const char* argName)
+//bool FabricTranslationLayer<TBaseClass, TResultType>::IsPortArray(const char* argName)
 //{
 //	FabricCore::RTVal rtVal = m_binding.getArgValue(argName);
 //	return rtVal.isValid() && rtVal.isArray();
@@ -1009,12 +1009,12 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //
 //
 //template<typename TBaseClass, typename TResultType>
-//bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPort(const char* argName)
+//bool FabricTranslationLayer<TBaseClass, TResultType>::SetOutPort(const char* argName)
 //{
 //	MAXSPLICE_CATCH_BEGIN
 //
 //	// can this port be translated to our out-type?
-//	BitArray legalTypes = SpliceTypeToMaxTypes(GetPortType(argName));
+//	BitArray legalTypes = FabricTypeToMaxTypes(GetPortType(argName));
 //	if (!legalTypes[GetValueType()])
 //		return false;
 //
@@ -1031,7 +1031,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //
 //
 //template<typename TBaseClass, typename TResultType>
-//int SpliceTranslationLayer<TBaseClass, TResultType>::GetMaxConnectedType(const char* argName)
+//int FabricTranslationLayer<TBaseClass, TResultType>::GetMaxConnectedType(const char* argName)
 //{
 //	int pid = ::GetPortParamID(m_binding, argName);
 //	if (pid >= 0)
@@ -1042,12 +1042,12 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//int SpliceTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(const char* argName, int maxType)
+//int FabricTranslationLayer<TBaseClass, TResultType>::SetMaxConnectedType(const char* argName, int maxType)
 //{
 //	// The user has requested the default type (-2)
 //	const char* spliceType = GetPortType(argName);
 //	if (maxType == -2)
-//		maxType = SpliceTypeToDefaultMaxType(spliceType);
+//		maxType = FabricTypeToDefaultMaxType(spliceType);
 //	else if (maxType == -1)
 //	{
 //		/* do nothing here, delete was requested */
@@ -1056,10 +1056,10 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //	{
 //		// Figure out what kind of parameter
 //		// we can/will create on the max side
-//		BitArray legalTypes = SpliceTypeToMaxTypes(spliceType);
+//		BitArray legalTypes = FabricTypeToMaxTypes(spliceType);
 //		// The requested max type is not legal for this splice type
 //		if (!legalTypes[maxType])
-//			maxType = SpliceTypeToDefaultMaxType(spliceType); // Reset to default
+//			maxType = FabricTypeToDefaultMaxType(spliceType); // Reset to default
 //	}
 //
 //	// Cache the type being set
@@ -1096,18 +1096,18 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //	CreateParamBlock(pNewDesc);
 //
 //	// Set the value to the current port value
-//	SetMaxParamFromSplice(m_pblock, newId, m_binding, argName);
+//	SetMaxParamFromFabric(m_pblock, newId, m_binding, argName);
 //	return newId;
 //}
 
 //
 //template<typename TBaseClass, typename TResultType>
-//bool SpliceTranslationLayer<TBaseClass, TResultType>::ConnectArgs( const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI )
+//bool FabricTranslationLayer<TBaseClass, TResultType>::ConnectArgs( const MSTR& myPortName, ReferenceTarget* pSrcContainer, const MSTR& srcPortName, int srcPortIndex, bool postConnectionsUI )
 //{
 //	//if (pSrcContainer == nullptr)
 //	//	return false;
 //
-//	//SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
+//	//FabricTranslationFPInterface* pSrcContInterface = static_cast<FabricTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
 //	//if (pSrcContInterface == nullptr)
 //	// return false;
 //
@@ -1130,7 +1130,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //	//	return false;
 //
 //	//if (theHold.Holding())
-//	//	theHold.Put(new SplicePortChangeObject(this));
+//	//	theHold.Put(new FabricPortChangeObject(this));
 //
 //	//// Ok - these ports are good to go.  Connect 'em up.
 //	//int res = SetMaxConnectedType(destPort, TYPE_REFTARG);
@@ -1156,7 +1156,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //
 //
 //template<typename TBaseClass, typename TResultType>
-//bool SpliceTranslationLayer<TBaseClass, TResultType>::DisconnectArgs(const MSTR& myPortName)
+//bool FabricTranslationLayer<TBaseClass, TResultType>::DisconnectArgs(const MSTR& myPortName)
 //{
 //	//DFGWrapper::ExecPortPtr connectedPort = GetPort(myargName);
 //	//if (connectedPort) 
@@ -1165,7 +1165,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //	//	if (connection == "") 
 //	//	{
 //	//		if (theHold.Holding())
-//	//			theHold.Put(new SplicePortChangeObject(this));
+//	//			theHold.Put(new FabricPortChangeObject(this));
 //
 //	//		SetMaxConnectedType(connectedPort, -1);
 //	//		connectedPort.setOption(MAX_SRC_OPT, FabricCore::Variant());
@@ -1176,7 +1176,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //}
 
 //template<typename TBaseClass, typename TResultType>
-//bool SpliceTranslationLayer<TBaseClass, TResultType>::SetPortUIMinMax(const char* argName, FPValue* uiMin, FPValue* uiMax)
+//bool FabricTranslationLayer<TBaseClass, TResultType>::SetPortUIMinMax(const char* argName, FPValue* uiMin, FPValue* uiMax)
 //{
 //	// For now, we only support Float/Int max types
 //	if ((uiMin->type == TYPE_FLOAT && uiMax->type == TYPE_FLOAT) ||
@@ -1201,7 +1201,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //}
 ////
 //template<typename TBaseClass, typename TResultType>
-//const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddNewEmptyGraph(const char* name)
+//const char* FabricTranslationLayer<TBaseClass, TResultType>::AddNewEmptyGraph(const char* name)
 //{
 //	FabricCore::DFGExec graph = m_binding.getExec();
 //	const char* newItem = graph.addInstWithNewGraph(name);
@@ -1210,7 +1210,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddNewEmptyFunc(const char* name)
+//const char* FabricTranslationLayer<TBaseClass, TResultType>::AddNewEmptyFunc(const char* name)
 //{
 //	FabricCore::DFGExec graph = m_binding.getExec();
 //	const char* newItem = graph.addInstWithNewFunc(name);
@@ -1220,7 +1220,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//const char* SpliceTranslationLayer<TBaseClass, TResultType>::AddNodeFromPreset(const char* name, const char* path)
+//const char* FabricTranslationLayer<TBaseClass, TResultType>::AddNodeFromPreset(const char* name, const char* path)
 //{
 //
 //	FabricCore::DFGExec graph = m_binding.getExec();
@@ -1230,7 +1230,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//bool SpliceTranslationLayer<TBaseClass, TResultType>::SetKLCodeForFunc(const char* funcPath, const char* code)
+//bool FabricTranslationLayer<TBaseClass, TResultType>::SetKLCodeForFunc(const char* funcPath, const char* code)
 //{
 //	FabricCore::DFGExec graph = m_binding.getExec();
 //	
@@ -1243,7 +1243,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //}
 //
 //template<typename TBaseClass, typename TResultType>
-//const char* SpliceTranslationLayer<TBaseClass, TResultType>::GetKLCodeForFunc(const char* funcPath)
+//const char* FabricTranslationLayer<TBaseClass, TResultType>::GetKLCodeForFunc(const char* funcPath)
 //{
 //	//MAXSPLICE_CATCH_BEGIN
 //
@@ -1259,16 +1259,16 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 //}
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::ResetPorts()
+void FabricTranslationLayer<TBaseClass, TResultType>::ResetPorts()
 {
 	MACROREC_GUARD;
 
 	// Setup any necessary ports for the current graph
-	m_outArgName = AddSpliceParameter(this, GetValueType(), "outputValue", FabricCore::DFGPortType_Out, "", "{ \"uiPersistValue\": \"false\" }");
+	m_outArgName = AddFabricParameter(this, GetValueType(), "outputValue", FabricCore::DFGPortType_Out, "", "{ \"uiPersistValue\": \"false\" }");
 }
 
 template<typename TBaseClass, typename TResultType>
-int SpliceTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam(const char* argName)
+int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam(const char* argName)
 {
 	// Technically we shouldnt call functions that can trigger
 	// calling a sync, but in this case its just easier to call
@@ -1322,7 +1322,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
 			SyncMaxParamDefault(argName, paramId);
 
 			// Set the value to the current port value
-			//SetMaxParamFromSplice(m_pblock, (ParamID)paramId, m_binding, argName);
+			//SetMaxParamFromFabric(m_pblock, (ParamID)paramId, m_binding, argName);
 		}
 	}
 	_m_isSyncing = true;
@@ -1334,7 +1334,7 @@ int SpliceTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
 
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::SyncMaxParamLimits(const char* argName, int id)
+void FabricTranslationLayer<TBaseClass, TResultType>::SyncMaxParamLimits(const char* argName, int id)
 {
 	if (id < 0)
 		return;
@@ -1414,19 +1414,19 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SyncMaxParamLimits(const c
 template<typename TType>
 void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::Variant& defaultVal) {
 	TType def;
-	SpliceToMaxValue(defaultVal, def);
+	FabricToMaxValue(defaultVal, def);
 	pDesc->ParamOption(pid, p_default, def, p_end);
 }
 
 template<typename TType>
 void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::RTVal& defaultVal) {
 	TType def;
-	SpliceToMaxValue(defaultVal, def);
+	FabricToMaxValue(defaultVal, def);
 	pDesc->ParamOption(pid, p_default, def, p_end);
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::SyncMaxParamDefault(const char* argName, int pid)
+void FabricTranslationLayer<TBaseClass, TResultType>::SyncMaxParamDefault(const char* argName, int pid)
 {
 	if (pid < 0)
 		return;
@@ -1503,7 +1503,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SyncMaxParamDefault(const 
 
 
 template<typename TBaseClass, typename TResultType>
-bool SpliceTranslationLayer<TBaseClass, TResultType>::GraphCanEvaluate()
+bool FabricTranslationLayer<TBaseClass, TResultType>::GraphCanEvaluate()
 {
 	if (!m_binding.isValid())
 		return false;
@@ -1516,7 +1516,7 @@ bool SpliceTranslationLayer<TBaseClass, TResultType>::GraphCanEvaluate()
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::SetupEvalContext(TimeValue t)
+void FabricTranslationLayer<TBaseClass, TResultType>::SetupEvalContext(TimeValue t)
 {
 	FabricCore::Client& client = GetClient();
 	if (!m_evalContext.isValid())
@@ -1537,7 +1537,7 @@ void SpliceTranslationLayer<TBaseClass, TResultType>::SetupEvalContext(TimeValue
 }
 
 template<typename TBaseClass, typename TResultType>
-const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(TimeValue t, Interval& ivValid)
+const TResultType& FabricTranslationLayer<TBaseClass, TResultType>::Evaluate(TimeValue t, Interval& ivValid)
 {
 	if (!GraphCanEvaluate())
 		return m_value;
@@ -1555,7 +1555,7 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 		//{
 		//	// setup the context.  Perhaps we should do this regardless?
 		//	FabricCore::RTVal evalContext = m_graph.getEvalContext();
-		//	evalContext.setMember("time", FabricSplice::constructFloat32RTVal(TicksToSec(t)));
+		//	evalContext.setMember("time", Fabric::constructFloat32RTVal(TicksToSec(t)));
 			m_valid.SetInstant(t);
 		//	// Force a re-evaluate (in case no other input parameters change)
 		//	m_graph.clearEvaluate();
@@ -1568,7 +1568,7 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 		//}
 
 		// Set  all Max values on their splice equivalents
-		TransferAllMaxValuesToSplice(t, m_pblock, m_binding, m_portValidities, m_valid);
+		TransferAllMaxValuesToFabric(t, m_pblock, m_binding, m_portValidities, m_valid);
 
 		// Trigger graph evaluation
 		m_binding.execute();
@@ -1578,7 +1578,7 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 		if (exec.haveExecPort(m_outArgName.c_str()) && exec.hasSrcPort(m_outArgName.c_str()))
 		{
 			FabricCore::RTVal rtOutVal = m_binding.getArgValue(m_outArgName.c_str());
-			SpliceToMaxValue(rtOutVal, m_value);
+			FabricToMaxValue(rtOutVal, m_value);
 		}
 		
 		MAXSPLICE_CATCH_END;
@@ -1591,14 +1591,14 @@ const TResultType& SpliceTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::TriggerEvaluate( TimeValue t, Interval& ivValid )
+void FabricTranslationLayer<TBaseClass, TResultType>::TriggerEvaluate( TimeValue t, Interval& ivValid )
 {
 	// Call evaluate
 	Evaluate(t, ivValid);
 }
 
 template<typename TBaseClass, typename TResultType>
-void SpliceTranslationLayer<TBaseClass, TResultType>::InitMixinInterface()
+void FabricTranslationLayer<TBaseClass, TResultType>::InitMixinInterface()
 {
 	GetDescriptor<TBaseClass, TResultType>();
 }

@@ -1,4 +1,4 @@
-m = SpliceMesh()
+m = FabricMesh()
 m.AddInputPort "speed" "Scalar" -2
 m.AddInputPort "factor1" "Scalar" -2
 m.AddInputPort "factor2" "Scalar" -2
@@ -189,4 +189,4 @@ m.speed = 100.0f
 m.factor1 = 0.6f
 m.factor2 = 0.5f
 
-Splice.Rendering = true
+Fabric.Rendering = true

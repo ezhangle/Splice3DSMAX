@@ -15,12 +15,12 @@ echo Generating new plugin ini file @ %TARGETDIR%
 SET MAX_ENV_VAR=ADSK_3DSMAX_x64_%MAXVERSION%
 CALL SET MAX_PATH=%%%MAX_ENV_VAR%%%
 
-del "%TARGETDIR%Generated.Plugin.Splice.ini"
+del "%TARGETDIR%Generated.Plugin.Fabric.ini"
 REM add in original plugins
-@echo [Directories] >> "%TARGETDIR%Generated.Plugin.Splice.ini"
-@echo Additional MAX plug-ins=%MAX_PATH%plugins >> "%TARGETDIR%Generated.Plugin.Splice.ini"
-@echo Splice Plugins=%~1 >> "%TARGETDIR%Generated.Plugin.Splice.ini"
-@echo [Help] >> "%TARGETDIR%Generated.Plugin.Splice.ini"
-@echo mental ray Help=http://www.autodesk.com/mentalray-help-2013-enu >> "%TARGETDIR%Generated.Plugin.Splice.ini"
+@echo [Directories] >> "%TARGETDIR%Generated.Plugin.Fabric.ini"
+@echo Additional MAX plug-ins=%MAX_PATH%plugins >> "%TARGETDIR%Generated.Plugin.Fabric.ini"
+@echo Fabric Plugins=%~1 >> "%TARGETDIR%Generated.Plugin.Fabric.ini"
+@echo [Help] >> "%TARGETDIR%Generated.Plugin.Fabric.ini"
+@echo mental ray Help=http://www.autodesk.com/mentalray-help-2013-enu >> "%TARGETDIR%Generated.Plugin.Fabric.ini"
 
 rem echo on

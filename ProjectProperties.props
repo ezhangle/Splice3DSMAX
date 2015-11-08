@@ -37,10 +37,10 @@
 		<IsUnicode>true</IsUnicode>
 		<IsUnicode Condition="'$(MaxVersion)' &lt; '2013'">false</IsUnicode>
 
-		<SpliceOutDir>$(FABRIC_DIR)\SpliceIntegrations\FabricSplice3dsmax$(MaxVersion)\</SpliceOutDir>
+		<FabricOutDir>$(FABRIC_DIR)\FabricIntegrations\Fabric3dsmax$(MaxVersion)\</FabricOutDir>
 
 		<FabricUIDir>$(FABRIC_UI_DIR)</FabricUIDir>
-		<!-- If no install of SpliceUI is present, default to the fabric system build values  -->
+		<!-- If no install of FabricUI is present, default to the fabric system build values  -->
 		<FabricUIDir Condition="'$(FabricUIDir)'==''">$(SolutionDir)FabricUI\</FabricUIDir>
 
 		<QtSuffix>4</QtSuffix>
@@ -51,8 +51,8 @@
 	<PropertyGroup Label="Configuration">
 		<UseOfMfc>false</UseOfMfc>
 		<UseOfAtl>false</UseOfAtl>
-		<IntDir>build\FabricSplice3dsmax\obj\$(Configuration)\</IntDir>
-		<OutDir>$(SpliceOutDir)plugin\</OutDir>
+		<IntDir>build\Fabric3dsmax\obj\$(Configuration)\</IntDir>
+		<OutDir>$(FabricOutDir)plugin\</OutDir>
 		<TargetExt>.dlu</TargetExt>
 		<ConfigurationType>DynamicLibrary</ConfigurationType>
 		<UseDebugLibraries>false</UseDebugLibraries>
@@ -139,20 +139,20 @@
 
   <ItemDefinitionGroup>
 	<PostBuildEvent>
-	  <Command>call "$(ProjectDir)/GenerateMaxLauncher.bat" "$(SpliceOutDir)/" "$(MaxVersion)"
-copy "$(ProjectDir)SetupMenu.ms" "$(SpliceOutDir)" /Y
-xcopy "$(ProjectDir)ScintillaNET" "$(SpliceOutDir)ScintillaNET" /E /I /Y
-xcopy "$(ProjectDir)testingScripts" "$(SpliceOutDir)samples" /E /I /Y
+	  <Command>call "$(ProjectDir)/GenerateMaxLauncher.bat" "$(FabricOutDir)/" "$(MaxVersion)"
+copy "$(ProjectDir)SetupMenu.ms" "$(FabricOutDir)" /Y
+xcopy "$(ProjectDir)ScintillaNET" "$(FabricOutDir)ScintillaNET" /E /I /Y
+xcopy "$(ProjectDir)testingScripts" "$(FabricOutDir)samples" /E /I /Y
 xcopy "$(ProjectDir)qt-solutions\qtwinmigrate\lib\QtSolutions_MFCMigrationFramework-head.dll" "$(FABRIC_DIR)\lib" /E /I /Y
 call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
 	  </Command>
 	</PostBuildEvent>
   </ItemDefinitionGroup>
   <PropertyGroup>
-	<LocalDebuggerCommandArguments>-vo -p "$(ProjectDir)/build/Generated.Plugin.Splice.ini"</LocalDebuggerCommandArguments>
-	<LocalDebuggerCommand>$(MaxPath)3dsmax.exe</LocalDebuggerCommand>
-	<LocalDebuggerEnvironment>SPLICE3DSMAXDIR=$(SpliceOutDir)
-SCINTILLANETDIR=$(SpliceOutDir)ScintillaNET\
+	<LocalDebuggerCommandArguments>-vo -p "$(ProjectDir)/build/Generated.Plugin.Fabric.ini"</LocalDebuggerCommandArguments>
+	<LocalDebuggerCommand>C:\Program Files\Autodesk\3ds Max 2016 DEBUG\x64\exe\3dsmax.exe</LocalDebuggerCommand>
+	<LocalDebuggerEnvironment>SPLICE3DSMAXDIR=$(FabricOutDir)
+SCINTILLANETDIR=$(FabricOutDir)ScintillaNET\
 PATH=$(PATH);$(FABRIC_DIR)\lib;$(SCINTILLANETDIR)
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>

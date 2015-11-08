@@ -3,44 +3,44 @@
   <ItemGroup>
     <ClCompile Include="src/DllEntry.cpp" />
     <ClCompile Include="src\StdAfx.cpp" />
-    <ClCompile Include="src\SpliceControlFloat.cpp">
+    <ClCompile Include="src\FabricControlFloat.cpp">
       <Filter>MaxImplementations</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceControlMatrix.cpp">
+    <ClCompile Include="src\FabricControlMatrix.cpp">
       <Filter>MaxImplementations</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceControlPosition.cpp">
+    <ClCompile Include="src\FabricControlPosition.cpp">
       <Filter>MaxImplementations</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceControlRotation.cpp">
+    <ClCompile Include="src\FabricControlRotation.cpp">
       <Filter>MaxImplementations</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceModifier.cpp">
+    <ClCompile Include="src\FabricModifier.cpp">
       <Filter>MaxImplementations</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceMesh.cpp">
+    <ClCompile Include="src\FabricMesh.cpp">
       <Filter>MaxImplementations</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceReferenceTarget.cpp">
+    <ClCompile Include="src\FabricReferenceTarget.cpp">
       <Filter>MaxImplementations</Filter>
     </ClCompile>
-    <ClCompile Include="src\MouseCallbacks\SpliceCommandMode.cpp">
-      <Filter>SpliceCallbacks</Filter>
+    <ClCompile Include="src\MouseCallbacks\FabricCommandMode.cpp">
+      <Filter>FabricCallbacks</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceEvents.cpp">
-      <Filter>SpliceCallbacks</Filter>
+    <ClCompile Include="src\FabricEvents.cpp">
+      <Filter>FabricCallbacks</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceLogging.cpp">
-      <Filter>SpliceCallbacks</Filter>
+    <ClCompile Include="src\FabricLogging.cpp">
+      <Filter>FabricCallbacks</Filter>
     </ClCompile>
-    <ClCompile Include="src\MouseCallbacks\SpliceMouseCallback.cpp">
-      <Filter>SpliceCallbacks</Filter>
+    <ClCompile Include="src\MouseCallbacks\FabricMouseCallback.cpp">
+      <Filter>FabricCallbacks</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceTranslationFPInterface.cpp">
-      <Filter>SpliceTranslation</Filter>
+    <ClCompile Include="src\FabricTranslationFPInterface.cpp">
+      <Filter>FabricTranslation</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceTranslationLayer.cpp">
-      <Filter>SpliceTranslation</Filter>
+    <ClCompile Include="src\FabricTranslationLayer.cpp">
+      <Filter>FabricTranslation</Filter>
     </ClCompile>
     <ClCompile Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.cpp">
       <Filter>DynPB</Filter>
@@ -49,12 +49,12 @@
       <Filter>DynPB</Filter>
     </ClCompile>
     <ClCompile Include="src\MaxConversionFns.cpp">
-      <Filter>SpliceTranslation</Filter>
+      <Filter>FabricTranslation</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceStaticFPInterface.cpp">
-      <Filter>SpliceTranslation</Filter>
+    <ClCompile Include="src\FabricStaticFPInterface.cpp">
+      <Filter>FabricTranslation</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceWSModifier.cpp">
+    <ClCompile Include="src\FabricWSModifier.cpp">
       <Filter>MaxImplementations</Filter>
     </ClCompile>
     <ClCompile Include="src\DockableWidget.cpp">
@@ -72,37 +72,37 @@
     <ClCompile Include="src\MaxDFGCmdHandler.cpp">
       <Filter>Undo</Filter>
     </ClCompile>
-    <ClCompile Include="src\SpliceRestoreObjects.cpp">
+    <ClCompile Include="src\FabricRestoreObjects.cpp">
       <Filter>Undo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\resource.h" />
-    <ClInclude Include="src\Splice3dsmax.h" />
+    <ClInclude Include="src\Fabric3dsmax.h" />
     <ClInclude Include="src\StdAfx.h" />
     <ClInclude Include="src\MouseCallbacks\KbdTranslation.h">
-      <Filter>SpliceCallbacks</Filter>
+      <Filter>FabricCallbacks</Filter>
     </ClInclude>
-    <ClInclude Include="src\MouseCallbacks\SpliceCommandMode.h">
-      <Filter>SpliceCallbacks</Filter>
+    <ClInclude Include="src\MouseCallbacks\FabricCommandMode.h">
+      <Filter>FabricCallbacks</Filter>
     </ClInclude>
-    <ClInclude Include="src\SpliceEvents.h">
-      <Filter>SpliceCallbacks</Filter>
+    <ClInclude Include="src\FabricEvents.h">
+      <Filter>FabricCallbacks</Filter>
     </ClInclude>
-    <ClInclude Include="src\SpliceLogging.h">
-      <Filter>SpliceCallbacks</Filter>
+    <ClInclude Include="src\FabricLogging.h">
+      <Filter>FabricCallbacks</Filter>
     </ClInclude>
-    <ClInclude Include="src\MouseCallbacks\SpliceMouseCallback.h">
-      <Filter>SpliceCallbacks</Filter>
+    <ClInclude Include="src\MouseCallbacks\FabricMouseCallback.h">
+      <Filter>FabricCallbacks</Filter>
     </ClInclude>
-    <ClInclude Include="src\SpliceTranslationFPInterface.h">
-      <Filter>SpliceTranslation</Filter>
+    <ClInclude Include="src\FabricTranslationFPInterface.h">
+      <Filter>FabricTranslation</Filter>
     </ClInclude>
-    <ClInclude Include="src\SpliceTranslationLayer.h">
-      <Filter>SpliceTranslation</Filter>
+    <ClInclude Include="src\FabricTranslationLayer.h">
+      <Filter>FabricTranslation</Filter>
     </ClInclude>
-    <ClInclude Include="src\SpliceTranslationLayer.hpp">
-      <Filter>SpliceTranslation</Filter>
+    <ClInclude Include="src\FabricTranslationLayer.hpp">
+      <Filter>FabricTranslation</Filter>
     </ClInclude>
     <ClInclude Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.h">
       <Filter>DynPB</Filter>
@@ -114,21 +114,21 @@
       <Filter>DynPB</Filter>
     </ClInclude>
     <ClInclude Include="src\MaxConversionFns.h">
-      <Filter>SpliceTranslation</Filter>
+      <Filter>FabricTranslation</Filter>
     </ClInclude>
-    <ClInclude Include="src\SpliceStaticFPInterface.h">
-      <Filter>SpliceTranslation</Filter>
+    <ClInclude Include="src\FabricStaticFPInterface.h">
+      <Filter>FabricTranslation</Filter>
     </ClInclude>
-    <ClInclude Include="src\SpliceModifier.h">
+    <ClInclude Include="src\FabricModifier.h">
       <Filter>MaxImplementations</Filter>
     </ClInclude>
-    <ClInclude Include="src\SpliceWSModifier.h">
+    <ClInclude Include="src\FabricWSModifier.h">
       <Filter>MaxImplementations</Filter>
     </ClInclude>
     <ClInclude Include="src\DockableWidget.h">
       <Filter>DFGWidget</Filter>
     </ClInclude>
-    <ClInclude Include="src\SpliceControl.hpp">
+    <ClInclude Include="src\FabricControl.hpp">
       <Filter>MaxImplementations</Filter>
     </ClInclude>
     <ClInclude Include="src\MaxDFGController.h">
@@ -137,7 +137,7 @@
     <ClInclude Include="src\MaxDFGCmdHandler.h">
       <Filter>Undo</Filter>
     </ClInclude>
-    <ClInclude Include="src\SpliceRestoreObjects.h">
+    <ClInclude Include="src\FabricRestoreObjects.h">
       <Filter>Undo</Filter>
     </ClInclude>
   </ItemGroup>
@@ -151,13 +151,13 @@
     <Filter Include="MaxImplementations">
       <UniqueIdentifier>{ce0a263a-6d21-4212-a37f-7e7374e168a0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SpliceCallbacks">
+    <Filter Include="FabricCallbacks">
       <UniqueIdentifier>{baf95174-c1ae-4f6c-a13e-dc1593cbe437}</UniqueIdentifier>
     </Filter>
     <Filter Include="DynPB">
       <UniqueIdentifier>{664c627d-631b-4a9a-a225-e71e1f107ebf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SpliceTranslation">
+    <Filter Include="FabricTranslation">
       <UniqueIdentifier>{eb571dd0-6f53-4b39-8436-a3fe36f08537}</UniqueIdentifier>
     </Filter>
     <Filter Include="DFGWidget">
@@ -198,7 +198,7 @@
     <None Include="testingScripts\UnitTestAddRemovePort.ms">
       <Filter>MaxScript files\TestingScripts</Filter>
     </None>
-    <None Include="testingScripts\UnitTestLoadSaveSpliceFile.ms">
+    <None Include="testingScripts\UnitTestLoadSaveFabricFile.ms">
       <Filter>MaxScript files\TestingScripts</Filter>
     </None>
     <None Include="testingScripts\UnitTestPortConnection.ms">
@@ -210,18 +210,18 @@
     <None Include="testingScripts\UnitTestRegisterReloadExtns.ms">
       <Filter>MaxScript files\TestingScripts</Filter>
     </None>
-    <None Include="testingScripts\UnitTestSpliceControllers.ms">
+    <None Include="testingScripts\UnitTestFabricControllers.ms">
       <Filter>MaxScript files\TestingScripts</Filter>
     </None>
-    <None Include="testingScripts\UnitTestSpliceModifier.ms">
+    <None Include="testingScripts\UnitTestFabricModifier.ms">
       <Filter>MaxScript files\TestingScripts</Filter>
     </None>
-    <None Include="testingScripts\UnitTestSpliceObject.ms">
+    <None Include="testingScripts\UnitTestFabricObject.ms">
       <Filter>MaxScript files\TestingScripts</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="src\DynamicParamBlocks\DynamicDialog\FabricSplice3dsmax.rc" />
+    <ResourceCompile Include="src\DynamicParamBlocks\DynamicDialog\Fabric3dsmax.rc" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="src\MaxDFGWidget.h">

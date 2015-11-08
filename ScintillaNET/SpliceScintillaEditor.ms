@@ -20,7 +20,7 @@ fn FindCtrl layout name = ( res = layout.Controls.Find name true )
 
 struct spliceEditorStruct
 (
-	mSpliceClass,
+	mFabricClass,
 	mBtnCompile,
 	mKlEditor,
 	mDispResults,
@@ -35,7 +35,7 @@ struct spliceEditorStruct
 	(
 		-- Find ptr to original splice class
 		local thisStruct = getStruct(sender)
-		local spliceClass = thisStruct.mSpliceClass
+		local spliceClass = thisStruct.mFabricClass
 		local klCode = thisStruct.mKlEditor
 		local entryPt = thisStruct.mEntryPt
 		local resultsBox = thisStruct.mDispResults
@@ -50,10 +50,10 @@ struct spliceEditorStruct
 	
 	fn evLoadPreset sender evt =
 	(
-		ldFile = getOpenFileName caption:"Splice Preset"  types:"Splice Preset(*.splice)|*.splice|All Files|*.*"
+		ldFile = getOpenFileName caption:"Fabric Preset"  types:"Fabric Preset(*.splice)|*.splice|All Files|*.*"
 		if (ldFile != undefined) do (
 			local thisStruct = getStruct(sender)
-			local spliceClass = thisStruct.mSpliceClass	
+			local spliceClass = thisStruct.mFabricClass	
 			local resultsBox = thisStruct.mDispResults
 			local klCode = thisStruct.mKlEditor
 			res = spliceClass.LoadFromFile ldFile true
@@ -71,10 +71,10 @@ struct spliceEditorStruct
 	
 	fn evSavePreset sender evt =
 	(
-		svFile = getSaveFileName caption:"Splice Preset"  types:"Splice Preset(*.splice)|*.splice"
+		svFile = getSaveFileName caption:"Fabric Preset"  types:"Fabric Preset(*.splice)|*.splice"
 		if (svFile != undefined) do (
 			local thisStruct = getStruct(sender)
-			local spliceClass = thisStruct.mSpliceClass	
+			local spliceClass = thisStruct.mFabricClass	
 			local resultsBox = thisStruct.mDispResults
 			res = spliceClass.SaveToFile svFile
 			
@@ -89,7 +89,7 @@ struct spliceEditorStruct
 	fn evRenameParam sender evt = (
 		local paramName = getName sender
 		local thisStruct = getStruct sender
-		local spliceClass = thisStruct.mSpliceClass
+		local spliceClass = thisStruct.mFabricClass
 		if spliceClass.SetPortName paramName sender.Text do ( setName sender sender.Text )
 		thisStruct.UpdateKLCodeTab()
 	),
@@ -97,7 +97,7 @@ struct spliceEditorStruct
 	fn evRenameOutPort sender evt = (
 		local paramName = sender.Text
 		local thisStruct = sender.parent.tag.value
-		local spliceClass = thisStruct.mSpliceClass
+		local spliceClass = thisStruct.mFabricClass
 		spliceClass.outPort = paramName
 		thisStruct.UpdateKLCodeTab()
 	),
@@ -106,7 +106,7 @@ struct spliceEditorStruct
 		local paramName = getName sender
 		local thisStruct = getStruct sender
 		local typeIdx = sender.SelectedIndex
-		local spliceClass = thisStruct.mSpliceClass
+		local spliceClass = thisStruct.mFabricClass
 		local legalTypes  = (spliceClass.GetLegalMaxTypes paramName) as array
 		local newType = -1
 		local asArray = false
@@ -121,7 +121,7 @@ struct spliceEditorStruct
 	fn evDelParam sender evt = (
 		local paramName = getName sender
 		local thisStruct = getStruct sender
-		success = thisStruct.mSpliceClass.RemovePort paramName
+		success = thisStruct.mFabricClass.RemovePort paramName
 		-- Remove newly deleted param from table
 		if success do (
 			thisStruct.UpdateParameterTab()
@@ -138,7 +138,7 @@ struct spliceEditorStruct
 		local maxType = (FindCtrl rowLayout "MaxType")[1].SelectedIndex + 1
 		local asArray = (FindCtrl rowLayout "ParamArray")[1].Checked
 		maxType = -maxType -- Negating gives -1 (none) and -2 (default type)
-		thisStruct.mSpliceClass.AddInputPort paramName paramType maxType isArray:asArray Extension:paramExtension
+		thisStruct.mFabricClass.AddInputPort paramName paramType maxType isArray:asArray Extension:paramExtension
 		
 		-- Recreate parameter rows
 		thisStruct.UpdateParameterTab()
@@ -351,7 +351,7 @@ struct spliceEditorStruct
 		tabsUsed = index * 3
 		
 		-- Add editable name box
-		local paramName = mSpliceClass.GetPortName index
+		local paramName = mFabricClass.GetPortName index
 		local nameEdit = dotNetObject "System.Windows.Forms.TextBox"
 		nameEdit.Name = "ParamName"
 		nameEdit.Text = paramName
@@ -370,7 +370,7 @@ struct spliceEditorStruct
 		setName nameEdit paramName
 		
 		-- Add non-editable type
-		local spliceType = mSpliceClass.GetPortType paramName
+		local spliceType = mFabricClass.GetPortType paramName
 		local typeLabel = dotNetObject "System.Windows.Forms.TextBox"
 		typeLabel.Name = "ParamType"
 		typeLabel.Enabled = false
@@ -382,8 +382,8 @@ struct spliceEditorStruct
 		ctrlLayout.Controls.Add typeLabel
 		
 		-- Add extension configuration
-		-- Splice doesn't alow us to query the extension used. 
-		-- local ext = mSpliceClass.GetPortExtension index
+		-- Fabric doesn't alow us to query the extension used. 
+		-- local ext = mFabricClass.GetPortExtension index
 		-- local extLabel = dotNetObject "System.Windows.Forms.TextBox"
 		-- extLabel.Name = "Extension"
 		-- extLabel.Enabled = false
@@ -395,7 +395,7 @@ struct spliceEditorStruct
 		-- ctrlLayout.Controls.Add extLabel
 		
 		-- Add isArray checkbox
-		local isArray = mSpliceClass.IsPortArray paramName
+		local isArray = mFabricClass.IsPortArray paramName
 		local isArrayCB = dotNetObject "System.Windows.Forms.Checkbox"
 		isArrayCB.Checked = isArray
 		isArrayCB.Name = "ParamArray"
@@ -406,8 +406,8 @@ struct spliceEditorStruct
 		ctrlLayout.Controls.Add isArrayCB
 
 		-- Allow user to switch between legal max types for input
-		local maxType = mSpliceClass.GetMaxType paramName
-		local legalMaxTypes = mSpliceClass.GetLegalMaxTypes paramName
+		local maxType = mFabricClass.GetMaxType paramName
+		local legalMaxTypes = mFabricClass.GetLegalMaxTypes paramName
 		local ddlist  =  dotNetObject "System.Windows.Forms.ComboBox"
 		ddlist.Name = "MaxType"
 		ddlist.DropDownStyle = ddlist.DropDownStyle.DropDownList
@@ -434,7 +434,7 @@ struct spliceEditorStruct
 	),
 	
 	fn CreateNewParameterLabels = (
-		local nParams = mSpliceClass.PortCount
+		local nParams = mFabricClass.PortCount
 		local tabIndex  = nParams * 3 + 100
 		-- Create a horizontal layout
 		ctrlLayout = dotNetObject "System.Windows.Forms.FlowLayoutPanel"
@@ -480,7 +480,7 @@ struct spliceEditorStruct
 	),
 	
 	fn CreateNewParameterCtrl = (
-		local nParams = mSpliceClass.PortCount
+		local nParams = mFabricClass.PortCount
 		local tabIndex  = nParams * 3 + 100
 		-- Create a horizontal layout
 		ctrlLayout = dotNetObject "System.Windows.Forms.FlowLayoutPanel"
@@ -498,7 +498,7 @@ struct spliceEditorStruct
 		
 		-- Add editable type
 		local spliceType =  dotNetObject "System.Windows.Forms.ComboBox"
-		spliceType.Name = "SpliceType"
+		spliceType.Name = "FabricType"
 		spliceType.items.addrange #("Integer", "Scalar", "Vec2", "Vec3", "Vec4", "Color", "Boolean", "Mat44", "Quat", "String", "PolygonMesh")
 		spliceType.Width = 110;
 		spliceType.TabIndex = tabIndex + 2
@@ -566,7 +566,7 @@ struct spliceEditorStruct
 
 
 		-- Generate row contents, add to table
-		local nParams = mSpliceClass.PortCount
+		local nParams = mFabricClass.PortCount
 		tabLayout.RowCount = nParams + 1
 		for i = 1 to nParams do
 		(
@@ -601,7 +601,7 @@ struct spliceEditorStruct
 	fn CreateParameterTab = (
 		tabParams = dotNetObject "System.Windows.Forms.TabPage" "Parameters"
 		
-		-- Create layout.  This layout arranges the list of input Splice parameters
+		-- Create layout.  This layout arranges the list of input Fabric parameters
 		local tabLayout = dotNetObject "System.Windows.Forms.TableLayoutPanel"
 		tabLayout.AutoSize = true;
 		tabLayout.Dock = tabLayout.Dock.Fill
@@ -631,12 +631,12 @@ struct spliceEditorStruct
 	),
 	
 	fn UpdateKLCodeTab = (
-		if (mSpliceClass != undefined) do 
+		if (mFabricClass != undefined) do 
 		(
-			mKlEditor.text = mSpliceClass.GetKLCode()
-			mEntryPt.text = mSpliceClass.GetKLOperatorName();
-			mOutputName.text = mSpliceClass.OutPort;
-			mAvailablePorts.text = mSpliceClass.AllPortsSignature
+			mKlEditor.text = mFabricClass.GetKLCode()
+			mEntryPt.text = mFabricClass.GetKLOperatorName();
+			mOutputName.text = mFabricClass.OutPort;
+			mAvailablePorts.text = mFabricClass.AllPortsSignature
 		)
 	),
 	
@@ -681,7 +681,7 @@ struct spliceEditorStruct
 
 -- Entry point, this fn will be called from C++ with instance of class to be edited.
 fn fn_From_Cpp_ShowKLEditor spliceClass = (
-	newStruct = spliceEditorStruct mSpliceClass:spliceClass
+	newStruct = spliceEditorStruct mFabricClass:spliceClass
 	newStruct
 )
 

@@ -11,7 +11,7 @@ fn FindPort sm name = (
 	return false
 )
 
-sm = SpliceMesh()
+sm = FabricMesh()
 -- Init required params
 nodeName = sm.name
 sm.OutPort = nodeName + "Val"

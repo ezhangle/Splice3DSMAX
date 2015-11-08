@@ -3,16 +3,16 @@
 
 #include <FabricUI/DFG/DFGUICmdHandler_QUndo.h>
 
-class SpliceTranslationFPInterface;
+class FabricTranslationFPInterface;
 
 class MaxDFGCmdHandler : public FabricUI::DFG::DFGUICmdHandler_QUndo
 {
 private:
 
-	SpliceTranslationFPInterface* m_pTranslationLayer;
+	FabricTranslationFPInterface* m_pTranslationLayer;
 
 public:
-	MaxDFGCmdHandler(SpliceTranslationFPInterface* pTranslation);
+	MaxDFGCmdHandler(FabricTranslationFPInterface* pTranslation);
 	~MaxDFGCmdHandler();
 
 	void dfgDoRemoveNodes(

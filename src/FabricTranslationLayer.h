@@ -1,11 +1,11 @@
 //////////////////////////////////////////////////////////////////////////
-// SpliceTranslationLayer
+// FabricTranslationLayer
 //
 // Description:
 //	This file describes the translation layer between
-//	Max native datatypes and inputs and the Splice System.
+//	Max native datatypes and inputs and the Fabric System.
 //	It is responsible for managing the input/output of values
-//	from the Splice system.  This class is purely usage agnostic,
+//	from the Fabric system.  This class is purely usage agnostic,
 //	and can be applied to any of Max's native interface types.
 //	However, any usage-specific interface functions cannot 
 //	be implemented here.
@@ -16,7 +16,7 @@
 // includes and forward declarations
 
 #include <vector>
-#include "SpliceTranslationFPInterface.h"
+#include "FabricTranslationFPInterface.h"
 #include "MaxConversionFns.h"
 
 namespace DynamicDialog
@@ -27,7 +27,7 @@ class IParamBlock2;
 class DynPBCustAttrClassDesc;
 
 
-// Stores a connection between Max data (ParamID) and Splice data (DGPort)
+// Stores a connection between Max data (ParamID) and Fabric data (DGPort)
 //typedef std::pair<ParamID, DFGWrapper::ExecPortPtr> ConnData;
 #define MAX_PID_OPT "MaxPID"
 #define MAX_SRC_OPT "SrcPort"
@@ -47,7 +47,7 @@ class DynPBCustAttrClassDesc;
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const MCHAR* sName, ParamID desiredId = -1);
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName);
 void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name);
-void SetMaxParamFromSplice(SpliceTranslationFPInterface* pOwner, ParamID pid, const char* argName);
+void SetMaxParamFromFabric(FabricTranslationFPInterface* pOwner, ParamID pid, const char* argName);
 
 /*! Generate a Win32 dialog for the passed pblok
 	\param pblock - The list of parameters to generate UI for
@@ -58,28 +58,28 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock);
 	values off similarly named parameters on pCopyThis where possible */
 IParamBlock2* CreateParamBlock(ParamBlockDesc2* pDesc, IParamBlock2* pCopyThis, ReferenceTarget* pOwner);
 
-/** Get all Max types that can be converted to the given Splice type */
-BitArray SpliceTypeToMaxTypes(const char* spliceType);
+/** Get all Max types that can be converted to the given Fabric type */
+BitArray FabricTypeToMaxTypes(const char* spliceType);
 
-/** Returns the Max ParamType2 that matches the named Splice type
+/** Returns the Max ParamType2 that matches the named Fabric type
 	if the type is not legal for PB2, returns -1 */
-int SpliceTypeToMaxType(const char* cType);
+int FabricTypeToMaxType(const char* cType);
 
-/** Returns the default Max ParamType2 that matches the named Splice type */
-int SpliceTypeToDefaultMaxType(const char* cType);
+/** Returns the default Max ParamType2 that matches the named Fabric type */
+int FabricTypeToDefaultMaxType(const char* cType);
 
 /** Add a new value port to the given DGGraph
-	This adds in the appropriate Splice type to recieve
+	This adds in the appropriate Fabric type to recieve
 	the Max parameter type, and connects the port.  The return
 	value should be cached as the port top set/get values
 	from the splice parameter
-	\rGraph - a reference to the Splice sub-graph to add the parameter too
+	\rGraph - a reference to the Fabric sub-graph to add the parameter too
 	\type - The Max type that will be set
 	\pName - The name of the parameter
 	\mode - whether this is a read/write variable */
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension = "", const char* metadata = "");
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode, const char* inExtension = "", const char* metadata = "");
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const char* pName, FabricCore::DFGPortType mode, const char* inExtension = "", const char* metadata = "");
+std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension = "", const char* metadata = "");
+std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode, const char* inExtension = "", const char* metadata = "");
+std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, int type, const char* pName, FabricCore::DFGPortType mode, const char* inExtension = "", const char* metadata = "");
 
 /** Get various useful info's from fabric Ports 
 	These functions are defined here and don't depend
@@ -90,15 +90,15 @@ int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName);
 const char* GetPortType(const FabricCore::DFGExec& exec, const char* argName);
 bool IsPortArray(const FabricCore::DFGExec& exec, const char* argName);
 
-std::string GetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName);
-void SetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName, const char* name);
-bool GetPortPostConnectionUI(SpliceTranslationFPInterface* pOwner, const char* argName);
-void SetPortPostConnectionUI(SpliceTranslationFPInterface* pOwner, const char* argName, bool postUI);
+std::string GetPortConnection(FabricTranslationFPInterface* pOwner, const char* argName);
+void SetPortConnection(FabricTranslationFPInterface* pOwner, const char* argName, const char* name);
+bool GetPortPostConnectionUI(FabricTranslationFPInterface* pOwner, const char* argName);
+void SetPortPostConnectionUI(FabricTranslationFPInterface* pOwner, const char* argName, bool postUI);
 
 /** Given a Max value, send it to the dgPort in the appropriate fashion */
 
-/** For each valid in the parameter block, send it to the appropriate Splice port in paramData */
-void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore::DFGBinding& rBinding, std::vector<Interval>& paramValidities, Interval& ivValid);
+/** For each valid in the parameter block, send it to the appropriate Fabric port in paramData */
+void TransferAllMaxValuesToFabric(TimeValue t, IParamBlock2* pblock, FabricCore::DFGBinding& rBinding, std::vector<Interval>& paramValidities, Interval& ivValid);
 
 // DlgCallback for our static UI
 INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -109,15 +109,15 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 //////////////////////////////////////////////////////////////////////////
 template<typename TBaseClass, typename TResultType>
-class SpliceTranslationLayer : public TBaseClass, public SpliceTranslationFPInterface
+class FabricTranslationLayer : public TBaseClass, public FabricTranslationFPInterface
 {
 public:
-	// Use this typedef within a derivation to refer to the parent class (eg CloneSpliceData)
-	typedef SpliceTranslationLayer<TBaseClass, TResultType> ParentClass;
+	// Use this typedef within a derivation to refer to the parent class (eg CloneFabricData)
+	typedef FabricTranslationLayer<TBaseClass, TResultType> ParentClass;
 
 protected:
 #pragma region Max Parameter Management data
-	// This is the input datablock for the Splice System.
+	// This is the input datablock for the Fabric System.
 	// Input parameters are constructed and placed in this
 	// block.  The parameters are evaluated and passed to the
 	// splice graph for evaluation.
@@ -147,14 +147,14 @@ protected:
 
 #pragma endregion
 
-#pragma region Splice Connections
+#pragma region Fabric Connections
 
 	// Store the name of the port/arg who
 	// returns the value this class retursn to max
 	std::string	m_outArgName;
 
 	// We store a vector recording the Max validity
-	// of each parameter.  We only reset data on Splice
+	// of each parameter.  We only reset data on Fabric
 	// if the parameter has actually changed.
 	std::vector<Interval> m_portValidities;
 
@@ -168,8 +168,8 @@ protected:
 
 public:
 
-	SpliceTranslationLayer(BOOL loading);
-	~SpliceTranslationLayer();
+	FabricTranslationLayer(BOOL loading);
+	~FabricTranslationLayer();
 
 	// Call this function to initialize splice graph
 	// Returns true if work was performed (initialization was
@@ -287,7 +287,7 @@ public:
 	BaseInterface* GetInterface(Interface_ID id)
 	{
 		if (id == ISPLICE__INTERFACE)
-			return static_cast<SpliceTranslationFPInterface*>(this);
+			return static_cast<FabricTranslationFPInterface*>(this);
 		return TBaseClass::GetInterface(id);
 	}
 
@@ -299,7 +299,7 @@ public:
 	{
 		if (id == ISPLICE__INTERFACE)
 			return GetDescriptor<TBaseClass, TResultType>();
-		return SpliceTranslationFPInterface::GetDescByID(id);
+		return FabricTranslationFPInterface::GetDescByID(id);
 	}
 
 	ReferenceTarget* CastToRefTarg() { return this; }
@@ -309,7 +309,7 @@ public:
 
 #pragma endregion
 
-#pragma region fns from SpliceCommandInterface (todo - rename to this)
+#pragma region fns from FabricCommandInterface (todo - rename to this)
 
 	//// The following are direct mappers to the commands defined by the DFGCmdHandler classed.
 	//virtual void DFGRemoveNodes(const Tab<TSTR*>& nodeNames, const MSTR& execPath) = 0;
@@ -418,7 +418,7 @@ public:
 	//// data for splice port
 	//// \param i The index of the splice port
 	//// \return A BitArray, where each set bit indicates a legal ParamType for the given port
-	//virtual BitArray GetLegalMaxTypes(const char* portName) { return SpliceTypeToMaxTypes(GetPortType(portName)); }
+	//virtual BitArray GetLegalMaxTypes(const char* portName) { return FabricTypeToMaxTypes(GetPortType(portName)); }
 
 	//// Allow setting various options on ports 
 	//// Set UI limits.  This will not actually limit the value, but for sliders etc it will limit what is presented to the user.
@@ -426,7 +426,7 @@ public:
 	//bool SetArgUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax);
 
 	// Set splice values
-	//	const FabricCore::DFGBinding& GetSpliceGraph() { return getGraph(); }
+	//	const FabricCore::DFGBinding& GetFabricGraph() { return getGraph(); }
 	//	void SetOutPort(const DFGWrapper::ExecPortPtr& port) { m_valuePort = port; };
 
 	// Load from a saved JSON file spec
@@ -457,7 +457,7 @@ public:
 	void Invalidate() { m_valid.SetEmpty(); }
 	// Send DCC info to graph (time, name, etc)
 	void SetupEvalContext(TimeValue t);
-	// Push our parameters to the Splice system, and get the results back...
+	// Push our parameters to the Fabric system, and get the results back...
 	const TResultType& Evaluate(TimeValue t, Interval& ivValid);
 	// Do an evaluation, but do not return the calculated value
 	void TriggerEvaluate(TimeValue t, Interval& ivValid);
@@ -474,8 +474,8 @@ public:
 	/*! A client may implement this class to do any cloning necessary
 		when cloning the client class.  The argument passed
 		is a fully constructed instance, missing only instance-specific
-		data not available to the SpliceTranslationLayer class. */
-	virtual bool CloneSpliceData(SpliceTranslationLayer* pMyClone) = 0;
+		data not available to the FabricTranslationLayer class. */
+	virtual bool CloneFabricData(FabricTranslationLayer* pMyClone) = 0;
 
 	/*! Invalidate all caches, notify Max, and request a redraw */
 	void InvalidateAll()

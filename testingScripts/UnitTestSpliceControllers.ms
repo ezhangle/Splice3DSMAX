@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------------------------------------
 -- Test basic controller structure, time change
 p1 = point()
-p1.controller = SpliceMatrixController()
+p1.controller = FabricMatrixController()
 p1.controller.OutPort = "outMatrixVal"
 entryPt = "unitTestBasicTransform"
 klCode = "
@@ -20,7 +20,7 @@ assert (p1.transform.position == [17.5, 0, 0]) message:"Bad Anim Position" optio
 -------------------------------------------------------------------------------------------------------------
 -- Test Position controller, parenting
 p2 = point()
-spliceCtrl = SplicePositionController()
+spliceCtrl = FabricPositionController()
 p2.controller.position.controller = spliceCtrl
 p2.parent = p1
 spliceCtrl.OutPort = "outPositionVal"
@@ -44,7 +44,7 @@ assert (p2.transform.position == [17.5, 0, 26]) message:"Bad Inheritted Animatio
 -- Test Rotation controller, transform order
 
 p3 = point()
-spliceCtrl = SpliceRotationController()
+spliceCtrl = FabricRotationController()
 p3.controller.rotation.controller = spliceCtrl
 spliceCtrl.OutPort = "outRotationVal"
 spliceCtrl.AddInputPort "xRot" "Scalar" 5
@@ -78,7 +78,7 @@ assert ((p3.transform as string) == "(matrix3 [0.739942,0.671834,0.0335364] [-0.
 -------------------------------------------------------------------------------------------------------------
 -- Test float controller, input chaining
 
-spliceFloatCtrl = SpliceFloatController()
+spliceFloatCtrl = FabricFloatController()
 spliceFloatCtrl.OutPort = "outSinTime"
 entryPt = "unitTestFloatChaining"
 klCode = "
@@ -110,7 +110,7 @@ operator unitTestSharedGraph(io Mat44 outValArray[], Scalar xMult, Scalar yMult,
 -- Test shared graphs, array output.
 
 p4 = Point()
-spliceCtrl = SpliceMatrixController()
+spliceCtrl = FabricMatrixController()
 p4.controller = spliceCtrl
 spliceCtrl.OutPort = "outValArray"
 spliceCtrl.OutPortIndex = 0
@@ -122,14 +122,14 @@ spliceCtrl.AddInputPort "zMult" "Scalar" -2
 spliceCtrl.SetKLCode entryPt klCode
 
 p5 = Point()
-p5.controller = SpliceMatrixController()
-p5.controller.SetSpliceGraph p4.controller
+p5.controller = FabricMatrixController()
+p5.controller.SetFabricGraph p4.controller
 p5.controller.OutPort = "outValArray"
 p5.controller.OutPortIndex = 1
 
 p6 = Point()
-p6.controller = SpliceMatrixController()
-p6.controller.SetSpliceGraph p4.controller
+p6.controller = FabricMatrixController()
+p6.controller.SetFabricGraph p4.controller
 p6.controller.OutPort = "outValArray"
 p6.controller.OutPortIndex = 2
 

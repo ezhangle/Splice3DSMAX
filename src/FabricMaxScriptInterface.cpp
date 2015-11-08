@@ -1,11 +1,11 @@
 #include "StdAfx.h"
-#include "SpliceMaxScriptInterface.h"
+#include "FabricMaxScriptInterface.h"
 //#include "CPApplication.h"
 //#include "maxapi.h"
 //#include "TextureData.h"
 
 //// Implement the functions exposed above
-//BOOL SpliceMaxScriptInterface::ShowSceneGraphEditor()
+//BOOL FabricMaxScriptInterface::ShowSceneGraphEditor()
 //{
 //	//if (CPApplication::m_applicationState == CPApplication::kReady)
 //	//{

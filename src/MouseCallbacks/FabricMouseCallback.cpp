@@ -4,12 +4,12 @@
 #include <list>
 #include <maxapi.h>
 #include <maxscript/maxscript.h>
-#include "SpliceMouseCallback.h"
+#include "FabricMouseCallback.h"
 #include <objmode.h>
 #include "FabricCore.h"
-#include "..\SpliceEvents.h"
-#include "..\Splice3dsmax.h"
-#include "..\SpliceRestoreObjects.h"
+#include "..\FabricEvents.h"
+#include "..\Fabric3dsmax.h"
+#include "..\FabricRestoreObjects.h"
 
 // Include Event constants
 #include "KbdTranslation.h"
@@ -17,9 +17,9 @@
 LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam);
 bool SendKLEvent(FabricCore::RTVal& klevent, ViewExp& pView, int eventType) ;
 
-FabricCore::RTVal SpliceMouseCallback::mEventDispatcher;
+FabricCore::RTVal FabricMouseCallback::mEventDispatcher;
 
-SpliceMouseCallback::SpliceMouseCallback(void)
+FabricMouseCallback::FabricMouseCallback(void)
 	: m_LMouseDown(false)
 	, m_MMouseDown(false)
 	, m_RMouseDown(false)
@@ -28,31 +28,31 @@ SpliceMouseCallback::SpliceMouseCallback(void)
 }
 
 
-SpliceMouseCallback::~SpliceMouseCallback(void)
+FabricMouseCallback::~FabricMouseCallback(void)
 {
 }
 
-int SpliceMouseCallback::override( int mode )
+int FabricMouseCallback::override( int mode )
 {
 	return CLICK_DRAG_CLICK;
 }
 
-BOOL SpliceMouseCallback::SupportTransformGizmo()
+BOOL FabricMouseCallback::SupportTransformGizmo()
 {
 	return FALSE;
 }
 
-void SpliceMouseCallback::DeactivateTransformGizmo()
+void FabricMouseCallback::DeactivateTransformGizmo()
 {
 }
 
-BOOL SpliceMouseCallback::SupportAutoGrid()
+BOOL FabricMouseCallback::SupportAutoGrid()
 {
-	// TODO: How to integrate AutoGrid into Splice?
+	// TODO: How to integrate AutoGrid into Fabric?
 	return TRUE;
 }
 
-BOOL SpliceMouseCallback::TolerateOrthoMode()
+BOOL FabricMouseCallback::TolerateOrthoMode()
 {
 	return TRUE;
 }
@@ -136,7 +136,7 @@ FabricCore::RTVal SetupViewport(ViewExp* pView)
 	return inlineViewport;
 }
 
-int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2 m )
+int FabricMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2 m )
 {
 	if (!mEventDispatcher.isValid())
 		return FALSE;  // Return FALSE to exit this command mode
@@ -243,12 +243,12 @@ int SpliceMouseCallback::proc( HWND hwnd, int msg, int point, int flags, IPoint2
 }
 
 
-void SpliceMouseCallback::EnterMode()
+void FabricMouseCallback::EnterMode()
 {
 	MAXSPLICE_CATCH_BEGIN;
 
 	if (!AnyInstances()) {
-		logMessage("Fabric Client not constructed yet. A Splice Node must be created before the manipulation tool can be activated.");
+		logMessage("Fabric Client not constructed yet. A Fabric Node must be created before the manipulation tool can be activated.");
 		return;
 	}
 
@@ -271,13 +271,13 @@ void SpliceMouseCallback::EnterMode()
 	MAXSPLICE_CATCH_END
 }
 
-void SpliceMouseCallback::ExitMode()
+void FabricMouseCallback::ExitMode()
 {
 	MAXSPLICE_CATCH_BEGIN
 
 	DbgAssert(!theHold.Holding());
 	if (theHold.Holding())
-		theHold.Accept(_T("ERROR - Splice Actions"));
+		theHold.Accept(_T("ERROR - Fabric Actions"));
 
 	if (mEventDispatcher.isValid())
 	{
@@ -332,7 +332,7 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 bool SendKLEvent(FabricCore::RTVal& klevent, ViewExp& pView, int eventType) 
 {
 
-	// Trigger the event on Splice
+	// Trigger the event on Fabric
 	FabricCore::RTVal inlineViewport = SetupViewport(&pView);
 	FabricCore::Client& client = GetClient();
 
@@ -364,7 +364,7 @@ bool SendKLEvent(FabricCore::RTVal& klevent, ViewExp& pView, int eventType)
 	}
 	//klevent.setMember("modifiers", FabricCore::RTVal::ConstructUInt32(client, modifiers));
 
-	SpliceMouseCallback::GetEventDispatcher().callMethod("Boolean", "onEvent", 1, &klevent);
+	FabricMouseCallback::GetEventDispatcher().callMethod("Boolean", "onEvent", 1, &klevent);
 
 	bool result = klevent.callMethod("Boolean", "isAccepted", 0, 0).getBoolean();
 
@@ -443,7 +443,7 @@ bool SendKLEvent(FabricCore::RTVal& klevent, ViewExp& pView, int eventType)
 #endif
 			}
 			else	
-				theHold.Accept(_T("Splice Manipulation"));
+				theHold.Accept(_T("Fabric Manipulation"));
 		}
 	}
 

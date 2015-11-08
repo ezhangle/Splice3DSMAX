@@ -6,7 +6,7 @@
 --      It does not test overall functionality
 -----------------------------------------------------------------------------
 
-m = SpliceMesh()
+m = FabricMesh()
 
 -- Cannot validate UI is shown
 -- m.ShowDFGGraphEditor()

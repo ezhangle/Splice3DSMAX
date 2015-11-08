@@ -1,15 +1,15 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-#define SpliceModifier_CLASS_ID	Class_ID(0x14f5108f, 0x1f3e182e)
+#define FabricModifier_CLASS_ID	Class_ID(0x14f5108f, 0x1f3e182e)
 
 //////////////////////////////////////////////////////////////////////////
-class SpliceModifier : public SpliceTranslationLayer<OSModifier, Mesh>
+class FabricModifier : public FabricTranslationLayer<OSModifier, Mesh>
 {
 public:
 
 	//Constructor/Destructor
-	SpliceModifier(BOOL loading);
-	virtual ~SpliceModifier();	
+	FabricModifier(BOOL loading);
+	virtual ~FabricModifier();	
 
 	virtual void DeleteThis() { delete this; }	
 
@@ -31,15 +31,15 @@ public:
 	virtual void Snap(TimeValue t, INode* inode, SnapInfo *snap, IPoint2 *p, ViewExp *vpt);
 
 	// Return the name that will appear in the history browser (modifier stack)
-	virtual const TCHAR *GetObjectName() { return GetString(IDS_SpliceModifier_CLASS_NAME); }
+	virtual const TCHAR *GetObjectName() { return GetString(IDS_FabricModifier_CLASS_NAME); }
 	virtual void GetWorldBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box );
 	virtual void GetLocalBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box );
 
 	virtual CreateMouseCallBack* GetCreateMouseCallBack() { return NULL; }
 
 	//From Animatable
-	virtual Class_ID ClassID() {return SpliceModifier_CLASS_ID;}		
-	virtual void GetClassName(TSTR& s) {s = GetString(IDS_SpliceModifier_CLASS_NAME);}
+	virtual Class_ID ClassID() {return FabricModifier_CLASS_ID;}		
+	virtual void GetClassName(TSTR& s) {s = GetString(IDS_FabricModifier_CLASS_NAME);}
 
 	// From ReferenceTarget
 	// Because we cannot initialize this class on creation,
@@ -49,9 +49,9 @@ public:
 	void RefAdded(RefMakerHandle rm);
 
 private:
-	// From SpliceTranslationLayer
+	// From FabricTranslationLayer
 	int GetValueType() override { return TYPE_MESH; }
-	bool CloneSpliceData(ParentClass* pMyClone) override { return true; }
+	bool CloneFabricData(ParentClass* pMyClone) override { return true; }
 	void ResetPorts() override;
 
 	// Pass input mesh in
@@ -60,17 +60,17 @@ private:
 	Interval m_inputValid;
 };
 
-class SpliceModifierClassDesc: public DynPBCustAttrClassDesc {
+class FabricModifierClassDesc: public DynPBCustAttrClassDesc {
 public:
-	void *			Create(BOOL loading = FALSE) { return new SpliceModifier(loading); }
-	const MCHAR *	ClassName() { static MSTR className = GetString(IDS_SpliceModifier_CLASS_NAME); return className.data(); }
+	void *			Create(BOOL loading = FALSE) { return new FabricModifier(loading); }
+	const MCHAR *	ClassName() { static MSTR className = GetString(IDS_FabricModifier_CLASS_NAME); return className.data(); }
 	SClass_ID		SuperClassID() { return OSM_CLASS_ID; }
-	Class_ID		ClassID() { return SpliceModifier_CLASS_ID; }
-	const TCHAR*	InternalName() {return _T("SpliceModifier");}
+	Class_ID		ClassID() { return FabricModifier_CLASS_ID; }
+	const TCHAR*	InternalName() {return _T("FabricModifier");}
 };
 
-DynPBCustAttrClassDesc* SpliceModifier::ParentClass::GetClassDesc() 
+DynPBCustAttrClassDesc* FabricModifier::ParentClass::GetClassDesc() 
 { 
-	static SpliceModifierClassDesc SpliceModifierDesc;
-	return &SpliceModifierDesc; 
+	static FabricModifierClassDesc FabricModifierDesc;
+	return &FabricModifierDesc; 
 }

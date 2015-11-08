@@ -13,7 +13,7 @@ fn FindPort sm name = (
 )
 
 -- Create the first mesh
-sm = SpliceMesh()
+sm = FabricMesh()
 sphereTriCounts = #(506, 255)
 sphereSize = 110.5
 -- Init required params
@@ -35,18 +35,18 @@ sm.SetKLCode nodeName klCode
 assert (CompArray (GetTriMeshFaceCount sm) sphereTriCounts) message:"Bad Init Tri Count" options:#(#dialog)
 assert (CompBB sm sphereSize) message:"Bad init size" options:#(#dialog)
 
-sm2 = SpliceMesh()
+sm2 = FabricMesh()
 sm2.addInputPort "inMesh" "PolygonMesh" -1
-sm2.OutPort = "SpliceMeshVal"
+sm2.OutPort = "FabricMeshVal"
 klCode = "
 require Math;
 require Geometry;
 
 operator cloneMesh(
-  io PolygonMesh SpliceMeshVal,
+  io PolygonMesh FabricMeshVal,
 	in PolygonMesh inMesh
 ) {
-  SpliceMeshVal = inMesh;
+  FabricMeshVal = inMesh;
 }
 ";
 sm2.SetKLCode "cloneMesh" klCode
@@ -58,7 +58,7 @@ assert (CompBB sm sphereSize) message:"Bad init size" options:#(#dialog)
 
 ----------------------------------------------------------------
 -- Test array accesses
-dataContainer = SpliceReferenceTarget()
+dataContainer = FabricReferenceTarget()
 dataContainer.addOutputPort "ptTransforms" "Mat44" isArray:true
 klCode = "
 require Math;
@@ -80,7 +80,7 @@ operator genTransforms(
 dataContainer.setKLCode "genTransforms" klCode
 
 --p1 = point()
-spliceCtrl = SpliceMatrixController()
+spliceCtrl = FabricMatrixController()
 --p1.transform.controller = spliceCtrl
 spliceCtrl.OutPort = "returnedValue"
 spliceCtrl.addInputPort "inMtx" "Mat44" -1

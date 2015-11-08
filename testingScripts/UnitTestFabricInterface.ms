@@ -2,8 +2,8 @@ fn FAssert b msg = (
 	assert (b) message:msg options:#(#dialog)
 )
 
-sm = SpliceMesh pos:[-27.1141,-29.5166,0] isSelected:on
-FAssert((sm.GetPortCount() == 1) and ((sm.GetPortName 1) == "outputValue")) "Error Initializing SpliceMesh"
+sm = FabricMesh pos:[-27.1141,-29.5166,0] isSelected:on
+FAssert((sm.GetPortCount() == 1) and ((sm.GetPortName 1) == "outputValue")) "Error Initializing FabricMesh"
 sm.ShowDFGGraphEditor() -- No way to test this
 
 res = $.DFGInstPreset "Fabric.Exts.Geometry.PolygonMesh.EmptyPolygonMesh" [212.000000,39.000000]  execPath:""

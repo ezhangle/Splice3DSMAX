@@ -1,8 +1,8 @@
 -----------------------------------------------------------------------------
--- Test import of Splice Files.
---   This unit test validates the ability to load/save Splice files.
+-- Test import of Fabric Files.
+--   This unit test validates the ability to load/save Fabric files.
 --   Tested:
---      Raw scene load of Splice file
+--      Raw scene load of Fabric file
 --      Object save of splice file
 --      Object load of splice file.
 -----------------------------------------------------------------------------
@@ -10,7 +10,7 @@ fn CompArray a b = (a as string == b as string)
 
 fn DoLoadFile filepath = (
 	numObjects = objects.count
-	res = Splice.loadFromFile filepath
+	res = Fabric.loadFromFile filepath
 	-- We should have a newly created mesh object
 	assert (objects.count == numObjects + 1) message:("Did not create node for:" + filepath) options:#(#dialog)
 	spliceObj = objects[numObjects + 1]
@@ -18,12 +18,12 @@ fn DoLoadFile filepath = (
 )
 
 -- All the examples here actually only happen in splice, so we need rendering to see whats happening
-Splice.rendering = true
+Fabric.rendering = true
 
--- We will load a few sample files from the installed SpliceStandalone
+-- We will load a few sample files from the installed FabricStandalone
 sysEnv = dotNetClass "System.Environment"
 fabricDir = sysEnv.GetEnvironmentVariable "FABRIC_DIR"
-sampleDir = fabricDir + "Samples\\SpliceStandalone\\"
+sampleDir = fabricDir + "Samples\\FabricStandalone\\"
 tempDir = sysEnv.GetEnvironmentVariable "TEMP"
 
 procGeo = DoLoadFile (sampleDir + "ProceduralGeometry\procgeo_revolution.splice")
@@ -39,7 +39,7 @@ bulletOp = DoLoadFile (sampleDir + "Bullet\RigidBodies_BasicDemo.splice");
 -- Ironically, the bullet op doesn't take advantage of the EvalContext time parameter
 
 -- Now, we test loading and saving off a proper max operator
-sm = SpliceMesh()
+sm = FabricMesh()
 -- Init required params
 nodeName = sm.name
 sm.OutPort = nodeName + "Val"
@@ -66,6 +66,6 @@ sm = DoLoadFile (tempDir + "\\sphere.splice");
 assert (CompArray (GetTriMeshFaceCount sm) origMeshCounts) message:"Did not restore output values in scene" options:#(#dialog)
 	
 delete sm
-sm = SpliceMesh()
+sm = FabricMesh()
 sm.loadFromFile (tempDir + "\\sphere.splice") true
 assert (CompArray (GetTriMeshFaceCount sm) origMeshCounts) message:"Did not restore output values in object" options:#(#dialog)

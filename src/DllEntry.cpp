@@ -11,10 +11,10 @@ CREATED BY:		Stephen Taylor, T&A Development
 **********************************************************************/
 
 #include "StdAfx.h"
-#include "SpliceStaticFPInterface.h"
+#include "FabricStaticFPInterface.h"
 #include <notify.h>
 #include <MaxScript/MaxScript.h>
-#include "SpliceEvents.h"
+#include "FabricEvents.h"
 
 // This function is called by Windows when the DLL is loaded.  This 
 // function may also be called many times during time critical operations
@@ -34,7 +34,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID /*lpvReserved*/)
 
 
 extern ClassDesc2* GetDynPBlockClassDesc();;
-extern DynPBCustAttrClassDesc* GetSpliceControllerDesc();
+extern DynPBCustAttrClassDesc* GetFabricControllerDesc();
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
@@ -59,14 +59,14 @@ __declspec( dllexport ) int LibNumberClasses()
 __declspec( dllexport ) ClassDesc* LibClassDesc(int i)
 {
 	switch(i) {
-	case 0: return SpliceTranslationLayer<Control, float>::GetClassDesc();
-	case 1: return SpliceTranslationLayer<Control, Point3>::GetClassDesc();
-	case 2: return SpliceTranslationLayer<Control, Quat>::GetClassDesc();
-	case 3: return SpliceTranslationLayer<Control, Matrix3>::GetClassDesc();
-	case 7: return SpliceTranslationLayer<OSModifier, Mesh>::GetClassDesc();
-	case 8: return SpliceTranslationLayer<WSModifier, Mesh>::GetClassDesc();
-	case 9: return SpliceTranslationLayer<GeomObject, Mesh>::GetClassDesc();
-	case 10: return SpliceTranslationLayer<ReferenceTarget, int>::GetClassDesc();
+	case 0: return FabricTranslationLayer<Control, float>::GetClassDesc();
+	case 1: return FabricTranslationLayer<Control, Point3>::GetClassDesc();
+	case 2: return FabricTranslationLayer<Control, Quat>::GetClassDesc();
+	case 3: return FabricTranslationLayer<Control, Matrix3>::GetClassDesc();
+	case 7: return FabricTranslationLayer<OSModifier, Mesh>::GetClassDesc();
+	case 8: return FabricTranslationLayer<WSModifier, Mesh>::GetClassDesc();
+	case 9: return FabricTranslationLayer<GeomObject, Mesh>::GetClassDesc();
+	case 10: return FabricTranslationLayer<ReferenceTarget, int>::GetClassDesc();
 	default: return nullptr;
 	}
 }
@@ -126,14 +126,14 @@ void OnShutdown(void* param, NotifyInfo* info)
 __declspec( dllexport ) int LibInitialize(void)
 {
 	// We need to initialize our MaxScript exposure for all classes as well.
-	SpliceTranslationLayer<Control, float>::InitMixinInterface();
-	SpliceTranslationLayer<Control, Point3>::InitMixinInterface();
-	SpliceTranslationLayer<Control, Quat>::InitMixinInterface();
-	SpliceTranslationLayer<Control, Matrix3>::InitMixinInterface();
-	SpliceTranslationLayer<OSModifier, Mesh>::InitMixinInterface();
-	SpliceTranslationLayer<WSModifier, Mesh>::InitMixinInterface();
-	SpliceTranslationLayer<GeomObject, Mesh>::InitMixinInterface();
-	SpliceTranslationLayer<ReferenceTarget, int>::InitMixinInterface();
+	FabricTranslationLayer<Control, float>::InitMixinInterface();
+	FabricTranslationLayer<Control, Point3>::InitMixinInterface();
+	FabricTranslationLayer<Control, Quat>::InitMixinInterface();
+	FabricTranslationLayer<Control, Matrix3>::InitMixinInterface();
+	FabricTranslationLayer<OSModifier, Mesh>::InitMixinInterface();
+	FabricTranslationLayer<WSModifier, Mesh>::InitMixinInterface();
+	FabricTranslationLayer<GeomObject, Mesh>::InitMixinInterface();
+	FabricTranslationLayer<ReferenceTarget, int>::InitMixinInterface();
 
 	// Force init/cleanup of client
 	RegisterNotification(OnStartup, NULL, NOTIFY_SYSTEM_STARTUP);
@@ -147,13 +147,13 @@ __declspec( dllexport ) int LibInitialize(void)
 __declspec( dllexport ) int LibShutdown(void)
 {
 	// Disable logging, the MaxScript system has already exit
-	//FabricSplice::Logging::setLogFunc(nullptr);
-	//FabricSplice::Logging::setLogErrorFunc(nullptr);
-	//FabricSplice::Logging::setCompilerErrorFunc(nullptr);
-	//FabricSplice::Logging::setKLReportFunc(nullptr);
-	//FabricSplice::Logging::setKLStatusFunc(nullptr);
+	//Fabric::Logging::setLogFunc(nullptr);
+	//Fabric::Logging::setLogErrorFunc(nullptr);
+	//Fabric::Logging::setCompilerErrorFunc(nullptr);
+	//Fabric::Logging::setKLReportFunc(nullptr);
+	//Fabric::Logging::setKLStatusFunc(nullptr);
 
-	//FabricSplice::Finalize();
+	//Fabric::Finalize();
 	return TRUE;
 }
 

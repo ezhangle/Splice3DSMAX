@@ -9,7 +9,7 @@
 #include "DynPBCustAttrClassDesc.h"
 
 DynPBUndo::DynPBUndo(ParamBlockDesc2* pbdesc, ReferenceTarget* pDynPB)
-:	m_pSpliceClient(pDynPB)
+:	m_pFabricClient(pDynPB)
 ,	m_pbOldDesc(pbdesc)
 ,	m_pDynPBClassDesc(dynamic_cast<DynPBCustAttrClassDesc*>(pbdesc->cd))
 ,	m_pbNewDesc(NULL)
@@ -88,7 +88,7 @@ void DynPBUndo::EndHold() {
 	// This is called when the undo operation is complete.
 	// Now, if we have been accepted, there is a new
 	// block in residence on the cust attrib.
-	IParamBlock2* newPB = m_pSpliceClient->GetParamBlock(0);
+	IParamBlock2* newPB = m_pFabricClient->GetParamBlock(0);
 	// We will need this new descriptor later if we undo/redo.
 	if (newPB != NULL) m_pbNewDesc = newPB->GetDesc();
 

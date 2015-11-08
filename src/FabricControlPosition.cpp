@@ -1,18 +1,18 @@
 //**************************************************************************/
-// DESCRIPTION: Generates position values using Splice
+// DESCRIPTION: Generates position values using Fabric
 // AUTHOR: Stephen Taylor
 //***************************************************************************/
 
 #include "StdAfx.h"
-#include "SpliceControl.hpp"
+#include "FabricControl.hpp"
 
-#define SpliceControlPosition_CLASS_ID	Class_ID(0x34952088, 0x7d9a01d7)
+#define FabricControlPosition_CLASS_ID	Class_ID(0x34952088, 0x7d9a01d7)
 
-class SpliceControlPosition : public SpliceControl<Point3> {
+class FabricControlPosition : public FabricControl<Point3> {
 public:
 
 	//From Animatable
-	Class_ID ClassID() {return SpliceControlPosition_CLASS_ID;}		
+	Class_ID ClassID() {return FabricControlPosition_CLASS_ID;}		
 	SClass_ID SuperClassID() { return CTRL_POSITION_CLASS_ID; }
 	void GetClassName(TSTR& s) {s = GetString(IDS_SPLICE_POS_CTRL_CLASS_NAME);}
 
@@ -21,33 +21,33 @@ public:
 	void SetValue(TimeValue,void *,int,GetSetMethod);
 
 	//Constructor/Destructor
-	SpliceControlPosition(BOOL loading);
-	~SpliceControlPosition();	
+	FabricControlPosition(BOOL loading);
+	~FabricControlPosition();	
 
 private:
 
 	int GetValueType() { return TYPE_POINT3; }
 };
 
-class SpliceControlPositionClassDesc : public DynPBCustAttrClassDesc {
+class FabricControlPositionClassDesc : public DynPBCustAttrClassDesc {
 public:
-	SpliceControlPositionClassDesc()
+	FabricControlPositionClassDesc()
 	{
 	}
-	void *			Create(BOOL loading = FALSE) { return new SpliceControlPosition(loading); }
+	void *			Create(BOOL loading = FALSE) { return new FabricControlPosition(loading); }
 	const MCHAR *	ClassName() { static MSTR s = GetString(IDS_SPLICE_POS_CTRL_CLASS_NAME); return s.data(); }
 	SClass_ID		SuperClassID() { return CTRL_POSITION_CLASS_ID; }
-	Class_ID		ClassID() { return SpliceControlPosition_CLASS_ID; }
-	const TCHAR*	InternalName() {return _T("SplicePositionController");}
+	Class_ID		ClassID() { return FabricControlPosition_CLASS_ID; }
+	const TCHAR*	InternalName() {return _T("FabricPositionController");}
 };
 
-DynPBCustAttrClassDesc* SpliceTranslationLayer<Control, Point3>::GetClassDesc()
+DynPBCustAttrClassDesc* FabricTranslationLayer<Control, Point3>::GetClassDesc()
 {
-	static SpliceControlPositionClassDesc spliceControllerDesc;
+	static FabricControlPositionClassDesc spliceControllerDesc;
 	return &spliceControllerDesc; 
 }
 
-SpliceControlPosition::SpliceControlPosition(BOOL loading)
+FabricControlPosition::FabricControlPosition(BOOL loading)
 	: ParentClass(loading)
 {
 	if (!loading)
@@ -55,35 +55,35 @@ SpliceControlPosition::SpliceControlPosition(BOOL loading)
 }
 
 
-SpliceControlPosition::~SpliceControlPosition() 
+FabricControlPosition::~FabricControlPosition() 
 {
 }		
 
-void SpliceControlPosition::Copy(Control *)
+void FabricControlPosition::Copy(Control *)
 {
 
 }
 
-void SpliceControlPosition::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
+void FabricControlPosition::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
 	if(method == CTRL_RELATIVE)
 	{
 		Invalidate(); // Evaluate every time in case parent changes too
 		Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
-		MaxValueToSplice(m_binding, m_parentArgName.c_str(), 0, interval, *pInVal);
+		MaxValueToFabric(m_binding, m_parentArgName.c_str(), 0, interval, *pInVal);
 		pInVal->SetTrans(Evaluate(t, interval));
 	}
 	else
 	{
 		Point3* pOutVal = reinterpret_cast<Point3*>(val);
-		MaxValueToSplice(m_binding, m_parentArgName.c_str(), 0, interval, Matrix3::Identity);
+		MaxValueToFabric(m_binding, m_parentArgName.c_str(), 0, interval, Matrix3::Identity);
 		*pOutVal = Evaluate(t, interval);
 	}
 }
 
 
 
-void SpliceControlPosition::SetValue(TimeValue,void *value,int,GetSetMethod)
+void FabricControlPosition::SetValue(TimeValue,void *value,int,GetSetMethod)
 {
 	// TODO:
 

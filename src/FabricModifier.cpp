@@ -1,30 +1,30 @@
 //**************************************************************************/
-// DESCRIPTION: Applies modifications to an input mesh using Splice
+// DESCRIPTION: Applies modifications to an input mesh using Fabric
 // AUTHOR: Stephen Taylor
 //***************************************************************************/
 
 #include "StdAfx.h"
-#include "SpliceModifier.h"
+#include "FabricModifier.h"
 
 
 
-//--- SpliceModifier -------------------------------------------------------
+//--- FabricModifier -------------------------------------------------------
 // Only initialize the splice graph if loading.  Else,
 // we initialize the class on every time the Modifier list
-// is dropped down in the UI.  If Splice is not initialized,
+// is dropped down in the UI.  If Fabric is not initialized,
 // this takes about 4s (every drop down), which is just not polite.
-SpliceModifier::SpliceModifier(BOOL loading)
+FabricModifier::FabricModifier(BOOL loading)
 	: ParentClass(true)
 {
 //	if (!loading)
 //		ResetPorts();
 }
 
-SpliceModifier::~SpliceModifier()
+FabricModifier::~FabricModifier()
 {
 }
 
-void SpliceModifier::RefAdded(RefMakerHandle rm)
+void FabricModifier::RefAdded(RefMakerHandle rm)
 {
 	if (!m_binding.isValid())
 	{
@@ -33,12 +33,12 @@ void SpliceModifier::RefAdded(RefMakerHandle rm)
 	}
 }
 
-Interval SpliceModifier::LocalValidity(TimeValue t)
+Interval FabricModifier::LocalValidity(TimeValue t)
 {
 	return m_valid;
 }
 
-void SpliceModifier::NotifyInputChanged( const Interval &changeInt, PartID partID, RefMessage message, ModContext *mc )
+void FabricModifier::NotifyInputChanged( const Interval &changeInt, PartID partID, RefMessage message, ModContext *mc )
 {
 	if (message == REFMSG_CHANGE)
 	{
@@ -48,7 +48,7 @@ void SpliceModifier::NotifyInputChanged( const Interval &changeInt, PartID partI
 }
 
 //////////////////////////////////////////////////////////////////////////
-void SpliceModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os, INode *node )
+void FabricModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os, INode *node )
 {
 	if (!m_binding.isValid())
 		return;
@@ -74,7 +74,7 @@ void SpliceModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os,
 		{
 			HoldSuspend hs; // Suspend undo, there is no need for FE to record this action
 			m_inputValid.SetInfinite();
-			MaxValuesToSplice<Object*, Mesh>(m_binding, m_inMeshPort.c_str(), t, m_inputValid, &os->obj, 1);
+			MaxValuesToFabric<Object*, Mesh>(m_binding, m_inMeshPort.c_str(), t, m_inputValid, &os->obj, 1);
 			ivValid &= m_inputValid;
 
 			// If Fabric does not have an output value for us, then
@@ -100,7 +100,7 @@ void SpliceModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os,
 	pTriObj->UpdateValidity(VERT_COLOR_CHAN_NUM, ivValid);
 }
 
-int SpliceModifier::Display(TimeValue t, INode* inode, ViewExp* vpt, int flags)
+int FabricModifier::Display(TimeValue t, INode* inode, ViewExp* vpt, int flags)
 {
 	// TODO: Nitrous support here
 	Interval ivDontCare;
@@ -110,7 +110,7 @@ int SpliceModifier::Display(TimeValue t, INode* inode, ViewExp* vpt, int flags)
 	return 0;
 }
 
-int SpliceModifier::HitTest(TimeValue t, INode* inode, int type, int crossing, 
+int FabricModifier::HitTest(TimeValue t, INode* inode, int type, int crossing, 
 						int flags, IPoint2* p, ViewExp* vpt)
 {
 	Interval ivDontCare;
@@ -125,7 +125,7 @@ int SpliceModifier::HitTest(TimeValue t, INode* inode, int type, int crossing,
 	return pMeshNoConst->select(gw, mtl, &hitRegion, flags & HIT_ABORTONHIT);
 }
 
-void SpliceModifier::Snap(TimeValue t, INode* inode, SnapInfo* snap, IPoint2* p, ViewExp* vpt)
+void FabricModifier::Snap(TimeValue t, INode* inode, SnapInfo* snap, IPoint2* p, ViewExp* vpt)
 {
 	Interval ivDontCare;
 	const Mesh& mesh = Evaluate(t, ivDontCare);
@@ -134,7 +134,7 @@ void SpliceModifier::Snap(TimeValue t, INode* inode, SnapInfo* snap, IPoint2* p,
 	pMeshNoConst->snap(vpt->getGW(), snap, p, tm);
 }
 
-void SpliceModifier::GetWorldBoundBox(TimeValue t, INode* mat, ViewExp* /*vpt*/, Box3& box )
+void FabricModifier::GetWorldBoundBox(TimeValue t, INode* mat, ViewExp* /*vpt*/, Box3& box )
 {
 	Interval ivDontCare;
 	const Mesh& mesh = Evaluate(t, ivDontCare);
@@ -142,7 +142,7 @@ void SpliceModifier::GetWorldBoundBox(TimeValue t, INode* mat, ViewExp* /*vpt*/,
 	box = pMeshNoConst->getBoundingBox(&mat->GetNodeTM(t));
 }
 
-void SpliceModifier::GetLocalBoundBox(TimeValue t, INode *mat, ViewExp * /*vpt*/, Box3& box )
+void FabricModifier::GetLocalBoundBox(TimeValue t, INode *mat, ViewExp * /*vpt*/, Box3& box )
 {
 	Interval ivDontCare;
 	const Mesh& mesh = Evaluate(t, ivDontCare);
@@ -150,7 +150,7 @@ void SpliceModifier::GetLocalBoundBox(TimeValue t, INode *mat, ViewExp * /*vpt*/
 	box = pMeshNoConst->getBoundingBox();
 }
 
-void SpliceModifier::ResetPorts()
+void FabricModifier::ResetPorts()
 {
 	MACROREC_GUARD;
 
@@ -165,7 +165,7 @@ void SpliceModifier::ResetPorts()
 			\"uiPersistValue\" : \"false\" \n \
 		}";
 
-		m_inMeshPort = AddSpliceParameter(this, GetValueType(), "BaseMesh", FabricCore::DFGPortType_In, "Geometry", metadata);
+		m_inMeshPort = AddFabricParameter(this, GetValueType(), "BaseMesh", FabricCore::DFGPortType_In, "Geometry", metadata);
 
 		// We want to ensure this value does not show up as a parameter in Max
 		if (!m_outArgName.empty())

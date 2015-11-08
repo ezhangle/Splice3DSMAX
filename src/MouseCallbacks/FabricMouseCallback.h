@@ -1,7 +1,7 @@
 #pragma once
 #include "mouseman.h"
 
-class SpliceMouseCallback :
+class FabricMouseCallback :
 	public MouseCallBack
 {
 private:
@@ -17,8 +17,8 @@ private:
 	HHOOK m_kbHookHandle;
 
 public:
-	SpliceMouseCallback(void);
-	~SpliceMouseCallback(void);
+	FabricMouseCallback(void);
+	~FabricMouseCallback(void);
 
 	virtual int override( int mode );
 

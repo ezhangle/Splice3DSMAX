@@ -253,7 +253,7 @@ ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName )
 	return AddMaxParameter(pDesc, type, sName.data());
 }
 
-void SetMaxParamLimits(SpliceTranslationFPInterface* pOwner, const char* argName)
+void SetMaxParamLimits(FabricTranslationFPInterface* pOwner, const char* argName)
 {
 	int id = pOwner->GetPortParamID(argName);
 	if (id < 0)
@@ -313,14 +313,14 @@ void SetMaxParamLimits(SpliceTranslationFPInterface* pOwner, const char* argName
 //template<typename TType>
 //void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::Variant& defaultVal) {
 //	TType def;
-//	SpliceToMaxValue(defaultVal, def);
+//	FabricToMaxValue(defaultVal, def);
 //	pDesc->ParamOption(pid, p_default, def, p_end); 
 //}
 //
 //template<typename TType>
 //void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::RTVal& defaultVal) {
 //	TType def;
-//	SpliceToMaxValue(defaultVal, def);
+//	FabricToMaxValue(defaultVal, def);
 //	pDesc->ParamOption(pid, p_default, def, p_end);
 //}
 //
@@ -416,11 +416,11 @@ void SetMaxParamValue(IParamBlock2* pblock, TimeValue t, ParamID pid, FabricCore
 	if (pblock->IDtoIndex(pid) < 0)
 		return;
 	TType def;
-	SpliceToMaxValue(value, def);
+	FabricToMaxValue(value, def);
 	pblock->SetValue(pid, t, def);
 }
 
-void SetMaxParamFromSplice(IParamBlock2* pblock, ParamID pid, FabricCore::DFGBinding& binding, const char* argName)
+void SetMaxParamFromFabric(IParamBlock2* pblock, ParamID pid, FabricCore::DFGBinding& binding, const char* argName)
 {
 	if (pblock == nullptr)
 		return;
@@ -623,9 +623,9 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 }
 
 // Add a parameter to the splice graph
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
+std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
 {
-	return AddSpliceParameter(pOwner, type, CStr::FromMCHAR(pName).data(), mode, inExtension, metadata);
+	return AddFabricParameter(pOwner, type, CStr::FromMCHAR(pName).data(), mode, inExtension, metadata);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -644,18 +644,18 @@ std::string GetPortConnection(FabricCore::DFGBinding& binding, const char* argNa
 	return binding.getExec().getExecPortMetadata(argName, MAX_SRC_OPT);
 }
 
-void SetPortConnection(SpliceTranslationFPInterface* pOwner, const char* argName, const char* name)
+void SetPortConnection(FabricTranslationFPInterface* pOwner, const char* argName, const char* name)
 {
 	pOwner->SetPortMetaData(argName, MAX_SRC_OPT, name, "");
 }
 
-bool GetPortPostConnectionUI(SpliceTranslationFPInterface* pOwner, const char* argName)
+bool GetPortPostConnectionUI(FabricTranslationFPInterface* pOwner, const char* argName)
 {
 	const char* res = pOwner->GetPortMetaData(argName, MAX_POST_UI_OPT);
 	return strcmp(res, "0") == 0 ? false : true;
 }
 
-void SetPortPostConnectionUI(SpliceTranslationFPInterface* pOwner, const char* argName, bool postUI)
+void SetPortPostConnectionUI(FabricTranslationFPInterface* pOwner, const char* argName, bool postUI)
 {
 	pOwner->SetPortMetaData(argName, MAX_POST_UI_OPT, postUI ? "1" : "0", "");
 }
@@ -722,12 +722,12 @@ int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName)
 	{
 		// If our type is not legal for our current port type,
 		// reset it to the default
-		BitArray legalTypes = SpliceTypeToMaxTypes(portType);
+		BitArray legalTypes = FabricTypeToMaxTypes(portType);
 		if (!legalTypes[maxType])
 			maxType = -2;
 	}
 	if (maxType == -2)
-		maxType = SpliceTypeToDefaultMaxType(portType);
+		maxType = FabricTypeToDefaultMaxType(portType);
 
 	return maxType;
 }
@@ -763,7 +763,7 @@ bool SetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue*
 
 	Interval iv;
 	TimeValue t = GetCOREInterface()->GetTime();
-	MaxValueToSplice(binding, argName, t, iv, *value);
+	MaxValueToFabric(binding, argName, t, iv, *value);
 	return true;
 #pragma message("TEST THIS")
 	MAXSPLICE_CATCH_END
@@ -795,7 +795,7 @@ inline bool sub_array(std::string& type)
 	return false;
 }
 
-BitArray SpliceTypeToMaxTypes(const char* cType)
+BitArray FabricTypeToMaxTypes(const char* cType)
 {
 	
 	if (cType == NULL)
@@ -876,7 +876,7 @@ BitArray SpliceTypeToMaxTypes(const char* cType)
 	return res;
 }
 
-int SpliceTypeToMaxType(const char* cType)
+int FabricTypeToMaxType(const char* cType)
 {
 	std::string sType = cType;
 	bool isArray = sub_array(sType);
@@ -918,7 +918,7 @@ int SpliceTypeToMaxType(const char* cType)
 		res =  TYPE_MESH;
 	else 
 	{
-		// DbgAssert(0 && "NOTE: Add Default translation Type for this Splice Type");
+		// DbgAssert(0 && "NOTE: Add Default translation Type for this Fabric Type");
 	}
 
 	if (res >= 0 && isArray)
@@ -930,18 +930,18 @@ int SpliceTypeToMaxType(const char* cType)
 // This function is simply here to override the default PB2 type for PolygonMesh.
 // The correct type for PolyMesh is TYPE_MESH, but unfortunately the PB2
 // doesn't support that data, so we need it to create an INODE parameter instead.
-int SpliceTypeToDefaultMaxType(const char* cType)
+int FabricTypeToDefaultMaxType(const char* cType)
 {
 	if (cType == nullptr)
 		return -1;
 
 	if (strcmp(cType, "PolygonMesh") == 0)
 		return TYPE_INODE;
-	return SpliceTypeToMaxType(cType);
+	return FabricTypeToMaxType(cType);
 }
 
 //
-//std::string MaxTypeToSpliceType(int type)
+//std::string MaxTypeToFabricType(int type)
 //{
 //	switch (type) {
 //	case TYPE_BOOL:
@@ -1044,7 +1044,7 @@ int SpliceTypeToDefaultMaxType(const char* cType)
 //		res = TYPE_MESH;
 //	else
 //	{
-//		// DbgAssert(0 && "NOTE: Add Default translation Type for this Splice Type");
+//		// DbgAssert(0 && "NOTE: Add Default translation Type for this Fabric Type");
 //	}
 //
 //	if (isArray)
@@ -1078,7 +1078,7 @@ int SpliceTypeToDefaultMaxType(const char* cType)
 //	return false;
 //}
 
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
+std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
 {
 	try
 	{
@@ -1087,13 +1087,13 @@ std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, const char*
 	}
 	catch(FabricCore::Exception e) 
 	{
-		CStr message = "ERROR on AddPort to Splice: ";
+		CStr message = "ERROR on AddPort to Fabric: ";
 		logMessage(message + e.getDesc_cstr());
 		return nullptr;
 	}
 }
 
-std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
+std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, int type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
 {
 	std::string strType;
 	switch ((int)type)
@@ -1147,7 +1147,7 @@ std::string AddSpliceParameter(SpliceTranslationFPInterface* pOwner, int type, c
 		return std::string();
 	}
 
-	return AddSpliceParameter(pOwner, strType.data(), cName, mode, inExtension, metadata);
+	return AddFabricParameter(pOwner, strType.data(), cName, mode, inExtension, metadata);
 }
 
 #pragma endregion
@@ -1171,7 +1171,7 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_COMMAND:
 		{
-			SpliceTranslationFPInterface* curInstance = reinterpret_cast<SpliceTranslationFPInterface*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+			FabricTranslationFPInterface* curInstance = reinterpret_cast<FabricTranslationFPInterface*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 			if (curInstance == NULL) 
 				return 0;
 
@@ -1240,11 +1240,11 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 #pragma endregion
 
 //////////////////////////////////////////////////////////////////////////
-#pragma region MaxToSplice conversion functions
+#pragma region MaxToFabric conversion functions
 
 //////////////////////////////////////////////////////////////////////////
 template<typename TResultType, typename TConvertType>
-void ParameterBlockValuesToSplice(FabricCore::DFGBinding& binding, const char* argName, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
+void ParameterBlockValuesToFabric(FabricCore::DFGBinding& binding, const char* argName, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
 {
 	MAXSPLICE_CATCH_BEGIN
 
@@ -1258,20 +1258,20 @@ void ParameterBlockValuesToSplice(FabricCore::DFGBinding& binding, const char* a
 	TResultType* pVals = new TResultType[nParams];
 	for (int i = 0; i < nParams; i++)
 		pblock->GetValue(pid, t, pVals[i], ivValid, i);
-	MaxValuesToSplice<TResultType, TConvertType>(binding, argName, t, ivValid, pVals, nParams);
+	MaxValuesToFabric<TResultType, TConvertType>(binding, argName, t, ivValid, pVals, nParams);
 	delete pVals;
 
 	MAXSPLICE_CATCH_END
 }
 
 template<typename TResultType>
-void ParameterBlockValuesToSplice(FabricCore::DFGBinding& binding, const char* argName, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
+void ParameterBlockValuesToFabric(FabricCore::DFGBinding& binding, const char* argName, TimeValue t, IParamBlock2* pblock, ParamID pid, Interval& ivValid)
 {
-	ParameterBlockValuesToSplice<TResultType, TResultType>(binding, argName, t, pblock, pid, ivValid);
+	ParameterBlockValuesToFabric<TResultType, TResultType>(binding, argName, t, pblock, pid, ivValid);
 }
 
-// This helper function converts from INode to the appropriate Splice type
-void MaxPtrToSplice(FabricCore::DFGBinding& binding, const char* argName, TimeValue t, IParamBlock2* pblock, ParamID id, Interval& ivValid)
+// This helper function converts from INode to the appropriate Fabric type
+void MaxPtrToFabric(FabricCore::DFGBinding& binding, const char* argName, TimeValue t, IParamBlock2* pblock, ParamID id, Interval& ivValid)
 {
 	FabricCore::DFGExec exec = binding.getExec();
 	if (!exec.haveExecPort(argName))
@@ -1279,28 +1279,28 @@ void MaxPtrToSplice(FabricCore::DFGBinding& binding, const char* argName, TimeVa
 
 	// There is no "INode" type in splice, so try to figure out a conversion
 	const char* cType = exec.getExecPortResolvedType(argName);
-	int maxTypeRequired = SpliceTypeToMaxType(cType);
+	int maxTypeRequired = FabricTypeToMaxType(cType);
 	switch(maxTypeRequired)
 	{
 	case TYPE_POINT3:
 		{
-			ParameterBlockValuesToSplice<INode*, Point3>(binding, argName, t, pblock, id, ivValid);
+			ParameterBlockValuesToFabric<INode*, Point3>(binding, argName, t, pblock, id, ivValid);
 			break;
 		}
 	case TYPE_QUAT:
 		{
-			ParameterBlockValuesToSplice<INode*, Quat>(binding, argName, t, pblock, id, ivValid);
+			ParameterBlockValuesToFabric<INode*, Quat>(binding, argName, t, pblock, id, ivValid);
 			break;
 		}
 	case TYPE_MATRIX3:
 		{
-			ParameterBlockValuesToSplice<INode*, Matrix3>(binding, argName, t, pblock, id, ivValid);
+			ParameterBlockValuesToFabric<INode*, Matrix3>(binding, argName, t, pblock, id, ivValid);
 			break;
 		}
 	case TYPE_MESH:
 		{
 			// Convert to mesh if possible
-			ParameterBlockValuesToSplice<INode*, Mesh>(binding, argName, t, pblock, id, ivValid);
+			ParameterBlockValuesToFabric<INode*, Mesh>(binding, argName, t, pblock, id, ivValid);
 			break;
 		}
 	default:
@@ -1308,7 +1308,7 @@ void MaxPtrToSplice(FabricCore::DFGBinding& binding, const char* argName, TimeVa
 	}
 }
 // Pblock conversion function
-void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore::DFGBinding& binding, std::vector<Interval>& paramValids, Interval& ivValid)
+void TransferAllMaxValuesToFabric(TimeValue t, IParamBlock2* pblock, FabricCore::DFGBinding& binding, std::vector<Interval>& paramValids, Interval& ivValid)
 {
 	if (pblock == NULL)
 		return;
@@ -1332,9 +1332,9 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 			continue;
 		}
 
-#pragma message("TODO: Figure out how to match Max's caching with Splices")
+#pragma message("TODO: Figure out how to match Max's caching with Fabrics")
 		// Has this parameter already been translated?  Test 
-		// the validity of the value currently in Splice
+		// the validity of the value currently in Fabric
 		if (pidx >= paramValids.size())
 			paramValids.resize(pidx + 1);
 		else
@@ -1350,45 +1350,45 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 		{
 		case TYPE_INT:		
 		case TYPE_INDEX:
-			ParameterBlockValuesToSplice<int>(binding, argName, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToFabric<int>(binding, argName, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_TIMEVALUE:
-			ParameterBlockValuesToSplice<TimeValue, float>(binding, argName, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToFabric<TimeValue, float>(binding, argName, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_FLOAT:
 		case TYPE_ANGLE:
 		case TYPE_WORLD:
 		case TYPE_PCNT_FRAC:
-			ParameterBlockValuesToSplice<float>(binding, argName, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToFabric<float>(binding, argName, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_RGBA:
-			ParameterBlockValuesToSplice<Color>(binding, argName, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToFabric<Color>(binding, argName, t, pblock, pid, paramValids[pidx]);
 			break;
 		//case TYPE_POINT2:
-		//	MaxValueToSplice(port, pblock->GetPoint3(id, t));
+		//	MaxValueToFabric(port, pblock->GetPoint3(id, t));
 		//	break;
 		case TYPE_POINT3:
-			ParameterBlockValuesToSplice<Point3>(binding, argName, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToFabric<Point3>(binding, argName, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_FRGBA:
-			ParameterBlockValuesToSplice<Point4>(binding, argName, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToFabric<Point4>(binding, argName, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_POINT4:
-			ParameterBlockValuesToSplice<Point4>(binding, argName, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToFabric<Point4>(binding, argName, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_BOOL:
-			ParameterBlockValuesToSplice<int, bool>(binding, argName, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToFabric<int, bool>(binding, argName, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_MATRIX3:
-			ParameterBlockValuesToSplice<Matrix3>(binding, argName, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToFabric<Matrix3>(binding, argName, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_STRING:
 		case TYPE_FILENAME:
-			ParameterBlockValuesToSplice<const MCHAR*>(binding, argName, t, pblock, pid, paramValids[pidx]);
+			ParameterBlockValuesToFabric<const MCHAR*>(binding, argName, t, pblock, pid, paramValids[pidx]);
 			break;
 		case TYPE_INODE:
 			{
-				MaxPtrToSplice(binding, argName, t, pblock, pid, paramValids[pidx]);
+				MaxPtrToFabric(binding, argName, t, pblock, pid, paramValids[pidx]);
 				break;
 			}
 		case TYPE_REFTARG:
@@ -1401,7 +1401,7 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 				std::string portConnection = GetPortConnection(binding, argName);
 				if (portConnection.length() > 0) {
 					
-					SpliceTranslationFPInterface* pSrcContInterface = static_cast<SpliceTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
+					FabricTranslationFPInterface* pSrcContInterface = static_cast<FabricTranslationFPInterface*>(pSrcContainer->GetInterface(ISPLICE__INTERFACE));
 					if (pSrcContInterface == nullptr)
 						continue;
 
@@ -1415,7 +1415,7 @@ void TransferAllMaxValuesToSplice(TimeValue t, IParamBlock2* pblock, FabricCore:
 				else 
 				{
 					// TODO
-					//MaxPtrToSplice(port, t, )
+					//MaxPtrToFabric(port, t, )
 				}
 				break;
 			}

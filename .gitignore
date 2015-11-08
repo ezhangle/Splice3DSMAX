@@ -11,5 +11,5 @@
 *.sdf
 *.suo
 *.user
-Generated.Plugin.Splice.ini
+Generated.Plugin.Fabric.ini
 src/moc_MaxDFGWidget.cpp

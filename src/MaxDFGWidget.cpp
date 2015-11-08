@@ -33,7 +33,7 @@ void MaxDFGWidget::onValueChanged()
 void MaxDFGWidget::onStructureChanged()
 {
 	//if (theHold.Holding())
-	//	theHold.Accept(_M("Splice Structure Changed"));
+	//	theHold.Accept(_M("Fabric Structure Changed"));
 }
 
 
@@ -41,13 +41,13 @@ void MaxDFGWidget::onStructureChanged()
 void MaxDFGWidget::onUndo()
 {
 	//if (theHold.Holding())
-	//	theHold.Accept(_M("Splice Structure Changed"));
+	//	theHold.Accept(_M("Fabric Structure Changed"));
 }
 
 void MaxDFGWidget::onRedo()
 {
 	//if (theHold.Holding())
-	//	theHold.Accept(_M("Splice Structure Changed"));
+	//	theHold.Accept(_M("Fabric Structure Changed"));
 }
 
 
@@ -195,7 +195,7 @@ void MaxDFGWidget::onPortEditDialogCreated(DFG::DFGBaseDialog * dialog)
 		QByteArray asName = title.toUtf8();
 		const char* fabricType = GetPortType(exec, asName.constData());
 
-		BitArray br = SpliceTypeToMaxTypes(fabricType);
+		BitArray br = FabricTypeToMaxTypes(fabricType);
 
 		if (br.AnyBitSet())
 		{
@@ -238,11 +238,11 @@ void MaxDFGWidget::onPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog * dialog
 				// Figure out what kind of parameter
 				// we can/will create on the Fabric side
 				QString spliceType = editPortDialog->dataType();
-				QByteArray asSpliceType = spliceType.toAscii();
-				BitArray legalTypes = SpliceTypeToMaxTypes(asSpliceType.constData());
+				QByteArray asFabricType = spliceType.toAscii();
+				BitArray legalTypes = FabricTypeToMaxTypes(asFabricType.constData());
 				// The requested max type is not legal for this splice type
 				if (!legalTypes[maxType])
-					maxType = SpliceTypeToDefaultMaxType(asSpliceType.constData()); // Reset to default
+					maxType = FabricTypeToDefaultMaxType(asFabricType.constData()); // Reset to default
 
 				FTL::JSONEnc<> paramTypeEnc(*additionalMetaData, FTL_STR(MAX_PARM_TYPE_OPT));
 				FTL::JSONSInt32Enc<> typeS32Enc(paramTypeEnc, maxType);

@@ -191,21 +191,6 @@ std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding
 	DFGHoldActions hold(_M("DFG Add Port"));
 
 	bool isPossibleMaxPort = portType != FabricCore::DFGPortType_Out && execPath.empty();
-	//if (isPossibleMaxPort && metaData.empty())
-	//{
-	//	int maxPortType = FabricTypeToDefaultMaxType(typeSpec.c_str());
-	//	if (maxPortType >= 0)
-	//	{
-	//		std::string sMetaData = metaData;
-	//		FTL::JSONEnc<> enc(sMetaData);
-	//		FTL::JSONObjectEnc<> objEnc(enc);
-	//		{
-	//			FTL::JSONEnc<> maxTypeEnc(objEnc, FTL_STR(MAX_PARM_TYPE_OPT));
-	//			FTL::JSONFloat64Enc<> xS32Enc(maxTypeEnc, -2);
-	//		}
-	//		metaData = sMetaData;
-	//	}
-	//}
 
 	std::string res = __super::dfgDoAddPort(binding, execPath, exec, desiredPortName, portType, typeSpec, portToConnect, extDep, metaData);
 

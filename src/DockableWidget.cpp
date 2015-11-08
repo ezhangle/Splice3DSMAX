@@ -116,7 +116,6 @@ int DockableWindow::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_KEYUP:
 		return TRUE;
 	}
-	//QApplication::processEvents();
 	return FALSE;
 }
 

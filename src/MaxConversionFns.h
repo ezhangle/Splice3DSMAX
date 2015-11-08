@@ -137,23 +137,3 @@ void FabricToMaxValue(const FabricCore::RTVal& rtv, MSTR& param);
 	// some types get silently promoted to bool, and we call the wrong fn
 template<typename TResultType>
 void FabricToMaxValue(const FabricCore::RTVal& spliceVal, TResultType& maxVal)  { ThisShouldNotCompile }
-
-//////////////////////////////////////////////////////////////////////////
-//template<typename TResultType>
-//void FabricToMaxValue(FabricCore::DFGBinding* binding, const char* port, TResultType& param, int index=-1)
-//{
-//	// De-const because some splice functions are not marked const
-//	//DFGWrapper::PortPtr& ncDGPort = const_cast<DFGWrapper::PortPtr&>(dgPort);
-//	FabricCore::RTVal rtVal;// = ncDGPort.getRTVal();
-//	//if (ncDGPort.isArray())
-//	//{
-//	//	DbgAssert(index >= 0);
-//	//	int nValues = ncDGPort.getArrayCount();
-//	//	if (index < nValues && index >= 0)
-//	//	{
-//	//		rtVal = rtVal.getArrayElement(index);
-//	//	}
-//	//}
-//	if (rtVal.isValid())
-//		FabricToMaxValue(rtVal, param);
-//}

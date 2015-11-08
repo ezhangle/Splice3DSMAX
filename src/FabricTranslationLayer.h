@@ -309,65 +309,7 @@ public:
 
 #pragma endregion
 
-#pragma region fns from FabricCommandInterface (todo - rename to this)
-
-	//// The following are direct mappers to the commands defined by the DFGCmdHandler classed.
-	//virtual void DFGRemoveNodes(const Tab<TSTR*>& nodeNames, const MSTR& execPath) = 0;
-	//virtual void DFGConnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath) = 0;
-	//virtual void DFGDisconnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath) = 0;
-	//virtual MSTR DFGAddGraph(const MSTR& title, Point2 pos, const MSTR& execPath) = 0;
-	//virtual MSTR DFGAddFunc(const MSTR& title, const MSTR& initialCode, Point2 pos, const MSTR& execPath) = 0;
-	//virtual MSTR DFGInstPreset(const MSTR& filename, Point2 pos, const MSTR& execPath) = 0;
-	//virtual MSTR DFGAddVar(const MSTR& desiredNodeName, const MSTR& dataType, const MSTR& extDep, Point2 pos, const MSTR& execPath) = 0;
-	//virtual MSTR DFGAddGet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath) = 0;
-	//virtual MSTR DFGAddSet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath) = 0;
-	//virtual MSTR DFGAddPort(const MSTR& desiredPortName, int portType, const MSTR& portSpec, const MSTR& portToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath) = 0;
-	//virtual MSTR DFGEditPort(const MSTR& portName, const MSTR& desiredNewPortName, const MSTR& typeSpec, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath) = 0;
-	//virtual void DFGRemovePort(const MSTR& portName, const MSTR& execPath) = 0;
-	//virtual void DFGResizeBackdrop(const MSTR& backDropNodeName, Point2 topLeft, Point2 size, const MSTR& execPath) = 0;
-	//virtual void DFGMoveNodes(Tab<TSTR*> nodeNames, Tab<Point2*> topLeftPoss, const MSTR& execPath) = 0;
-	//virtual MSTR DFGImplodeNodes(Tab<TSTR*> nodeNames, const MSTR& desiredNewNodeName, const MSTR& execPath) = 0;
-	//virtual Tab<TSTR*> DFGExplodeNodes(const MSTR& nodeName, const MSTR& execPath) = 0;
-	//virtual void DFGAddBackdrop(const MSTR& title, Point2 pos, const MSTR& execPath) = 0;
-	//virtual void DFGSetNodeTitle(const MSTR& nodeName, const MSTR& newTitle, const MSTR& execPath) = 0;
-	//virtual void DFGSetNodeComment(const MSTR& nodeName, const MSTR& comment, const MSTR& execPath) = 0;
-	//virtual void DFGSetCode(const MSTR& code, const MSTR& execPath) = 0;
-	//virtual MSTR DFGRenamePort(const MSTR& oldName, const MSTR& newDesiredName, const MSTR& execPath) = 0;
-	//virtual Tab<TSTR*> DFGPaste(const MSTR& json, Point2 pos, const MSTR& execPath) = 0;
-	//virtual void DFGSetArgType(const MSTR& argName, const MSTR& argType) = 0;
-	//virtual void DFGSetArgValue(const MSTR& argName, const FPValue* argValue) = 0;
-	//virtual void DFGSetPortDefaultValue(const MSTR& portName, const FPValue* value, const MSTR& execPath) = 0;
-	//virtual void DFGSetRefVarPath(const MSTR& refName, const MSTR& varPath, const MSTR& execPath) = 0;
-	//virtual void DFGReorderPorts(Tab<int> indices, const MSTR& execPath) = 0;
-	//virtual void DFGSetExtDeps(Tab<TSTR*> extDeps, const MSTR& execPath) = 0;
-	//virtual void DFGSplitFromPreset(const MSTR& execPath) = 0;
-
-	//// Load the splice graph for this entity from the given filename
-	//virtual bool LoadFromFile(const MCHAR* filename, bool createMaxParams) = 0;
-	//virtual bool SaveToFile(const MCHAR* filename) = 0;
-
-	//virtual bool RestoreFromJSON(const MSTR& json, bool createMaxParams) = 0;
-	//virtual MSTR ExportToJSON() = 0;
-
-	//// Allow introspecting the ports on this graph
-	//virtual int GetPortCount(const MSTR& execPath) = 0;
-	//virtual MSTR GetPortName(int i, const MSTR& execPath) = 0;
-	//virtual MSTR GetPortType(const MSTR& portName, const MSTR& execPath) = 0;
-	//virtual FPValue GetPortValue(const MSTR& portName, const MSTR& execPath) = 0;
-	//// Returns if the in port is an array type or not
-	//virtual bool IsPortArray(const char* port)=0;
-
-
-	//virtual int GetMaxTypeForArg(const MSTR& argName) = 0;
-	//virtual int SetMaxTypeForArg(const MSTR& argName, int type) = 0;
-	//virtual BitArray GetLegalMaxTypesForArg(const MSTR& argName) = 0;
-
-	// Allow setting various options on our ports
-	//bool SetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& value, bool canUndo, const MSTR& execPath);
-	//MSTR GetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& execPath);
-
-	// Convenience functions
-	//virtual bool SetArgUIMinMax(const MSTR& port, FPValue* uiMin, FPValue* uiMax, const MSTR& execPath) = 0;
+#pragma region fns from FabricCommandInterface
 
 	// Connect myPortName to the output port on pSrcContainer named srcPortName
 	// Returns true if successfully connected, false if for any reason the
@@ -378,64 +320,11 @@ public:
 	// has been successfully disconnected, false if disconnect failed or if no connection existed.
 	bool DisconnectArgs(const MSTR& myPortName) override;
 
-	//////////////////////////////////////////////////////////////////////////
-	// Props
+	// Name of the port we pull the value we return to Max from
 	MSTR GetOutPortName() override;
 	bool SetOutPortName(const MSTR& name)  override;
-	// Port creation/management
 
 #pragma endregion
-
-	// Get the number of ports on this graph
-	//int GetPortCount() { return m_binding.getExec().getExecPortCount(); }
-
-	// Get name of port
-	/*const char* GetPortName(int i);
-	const char* SetPortName(const char* oldName, const char* newName);
-	const char* GetPortType(const char* i);
-	bool IsPortArray(const char* i);
-*/
-	// Get the name of the port we our value from
-	//const char* GetOutPortName() { return m_outArgName.c_str(); }
-	//bool SetOutPort(const char* name);
-
-	// Connect myPortName to the output port on pSrcContainer named srcPortName
-	//bool ConnectPort(const char* myPortName, ReferenceTarget* pSrcContainer, const char* srcPortName, int srcPortIndex, bool postConnectionsUI);
-	// Disconnect a previously connected port.
-	//bool DisconnectPort(const char* myPortName);
-
-	//virtual MSTR GetPortMaxValue(int i);
-	//virtual MSTR GetPortMinValue(int i);
-
-	// Get the type of the max parameter connected to the splice in port (i)
-	// \param i The index of the splice port
-	//virtual int GetMaxConnectedType(const char* portName);
-	//// Set the type of the Max parameter pushing data to the splice port
-	//// \param i The index of the splice port
-	//// \type The ParamType to set the matching Max parameter to.
-	//int SetMaxConnectedType(const char* argName, int maxType);
-	//// Returns an array of the max types that can be used to drive
-	//// data for splice port
-	//// \param i The index of the splice port
-	//// \return A BitArray, where each set bit indicates a legal ParamType for the given port
-	//virtual BitArray GetLegalMaxTypes(const char* portName) { return FabricTypeToMaxTypes(GetPortType(portName)); }
-
-	//// Allow setting various options on ports 
-	//// Set UI limits.  This will not actually limit the value, but for sliders etc it will limit what is presented to the user.
-	//bool SetPortValue(const char* name, FPValue* value);
-	//bool SetArgUIMinMax(const char* port, FPValue* uiMin, FPValue* uiMax);
-
-	// Set splice values
-	//	const FabricCore::DFGBinding& GetFabricGraph() { return getGraph(); }
-	//	void SetOutPort(const DFGWrapper::ExecPortPtr& port) { m_valuePort = port; };
-
-	// Load from a saved JSON file spec
-	//bool LoadFromFile(const MCHAR* filename, bool createMaxParams);
-	//bool SaveToFile(const MCHAR* filename);
-
-	//bool RestoreFromJSON(const char* json, bool createMaxParams);
-	//void ExportToJSON(std::string &outJson);
-
 
 	virtual void ResetPorts();
 

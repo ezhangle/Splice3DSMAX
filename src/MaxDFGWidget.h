@@ -4,7 +4,6 @@
 
 
 #include <FabricUI/DFG/DFGCombinedWidget.h>
-//#include "MaxDFGCmdHandler.h"
 #include <FabricUI/DFG/DFGUICmdHandler_QUndo.h>
 
 using namespace FabricServices;
@@ -20,12 +19,6 @@ public:
 	
 	MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding, FabricUI::DFG::DFGUICmdHandler* cmdHandler);
 	~MaxDFGWidget();
-
-  //static QWidget * creator(QWidget * parent, const QString & name);
-  
-  //static void setCurrentUINodeName(const char * node);
-  //static void mayaLog(const char * message);
-  //static void closeWidgetsForBaseInterface(FabricDFGBaseInterface * interf);
 
 public slots:
 	virtual void onValueChanged() override;

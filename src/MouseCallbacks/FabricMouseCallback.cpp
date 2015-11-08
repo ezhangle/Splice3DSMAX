@@ -1,5 +1,3 @@
-
-// We need to access private variables on the SelectionCallback
 #include "StdAfx.h"
 #include <list>
 #include <maxapi.h>

@@ -298,13 +298,6 @@ void FabricTranslationFPInterface::DFGSplitFromPreset(const MSTR& execPath)
 	MAXSPLICE_CATCH_END
 }
 
-//// Load the splice graph for this entity from the given filename
-//bool LoadFromFile(const MCHAR* filename, bool createMaxParams);
-//bool SaveToFile(const MCHAR* filename);
-//
-//bool RestoreFromJSON(const MSTR& json, bool createMaxParams);
-//MSTR ExportToJSON();
-
 // Allow introspecting the ports on this graph
 int FabricTranslationFPInterface::GetPortCount(const MSTR& execPath)
 {
@@ -640,8 +633,10 @@ bool FabricTranslationFPInterface::LoadFromFile(const MCHAR* filename, bool crea
 	if (!file)
 	{
 		erno;
-		//log()
-		// TODO - Fix logging!
+		CStr errMsg;
+		errMsg.printf("ERROR %i: Could not open \'%s\'", erno, CStr::FromMCHAR(filename).data());
+		logMessage(errMsg);
+		return false;
 	}
 
 	fseek(file, 0, SEEK_END);
@@ -671,8 +666,9 @@ bool FabricTranslationFPInterface::SaveToFile(const MCHAR* filename)
 	if (!file)
 	{
 		erno;
-		//log()
-		// TODO - Fix logging!
+		CStr errMsg;
+		errMsg.printf("ERROR %i: Could not open \'%s\'", erno, CStr::FromMCHAR(filename).data());
+		logMessage(errMsg);
 		return false;
 	}
 
@@ -763,88 +759,7 @@ FabricCore::DFGExec FabricTranslationFPInterface::GetExec(const MSTR& execPath)
 	return GetExec(TO_CSTR(execPath));
 }
 
-/*
-Value* CallMaxScriptFunction(MCHAR* function, ReferenceTarget* fnArgument, bool returnResult) 
-{
-	Value* valueArg = MAXClass::make_wrapper_for(fnArgument);
-	return CallMaxScriptFunction(function, valueArg, returnResult);
-}
-
-Value* CallMaxScriptFunction(MCHAR* function, Value* fnArgument, bool returnResult)
-{
-	if (fnArgument == nullptr)
-		return nullptr;
-
-	// We are going to called a function defined entirely in MaxScript
-	// to pop the editor dialog.  This MxS argument is required to take
-	// a single argument called interface which is a pointer to the class
-	// whose KL we are going to edit.  This genius section of code was
-	// lifted from:
-	// <http://sourceforge.net/p/niftools/max-nif-plugin/ci/master/tree/NifCommon/nimorph.cpp#l88>, 
-	// pretty damn snazzy stuff
-
-	// Magic initialization stuff for maxscript.
-	static bool script_initialized = false;
-	if (!script_initialized) {
-		init_MAXScript();
-		script_initialized = TRUE;
-
-		// On first run, evaluate the script that defines our function
-		char* mxsEditor = nullptr;
-		size_t buffSize = 0;
-		if (_dupenv_s(&mxsEditor, &buffSize, "SCINTILLANETDIR") == 0) {
-			MSTR mxsEditorPath = MSTR::FromACP(mxsEditor, buffSize);
-			mxsEditorPath = mxsEditorPath + _T("FabricScintillaEditor.ms");
-			filein_script(mxsEditorPath.data());
-			free(mxsEditor);
-		}
-	}
-	init_thread_locals();
-	push_alloc_frame();
-	four_value_locals(name, fn, target, result);
-	save_current_frames();
-	set_error_trace_back_active(FALSE);
-
-	try	{
-		// Create the name of the maxscript function we want.
-		// and look it up in the global names
-		vl.name = Name::intern(function);
-		vl.fn = globals->get(vl.name);
-
-		// For some reason we get a global thunk back, so lets
-		// check the cell which should point to the function.
-		// Just in case if it points to another global thunk
-		// try it again.
-		while (vl.fn != NULL && is_globalthunk(vl.fn))
-			vl.fn = static_cast<GlobalThunk*>(vl.fn)->cell;
-		while (vl.fn != NULL && is_constglobalthunk(vl.fn))
-			vl.fn = static_cast<ConstGlobalThunk*>(vl.fn)->cell;
-
-		// Now we should have a MAXScriptFunction, which we can
-		// call to do the actual conversion. If we didn't
-		// get a MAXScriptFunction, we can't convert.
-		if (vl.fn != NULL) {
-			// Ok. our KL editor takes takes 1 parameter
-			// Call the function and save the result.
-			vl.result = static_cast<Primitive*>(vl.fn)->apply(&fnArgument, 1);
-		}
-	} catch (...) {
-		clear_error_source_data();
-		restore_current_frames();
-		MAXScript_signals = 0;
-	}
-
-	// If we are returning this value, we need to protect it from GC
-	Value* res = nullptr;
-	if (returnResult)
-		res = vl.result ? vl.result->make_heap_permanent() : nullptr;
-
-	// Magic Max Script stuff to clear the frame and locals.
-	pop_value_locals();
-	pop_alloc_frame();
-	return res;
-}
-*/
+//////////////////////////////////////////////////////////////////////////
 FabricTranslationFPInterface* GetFabricInterface( ReferenceTarget* pTarg )
 {
 	if (pTarg)

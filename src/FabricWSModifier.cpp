@@ -29,8 +29,6 @@ DynPBCustAttrClassDesc* FabricWSModifier::ParentClass::GetClassDesc()
 FabricWSModifier::FabricWSModifier(BOOL loading)
 	: ParentClass(true)
 {
-//	if (!loading)
-//		ResetPorts();
 }
 
 FabricWSModifier::~FabricWSModifier()
@@ -40,10 +38,6 @@ FabricWSModifier::~FabricWSModifier()
 void FabricWSModifier::RefAdded(RefMakerHandle rm)
 {
 	Init(false);
-	//if (Init())
-	//{
-	//	SetPortName("outputValue", "modifierMesh");
-	//}
 }
 
 Interval FabricWSModifier::LocalValidity(TimeValue t)

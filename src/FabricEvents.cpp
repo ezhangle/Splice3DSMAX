@@ -45,7 +45,6 @@ bool FabricEvents::MouseEventsHooked()
 //////////////////////////////////////////////////////////////////////////
 #pragma region Viewport Rendering event
 
-//FabricCore::RTVal FabricEvents::s_DrawContexts[MAX_VPTS];
 FabricCore::RTVal FabricEvents::s_DrawContext;
 FabricCore::RTVal FabricEvents::s_InlineViewports[MAX_VPTS];
 FabricCore::RTVal s_viewportIds[MAX_VPTS];
@@ -68,7 +67,8 @@ void doFabricDrawing(void *data)
 				FabricCore::RTVal success = GetDrawing().callMethod("Boolean", "drawViewport", 2, args);
 				if (!success.getBoolean())
 				{
-					//myLogFunc(NULL, "Drawing Failed", -1);
+					DbgAssert(!"Drawing failed");
+					logMessage("Drawing failed");
 				}
 			}
 		}

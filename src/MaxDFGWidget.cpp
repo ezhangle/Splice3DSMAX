@@ -246,8 +246,6 @@ void MaxDFGWidget::onPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog * dialog
 
 				FTL::JSONEnc<> paramTypeEnc(*additionalMetaData, FTL_STR(MAX_PARM_TYPE_OPT));
 				FTL::JSONSInt32Enc<> typeS32Enc(paramTypeEnc, maxType);
-
-				//SetPort3dsMaxType(m_binding, title.toUtf8().constData(), maxType);
 			}
 		}
 	}

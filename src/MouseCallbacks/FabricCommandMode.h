@@ -1,3 +1,9 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Implements Max's CommandMode class to integrate with 
+//  Max's mouse handling system.  Fabric Edit mode is now
+//  essentially simply another edit mode, like select or P/R/S
+//
 #pragma once
 #include "cmdmode.h"
 #include "FabricMouseCallback.h"

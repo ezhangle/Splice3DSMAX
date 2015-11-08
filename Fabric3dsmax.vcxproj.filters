@@ -60,9 +60,6 @@
     <ClCompile Include="src\DockableWidget.cpp">
       <Filter>DFGWidget</Filter>
     </ClCompile>
-    <ClCompile Include="src\MaxDFGController.cpp">
-      <Filter>DFGWidget</Filter>
-    </ClCompile>
     <ClCompile Include="src\MaxDFGWidget.cpp">
       <Filter>DFGWidget</Filter>
     </ClCompile>
@@ -131,14 +128,14 @@
     <ClInclude Include="src\FabricControl.hpp">
       <Filter>MaxImplementations</Filter>
     </ClInclude>
-    <ClInclude Include="src\MaxDFGController.h">
-      <Filter>DFGWidget</Filter>
-    </ClInclude>
     <ClInclude Include="src\MaxDFGCmdHandler.h">
       <Filter>Undo</Filter>
     </ClInclude>
     <ClInclude Include="src\FabricRestoreObjects.h">
       <Filter>Undo</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CriticalSection.h">
+      <Filter>FabricCallbacks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

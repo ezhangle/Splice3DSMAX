@@ -185,15 +185,6 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 	while (pDesc->IDtoIndex(pid) != -1)
 		pid++;
 
-	// If our requested index is not in range, disable it
-	//if (index >= pid)
-	//	index = -1;
-
-	// If we have a requested index, and there is no matching ID,
-	// we assign ID == index.
-	//if (index >= 0 && pDesc->IDtoIndex((ParamID)index) < 0)
-	//	pid = (ParamID)index;
-
 	// Create the parameter.  Every parameter requires an
 	// accessor, so set it now.
 	if (is_tab(type))
@@ -252,145 +243,6 @@ ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName )
 	MSTR sName = MSTR::FromACP(cName);
 	return AddMaxParameter(pDesc, type, sName.data());
 }
-
-void SetMaxParamLimits(FabricTranslationFPInterface* pOwner, const char* argName)
-{
-	int id = pOwner->GetPortParamID(argName);
-	if (id < 0)
-		return;
-	ParamID pid = ParamID(id);
-
-	std::string rangeStr = pOwner->GetPortMetaData(argName, "uiRange");
-	if (rangeStr.empty())
-		return;
-
-	ParamBlockDesc2* pDesc = pOwner->GetPBlock()->GetDesc();
-	ParamDef& def = pDesc->GetParamDef(pid);
-	int baseType = base_type(def.type);
-
-	if (rangeStr.length() < 2)
-		return;
-	DbgAssert(rangeStr[0] == '(' && rangeStr[rangeStr.length() - 1] == ')');
-	//rangeStr = rangeStr.substr(1, rangeStr.length() - 1);
-	size_t splitIdx = rangeStr.find(',');
-	std::string firstValStr = rangeStr.substr(1, splitIdx - 1);
-	std::string secondValStr = rangeStr.substr(splitIdx + 1, rangeStr.length() - (splitIdx + 2));
-	
-	switch((int)baseType)
-	{
-	case TYPE_FLOAT:	
-	case TYPE_ANGLE:	
-	case TYPE_PCNT_FRAC:	
-	case TYPE_WORLD:
-		{
-			float vMin = (float)atof(firstValStr.c_str());
-			float vMax = (float)atof(secondValStr.c_str());;
-			pDesc->ParamOption(pid, p_range, vMin, vMax, p_end); 
-			break;
-		}
-	case TYPE_INT:
-		{
-			int vMin = atoi(firstValStr.c_str());
-			int vMax = atoi(secondValStr.c_str());
-			pDesc->ParamOption(pid, p_range,  vMin, vMax, p_end); 
-			break;
-		}
-	//case TYPE_RGBA:		pDesc->ParamOption(pid, p_ui, TYPE_COLORSWATCH, 0, p_end); break;
-	case TYPE_POINT3:
-		{
-			//Point3 uiMin = port.getOption()
-			break;
-		}
-	//case TYPE_POINT4:	pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); break;
-	//case TYPE_BOOL:		pDesc->ParamOption(pid, p_ui, TYPE_SINGLECHEKBOX, 0, p_end); break;
-	//case TYPE_INODE:	pDesc->ParamOption(pid, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
-	//case TYPE_MTL:		pDesc->ParamOption(pid, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
-	//case TYPE_TEXMAP:	pDesc->ParamOption(pid, p_ui, TYPE_TEXMAPBUTTON, 0, p_end); break;
-	//case TYPE_STRING:	pDesc->ParamOption(pid, p_ui, TYPE_EDITBOX, 0, p_end); break;
-	}
-}
-//
-//template<typename TType>
-//void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::Variant& defaultVal) {
-//	TType def;
-//	FabricToMaxValue(defaultVal, def);
-//	pDesc->ParamOption(pid, p_default, def, p_end); 
-//}
-//
-//template<typename TType>
-//void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::RTVal& defaultVal) {
-//	TType def;
-//	FabricToMaxValue(defaultVal, def);
-//	pDesc->ParamOption(pid, p_default, def, p_end);
-//}
-//
-//void SetMaxParamDefault(ParamBlockDesc2* pDesc, ParamID pid, FabricCore::DFGBinding& binding, const char* argName) {
-//
-//	char const *resolvedType = GetPortType(binding, argName);
-//	if (!resolvedType)
-//		return;
-//
-//	FabricCore::RTVal defaultVal = binding.getExec().getPortDefaultValue(argName, resolvedType);
-//	if(!defaultVal.isValid())
-//		return;
-//
-//	ParamDef& def = pDesc->GetParamDef(pid);
-//	int baseType = base_type(def.type);
-//	switch((int)baseType)
-//	{
-//	case TYPE_BOOL:
-//	case TYPE_INT:
-//		{
-//			SetMaxParamDefault<int>(pDesc, pid, defaultVal);
-//			break;
-//		}
-//	case TYPE_FLOAT:	
-//	case TYPE_ANGLE:	
-//	case TYPE_PCNT_FRAC:	
-//	case TYPE_WORLD:
-//		{
-//			SetMaxParamDefault<float>(pDesc, pid, defaultVal);
-//			break;
-//		}
-//	case TYPE_RGBA:
-//		{
-//			SetMaxParamDefault<Color>(pDesc, pid, defaultVal);
-//			break;
-//		}
-//	case TYPE_POINT3:
-//		{
-//			SetMaxParamDefault<Point3>(pDesc, pid, defaultVal);
-//			break;
-//		}
-//	case TYPE_FRGBA:
-//	case TYPE_POINT4:
-//		{
-//			SetMaxParamDefault<Point4>(pDesc, pid, defaultVal);
-//			break;
-//		}
-//	case TYPE_MATRIX3:
-//		{
-//			SetMaxParamDefault<Matrix3>(pDesc, pid, defaultVal);
-//			break;
-//		}
-//	case TYPE_STRING:
-//		{
-//			SetMaxParamDefault<MSTR>(pDesc, pid, defaultVal);
-//			break;
-//		}
-//	case TYPE_INODE:
-//	case TYPE_REFTARG:
-//		{
-//			// No default possible for this type.
-//			break;
-//		}
-//	default:
-//		DbgAssert(0 && "Implment me");
-//		//case TYPE_INODE:	pDesc->ParamOption(pid, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
-//		//case TYPE_MTL:		pDesc->ParamOption(pid, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
-//		//case TYPE_TEXMAP:	pDesc->ParamOption(pid, p_ui, TYPE_TEXMAPBUTTON, 0, p_end); break;
-//	}
-//}
 
 void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name)
 {
@@ -587,7 +439,6 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 		const MCHAR* pName = pbDef.int_name;
 
 		dialogTemplate->AddStaticControl(WS_VISIBLE | WS_CHILD | WS_GROUP, 0, DLG_PAD / 2, ypos, LBL_WIDTH, CTRL_HEIGHT, -1, pName);
-		//m_dialogTemplate->AddStaticControl(WS_VISIBLE, 0, 50, 50, 100, 50, ctrlId++, buf);
 
 		switch ((int)pbDef.type)
 		{
@@ -731,29 +582,6 @@ int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName)
 
 	return maxType;
 }
-//
-//void SetPort3dsMaxType(FabricCore::DFGBinding& binding, const char* argName, int type)
-//{
-//	char buff[20];
-//	_itoa_s(type, buff, 10);
-//	bool doUndo = theHold.Holding();
-//	if (doUndo)
-//		theHold.Put(new FabricCoreRestoreObj());
-//	binding.getExec().setExecPortMetadata(argName, MAX_PARM_TYPE_OPT, buff, doUndo);
-//}
-
-//bool SetPortOption(FabricCore::DFGBinding& binding, const char* argName, const char* option, FPValue* value)
-//{
-//	MAXSPLICE_CATCH_BEGIN
-//
-//	//if (value == nullptr)
-//	//	return false;
-//	//FabricCore::Variant variant = GetVariant(*value);
-//	//// if (!variant.isNull()) Do we want to allow setting Null values (remove option?);
-//	//	aPort->setOption(option, &variant);
-//	//return true;
-//	MAXSPLICE_CATCH_RETURN(false);
-//}
 
 bool SetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue* value)
 {
@@ -939,144 +767,6 @@ int FabricTypeToDefaultMaxType(const char* cType)
 		return TYPE_INODE;
 	return FabricTypeToMaxType(cType);
 }
-
-//
-//std::string MaxTypeToFabricType(int type)
-//{
-//	switch (type) {
-//	case TYPE_BOOL:
-//	case TYPE_bool:
-//		return "Boolean";
-//	case TYPE_INT:
-//	case TYPE_RADIOBTN_INDEX:
-//	case TYPE_INDEX:
-//		return "SInt32";
-//	case TYPE_FLOAT:
-//	case TYPE_ANGLE:
-//	case TYPE_PCNT_FRAC:
-//	case TYPE_WORLD:
-//	case TYPE_TIMEVALUE:
-//		return "Float32";
-//	case TYPE_POINT2:
-//		return "Vec2";
-//	case TYPE_RGBA:
-//	case TYPE_POINT3:
-//	case TYPE_COLOR_CHANNEL:
-//		return "Vec3";
-//	case TYPE_STRING:
-//	case TYPE_FILENAME:
-//		return  "String";
-//
-//	}
-//		//TYPE_MTL,					//!< A pointer to a material object. This can be one of three types: a reference owned by the parameter block, a reference owned by the block owner, or no reference management (just a copy of the pointer).
-//		//TYPE_TEXMAP,				//!< A pointer to a texture map object. This can be one of three types: a reference owned by the parameter block, a reference owned by the block owner, or no reference management (just a copy of the pointer). 
-//		//TYPE_BITMAP,				//!< A pointer to a bitmap object. This can be one of three types: a reference owned by the parameter block, a reference owned by the block owner, or no reference management (just a copy of the pointer).
-//		TYPE_INODE,					//!< A pointer to a node. This can be one of three types: a reference owned by the parameter block, a reference owned by the block owner, or no reference management (just a copy of the pointer). 
-//		TYPE_REFTARG,				//!< A pointer to a reference target. All reference targets in this group can be one of three types: reference owned by parameter block, reference owned by block owner, or no reference management (just a copy of the pointer).
-//		// new for R4...
-//		TYPE_MATRIX3,				//!< A standard 3ds Max matrix.
-//		TYPE_POINT4,
-//		TYPE_FRGBA,
-//
-//		// only for published function parameter types, not pblock2 parameter types...
-//		TYPE_ENUM,
-//		TYPE_VOID,
-//		TYPE_INTERVAL,
-//		TYPE_ANGAXIS,
-//		TYPE_QUAT,
-//		TYPE_RAY,
-//		TYPE_POINT2,
-//		TYPE_BITARRAY,
-//		TYPE_CLASS,
-//		TYPE_MESH,
-//		TYPE_OBJECT,
-//		TYPE_CONTROL,
-//		TYPE_POINT,
-//		TYPE_TSTR,
-//		TYPE_IOBJECT,
-//		TYPE_INTERFACE,
-//		TYPE_HWND,
-//		TYPE_NAME,
-//		TYPE_COLOR,
-//		TYPE_FPVALUE,
-//		TYPE_VALUE,
-//		TYPE_DWORD,
-//		TYPE_bool,
-//		TYPE_INTPTR,
-//		TYPE_INT64,
-//		TYPE_DOUBLE,
-//
-//	int res = -1;
-//	// Max only supports 1 type of int, boring old SInt32
-//	// We'll accept the rest though, and hope we don't 
-//	// overflow anywhere
-//	if (strcmp(cType, "Integer") == 0 ||
-//		strcmp(cType, "Size") == 0 ||
-//		strcmp(cType, "SInt32") == 0 ||
-//		strcmp(cType, "SInt16") == 0 ||
-//		strcmp(cType, "UInt32") == 0 ||
-//		strcmp(cType, "UInt64") == 0 ||
-//		strcmp(cType, "UInt16") == 0)
-//		res = TYPE_INT;
-//	else if (strcmp(cType, "Boolean") == 0)
-//		res = TYPE_BOOL;
-//	// Similarily, we only support a single FP type
-//	else if (strcmp(cType, "Scalar") == 0 ||
-//		strcmp(cType, "Float16") == 0 ||
-//		strcmp(cType, "Float32") == 0 ||
-//		strcmp(cType, "Float64") == 0)
-//		res = TYPE_FLOAT;
-//	else if (strcmp(cType, "Color") == 0)
-//		res = TYPE_FRGBA;
-//	else if (strcmp(cType, "Vec2") == 0)
-//		res = TYPE_POINT2;
-//	else if (strcmp(cType, "Vec3") == 0)
-//		res = TYPE_POINT3;
-//	else if (strcmp(cType, "Vec4") == 0)
-//		res = TYPE_POINT4;
-//	else if (strcmp(cType, "Mat44") == 0)
-//		res = TYPE_MATRIX3;
-//	else if (strcmp(cType, "Quat") == 0)
-//		res = TYPE_QUAT;
-//	else if (strcmp(cType, "String") == 0)
-//		res = TYPE_STRING;
-//	else if (strcmp(cType, "PolygonMesh") == 0)
-//		res = TYPE_MESH;
-//	else
-//	{
-//		// DbgAssert(0 && "NOTE: Add Default translation Type for this Fabric Type");
-//	}
-//
-//	if (isArray)
-//		res |= TYPE_TAB;
-//
-//	return res;
-//}
-
-////////////////////////////////////////////////////////////////////////////
-//bool IsPortPersistable(DFGWrapper::ExecPort& port) {
-//	if (!port.isValid())
-//		return false;
-//
-//	FabricCore::RTVal rtVal = port.getArgValue();
-//	if(rtVal.isValid())
-//	{
-//		if(rtVal.isObject())
-//		{
-//			if(!rtVal.isNullObject())
-//			{
-//				//FabricCore::RTVal objectRtVal = FabricCore::RTVal::Create(port.getWrappedCoreBinding(), "Object", 1, &rtVal);
-//				if(rtVal.isValid())
-//				{
-//					//FabricCore::RTVal persistable = FabricCore::RTVal::Construct(port.getWrappedCoreExec()., "Persistable", objectRtVal);
-//					//if(!persistable.isNullObject())
-//						return true;
-//				}
-//			}
-//		}
-//	}
-//	return false;
-//}
 
 std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
 {

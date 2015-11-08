@@ -47,7 +47,6 @@
     <ClCompile Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.cpp" />
     <ClCompile Include="src\DynamicParamBlocks\DynPBUndo.cpp" />
     <ClCompile Include="src\MaxConversionFns.cpp" />
-    <ClCompile Include="src\MaxDFGController.cpp" />
     <ClCompile Include="src\moc_MaxDFGWidget.cpp">
       <ForcedIncludeFiles>StdAfx.h</ForcedIncludeFiles>
     </ClCompile>
@@ -76,11 +75,11 @@
       <Outputs>moc_%(Filename).cpp</Outputs>
       <TreatOutputAsContent>true</TreatOutputAsContent>
     </CustomBuild>
+    <ClInclude Include="src\CriticalSection.h" />
     <ClInclude Include="src\DockableWidget.h" />
     <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\resource.h" />
     <ClInclude Include="src\MaxConversionFns.h" />
     <ClInclude Include="src\MaxDFGCmdHandler.h" />
-    <ClInclude Include="src\MaxDFGController.h" />
     <ClInclude Include="src\MouseCallbacks\KbdTranslation.h" />
     <ClInclude Include="src\MouseCallbacks\FabricCommandMode.h" />
     <ClInclude Include="src\MouseCallbacks\FabricMouseCallback.h" />

@@ -16,8 +16,6 @@
 FabricModifier::FabricModifier(BOOL loading)
 	: ParentClass(true)
 {
-//	if (!loading)
-//		ResetPorts();
 }
 
 FabricModifier::~FabricModifier()

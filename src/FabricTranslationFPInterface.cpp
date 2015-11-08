@@ -471,7 +471,14 @@ bool FabricTranslationFPInterface::GetArgValue(const char* argName, FPValue& val
 		value.Load(TYPE_MESH, mesh);
 		break;
 	}
-
+	default:
+	{
+		DbgAssert(!"Cannot convert Fabric type");
+		MSTR errorStr = _M("Cannot convert Fabric type: ");
+		errorStr += MSTR::FromACP(cType);
+		value.Load(TYPE_STRING, errorStr);
+		return false;
+	}
 	}
 	return true;
 #pragma message("TEST THIS")
@@ -479,7 +486,7 @@ bool FabricTranslationFPInterface::GetArgValue(const char* argName, FPValue& val
 		return false;
 }
 
-FPValue FabricTranslationFPInterface::GetArgValue(const MSTR& portName, const MSTR& execPath)
+const FPValue& FabricTranslationFPInterface::GetArgValue(const MSTR& portName, const MSTR& execPath)
 {
 	// We make the val static so we don't leak pointers assigned to it.
 	static FPValue val;

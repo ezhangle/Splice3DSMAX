@@ -150,7 +150,7 @@ public:
 		FN_1(fn_getPortCount, TYPE_INT, GetPortCount, TYPE_TSTR);
 		FN_2(fn_getPortName, TYPE_TSTR_BV, GetPortName, TYPE_INDEX, TYPE_TSTR);
 		FN_2(fn_getPortType, TYPE_TSTR_BV, GetPortType, TYPE_TSTR, TYPE_TSTR);
-		FN_2(fn_getArgValue, TYPE_FPVALUE, GetArgValue, TYPE_TSTR, TYPE_TSTR);
+		FN_2(fn_getArgValue, TYPE_FPVALUE_BR, GetArgValue, TYPE_TSTR, TYPE_TSTR);
 
 		FN_1(fn_hasSrcPort, TYPE_bool, HasSrcPort, TYPE_TSTR);
 		FN_1(fn_hasDstPort, TYPE_bool, HasDstPort, TYPE_TSTR);
@@ -230,7 +230,7 @@ public:
 	int GetNodeType(const MSTR& nodeName, const MSTR& execPath);
 
 	bool GetArgValue(const char* argName, FPValue& value);
-	FPValue GetArgValue(const MSTR& portName, const MSTR& execPath);
+	const FPValue& GetArgValue(const MSTR& portName, const MSTR& execPath);
 	// Returns if the in port is an array type or not
 	//virtual bool IsPortArray(const char* port)=0;
 

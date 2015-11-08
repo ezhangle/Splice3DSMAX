@@ -474,7 +474,8 @@ bool FabricTranslationFPInterface::GetArgValue(const char* argName, FPValue& val
 	default:
 	{
 		DbgAssert(!"Cannot convert Fabric type");
-		MSTR errorStr = _M("Cannot convert Fabric type: ");
+		static MSTR errorStr;
+		errorStr = _M("Cannot convert Fabric type: ");
 		errorStr += MSTR::FromACP(cType);
 		value.Load(TYPE_STRING, errorStr);
 		return false;

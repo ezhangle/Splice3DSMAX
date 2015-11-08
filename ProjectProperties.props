@@ -39,10 +39,6 @@
 
 		<FabricOutDir>$(FABRIC_DIR)\FabricIntegrations\Fabric3dsmax$(MaxVersion)\</FabricOutDir>
 
-		<FabricUIDir>$(FABRIC_UI_DIR)</FabricUIDir>
-		<!-- If no install of FabricUI is present, default to the fabric system build values  -->
-		<FabricUIDir Condition="'$(FabricUIDir)'==''">$(SolutionDir)FabricUI\</FabricUIDir>
-
 		<QtSuffix>4</QtSuffix>
 
 	</PropertyGroup>
@@ -81,7 +77,7 @@
 	<ItemDefinitionGroup>
 		<!-- default values for compiler -->
 		<ClCompile>
-			<AdditionalIncludeDirectories>$(FabricUIDir)stage\include\FabricUI;$(FABRIC_DIR)include;$(FABRIC_DIR)include\FabricServices;$(QT_DIR)include;$(QT_DIR)include/QtGui;$(MaxSDKPath)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(FABRIC_DIR)include;$(FABRIC_DIR)include\FabricServices;$(QT_DIR)include;$(QT_DIR)include/QtGui;$(MaxSDKPath)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<StringPooling>true</StringPooling>
@@ -123,7 +119,7 @@
 			<AdditionalDependencies Condition="'$(MaxVersion)'!='2012'">GraphicsUtility.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies>FabricSplitSearch.lib;FabricCore-2.0.lib;FabricServices-MSVC-12.0-mt.lib;FabricUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies>QtSolutions_MFCMigrationFramework-head.lib;QtCore$(QtSuffix).lib;QtGui$(QtSuffix).lib;QtOpenGL$(QtSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalLibraryDirectories>$(QT_DIR)lib;$(FabricUIDir)stage\lib;$(FABRIC_DIR)\lib;$(BOOST_DIR);$(MaxSDKLibPath);$(SolutionDir)qt-solutions\qtwinmigrate\lib</AdditionalLibraryDirectories>
+			<AdditionalLibraryDirectories>$(QT_DIR)lib;$(FABRIC_DIR)\lib;$(BOOST_DIR);$(MaxSDKLibPath);$(SolutionDir)qt-solutions\qtwinmigrate\lib</AdditionalLibraryDirectories>
 		</Link>
 	</ItemDefinitionGroup>
 	<ImportGroup Label="PropertySheets">
@@ -150,7 +146,7 @@ call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
   </ItemDefinitionGroup>
   <PropertyGroup>
 	<LocalDebuggerCommandArguments>-vo -p "$(ProjectDir)/build/Generated.Plugin.Fabric.ini"</LocalDebuggerCommandArguments>
-	<LocalDebuggerCommand>C:\Program Files\Autodesk\3ds Max 2016 DEBUG\x64\exe\3dsmax.exe</LocalDebuggerCommand>
+	<LocalDebuggerCommand>$(MaxPath)\3dsmax.exe</LocalDebuggerCommand>
 	<LocalDebuggerEnvironment>SPLICE3DSMAXDIR=$(FabricOutDir)
 SCINTILLANETDIR=$(FabricOutDir)ScintillaNET\
 PATH=$(PATH);$(FABRIC_DIR)\lib;$(SCINTILLANETDIR)

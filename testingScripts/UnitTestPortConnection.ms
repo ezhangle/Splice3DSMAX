@@ -1,114 +1,78 @@
-fn CompArray a b = (a as string == b as string)
-fn CompBB anode expSize = (
-	bb = (nodeLocalBoundingBox anode)
-	size = length (bb[1] - bb[2])
-	res =abs(size - expSize) < 1 -- Be generous in testing BB, it seems to change a lot
-	res
+--------------------------------------------------------------------------
+--
+-- This unit test demonstrates connecting together various Splice Graphs.  This
+-- would be useful in the case of using a single datasource to drive multiple outputs
+--
+--------------------------------------------------------------------------
+
+rootFolder = systemTools.getEnvVariable("SPLICE3DSMAXDIR")
+fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
+
+dataSource = FabricReferenceTarget()
+
+dataSource.DFGAddFunc "makeMatrices" "dfgEntry {
+  // result = a + b;
+}
+" [506.776030,168.906259]  execPath:""
+dataSource.DFGAddPort "count" 0 "Size" execPath:"makeMatrices"
+dataSource.DFGAddPort "matrices" 2 "Mat44[]" execPath:"makeMatrices"
+dataSource.DFGAddPort "time" 0 "Scalar" execPath:"makeMatrices"
+dataSource.DFGSetCode "dfgEntry {
+  //result = lhs + rhs;
+  matrices.resize(count);
+  for (UInt32 i = 0; i < count; i++) {
+    matrices[i].setTranslation(Vec3(i * time * 5, i * 10, 0));
+  }
+}
+"    execPath:"makeMatrices"
+dataSource.DFGInstPreset "Fabric.Exts.Util.EvalContext.CurrentEvalContext" [-66.000000,137.000000]   execPath:""
+dataSource.DFGInstPreset "Fabric.Exts.Util.EvalContext.GetTime" [-5.000000,126.000000]   execPath:""
+dataSource.DFGConnect "CurrentEvalContext.context" "GetTime.this"   execPath:""
+dataSource.DFGConnect "GetTime.result" "makeMatrices.time"   execPath:""
+
+dataSource.DFGAddPort "value" 2 "Mat44[]" portToConnect:"makeMatrices.matrices"
+dataSource.DFGMoveNodes #("makeMatrices") #([294.776031,155.906265])   execPath:""
+dataSource.DFGAddPort "count" 0 "Size" portToConnect:"makeMatrices.count" extDep:"" metaData:"" execPath:""
+
+numOutputs = 3
+-- This data source will generate 3 matrices
+dataSource.count = numOutputs
+dataSource.ShowDFGGraphEditor()
+
+-- Create Max points that connect to DataSource and show its results.
+pts = #()
+for i = 0 to (numOutputs - 1) do (
+	pt = Point()
+	dfgCtrl = FabricMatrixController()
+	
+	dfgCtrl.DFGInstPreset "Fabric.Core.Array.Get" [300.000000,183.000000]   execPath:""
+	dfgCtrl.DFGMoveNodes #("Get") #([265.000000,168.000000])   execPath:""
+	dfgCtrl.DFGAddPort "index" 0 "UInt32" portToConnect:"Get.index" extDep:"" metaData:"" execPath:""
+	dfgCtrl.DFGAddPort "dataVal" 0 "Mat44[]" portToConnect:"" extDep:"" metaData:"" execPath:""
+	dfgCtrl.DFGConnect "dataVal" "Get.array"   execPath:""
+	dfgCtrl.ConnectArgs "dataVal" dataSource "value" postUI:(i == 0)
+	dfgCtrl.DFGConnect "Get.element" "outputValue"   execPath:""
+		
+	pt.controller = dfgCtrl
+	dfgCtrl.index = i
+	FAssert (pt.transform.position == [0, i * 10, 0]) "Point didn't get the right position"
+	append pts pt
 )
-fn FindPort sm name = (
-	for i = 1 to sm.PortCount do (
-		if (sm.GetPortName i) == name do return true
-	)
-	return false
-)
-
--- Create the first mesh
-sm = FabricMesh()
-sphereTriCounts = #(506, 255)
-sphereSize = 110.5
--- Init required params
-nodeName = sm.name
-sm.OutPort = nodeName + "Val"
-
--- Init base compilation
-klCode =  "
-require Math;
-require PolygonMesh;
-
-operator " + nodeName + "(io PolygonMesh " + sm.OutPort + ") {
-	Xfo init;
-	init.setIdentity();
-	" + sm.OutPort + " = PolygonMesh();
-	" + sm.OutPort + ".addSphere(init, 32, 10, true, true);
-}"
-sm.SetKLCode nodeName klCode
-assert (CompArray (GetTriMeshFaceCount sm) sphereTriCounts) message:"Bad Init Tri Count" options:#(#dialog)
-assert (CompBB sm sphereSize) message:"Bad init size" options:#(#dialog)
-
-sm2 = FabricMesh()
-sm2.addInputPort "inMesh" "PolygonMesh" -1
-sm2.OutPort = "FabricMeshVal"
-klCode = "
-require Math;
-require Geometry;
-
-operator cloneMesh(
-  io PolygonMesh FabricMeshVal,
-	in PolygonMesh inMesh
-) {
-  FabricMeshVal = inMesh;
-}
-";
-sm2.SetKLCode "cloneMesh" klCode
-
--- Set the output from sm as the input on sm2
-sm2.ConnectPorts "inMesh" sm.baseobject (nodeName + "Val")
-assert (CompArray (GetTriMeshFaceCount sm) sphereTriCounts) message:"Bad Init Tri Count" options:#(#dialog)
-assert (CompBB sm sphereSize) message:"Bad init size" options:#(#dialog)
-
-----------------------------------------------------------------
--- Test array accesses
-dataContainer = FabricReferenceTarget()
-dataContainer.addOutputPort "ptTransforms" "Mat44" isArray:true
-klCode = "
-require Math;
-require Geometry;
-
-operator genTransforms(
-  in EvalContext context,
-	io Mat44 ptTransforms[])
-{
-	report('Eval: ' + context.time);
-	for (Integer i = 0; i < ptTransforms.size(); i++) {
-		ptTransforms[i].setIdentity();
-	  Vec3 trans(i * 10, sin(context.time) * 10, 0);
-		ptTransforms[i].setTranslation(trans);
-	}
-}
-";
-
-dataContainer.setKLCode "genTransforms" klCode
-
---p1 = point()
-spliceCtrl = FabricMatrixController()
---p1.transform.controller = spliceCtrl
-spliceCtrl.OutPort = "returnedValue"
-spliceCtrl.addInputPort "inMtx" "Mat44" -1
-klCode = "
-require Math;
-
-operator returnValue(
-  io Mat44 returnedValue, 
-  in Mat44 inMtx, 
-) {
-  returnedValue = inMtx;
-}
-";
-spliceCtrl.setKLCode "returnValue" klCode
-spliceCtrl.ConnectPorts "inMtx"  dataContainer "ptTransforms" srcPortIndex:0 postUI:true
-sm2.transform.controller = spliceCtrl
-
--- Release reference to dataContainer, otherwise
--- MxS will hold a reference to dataContainer and prevent it from being deleted
--- For some reason, objects are auto deleted, but these two need explicit release
-dataContainer = undefined
-spliceCtrl = undefined
-
-sliderTime = 0f
-assert (sm2.transform.position == Point3 0 0 0) message:"Bad transform at time:0" options:#(#dialog)
 
 sliderTime = 20f
-assert (sm2.transform.position as string == "[0,6.1837,0]") message:"Bad transform at time:20" options:#(#dialog)
+for i = 0 to numOutputs - 1 do (
+	pt = pts[i + 1]
+	t = currentTime.ticks as float/4800
+	expectedPosition = [i as float * t * 5, i * 10, 0]
+	currPosition = pt.transform.position
+	FAssert (currPosition == expectedPosition) ("Point didn't get the right position: " + (currPosition as string) + " != " +(expectedPosition as string))
+)
 
 sliderTime = 100f
-assert (sm2.transform.position as string == "[0,-1.90568,0]") message:"Bad transform at time:100" options:#(#dialog)
+for i = 0 to numOutputs - 1 do (
+	pt = pts[i + 1]
+	t = currentTime.ticks as float/4800
+	expectedPosition = [i as float * t * 5, i * 10, 0]
+	currPosition = pt.transform.position
+	FAssert (currPosition == expectedPosition) ("Point didn't get the right position: " + (currPosition as string) + " != " +(expectedPosition as string))
+)

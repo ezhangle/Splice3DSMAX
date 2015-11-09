@@ -518,10 +518,9 @@ int FabricTranslationFPInterface::SetMaxTypeForArg(const char* argName, int type
 	char buff[20];
 	_itoa_s(type, buff, 10);
 	SetPortMetaData(argName, MAX_PARM_TYPE_OPT, buff);
-	SyncMetaDataFromPortToParam(argName);
-	return -1;
-
+	return SyncMetaDataFromPortToParam(argName);
 }
+
 int FabricTranslationFPInterface::SetMaxTypeForArg(const MSTR& argName, int type)
 {
 	MAXSPLICE_CATCH_BEGIN

@@ -648,8 +648,8 @@ bool FabricTranslationLayer<TBaseClass, TResultType>::ConnectArgs(const MSTR& my
 		CStr cSrcPort = srcPortName.ToCStr();
 		CStr cDstPort = myPortName.ToCStr();
 		// First, do our ports exist?
-		bool srcExists = pSrcContInterface->HasDstPort(cSrcPort);
-		bool dstExists = HasSrcPort(cDstPort);
+		bool srcExists = pSrcContInterface->HasSrcPort(cSrcPort);
+		bool dstExists = HasDstPort(cDstPort);
 		if (!srcExists || !dstExists)
 			return false;
 

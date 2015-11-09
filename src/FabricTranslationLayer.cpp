@@ -1096,7 +1096,7 @@ void TransferAllMaxValuesToFabric(TimeValue t, IParamBlock2* pblock, FabricCore:
 						continue;
 
 					pSrcContInterface->TriggerEvaluate(t, paramValids[pidx]);
-					if (pSrcContInterface->HasDstPort(portConnection.data()))
+					if (pSrcContInterface->HasSrcPort(portConnection.data()))
 					{
 						FabricCore::RTVal srcVal = pSrcContInterface->GetBinding().getArgValue(portConnection.data());
 						binding.setArgValue(argName, srcVal, false);

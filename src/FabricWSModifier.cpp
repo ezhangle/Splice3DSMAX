@@ -193,3 +193,51 @@ void FabricWSModifier::ResetPorts()
 
 	ParentClass::ResetPorts();
 }
+
+//////////////////////////////////////////////////////////////////////////
+#define BASE_MESH_PORT_NAME		0x100
+#define BASE_TRANS_PORT_NAME	0x200
+
+IOResult FabricWSModifier::SaveImpData(ISave* isave)
+{
+	// Save additional values for derived values
+	isave->BeginChunk(BASE_MESH_PORT_NAME);
+	isave->WriteCString(m_baseMeshArgName.c_str());
+	isave->EndChunk();
+
+	isave->BeginChunk(BASE_TRANS_PORT_NAME);
+	isave->WriteCString(m_baseMeshTransformArgName.c_str());
+	isave->EndChunk();
+	return IO_OK;
+
+}
+
+IOResult FabricWSModifier::LoadImpData(ILoad* iload)
+{
+	IOResult result = IO_OK;
+	while (IO_OK == (result = iload->OpenChunk()))
+	{
+		switch (iload->CurChunkID())
+		{
+		case BASE_MESH_PORT_NAME:
+		{
+			char *buff;
+			if (iload->ReadCStringChunk(&buff) == IO_OK) {
+				m_baseMeshArgName = buff;
+			}
+			break;
+		}
+		case BASE_TRANS_PORT_NAME:
+		{
+			char *buff;
+			if (iload->ReadCStringChunk(&buff) == IO_OK) {
+				m_baseMeshTransformArgName = buff;
+			}
+			break;
+		}
+
+		}
+		iload->CloseChunk();
+	}
+	return result;
+}

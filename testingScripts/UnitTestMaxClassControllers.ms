@@ -27,9 +27,9 @@ dfgCtrller.DFGMoveNodes #("Vec3") #([444.000000,111.000000])   execPath:""
 dfgCtrller.DFGMoveNodes #("SetTranslation") #([589.000000,213.000000])   execPath:""
 
 sliderTime = 0f
-assert (p1.transform.position == [0, 0, 0]) message:"Bad Initial Position" options:#(#dialog)
+FAssert (p1.transform.position == [0, 0, 0]) "Bad Initial Position"
 sliderTime = 75f
-assert (p1.transform.position == [17.5, 0, 0]) message:"Bad Anim Position" options:#(#dialog)
+FAssert (p1.transform.position == [17.5, 0, 0]) "Bad Anim Position"
 
 -------------------------------------------------------------------------------------------------------------
 -- Test Position controller, parenting

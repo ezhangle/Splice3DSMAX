@@ -49,11 +49,14 @@ public:
 	void RefAdded(RefMakerHandle rm);
 
 private:
-	void ResetPorts();
+	void ResetPorts() override;
 
 	// From FabricTranslationLayer
-	int GetValueType() { return TYPE_MESH; }
-	bool CloneFabricData(ParentClass* pMyClone) { return true; }
+	int GetValueType()  override { return TYPE_MESH; }
+	bool CloneFabricData(ParentClass* pMyClone)  override { return true; }
+
+	IOResult SaveImpData(ISave* isave) override;
+	IOResult LoadImpData(ILoad* iload) override;
 
 	std::string m_baseMeshTransformArgName;
 	std::string m_baseMeshArgName;

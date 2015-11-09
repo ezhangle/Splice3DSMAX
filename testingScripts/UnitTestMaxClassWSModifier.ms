@@ -1,21 +1,23 @@
+rootFolder = systemTools.getEnvVariable("SPLICE3DSMAXDIR")
+fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
+
 tp = Teapot radius:40 pos:[-14.2223,31.2546,0]
 sp = Sphere radius:40 smooth:on segs:32 pos:[58.9291,-39.6191,0]
 
-spliceMod = Fabric_WSModifier()
-addModifier sp spliceMod
+dfgMod = Fabric_WSModifier()
+addModifier sp dfgMod
 
-spliceMod.AddInputPort "projMesh" "PolygonMesh" -2
-spliceMod.AddInputPort "projMtx" "Mat44" 17
-spliceMod.AddInputPort "offset" "Scalar" -2
+dfgMod.DFGAddFunc "shrinkWrap" "dfgEntry {
+  // TODO
+}
+" [390.000000,211.000000]  execPath:""
 
-spliceMod.projMesh = tp
-spliceMod.projMtx = tp
-spliceMod.offset = 35
-
-klCode = "
-require Math;
-require Geometry;
-
+dfgMod.DFGAddPort "source" 1 "PolygonMesh" portToConnect:"" extDep:"Geometry" metaData:"" execPath:"shrinkWrap"
+dfgMod.DFGAddPort "sourceTrans" 0 "Mat44" portToConnect:"" extDep:"" metaData:"" execPath:"shrinkWrap"
+dfgMod.DFGAddPort "target" 0 "PolygonMesh" portToConnect:"" extDep:"" metaData:"" execPath:"shrinkWrap"
+dfgMod.DFGAddPort "targetTrans" 0 "Mat44" portToConnect:"" extDep:"" metaData:"" execPath:"shrinkWrap"
+dfgMod.DFGAddPort "offset" 0 "Float32" portToConnect:"" extDep:"" metaData:"" execPath:"shrinkWrap"
+dfgMod.DFGSetCode "
 operator ParallelShrinkWrap<<<index>>>( io PolygonMesh source, SpatialQueryable target, Scalar offset, Mat44 srcToTarget, Mat44 targToSource ) {
   Ray ray;
   ray.start = srcToTarget * source.getPointPosition( index );
@@ -35,28 +37,41 @@ operator ParallelShrinkWrap<<<index>>>( io PolygonMesh source, SpatialQueryable 
     }
   }
 }
-operator FabricWSModifier(
-  io PolygonMesh modifierMesh, 
-  in Mat44 nodeTransform, 
-  in PolygonMesh projMesh, 
-  in Mat44 projMtx,  
-  in Scalar offset
-){
-  PolygonMesh source = modifierMesh;
-  PolygonMesh target = projMesh;
-  
+
+dfgEntry {
   //Initialize options to use a sparse grid
   GenericValueContainer options = GenericValueContainer();
   PrepareForSpatialQueries_setSparseGrid(options);
 
   //Prepare for one query per source point
 
-  Mat44 srcToTarget = nodeTransform * projMtx.inverse();
+  Mat44 srcToTarget = sourceTrans * targetTrans.inverse();
   Mat44 targToSource = srcToTarget.inverse();
   
   target.prepareForSpatialQueries( source.pointCount(), options );
   ParallelShrinkWrap<<<source.pointCount()>>>( source, target, offset, srcToTarget, targToSource );
 }
-"
+"    execPath:"shrinkWrap"
 
-spliceMod.SetKLCode "FabricWSModifier" klCode
+dfgMod.DFGConnect "baseMeshTransform" "shrinkWrap.sourceTrans"   execPath:""
+dfgMod.DFGConnect "baseMesh" "shrinkWrap.source"   execPath:""
+dfgMod.DFGAddPort "target" 0 "PolygonMesh" portToConnect:"shrinkWrap.target" extDep:"" metaData:"" execPath:""
+dfgMod.DFGAddPort "targetTrans" 0 "Mat44" portToConnect:"shrinkWrap.targetTrans" extDep:"" metaData:"" execPath:""
+dfgMod.DFGAddPort "offset" 0 "Float32" portToConnect:"shrinkWrap.offset" extDep:"" metaData:"" execPath:""
+
+dfgMod.SetPortMetadata "targetTrans" "MaxType" "17" -- Reset to type Node input
+dfgMod.DFGConnect "shrinkWrap.source" "outputValue"   execPath:""
+
+FAssert (CompBB sp 138.564) "Bad init size"
+
+dfgMod.target = tp
+dfgMod.targetTrans = tp
+dfgMod.offset = 70
+
+-- Check mesh updates when modified object noves
+sp.position = [5.04404,-47.2943,26.2671]
+FAssert (CompBB sp 153.829) "Bad modified size"
+
+-- Check mesh updates when projected mesh moves
+tp.position = [3.84099,-47.8585,-84.0985]
+FAssert (CompBB sp 131.938) "Bad Final size"

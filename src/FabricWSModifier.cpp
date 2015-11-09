@@ -37,7 +37,11 @@ FabricWSModifier::~FabricWSModifier()
 
 void FabricWSModifier::RefAdded(RefMakerHandle rm)
 {
-	Init(false);
+	if (!m_binding.isValid())
+	{
+		Init(false);
+		ResetPorts();
+	}
 }
 
 Interval FabricWSModifier::LocalValidity(TimeValue t)
@@ -48,13 +52,18 @@ Interval FabricWSModifier::LocalValidity(TimeValue t)
 void FabricWSModifier::NotifyInputChanged( const Interval &changeInt, PartID partID, RefMessage message, ModContext *mc )
 {
 	if (message == REFMSG_CHANGE)
+	{
+		m_inputValid.SetEmpty();
 		Invalidate();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
 void FabricWSModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os, INode *node )
 {
 	if (!m_binding.isValid())
+		return;
+	if (node == nullptr)
 		return;
 
 	TriObject* pTriObj = static_cast<TriObject*>(os->obj);
@@ -74,15 +83,33 @@ void FabricWSModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* o
 		ivValid = m_valid;
 	}
 	else {
+
+		// Suspend hold, so FE does not record changes to our mesh/Mtx ports
+		HoldSuspend hs;
 		// A modifier is a special kind of mesh, in that we pipe our
 		// mesh into the output port as an IO port
-		MaxValuesToFabric<Object*, Mesh>(m_binding, m_outArgName.c_str(), t, ivValid, &os->obj, 1);
+#pragma message("TODO: Clean up caching based on Fabric's version number")
+		//if (!m_inputValid.InInterval(t))
+		{
+			HoldSuspend hs; // Suspend undo, there is no need for FE to record this action
+			m_inputValid.SetInfinite();
+			MaxValuesToFabric<Object*, Mesh>(m_binding, m_baseMeshArgName.c_str(), t, m_inputValid, &os->obj, 1);
+			ivValid &= m_inputValid;
+
+			// If Fabric does not have an output value for us, then
+			// nothing will be read into our cached value.  In this
+			// case we don't want to change the base mesh, so ensure
+			// that is what is in the cache.
+			FabricCore::DFGExec exec = GetExec(nullptr);
+			if (!(exec.haveExecPort(m_outArgName.c_str()) && exec.hasSrcPort(m_outArgName.c_str()))) {
+				m_value = pTriObj->GetMesh();
+			}
+		}
 
 		// A WSModifier is a special kind of modifier that has access to its nodes transform
-		MaxValueToFabric(m_binding, m_nodeTransformArgName.c_str(), t, ivValid, tmNode);
+		MaxValueToFabric(m_binding, m_baseMeshTransformArgName.c_str(), t, ivValid, tmNode);
 
 		// Set our output.
-		TriObject* pTriObj = static_cast<TriObject*>(os->obj);
 		if (GraphCanEvaluate())
 			pTriObj->GetMesh() = Evaluate(t, ivValid);
 	}
@@ -154,19 +181,16 @@ void FabricWSModifier::ResetPorts()
 {
 	MACROREC_GUARD;
 
-	// We add a transform value so that our Fabric operator can evaluate relative to the input matrix
-	m_nodeTransformArgName = AddFabricParameter(this, TYPE_MATRIX3, "nodeTransform", FabricCore::DFGPortType_In);
-	if (!m_nodeTransformArgName.empty())
-	{
-		SetPortMetaData(m_nodeTransformArgName.c_str(), FABRIC_UI_HIDDEN, "true", "");
-	}
+	const char* metadata = "{ \n\
+			\"uiHidden\" : \"true\", \n\
+			\"uiPersistValue\" : \"false\" \n \
+		}";
 
-	// Our value is an IO port as we can set data in and 
-	m_inMeshArgName = AddFabricParameter(this, GetValueType(), "inputMesh", FabricCore::DFGPortType_In);
-	if (!m_inMeshArgName.empty())
-	{
-		SetPortMetaData(m_nodeTransformArgName.c_str(), FABRIC_UI_HIDDEN, "true", "");
-	}
+	// Add an in-port to send in the Max mesh to be modified.
+	m_baseMeshArgName = AddFabricParameter(this, GetValueType(), "baseMesh", FabricCore::DFGPortType_In, "Geometry", metadata);
+	// We add a transform value so that our Fabric operator can evaluate relative to the input matrix
+	m_baseMeshTransformArgName = AddFabricParameter(this, TYPE_MATRIX3, "baseMeshTransform", FabricCore::DFGPortType_In, "Math", metadata);
+
 
 	ParentClass::ResetPorts();
 }

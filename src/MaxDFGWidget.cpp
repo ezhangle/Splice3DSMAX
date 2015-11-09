@@ -244,8 +244,12 @@ void MaxDFGWidget::onPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog * dialog
 				if (!legalTypes[maxType])
 					maxType = FabricTypeToDefaultMaxType(asFabricType.constData()); // Reset to default
 
-				FTL::JSONEnc<> paramTypeEnc(*additionalMetaData, FTL_STR(MAX_PARM_TYPE_OPT));
-				FTL::JSONSInt32Enc<> typeS32Enc(paramTypeEnc, maxType);
+				CStr cMaxType;
+				cMaxType.printf("%i", maxType);
+				FTL::JSONEnc<> enc(*additionalMetaData, FTL_STR(MAX_PARM_TYPE_OPT));
+				FTL::JSONStringEnc<> valueEnc(enc, FTL_STR(cMaxType.data()));
+
+				//FTL::JSONSInt32Enc<> typeS32Enc(paramTypeEnc, maxType);
 			}
 		}
 	}

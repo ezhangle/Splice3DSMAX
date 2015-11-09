@@ -2,11 +2,17 @@
 #include "FabricRestoreObjects.h"
 
 
+bool UndoOn()
+{
+	return theHold.Holding() && !theHold.IsSuspended();
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 DFGHoldActions::DFGHoldActions(const MCHAR* msg) 
 	: HoldActions(msg)
 {
-	if (theHold.Holding())
+	if (UndoOn())
 	{
 		int nextIndex = GetQtUndoStack()->count();
 		theHold.Put(new DFGCommandRestoreObj(nextIndex));
@@ -17,7 +23,7 @@ DFGHoldActions::DFGHoldActions(const MCHAR* msg)
 CoreHoldActions::CoreHoldActions(const MCHAR* msg) 
 	: HoldActions(msg)
 {
-	if (theHold.Holding())
+	if (UndoOn())
 	{
 		theHold.Put(new FabricCoreRestoreObj());
 	}

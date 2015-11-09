@@ -163,7 +163,7 @@ void FabricModifier::ResetPorts()
 			\"uiPersistValue\" : \"false\" \n \
 		}";
 
-		m_inMeshPort = AddFabricParameter(this, GetValueType(), "BaseMesh", FabricCore::DFGPortType_In, "Geometry", metadata);
+		m_inMeshPort = AddFabricParameter(this, GetValueType(), "baseMesh", FabricCore::DFGPortType_In, "Geometry", metadata);
 
 		// We want to ensure this value does not show up as a parameter in Max
 		if (!m_outArgName.empty())

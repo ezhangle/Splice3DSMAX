@@ -68,7 +68,7 @@ void MaxValuesToFabric(FabricCore::DFGBinding & binding, const char* argName, Ti
 	TConvertType convert;
 
 	// Is resetting the value necessary?
-	bool canUndo = theHold.Holding();
+	bool canUndo = UndoOn();
 
 	FabricCore::RTVal rtVal = binding.getArgValue(argName);
 	if (rtVal.isArray())

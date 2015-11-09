@@ -536,11 +536,11 @@ BitArray FabricTranslationFPInterface::GetLegalMaxTypesForArg(const MSTR& argNam
 
 bool FabricTranslationFPInterface::SetPortMetaData(const char* argName, const char* option, const char* value, const char* execPath)
 {
-	bool canUndo = theHold.Holding();
+	bool canUndo = UndoOn();
 	if (canUndo) {
 		theHold.Put(new FabricCoreRestoreObj());
 	}
-	GetBinding().getExec().setExecPortMetadata(argName, option, value, canUndo);
+	GetExec(execPath).setExecPortMetadata(argName, option, value, canUndo);
 	SyncMetaDataFromPortToParam(argName);
 	return true;
 }
@@ -555,7 +555,7 @@ bool FabricTranslationFPInterface::SetPortMetaData(const MSTR& argName, const MS
 
 const char* FabricTranslationFPInterface::GetPortMetaData(const char* port, const char* option, const char* execPath /* = "" */)
 {
-	return GetBinding().getExec().getExecPortMetadata(port, option);
+	return GetExec(execPath).getExecPortMetadata(port, option);
 }
 
 MSTR FabricTranslationFPInterface::GetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& execPath)
@@ -731,9 +731,7 @@ MSTR FabricTranslationFPInterface::GetExecCode(const MSTR& execPath) {
 
 MSTR FabricTranslationFPInterface::GetGraphName()
 {
-	FabricCore::DFGBinding& binding = GetBinding();
-	FabricCore::DFGExec exec = binding.getExec();
-	const char* title = exec.getTitle();
+	const char* title = GetExec(nullptr).getTitle();
 	return MSTR::FromACP(title);
 }
 

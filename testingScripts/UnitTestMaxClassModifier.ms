@@ -1,6 +1,5 @@
 rootFolder = systemTools.getEnvVariable("SPLICE3DSMAXDIR")
-fileIn (rootFolder + "UnitTestUtilFns.ms")
-
+fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
 
 m = plane()
 m.length = 200
@@ -33,7 +32,7 @@ dfgMod.DFGSetCode "dfgEntry {
 }
 "    execPath:"waveMod"
 
-dfgMod.DFGConnect "BaseMesh" "waveMod.inMesh"   execPath:""
+dfgMod.DFGConnect "baseMesh" "waveMod.inMesh"   execPath:""
 dfgMod.DFGAddPort "phaseOffset" 0 "Float32" portToConnect:"waveMod.phaseOffset" extDep:"" metaData:"" execPath:""
 dfgMod.DFGAddPort "frequency" 0 "Float32" portToConnect:"waveMod.frequency" extDep:"" metaData:"" execPath:""
 dfgMod.DFGAddPort "amplitude" 0 "Float32" portToConnect:"waveMod.amplitude" extDep:"" metaData:"" execPath:""

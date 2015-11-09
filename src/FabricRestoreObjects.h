@@ -8,6 +8,8 @@
 
 #pragma once
 
+// Helper function to get the actually useful info - should we create undo objects?
+bool UndoOn();
 //////////////////////////////////////////////////////////////////////////
 // This RAII scopes calls to the undo system
 class HoldActions {

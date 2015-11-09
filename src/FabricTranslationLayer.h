@@ -163,6 +163,17 @@ protected:
 
 	//! this switch prevents infinite recursion when synching Ports/Params
 	bool _m_isSyncing;
+	// INTERNAL: RAII class to ensure exceptions don't kill our evaluation
+	class DoSyncing {
+		FabricTranslationLayer<TBaseClass, TResultType>& m_owner;
+		DoSyncing& operator=(const DoSyncing &tmp); // Suppress couldnt generate assignment error
+	public:
+		DoSyncing(FabricTranslationLayer<TBaseClass, TResultType>& owner) : m_owner(owner)
+		{ m_owner._m_isSyncing = true;  }
+		~DoSyncing()
+		{ m_owner._m_isSyncing = false; }
+	};
+	friend DoSyncing;
 
 #pragma endregion
 

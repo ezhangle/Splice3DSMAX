@@ -1,6 +1,5 @@
 rootFolder = systemTools.getEnvVariable("SPLICE3DSMAXDIR")
---fileIn "C:\\src\\FabricEngine\\Fabric3dsMax\\testingScripts\\UnitTestUtilFns.ms"
-fileIn (rootFolder + "UnitTestUtilFns.ms")
+fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
 
 sm = FabricMesh()
 -- Init required params

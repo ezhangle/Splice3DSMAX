@@ -27,7 +27,6 @@ FabricTranslationLayer<TBaseClass, TResultType>::FabricTranslationLayer(BOOL loa
 	,	m_pblock(NULL)
 	,	m_valid(NEVER)
 	,	_m_isSyncing(false)
-//	,	m_notificationHandler(this)
 {
 	InstanceCreated();
 
@@ -360,7 +359,7 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SetReference(int i, RefTar
 			// descriptors lying around that have no parameter blocks
 			ParamBlockDesc2* pbDesc = m_pblock->GetDesc();
 			DbgAssert(pbDesc != NULL); // This is frankly impossible
-			if (theHold.Holding()) 
+			if (UndoOn())
 			{
 				// If we are holding, then we have to be prepared for the possibility that the user
 				// undos their action.  In this case, we can't just delete our descriptor.  To
@@ -732,6 +731,7 @@ int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
 	// writing all that code again.
 	if (_m_isSyncing)
 		return -1;
+	DoSyncing ds(*this);
 
 	// Does this type already exist?
 	int paramId = GetPortParamID(argName);
@@ -782,10 +782,8 @@ int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
 			SyncMaxParamDefault(argName, paramId);
 		}
 	}
-	_m_isSyncing = true;
 	MACROREC_GUARD;
 	SetPortParamID(argName, paramId);
-	_m_isSyncing = false;
 	return paramId;
 }
 
@@ -972,6 +970,9 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SyncMaxParamDefault(const 
 template<typename TBaseClass, typename TResultType>
 bool FabricTranslationLayer<TBaseClass, TResultType>::GraphCanEvaluate()
 {
+	if (_m_isSyncing)
+		return false;
+
 	if (!m_binding.isValid())
 		return false;
 
@@ -1009,6 +1010,15 @@ const TResultType& FabricTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
 	if (!GraphCanEvaluate())
 		return m_value;
 
+	// We set our synching flag here to indicate that we are sending
+	// values to Fabric.  This is theoretically to prevent our params changing
+	// while evaluating, but in reality is to prevent re-entry if 
+	// we pop a dialog due to an exception.  If that happens, then Max starts
+	// processing it's messages, and we recurse straight back into this function.
+	DoSyncing ds(*this);
+	// We suspend undo's while copying values over, as these values are 
+	// managed by Max and Splice does not need to worry about undoing them
+	HoldSuspend hs;
 
 	// If our value is valid, do not re-evaluate
 	if (!m_valid.InInterval(t))

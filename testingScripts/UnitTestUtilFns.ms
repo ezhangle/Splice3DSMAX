@@ -3,8 +3,10 @@ fn FAssert b msg = (
 )
 
 fn CompArray a b = (a as string == b as string)
-fn CompBB anode expSize = (
+fn GetBBSize anode = (
 	bb = (nodeLocalBoundingBox anode)
 	size = length (bb[1] - bb[2])
-	res =abs(size - expSize) < 1
+)
+fn CompBB anode expSize = (
+	res =abs(BBSize(anode) - expSize) < 1
 )

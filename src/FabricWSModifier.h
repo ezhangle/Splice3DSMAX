@@ -55,11 +55,14 @@ private:
 	int GetValueType() { return TYPE_MESH; }
 	bool CloneFabricData(ParentClass* pMyClone) { return true; }
 
-	std::string m_nodeTransformArgName;
-	std::string m_inMeshArgName;
+	std::string m_baseMeshTransformArgName;
+	std::string m_baseMeshArgName;
 
 	// Our cache is only valid if the node transform has not changed.
 	// We cache the nodes transform, and invalidate our cache
 	// if it changes.
 	Matrix3 m_cachedNodeTM;
+
+	// Has the input mesh changed?
+	Interval m_inputValid;
 };

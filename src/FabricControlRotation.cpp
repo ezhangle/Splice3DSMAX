@@ -51,6 +51,8 @@ DynPBCustAttrClassDesc* FabricTranslationLayer<Control, Quat>::GetClassDesc()
 FabricControlRotation::FabricControlRotation(BOOL loading)
 	: ParentClass(loading)
 {
+	if (!loading)
+		ResetPorts();
 }
 
 

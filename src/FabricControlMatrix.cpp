@@ -59,6 +59,8 @@ FabricControlMatrix::FabricControlMatrix(BOOL loading)
 	: ParentClass(loading)
 {
 	m_value.IdentityMatrix();
+	if (!loading)
+		ResetPorts();
 }
 
 

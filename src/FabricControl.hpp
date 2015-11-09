@@ -27,8 +27,8 @@ template<typename TResultType>
 FabricControl<TResultType>::FabricControl(BOOL loading)
 	: FabricTranslationLayer< Control, TResultType >(loading)
 {
-	if (!loading)
-		ResetPorts();
+	// Unfortunately, we cannot call ResetPorts here because
+	// it is a virtual call (can only happen after child is constructed)
 }
 
 template<typename TResultType>

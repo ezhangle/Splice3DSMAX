@@ -54,6 +54,8 @@ DynPBCustAttrClassDesc* FabricTranslationLayer<Control, float>::GetClassDesc()
 FabricControlFloat::FabricControlFloat(BOOL loading)
 	: ParentClass(loading)
 {
+	if (!loading)
+		ResetPorts();
 }
 
 

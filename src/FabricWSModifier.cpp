@@ -91,7 +91,6 @@ void FabricWSModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* o
 #pragma message("TODO: Clean up caching based on Fabric's version number")
 		//if (!m_inputValid.InInterval(t))
 		{
-			HoldSuspend hs; // Suspend undo, there is no need for FE to record this action
 			m_inputValid.SetInfinite();
 			MaxValuesToFabric<Object*, Mesh>(m_binding, m_baseMeshArgName.c_str(), t, m_inputValid, &os->obj, 1);
 			ivValid &= m_inputValid;

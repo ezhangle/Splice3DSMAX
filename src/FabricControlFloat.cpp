@@ -26,7 +26,9 @@ public:
 
 private:
 
-	int GetValueType() { return TYPE_FLOAT; }
+	int GetValueType() override { return TYPE_FLOAT; }
+	int GetParentValueType() override { return TYPE_FLOAT; }
+
 
 	bool CloneFabricData(FabricTranslationLayer<Control, float>* pMyClone) { return true; } ; // No cloning for me...
 };
@@ -52,8 +54,6 @@ DynPBCustAttrClassDesc* FabricTranslationLayer<Control, float>::GetClassDesc()
 FabricControlFloat::FabricControlFloat(BOOL loading)
 	: ParentClass(loading)
 {
-	if (!loading)
-		ResetPorts();
 }
 
 
@@ -68,7 +68,7 @@ void FabricControlFloat::Copy(Control *)
 
 void FabricControlFloat::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
-
+	HoldSuspend hs(); // Prevents us from creating undo objects when setting values to Fabric
 	float* pVal = reinterpret_cast<float*>(val);
 	if(method == CTRL_RELATIVE)
 	{

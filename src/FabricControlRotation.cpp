@@ -27,6 +27,7 @@ public:
 private:
 
 	int GetValueType() { return TYPE_QUAT; }
+	int GetParentValueType() override { return TYPE_MATRIX3; }
 };
 
 class FabricControlRotationClassDesc : public DynPBCustAttrClassDesc {
@@ -50,7 +51,6 @@ DynPBCustAttrClassDesc* FabricTranslationLayer<Control, Quat>::GetClassDesc()
 FabricControlRotation::FabricControlRotation(BOOL loading)
 	: ParentClass(loading)
 {
-	ResetPorts();
 }
 
 
@@ -66,6 +66,7 @@ void FabricControlRotation::Copy(Control *)
 
 void FabricControlRotation::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
+	HoldSuspend hs(); // Prevents us from creating undo objects when setting values to Fabric
 	if(method == CTRL_RELATIVE)
 	{
 		Invalidate(); // Evaluate every time in case parent changes too

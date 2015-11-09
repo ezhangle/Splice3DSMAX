@@ -18,6 +18,7 @@ protected:
 	bool CloneFabricData(ParentClass* pMyClone) override { return true; }; // No cloning for me...
 
 	// Handle parent value port
+	virtual int GetParentValueType() = 0;
 	std::string m_parentArgName;
 	typedef FabricControl<TResultType> ParentClass;
 };
@@ -26,7 +27,8 @@ template<typename TResultType>
 FabricControl<TResultType>::FabricControl(BOOL loading)
 	: FabricTranslationLayer< Control, TResultType >(loading)
 {
-
+	if (!loading)
+		ResetPorts();
 }
 
 template<typename TResultType>
@@ -42,7 +44,7 @@ void FabricControl<TResultType>::ResetPorts()
 	MACROREC_GUARD;
 
 	m_parentArgName = "parentValue";
-	AddFabricParameter(this, GetValueType(), m_parentArgName.c_str(), FabricCore::DFGPortType_In);
+	AddFabricParameter(this, GetParentValueType(), m_parentArgName.c_str(), FabricCore::DFGPortType_In);
 	SetPortMetaData(m_parentArgName.c_str(), FABRIC_UI_HIDDEN, "true", "");
 	__super::ResetPorts();
 }

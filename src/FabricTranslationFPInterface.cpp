@@ -258,11 +258,13 @@ void FabricTranslationFPInterface::DFGSetPortDefaultValue(const MSTR& portName, 
 	CStr cPortName = portName.ToCStr();
 	FabricCore::DFGExec exec = GetExec(execPath);
 	const char* portType = exec.getNodePortResolvedType(cPortName);
-	//if (portType == nullptr || strlen(portType) == 0)
-	//	throw MAXScriptException()
+	if (portType == nullptr || strlen(portType) == 0)
+		throw TypeError(_M("Cannot set default type for unresolved port"), nullptr);
 
-	FabricCore::RTVal defVal = exec.getPortDefaultValue(cPortName, portType);
-	//FabricCore::RTVal rtVal = m_binding.getArgValue(cPortName.data());
+	FabricCore::RTVal defVal = FabricCore::RTVal::Construct(GetClient(), portType, 0, nullptr);
+	if (defVal.isObject())
+		defVal = FabricCore::RTVal::Create(GetClient(), portType, 0, nullptr);
+
 	if (defVal.isValid())
 	{
 		ConvertToRTVal(*fpvalue, defVal);

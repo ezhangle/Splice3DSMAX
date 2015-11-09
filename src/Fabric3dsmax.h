@@ -16,24 +16,14 @@
 	catch (FabricCore::Exception e) { \
 		logMessage(e.getDesc_cstr()); \
 		DBGONLYMSG(MSTR::FromACP(e.getDesc_cstr()), _M("FabricException")); \
-	} \
-	catch (...) \
-	{ \
-		logMessage("ERROR: Unhandled exception."); \
-		DBGONLYMSG(_M("Unhandled Exception"), _M("Unhandled Exception")); \
-	}
+	} 
 
 #define MAXSPLICE_CATCH_RETURN(value) \
 		} \
 	catch (FabricCore::Exception e) { \
 		logMessage(e.getDesc_cstr()); \
 		return value; \
-	} \
-	catch (...) \
-	{ \
-		logMessage("ERROR: Unhandled exception."); \
-		return value; \
-	}
+	} 
 
 #else
 // In debug mode, we do not want exceptions to be caught.  Ever...

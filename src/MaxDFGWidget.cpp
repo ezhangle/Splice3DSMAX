@@ -189,26 +189,28 @@ void MaxDFGWidget::onPortEditDialogCreated(DFG::DFGBaseDialog * dialog)
 	QString title = editPortDialog->title();
 
 	QComboBox *comboBox = new QComboBox;
+	bool isDisabled = true;
 	if (title.length() > 0)
 	{
 		FabricCore::DFGExec exec = m_binding.getExec();
 		QByteArray asName = title.toUtf8();
-		const char* fabricType = GetPortType(exec, asName.constData());
+		const char* portName = asName.constData();
 
-		BitArray br = FabricTypeToMaxTypes(fabricType);
-
-		if (br.AnyBitSet())
+		// Do not enable 
+		if (GetPortParamID(exec, portName) >= 0)
 		{
-			int maxType = GetPort3dsMaxType(exec, asName.constData());
-			FillComboBox filler(comboBox, maxType);
-			br.EnumSet(filler);
+			const char* fabricType = GetPortType(exec, portName);
+			BitArray br = FabricTypeToMaxTypes(fabricType);
+			if (br.AnyBitSet())
+			{
+				int maxType = GetPort3dsMaxType(exec, asName.constData());
+				FillComboBox filler(comboBox, maxType);
+				br.EnumSet(filler);
+				isDisabled = false;
+			}
 		}
-		else
-			comboBox->setDisabled(true);
 	}
-	else
-		comboBox->setDisabled(true);
-
+	comboBox->setDisabled(isDisabled);
 	dialog->addInput(comboBox, "3ds Max Type");
 }
 

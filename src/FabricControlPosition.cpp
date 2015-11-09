@@ -27,6 +27,7 @@ public:
 private:
 
 	int GetValueType() { return TYPE_POINT3; }
+	int GetParentValueType() override { return TYPE_MATRIX3; }
 };
 
 class FabricControlPositionClassDesc : public DynPBCustAttrClassDesc {
@@ -50,8 +51,6 @@ DynPBCustAttrClassDesc* FabricTranslationLayer<Control, Point3>::GetClassDesc()
 FabricControlPosition::FabricControlPosition(BOOL loading)
 	: ParentClass(loading)
 {
-	if (!loading)
-		ResetPorts();
 }
 
 
@@ -66,6 +65,7 @@ void FabricControlPosition::Copy(Control *)
 
 void FabricControlPosition::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
+	HoldSuspend hs(); // Prevents us from creating undo objects when setting values to Fabric
 	if(method == CTRL_RELATIVE)
 	{
 		Invalidate(); // Evaluate every time in case parent changes too

@@ -230,6 +230,7 @@ extern FabricCore::Variant GetVariant(const FPValue& value)
 #pragma region Get RTVals
 void ConvertToRTVal(int param, FabricCore::RTVal& rtVal)
 {
+	DbgAssert(rtVal.isValid());
 	if (!rtVal.isValid())
 		return;
 
@@ -261,7 +262,7 @@ void ConvertToRTVal(int param, FabricCore::RTVal& rtVal)
 		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
 
 	// These can come through sometimes
-	else if (strcmp(spliceType, "Float32") == 0)
+	else if (strcmp(spliceType, "Float32") == 0 || strcmp(spliceType, "Scalar") == 0)
 		rtVal = FabricCore::RTVal::ConstructFloat32(GetClient(), (float)param);
 	else if (strcmp(spliceType, "Float64") == 0)
 		rtVal = FabricCore::RTVal::ConstructFloat64(GetClient(), param);
@@ -275,6 +276,7 @@ void ConvertToRTVal(int param, FabricCore::RTVal& rtVal)
 
 void ConvertToRTVal(float param, FabricCore::RTVal& val)
 {
+	DbgAssert(val.isValid());
 	if (!val.isValid())
 		return;
 
@@ -289,11 +291,13 @@ void ConvertToRTVal(float param, FabricCore::RTVal& val)
 
 void ConvertToRTVal(bool param, FabricCore::RTVal& val)
 {
+	DbgAssert(val.isValid());
 	val = FabricCore::RTVal::ConstructBoolean(GetClient(), param);
 }
 
 void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val)
 {
+	DbgAssert(val.isValid());
 	if (!val.isValid())
 		return;
 
@@ -304,6 +308,7 @@ void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val)
 
 void ConvertToRTVal(const Color& param, FabricCore::RTVal& val)
 {
+	DbgAssert(val.isValid());
 	if (!val.isValid())
 		return;
 
@@ -315,6 +320,7 @@ void ConvertToRTVal(const Color& param, FabricCore::RTVal& val)
 
 void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
 {
+	DbgAssert(val.isValid());
 	if (!val.isValid())
 		return;
 
@@ -338,6 +344,7 @@ void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
 
 void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val)
 {
+	DbgAssert(val.isValid());
 	if (!val.isValid())
 		return;
 
@@ -348,6 +355,7 @@ void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val)
 
 void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val)
 {
+	DbgAssert(val.isValid());
 	if (!val.isValid())
 		return;
 
@@ -366,18 +374,21 @@ void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val)
 
 void ConvertToRTVal(const MSTR& param, FabricCore::RTVal& val)
 {
+	DbgAssert(val.isValid());
 	CStr cStr = param.ToCStr();
 	val = FabricCore::RTVal::ConstructString(GetClient(), cStr.data());
 }
 
 void ConvertToRTVal(const MCHAR* param, FabricCore::RTVal& val)
 {
+	DbgAssert(val.isValid());
 	CStr cStr = CStr::FromMCHAR(param);
 	val = FabricCore::RTVal::ConstructString(GetClient(), cStr.data());
 }
 
 void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 {
+	DbgAssert(rtMesh.isValid());
 	if (!rtMesh.isValid() || rtMesh.isNullObject())
 		rtMesh = FabricCore::RTVal::Create(GetClient(), "PolygonMesh", 0, nullptr);
 	
@@ -464,6 +475,7 @@ void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 
 void ConvertToRTVal(const FPValue& param, FabricCore::RTVal& val)
 {
+	DbgAssert(val.isValid());
 	if (is_tab(param.type) || val.isArray())
 	{
 		if (is_tab(param.type) && val.isArray())
@@ -540,6 +552,7 @@ void ConvertToRTVal(const FPValue& param, FabricCore::RTVal& val)
 
 #pragma region Variant to Max
 void FabricToMaxValue(const FabricCore::Variant& var, bool& param) {
+	DbgAssert(var.isBoolean());
 	if (var.isBoolean())
 		param = var.getBoolean();
 }
@@ -568,6 +581,10 @@ void FabricToMaxValue(const FabricCore::Variant& var, int& param)
 		param = (int)var.getUInt32();
 	else if (var.isUInt64())
 		param = (int)var.getUInt64();
+	else
+	{
+		DbgAssert(!"Unkonwn Type");
+	}
 }
 
 void FabricToMaxValue(const FabricCore::Variant& var, float& param)
@@ -592,10 +609,15 @@ void FabricToMaxValue(const FabricCore::Variant& var, float& param)
 		param = (float)var.getUInt32();
 	else if (var.isUInt64())
 		param = (float)var.getUInt64();
+	else
+	{
+		DbgAssert(!"Unkonwn Type");
+	}
 }
 
 void FabricToMaxValue(const FabricCore::Variant& var, Point3& param)
 {
+	DbgAssert(var.isDict());
 	if (!var.isDict())
 		return;
 	FabricToMaxValue(*var.getDictValue("x"), param.x);
@@ -605,6 +627,7 @@ void FabricToMaxValue(const FabricCore::Variant& var, Point3& param)
 
 void FabricToMaxValue(const FabricCore::Variant& var, Color& param)
 {
+	DbgAssert(var.isDict());
 	if (!var.isDict())
 		return;
 	FabricToMaxValue(*var.getDictValue("r"), param.r);
@@ -615,6 +638,7 @@ void FabricToMaxValue(const FabricCore::Variant& var, Color& param)
 
 void FabricToMaxValue(const FabricCore::Variant& var, Point4& param)
 {
+	DbgAssert(var.isDict());
 	if (!var.isDict())
 		return;
 	// A variant could be either a XYZT or a RGBA,
@@ -634,6 +658,7 @@ void FabricToMaxValue(const FabricCore::Variant& var, Point4& param)
 
 void FabricToMaxValue(const FabricCore::Variant& var, Quat& param)
 {
+	DbgAssert(var.isDict());
 	if (!var.isDict())
 		return;
 	const FabricCore::Variant* axis = var.getDictValue("v");
@@ -645,6 +670,7 @@ void FabricToMaxValue(const FabricCore::Variant& var, Quat& param)
 
 void FabricToMaxValue(const FabricCore::Variant& var, Matrix3& param)
 {
+	DbgAssert(var.isDict());
 	if (!var.isDict())
 		return;
 
@@ -679,6 +705,7 @@ void FabricToMaxValue(const FabricCore::Variant& var, Matrix3& param)
 
 void FabricToMaxValue(const FabricCore::Variant& var, MSTR& param)
 {
+	DbgAssert(var.isString());
 	if (!var.isString())
 		return;
 
@@ -805,6 +832,7 @@ void FabricToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param)
 		!pRow1.isValid() ||
 		!pRow2.isValid())
 	{
+		DbgAssert(!"Fabric Matrix Valid");
 		return;
 	}
 
@@ -824,6 +852,7 @@ void FabricToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 {
 	if (rtv.isNullObject())
 	{
+		DbgAssert(!"Fabric Mesh Valid");
 		param.FreeAll();
 		return;
 	}

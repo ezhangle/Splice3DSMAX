@@ -28,6 +28,8 @@ public:
 private:
 
 	int GetValueType() { return TYPE_MATRIX3; }
+	int GetParentValueType() override { return TYPE_MATRIX3; }
+
 
 	// Our cache is only valid if the parent has not changed.
 	// We cache the parents transform, and invalidate our cache
@@ -57,8 +59,6 @@ FabricControlMatrix::FabricControlMatrix(BOOL loading)
 	: ParentClass(loading)
 {
 	m_value.IdentityMatrix();
-	if (!loading)
-		ResetPorts();
 }
 
 
@@ -78,6 +78,7 @@ void FabricControlMatrix::Copy(Control *from)
 void FabricControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
 	Invalidate();
+	HoldSuspend hs(); // Prevents us from creating undo objects when setting values to Fabric
 	Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
 	if(method == CTRL_ABSOLUTE)
 	{

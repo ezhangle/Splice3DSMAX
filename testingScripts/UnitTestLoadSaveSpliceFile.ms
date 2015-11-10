@@ -20,7 +20,7 @@ fn IsEquivVec a b = (
 	return (length(a - b) < 0.1)
 )
 -- Common data
-rootFolder = systemTools.getEnvVariable("SPLICE3DSMAXDIR")
+rootFolder = systemTools.getEnvVariable("FABRIC3DSMAXDIR")
 fabricDir = systemTools.getEnvVariable("FABRIC_DIR")
 sampleDir = fabricDir + "Samples\\Canvas\\"
 tempFile = systemTools.getEnvVariable("TEMP") + "\\temp.canvas"

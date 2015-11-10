@@ -37,7 +37,7 @@
 		<IsUnicode>true</IsUnicode>
 		<IsUnicode Condition="'$(MaxVersion)' &lt; '2013'">false</IsUnicode>
 
-		<FabricOutDir>$(FABRIC_DIR)\FabricIntegrations\Fabric3dsmax$(MaxVersion)\</FabricOutDir>
+		<FabricOutDir>$(FABRIC_DIR)\DCCIntegrations\Fabric3dsmax$(MaxVersion)\</FabricOutDir>
 
 		<QtSuffix>4</QtSuffix>
 
@@ -146,7 +146,7 @@ call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
   <PropertyGroup>
 	<LocalDebuggerCommandArguments>-vo -p "$(ProjectDir)/build/Generated.Plugin.Fabric.ini"</LocalDebuggerCommandArguments>
 	<LocalDebuggerCommand>$(MaxPath)\3dsmax.exe</LocalDebuggerCommand>
-	<LocalDebuggerEnvironment>SPLICE3DSMAXDIR=$(FabricOutDir)
+	<LocalDebuggerEnvironment>FABRIC3DSMAXDIR=$(FabricOutDir)
 PATH=$(PATH);$(FABRIC_DIR)\lib
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>

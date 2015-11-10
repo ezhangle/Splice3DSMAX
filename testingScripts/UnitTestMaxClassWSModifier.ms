@@ -1,4 +1,4 @@
-rootFolder = systemTools.getEnvVariable("SPLICE3DSMAXDIR")
+rootFolder = systemTools.getEnvVariable("FABRIC3DSMAXDIR")
 fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
 
 tp = Teapot radius:40 pos:[-14.2223,31.2546,0]

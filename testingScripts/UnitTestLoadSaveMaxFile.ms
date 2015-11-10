@@ -7,7 +7,7 @@
 ----------------------------------------------------------------------
 
 -- Common data
-rootFolder = systemTools.getEnvVariable("SPLICE3DSMAXDIR")
+rootFolder = systemTools.getEnvVariable("FABRIC3DSMAXDIR")
 tempFile = systemTools.getEnvVariable("TEMP") + "\\temp.max"
 -- Bring in util functions
 fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")

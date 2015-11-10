@@ -39,17 +39,17 @@ REM Clear the contents of the file if it already exists.
 @echo 	@echo mental ray Help=http://www.autodesk.com/mentalray-help-2013-enu ^>^> Generated.Plugin.Fabric.ini>> %LAUNCHER%
 @echo )>> %LAUNCHER%
 @echo.>> %LAUNCHER%
-@echo set SPLICE3DSMAXDIR=%%~dp0>> %LAUNCHER%
-@echo set FABRIC_DIR=%%SPLICE3DSMAXDIR%%..\..\>> %LAUNCHER%
+@echo set FABRIC3DSMAXDIR=%%~dp0>> %LAUNCHER%
+@echo set FABRIC_DIR=%%FABRIC3DSMAXDIR%%..\..\>> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo REM Ensure that the Fabric plugin will be able to find the extensions >> %LAUNCHER%
 @echo set FABRIC_EXTS_PATH=%%FABRIC_EXTS_PATH%%;%%FABRIC_DIR%%Exts>> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo REM Enable the system to find the FabricCore and Scintilla dlls>> %LAUNCHER%
-@echo set PATH=%%PATH%%;%%SPLICE3DSMAXDIR%%..\..\lib >> %LAUNCHER%
+@echo set PATH=%%PATH%%;%%FABRIC3DSMAXDIR%%..\..\lib >> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo REM Launch Max>> %LAUNCHER%
-@echo call "%%ADSK_3DSMAX_x64_%MAXVERSION%%%\3dsmax.exe" -vo -p "%%SPLICE3DSMAXDIR%%/Generated.Plugin.Fabric.ini">> %LAUNCHER%
+@echo call "%%ADSK_3DSMAX_x64_%MAXVERSION%%%\3dsmax.exe" -vo -p "%%FABRIC3DSMAXDIR%%/Generated.Plugin.Fabric.ini">> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo rem echo on>> %LAUNCHER%
 

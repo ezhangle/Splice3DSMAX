@@ -101,11 +101,15 @@ void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 		// On first run, evaluate the script that defines our function
 		char* mxsMenuSetup = nullptr;
 		size_t buffSize = 0;
-		if (_dupenv_s(&mxsMenuSetup, &buffSize, "SPLICE3DSMAXDIR") == 0) {
+		if (_dupenv_s(&mxsMenuSetup, &buffSize, "FABRIC3DSMAXDIR") == 0) {
 			MSTR mxsMenuSetupPath = MSTR::FromACP(mxsMenuSetup, buffSize);
 			mxsMenuSetupPath = mxsMenuSetupPath + _T("SetupMenu.ms");
 			filein_script(mxsMenuSetupPath.data());
 			free(mxsMenuSetup);
+		}
+		else
+		{
+			logMessage("** Error loading Fabric menu: env variable FABRIC3DSMAXDIR not set **");
 		}
 	}
 

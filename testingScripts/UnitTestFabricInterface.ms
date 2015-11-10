@@ -7,7 +7,7 @@
 --
 -----------------------------------------------------------
 
-rootFolder = systemTools.getEnvVariable("SPLICE3DSMAXDIR")
+rootFolder = systemTools.getEnvVariable("FABRIC3DSMAXDIR")
 fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
 
 sm = FabricMesh pos:[-27.1141,-29.5166,0] isSelected:on

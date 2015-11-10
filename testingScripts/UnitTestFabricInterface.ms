@@ -1,3 +1,15 @@
+-----------------------------------------------------------
+--
+-- Simple testing script exercises the interface exposed
+-- by all Fabric classes.  It only performs superficial testing,
+-- its testing the interface, not so much the underlying 
+-- functionality
+--
+-----------------------------------------------------------
+
+rootFolder = systemTools.getEnvVariable("SPLICE3DSMAXDIR")
+fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
+
 sm = FabricMesh pos:[-27.1141,-29.5166,0] isSelected:on
 FAssert((sm.GetPortCount() == 1) and ((sm.GetPortName 1) == "outputValue")) "Error Initializing FabricMesh"
 sm.ShowDFGGraphEditor() -- No way to test this

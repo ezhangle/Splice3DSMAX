@@ -177,3 +177,40 @@ void FabricModifier::ResetPorts()
 		}
 	MAXSPLICE_CATCH_END
 }
+
+
+//////////////////////////////////////////////////////////////////////////
+#define BASE_MESH_PORT_NAME		0x100
+
+IOResult FabricModifier::SaveImpData(ISave* isave)
+{
+	// Save additional values for derived values
+	isave->BeginChunk(BASE_MESH_PORT_NAME);
+	isave->WriteCString(m_inMeshPort.c_str());
+	isave->EndChunk();
+
+	return IO_OK;
+
+}
+
+IOResult FabricModifier::LoadImpData(ILoad* iload)
+{
+	IOResult result = IO_OK;
+	while (IO_OK == (result = iload->OpenChunk()))
+	{
+		switch (iload->CurChunkID())
+		{
+		case BASE_MESH_PORT_NAME:
+		{
+			char *buff;
+			if (iload->ReadCStringChunk(&buff) == IO_OK) {
+				m_inMeshPort = buff;
+			}
+			break;
+		}
+
+		}
+		iload->CloseChunk();
+	}
+	return result;
+}

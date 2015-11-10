@@ -54,6 +54,10 @@ private:
 	bool CloneFabricData(ParentClass* pMyClone) override { return true; }
 	void ResetPorts() override;
 
+	IOResult FabricModifier::LoadImpData(ILoad* iload) override;
+	IOResult FabricModifier::SaveImpData(ISave* isave) override;
+
+
 	// Pass input mesh in
 	std::string m_inMeshPort;
 

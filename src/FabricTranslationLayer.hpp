@@ -752,12 +752,21 @@ int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
 	{
 		if (paramId >= 0)
 		{
-			// Check that its not the correct type already
-			if (m_pblock->GetParamDef((ParamID)paramId).type != maxType)
+			// It's possible to not even have a pblock right now
+			// For example, when loading back a json file saved out from Max
+			if (m_pblock == nullptr)
 			{
-				// Is the type incompatible?  For now... guess so...
-				DeleteMaxParameter((ParamID)paramId);
-				paramId = -1;
+				paramId = -1; 
+			}
+			else
+			{
+				// Check that its not the correct type already
+				if (m_pblock->GetParamDef((ParamID)paramId).type != maxType)
+				{
+					// Is the type incompatible?  For now... guess so...
+					DeleteMaxParameter((ParamID)paramId);
+					paramId = -1;
+				}
 			}
 		}
 

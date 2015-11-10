@@ -1129,17 +1129,24 @@ static FabricCore::Client s_client;
 static FabricCore::DFGHost s_Host;
 static FabricCore::RTVal s_drawing;
 
-FabricCore::Client& GetClient() 
+FabricCore::Client& GetClient(bool doCreate/*=true*/, const char* contexId) 
 {
-	if (!s_client.isValid())
+	if (!s_client.isValid() && doCreate)
 	{
-		// create a client
-		FabricCore::Client::CreateOptions options;
-		memset(&options, 0, sizeof(options));
-		options.optimizationType = FabricCore::ClientOptimizationType_Background;
-		options.guarded = 1;
 		FabricCore::Client::ReportCallback pCallback = &myLogFunc;
-		s_client = FabricCore::Client(pCallback, nullptr, &options);
+		if (contexId != nullptr)
+		{
+			s_client = FabricCore::Client(pCallback, nullptr, contexId);
+		}
+		else
+		{
+			// create a client
+			FabricCore::Client::CreateOptions options;
+			memset(&options, 0, sizeof(options));
+			options.optimizationType = FabricCore::ClientOptimizationType_Background;
+			options.guarded = 1;
+			s_client = FabricCore::Client(pCallback, nullptr, &options);
+		}
 	}
 	return s_client;
 }

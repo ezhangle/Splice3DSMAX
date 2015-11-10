@@ -27,12 +27,6 @@ extern void myLogFunc(
 	char const *lineCStr,
 	uint32_t lineSize);
 
-extern void SetGenericLoggerEnabled(bool enable);
-extern void SetErrorLoggerEnabled(bool enable);
-extern void SetCompilerLoggerEnabled(bool enable);
-extern void SetKLReportLoggerEnabled(bool enable);
-extern void SetKLStatusLoggerEnabled(bool enable);
-
 // Log messages to the maxscript window
 extern void logMessage(const CStr &cstr);
 

@@ -393,7 +393,7 @@ public:
 };
 
 
-extern FabricCore::Client& GetClient();
+extern FabricCore::Client& GetClient(bool doCreate= true, const char* contextId=nullptr);
 extern FabricCore::DFGHost& GetHost();
 extern FabricCore::RTVal& GetDrawing();
 

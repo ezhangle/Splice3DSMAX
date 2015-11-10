@@ -91,7 +91,6 @@ void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 {
 	// setup the callback functions
 	InitLoggingTimer();
-	FabricStaticFPInterface::GetInstance()->EnableLogging(FabricStaticFPInterface::LOG_ALL);
 
 	// Magic initialization stuff for maxscript.
 	static bool menus_setup = false;
@@ -134,6 +133,8 @@ __declspec( dllexport ) int LibInitialize(void)
 	FabricTranslationLayer<WSModifier, Mesh>::InitMixinInterface();
 	FabricTranslationLayer<GeomObject, Mesh>::InitMixinInterface();
 	FabricTranslationLayer<ReferenceTarget, int>::InitMixinInterface();
+
+	FabricStaticFPInterface::GetInstance();
 
 	// Force init/cleanup of client
 	RegisterNotification(OnStartup, NULL, NOTIFY_SYSTEM_STARTUP);

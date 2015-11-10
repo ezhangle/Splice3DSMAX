@@ -70,7 +70,7 @@ void FabricControlFloat::Copy(Control *)
 
 void FabricControlFloat::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
-	HoldSuspend hs(); // Prevents us from creating undo objects when setting values to Fabric
+	HoldSuspend hs; // Prevents us from creating undo objects when setting values to Fabric
 	float* pVal = reinterpret_cast<float*>(val);
 	if(method == CTRL_RELATIVE)
 	{

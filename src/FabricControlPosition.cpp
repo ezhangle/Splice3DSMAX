@@ -67,7 +67,7 @@ void FabricControlPosition::Copy(Control *)
 
 void FabricControlPosition::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)
 {
-	HoldSuspend hs(); // Prevents us from creating undo objects when setting values to Fabric
+	HoldSuspend hs; // Prevents us from creating undo objects when setting values to Fabric
 	if(method == CTRL_RELATIVE)
 	{
 		Invalidate(); // Evaluate every time in case parent changes too

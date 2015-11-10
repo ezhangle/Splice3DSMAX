@@ -25,6 +25,15 @@
 		return value; \
 	} 
 
+// When catching from an FPInterface function, the best thing to do
+// is re-throw with Fabric's error code.
+#define MAXSCRIPT_CATCH_END \
+	} \
+	catch (FabricCore::Exception e) { \
+		logMessage(e.getDesc_cstr()); \
+		throw UserThrownError(MSTR::FromACP(e.getDesc_cstr()), FALSE); \
+	} 
+
 #else
 // In debug mode, we do not want exceptions to be caught.  Ever...
 #define MAXSPLICE_CATCH_BEGIN

@@ -25,7 +25,7 @@ FabricStaticFPInterface* FabricStaticFPInterface::GetInstance()
 			
 			FabricStaticFPInterface::fn_loadFabricExtension, _T("LoadExtension"), 0, TYPE_BOOL, 0, 3,
 				_M("extension"),	0,	TYPE_TSTR,
-				_M("version"),	0,	TYPE_TSTR, f_keyArgDefault, _M(""),
+				_M("version"),	0,	TYPE_TSTR, f_keyArgDefault, EMPTY_STR,
 				_M("reload"),	0,	TYPE_bool, f_keyArgDefault, false,
 			FabricStaticFPInterface::fn_registerFabricExtension, _T("RegisterExtension"), 0, TYPE_BOOL, 0, 7,
 				_M("extension"),	0,	TYPE_TSTR,

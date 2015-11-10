@@ -137,7 +137,6 @@
 	<PostBuildEvent>
 	  <Command>call "$(ProjectDir)/GenerateMaxLauncher.bat" "$(FabricOutDir)/" "$(MaxVersion)"
 copy "$(ProjectDir)SetupMenu.ms" "$(FabricOutDir)" /Y
-xcopy "$(ProjectDir)ScintillaNET" "$(FabricOutDir)ScintillaNET" /E /I /Y
 xcopy "$(ProjectDir)testingScripts" "$(FabricOutDir)samples" /E /I /Y
 xcopy "$(ProjectDir)qt-solutions\qtwinmigrate\lib\QtSolutions_MFCMigrationFramework-head.dll" "$(FABRIC_DIR)\lib" /E /I /Y
 call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
@@ -148,8 +147,7 @@ call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
 	<LocalDebuggerCommandArguments>-vo -p "$(ProjectDir)/build/Generated.Plugin.Fabric.ini"</LocalDebuggerCommandArguments>
 	<LocalDebuggerCommand>$(MaxPath)\3dsmax.exe</LocalDebuggerCommand>
 	<LocalDebuggerEnvironment>SPLICE3DSMAXDIR=$(FabricOutDir)
-SCINTILLANETDIR=$(FabricOutDir)ScintillaNET\
-PATH=$(PATH);$(FABRIC_DIR)\lib;$(SCINTILLANETDIR)
+PATH=$(PATH);$(FABRIC_DIR)\lib
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>
 </Project>

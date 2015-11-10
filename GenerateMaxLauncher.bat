@@ -46,10 +46,7 @@ REM Clear the contents of the file if it already exists.
 @echo set FABRIC_EXTS_PATH=%%FABRIC_EXTS_PATH%%;%%FABRIC_DIR%%Exts>> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo REM Enable the system to find the FabricCore and Scintilla dlls>> %LAUNCHER%
-@echo set PATH=%%PATH%%;%%SPLICE3DSMAXDIR%%..\..\lib;%%SPLICE3DSMAXDIR%%ScintillaNET\>> %LAUNCHER%
-@echo.>> %LAUNCHER%
-@echo REM Save the Scintilla folder to an environment variable that will be accessed in MaxScript>> %LAUNCHER%
-@echo set SCINTILLANETDIR=%%SPLICE3DSMAXDIR%%ScintillaNET\>> %LAUNCHER%
+@echo set PATH=%%PATH%%;%%SPLICE3DSMAXDIR%%..\..\lib >> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo REM Launch Max>> %LAUNCHER%
 @echo call "%%ADSK_3DSMAX_x64_%MAXVERSION%%%\3dsmax.exe" -vo -p "%%SPLICE3DSMAXDIR%%/Generated.Plugin.Fabric.ini">> %LAUNCHER%

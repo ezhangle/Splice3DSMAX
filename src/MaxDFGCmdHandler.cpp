@@ -89,13 +89,13 @@ MSTR ToMSTR(nothing v) {
 }
 
 // Quickly convert FTL::CStrRef to MCHAR*
-#define TO_MSTR(x) ToMSTR(x).data()
+#define TO_MCHAR(x) ToMSTR(x).data()
 
 template<typename T1, typename T2, typename T3, typename T4>
 void doEmit(const MCHAR* fn, const T1& t1, const T2& t2, const T3& t3, const T4& t4, FTL::CStrRef& execPath)
 {
 	MSTR cmd;
-	cmd.printf(_M("$.%s %s %s %s %s execPath:%s"), fn, TO_MSTR(t1), TO_MSTR(t2), TO_MSTR(t3), TO_MSTR(t4), TO_MSTR(execPath));
+	cmd.printf(_M("$.%s %s %s %s %s execPath:%s"), fn, TO_MCHAR(t1), TO_MCHAR(t2), TO_MCHAR(t3), TO_MCHAR(t4), TO_MCHAR(execPath));
 	macroRecorder->ScriptString(cmd.data());
 	macroRecorder->EmitScript();
 }
@@ -178,13 +178,13 @@ std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding
 	MSTR cmd;
 	cmd.printf(_M("$.%s %s %i %s portToConnect:%s extDep:%s metaData:%s execPath:%s"),
 		_M("DFGAddPort"),
-		TO_MSTR(desiredPortName),
+		TO_MCHAR(desiredPortName),
 		portType,
-		TO_MSTR(typeSpec),
-		TO_MSTR(portToConnect),
-		TO_MSTR(extDep),
-		TO_MSTR(metaData),
-		TO_MSTR(execPath));
+		TO_MCHAR(typeSpec),
+		TO_MCHAR(portToConnect),
+		TO_MCHAR(extDep),
+		TO_MCHAR(metaData),
+		TO_MCHAR(execPath));
 	macroRecorder->ScriptString(cmd.data());
 	macroRecorder->EmitScript();
 
@@ -207,12 +207,12 @@ std::string MaxDFGCmdHandler::dfgDoEditPort(FabricCore::DFGBinding const &bindin
 	MSTR cmd;
 	cmd.printf(_M("$.%s %s desiredNewPortName:%s typeSpec:%s extDep:%s metadata:%s execPath:%s"),
 		_M("DFGEditPort"),
-		TO_MSTR(oldPortName),
-		TO_MSTR(desiredNewPortName),
-		TO_MSTR(typeSpec),
-		TO_MSTR(extDep),
-		TO_MSTR(uiMetadata),
-		TO_MSTR(execPath));
+		TO_MCHAR(oldPortName),
+		TO_MCHAR(desiredNewPortName),
+		TO_MCHAR(typeSpec),
+		TO_MCHAR(extDep),
+		TO_MCHAR(uiMetadata),
+		TO_MCHAR(execPath));
 	macroRecorder->ScriptString(cmd.data());
 	macroRecorder->EmitScript();
 
@@ -324,8 +324,8 @@ std::vector<std::string> MaxDFGCmdHandler::dfgDoPaste(FabricCore::DFGBinding con
 void MaxDFGCmdHandler::dfgDoSetArgType(FabricCore::DFGBinding const &binding, FTL::CStrRef argName, FTL::CStrRef typeName)
 {
 	macroRecorder->FunctionCall(_M("$.DFGSetArgType"), 2, 0,
-		mr_string, TO_MSTR(argName),
-		mr_string, TO_MSTR(typeName)
+		mr_string, TO_MCHAR(argName),
+		mr_string, TO_MCHAR(typeName)
 		);
 
 	DFGHoldActions hold(_M("DFG Set Arg Type"));
@@ -343,8 +343,8 @@ void MaxDFGCmdHandler::dfgDoSetArgType(FabricCore::DFGBinding const &binding, FT
 void MaxDFGCmdHandler::dfgDoSetArgValue(FabricCore::DFGBinding const &binding, FTL::CStrRef argName, FabricCore::RTVal const &value)
 {
 	macroRecorder->FunctionCall(_M("$.DFGSetArgValue"), 2, 0,
-		mr_string, TO_MSTR(argName),
-		mr_string, TO_MSTR(value)
+		mr_string, TO_MCHAR(argName),
+		mr_string, TO_MCHAR(value)
 		);
 
 	DFGHoldActions hold(_M("DFG Set Arg Value"));

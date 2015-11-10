@@ -47,7 +47,7 @@ void FabricTranslationFPInterface::CloseDFGGraphEditor()
 #pragma region Fabric commands exposed to MaxScript
 
 #pragma region a few conv functions
-#define TO_CSTR(x) (x).ToCStr().data()
+
 QPointF Convert(const Point2& v) { return QPointF(v.x, v.y); }
 
 void Convert(const Tab<MSTR*>& from, std::vector<FTL::StrRef>& to) {

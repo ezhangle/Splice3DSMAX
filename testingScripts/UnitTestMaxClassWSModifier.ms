@@ -75,3 +75,12 @@ FAssert (CompBB sp 153.829) "Bad modified size"
 -- Check mesh updates when projected mesh moves
 tp.position = [3.84099,-47.8585,-84.0985]
 FAssert (CompBB sp 131.938) "Bad Final size"
+
+v2 = Cylinder smooth:on heightsegs:50 capsegs:1 sides:18 height:127.604 radius:43.6304 mapcoords:on pos:[59.5356,-139.222,-100] isSelected:on
+	-- For some reason, we are not redrawing after creating the cylinder, and that seems to cause crashes on some video cards
+redrawViews()
+bb1 = GetBBSize(v2)
+wsmClone = copy sp.modifiers[1]
+addModifier v2 wsmClone
+bb2 = GetBBSize(v2)
+FAssert (bb1 != bb2) "Clone WSM had no effect"

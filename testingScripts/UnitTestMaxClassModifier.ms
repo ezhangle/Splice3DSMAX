@@ -16,7 +16,7 @@ dfgEntry {
 }
 " [573.000000,187.000000]
 
-dfgMod.DFGAddPort "inMesh" 1 "PolygonMesh" portToConnect:"" extDep:"" metaData:"" execPath:"waveMod"
+dfgMod.DFGAddPort "inMesh" 1 "PolygonMesh" portToConnect:"" extDep:"Geometry" metaData:"" execPath:"waveMod"
 dfgMod.DFGAddPort "phaseOffset" 0 "Float32" portToConnect:"" extDep:"" metaData:"" execPath:"waveMod"
 dfgMod.DFGAddPort "frequency" 0 "Float32" portToConnect:"" extDep:"" metaData:"" execPath:"waveMod"
 dfgMod.DFGAddPort "amplitude" 0 "Float32" portToConnect:"" extDep:"" metaData:"" execPath:"waveMod"

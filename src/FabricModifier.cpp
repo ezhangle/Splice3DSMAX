@@ -154,7 +154,6 @@ void FabricModifier::ResetPorts()
 
 	MAXSPLICE_CATCH_BEGIN
 
-		ParentClass::ResetPorts();
 		// For a modifier, we create an IO port in order to more accurately represent max's method of working
 		// with meshes.
 
@@ -164,6 +163,8 @@ void FabricModifier::ResetPorts()
 		}";
 
 		m_inMeshPort = AddFabricParameter(this, GetValueType(), "baseMesh", FabricCore::DFGPortType_In, "Geometry", metadata);
+
+    ParentClass::ResetPorts();
 
 		// We want to ensure this value does not show up as a parameter in Max
 		if (!m_outArgName.empty())

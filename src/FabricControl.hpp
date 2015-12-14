@@ -15,7 +15,7 @@ protected:
 	IOResult SaveImpData(ISave* isave) override;
 	IOResult LoadImpData(ILoad* isave) override;
 
-	bool CloneFabricData(ParentClass* pMyClone) override { return true; }; // No cloning for me...
+	bool CloneFabricData( FabricTranslationLayer < Control, TResultType >* pMyClone) override; // No cloning for me...
 
 	// Handle parent value port
 	virtual int GetParentValueType() = 0;
@@ -67,3 +67,9 @@ IOResult FabricControl<TResultType>::LoadImpData(ILoad* iload)
 	return IO_OK;
 }
 
+template<typename TResultType>
+bool FabricControl<TResultType>::CloneFabricData( FabricTranslationLayer < Control, TResultType >* pMyClone)
+{
+  static_cast<FabricControl<TResultType>*>(pMyClone)->m_parentArgName = m_parentArgName;
+  return true;
+}

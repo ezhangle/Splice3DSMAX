@@ -744,6 +744,11 @@ MaxDFGCmdHandler* FabricTranslationFPInterface::GetCommandHandler()
 
 FabricCore::DFGExec FabricTranslationFPInterface::GetExec(const char* execPath)
 {
+  // It is expected for our binding to be valid if we are here...
+  DbgAssert( m_binding.isValid() );
+  if (!m_binding.isValid())
+    return FabricCore::DFGExec();
+
 	FabricCore::DFGExec exec = m_binding.getExec();
 	if (execPath && execPath[0] != '\0')
 	{

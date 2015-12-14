@@ -51,7 +51,7 @@ public:
 private:
 	// From FabricTranslationLayer
 	int GetValueType() override { return TYPE_MESH; }
-	bool CloneFabricData(ParentClass* pMyClone) override { return true; }
+  bool CloneFabricData( ParentClass* pMyClone ) override;
 	void ResetPorts() override;
 
 	IOResult FabricModifier::LoadImpData(ILoad* iload) override;

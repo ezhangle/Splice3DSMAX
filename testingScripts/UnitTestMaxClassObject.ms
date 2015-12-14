@@ -37,5 +37,23 @@ tp.position = Point3 10 10 0
 sm.inMesh = tp
 FAssert (CompArray (GetTriMeshFaceCount sm) #(1530, 785)) "Bad Tri Count on Set Mesh"
 FAssert (CompBB sm 228.915) "Bad 5 size"
-	
+
+-- Fix normals
+sm.DFGInstPreset "Fabric.Compounds.PolygonMesh.Modify.RecomputeNormals" [647.000000,159.000000]   execPath:""
+sm.DFGMoveNodes #("RecomputeNormals") #([728.000000,188.000000])   execPath:""
+sm.DFGConnect "AddSphere.this" "RecomputeNormals.mesh"   execPath:""
+sm.DFGConnect "RecomputeNormals.result" "outputValue"   execPath:""
+
+-- Test clone
+maxOps.cloneNodes sm cloneType:#copy newNodes:&nnl
+nnl = nnl[1]
+move nnl [0,-93.7512,0]
+FAssert (CompArray (GetTriMeshFaceCount nnl) #(1530, 785)) "Bad Tri Count on Cloned Mesh"
+FAssert (CompBB nnl 228.915) "Bad Cloned size"
+
+-- Verify its updating correctly (and a proper clone, not an instance	
+nnl.radius = 20
+FAssert (CompBB nnl 213.466) "Bad Cloned size"
+FAssert (CompBB sm 228.915) "Bad Cloned size"
+
 print "all tests passed!"

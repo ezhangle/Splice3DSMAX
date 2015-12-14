@@ -18,4 +18,8 @@ const Matrix3 Matrix3::Identity(1);
 explicit_bool ifThisDoesntCompileUpdateFabricVersion;
 #endif
 
-const MSTR EMPTY(_M(""));
+const MSTR* EmptyStr()
+{
+  static MSTR empty( _M("") );
+  return &empty;
+}

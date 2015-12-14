@@ -44,15 +44,10 @@ extern TCHAR *GetString(int id);
 #define TO_CSTR(x) (x).ToCStr().data()
 #define TO_MSTR(x) MSTR::FromACP(x)
 
-extern const MSTR EMPTY;
-#define EMPTY_STR	EMPTY.data()
+extern const MSTR* EmptyStr();
 
 #pragma warning(push, 0)
 // Fabric includes
-//#include <DFGWrapper/DFGWrapper.h>
-//#include <DFGWrapper/Port.h>
-//using namespace FabricServices;
-
 #include <FabricCore.h>
 
 #include <FabricUI/DFG/DFGUICmdHandler.h>

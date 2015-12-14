@@ -53,7 +53,7 @@ private:
 
 	// From FabricTranslationLayer
 	int GetValueType()  override { return TYPE_MESH; }
-	bool CloneFabricData(ParentClass* pMyClone)  override { return true; }
+	bool CloneFabricData(ParentClass* pMyClone)  override;
 
 	IOResult SaveImpData(ISave* isave) override;
 	IOResult LoadImpData(ILoad* iload) override;

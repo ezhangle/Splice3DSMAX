@@ -178,6 +178,12 @@ void FabricModifier::ResetPorts()
 	MAXSPLICE_CATCH_END
 }
 
+bool FabricModifier::CloneFabricData( ParentClass* pMyClone )
+{
+  static_cast<FabricModifier*>(pMyClone)->m_inMeshPort = m_inMeshPort;
+  return true;
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 #define BASE_MESH_PORT_NAME		0x100

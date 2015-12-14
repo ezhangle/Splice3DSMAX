@@ -30,7 +30,7 @@ private:
 	int GetParentValueType() override { return TYPE_FLOAT; }
 
 
-	bool CloneFabricData(FabricTranslationLayer<Control, float>* pMyClone) { return true; } ; // No cloning for me...
+
 };
 
 class FabricControlFloatClassDesc : public DynPBCustAttrClassDesc {

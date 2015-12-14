@@ -198,7 +198,15 @@ void FabricWSModifier::ResetPorts()
 #define BASE_MESH_PORT_NAME		0x100
 #define BASE_TRANS_PORT_NAME	0x200
 
-IOResult FabricWSModifier::SaveImpData(ISave* isave)
+bool FabricWSModifier::CloneFabricData( ParentClass* pMyClone )
+{
+  FabricWSModifier* pMyCloneWSM = static_cast<FabricWSModifier*>(pMyClone);
+  pMyCloneWSM->m_baseMeshArgName = m_baseMeshArgName;
+  pMyCloneWSM->m_baseMeshTransformArgName = m_baseMeshTransformArgName;
+  return true;
+}
+
+IOResult FabricWSModifier::SaveImpData( ISave* isave )
 {
 	// Save additional values for derived values
 	isave->BeginChunk(BASE_MESH_PORT_NAME);

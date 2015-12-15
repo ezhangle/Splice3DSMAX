@@ -89,7 +89,6 @@ public:
 
 	virtual void Display( TimeValue t, ViewExp *vpt, int flags )
 	{
-    return;
 		MAXSPLICE_CATCH_BEGIN;
 
 		if (!AnyInstances())

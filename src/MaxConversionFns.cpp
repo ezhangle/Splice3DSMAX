@@ -435,41 +435,59 @@ void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 	// Do we have specified normals?
 	Mesh* pNonConstMesh = const_cast<Mesh*>(&param);
 	MeshNormalSpec* pNormalSpec = pNonConstMesh->GetSpecifiedNormals();
-#pragma message("TODO: Fix this!")
-	if (false && pNormalSpec != NULL && pNormalSpec->GetNumNormals() > 0)
+	if (pNormalSpec != NULL && pNormalSpec->GetNumNormals() > 0)
 	{
-		FabricCore::RTVal args[3];
-		args[0] = FabricCore::RTVal::ConstructString(client, "normals");
-
 		// 1 normal per index
 		int nNormals = pNormalSpec->GetNumNormals();
-		Point3* pNormalData = pNormalSpec->GetNormalArray();
-		std::vector<double> dNormalsDbls(nNormals * 3);
-		for (int i = 0; i < nNormals; i++)
-		{
-			for (int j = 0; j < 3; j++)
-				dNormalsDbls[(i * 3) + j] = pNormalData[i][j];
-		}
-		args[1] = FabricCore::RTVal::ConstructExternalArray(client, "Vec3", nNormals, &dNormalsDbls[0]);
+    MeshNormalFace* pFaces = pNormalSpec->GetFaceArray();
+    Point3* pNormalData = pNormalSpec->GetNormalArray();
+    int nFaces = pNormalSpec->GetNumFaces();
 
-		std::vector<UINT64> dNormalIndices;
-		int nFaces = pNormalSpec->GetNumFaces();
-		dNormalIndices.resize(nFaces * 3);
-		MeshNormalFace* pFaces = pNormalSpec->GetFaceArray();
-		for (int f = 0; f < nFaces; f++)
+    // We set normals 1-per-poly-point
+    std::vector<float> dNormals( nFaces * 3 * 3);
+    size_t toidx = 0;
+		for (int i = 0; i < nFaces; i++)
 		{
-			for (int j = 0; j < 3; j++)
-				dNormalIndices[f* 3 + j] = pFaces[f].GetNormalID(j);
-			//			memcpy(&dNormalIndices[f*3], pFaces[f].GetNormalIDArray(), sizeof(int) * 3);
+      for (int j = 0; j < 3; j++)
+      {
+        Point3& normal = pNormalData[pFaces[i].GetNormalID( j )];
+        dNormals[toidx++] = normal.x;
+        dNormals[toidx++] = normal.y;
+        dNormals[toidx++] = normal.z;
+      }
 		}
-		args[2] = FabricCore::RTVal::ConstructExternalArray(client, "UInt64", nFaces * 3, &dNormalIndices[0]);
-		rtMesh.callMethod("", "setAttributeFromPolygonPackedData", 3, args);
+    FabricCore::RTVal arg = FabricCore::RTVal::ConstructExternalArray(client, "Float32", nFaces * 3 * 3, &dNormals[0]);
+		rtMesh.callMethod("", "setNormalsFromExternalArray", 1, &arg );
 	}
 	else
 	{
 		rtMesh.callMethod("", "recomputePointNormals", 0, NULL);
 	}
 
+  // Send UV's
+  if (param.mapSupport( 1 ))
+  {
+    // Unpack UV's (explode by idx)
+    FabricCore::RTVal args[2];
+    std::vector<float> dUVs;
+    int uvIdx = 0;
+    dUVs.resize( param.numFaces * 3 * 2 );
+    for (size_t i = 0; i < param.numFaces; i++)
+    {
+      for (int j = 0; j < 3; j++)
+      {
+        int tVertIdx = param.tvFace[i].getTVert( j );
+        dUVs[uvIdx++] = param.tVerts[tVertIdx].x;
+        dUVs[uvIdx++] = param.tVerts[tVertIdx].y;
+      }
+    }
+
+    args[0] = FabricCore::RTVal::ConstructString( client, "uvs0" );
+    args[1] = FabricCore::RTVal::ConstructExternalArray( client, "Vec2", param.numFaces * 3, &dUVs[0] );
+
+    // Force create UV's
+    rtMesh.callMethod( "", "setAttributeFromPolygonPackedData", 2, args );
+  }
 	return;
 }
 
@@ -888,17 +906,6 @@ void FabricToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 		rtMesh.callMethod("", "getPointsAsExternalArray", 2, &args[0]);
 	}
 
-	// Get normals from rtMesh
-	Tab<Point3> rtNormals;
-	param.SpecifyNormals();
-	MeshNormalSpec* pNormalSpec = param.GetSpecifiedNormals();
-	rtNormals.SetCount(nbIndices);
-	{
-		std::vector<FabricCore::RTVal> args(1);
-		args[0] = FabricCore::RTVal::ConstructExternalArray(client, "Float32", nbIndices * 3, rtNormals.Addr(0));
-		rtMesh.callMethod("", "getNormalsAsExternalArray", 1, &args[0]);
-	}
-
 	// Init UV's
 	if(bHasUVs)
 	{
@@ -928,6 +935,19 @@ void FabricToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 		args[1] = FabricCore::RTVal::ConstructExternalArray(client, "UInt32", nbIndices, indices.Addr(0));
 		rtMesh.callMethod("", "getTopologyAsCountsIndicesExternalArrays", 2, &args[0]);
 	}
+
+  //////////////////////////////////////////////////////////////////////////
+  // Get normals from rtMesh
+  Tab<Point3> rtNormals;
+  param.SpecifyNormals();
+  MeshNormalSpec* pNormalSpec = param.GetSpecifiedNormals();
+  rtNormals.SetCount( nbIndices );
+  {
+    std::vector<FabricCore::RTVal> args( 1 );
+    args[0] = FabricCore::RTVal::ConstructExternalArray( client, "Float32", nbIndices * 3, rtNormals.Addr( 0 ) );
+    rtMesh.callMethod( "", "getNormalsAsExternalArray", 1, &args[0] );
+  }
+
 	//////////////////////////////////////////////////////////////////////////
 	// Begin conversion, pushing values from rtMesh to our max Mesh
 	// We will convert from polygons to tri's, so count
@@ -1028,7 +1048,7 @@ void FabricToMaxValue(const FabricCore::RTVal& rtv, Mesh& param)
 
 	// Validate normals.
 	pNormalSpec->SetAllExplicit();
-	pNormalSpec->CheckAllData(nTriFaces);
+	//pNormalSpec->CheckAllData(nTriFaces);
 
 	//if(rtMesh.callMethod("Boolean", "hasVertexColors", 0, 0).getBoolean())
 	//{

@@ -5,6 +5,7 @@
 
 #include "StdAfx.h"
 #include "FabricModifier.h"
+#include <MeshNormalSpec.h>
 
 
 
@@ -87,6 +88,13 @@ void FabricModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os,
 
 		// Evaluate the graph, get our results
 		pTriObj->GetMesh() = Evaluate(t, ivValid);
+
+    MeshNormalSpec* pNormalSpec = pTriObj->GetMesh().GetSpecifiedNormals();
+    // Indicate to the system that we're supporting the specified normals.
+    pNormalSpec->SetFlag( MESH_NORMAL_MODIFIER_SUPPORT );
+
+    // Indicate to the system that the non-explicit normals need recomputing:
+    pNormalSpec->ClearFlag( MESH_NORMAL_NORMALS_COMPUTED );
 	}
 
 	// We may have changed any of these attributes.

@@ -731,6 +731,9 @@ void FabricTranslationLayer<TBaseClass, TResultType>::ResetPorts()
 template<typename TBaseClass, typename TResultType>
 int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam(const char* argName)
 {
+  if (argName == nullptr || strcmp( argName, "" ) == 0)
+    return -1;
+
   // Technically we shouldnt call functions that can trigger
   // calling a sync, but in this case its just easier to call
   // SetPortParamID (which recurses to this function) than

@@ -44,7 +44,7 @@ category:"FabricEngine"
 internalCategory:"FabricEngine"
 autoUndoEnabled:false
 (
-  shellLaunch "http://documentation.fabric-engine.com/FabricEngine/latest/HTML/Fabric/" ""
+  shellLaunch "http://docs.fabric-engine.com/FabricEngine/latest/HTML/" ""
 )
 __FE_MENU_NAME = "Fabric"
 

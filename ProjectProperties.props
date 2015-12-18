@@ -70,7 +70,11 @@
 	<PropertyGroup Condition="'$(MaxVersion)' &gt; '2014'">
 		<PlatformToolset>v110</PlatformToolset>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(MaxVersion)' &gt; '2015'"><!-- Tmp overwrite VS version, until FE supplies libraries we can link vs earlier VS versions-->
+	<PropertyGroup Condition="'$(MaxVersion)' &gt; '2015'">
+		<PlatformToolset>v120</PlatformToolset>
+	</PropertyGroup>
+
+	<PropertyGroup><!-- Tmp overwrite VS version, until FE supplies libraries we can link vs earlier VS versions-->
 		<PlatformToolset>v120</PlatformToolset>
 	</PropertyGroup>
 	

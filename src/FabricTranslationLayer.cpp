@@ -1145,6 +1145,12 @@ FabricCore::Client& GetClient(bool doCreate/*=true*/, const char* contexId)
 			memset(&options, 0, sizeof(options));
 			options.optimizationType = FabricCore::ClientOptimizationType_Background;
 			options.guarded = 1;
+
+      // Make sure we don't consume a interactive license if we are render node
+      options.licenseType = GetCOREInterface()->IsNetworkLicense() ?
+        FabricCore::ClientLicenseType_Compute :
+        FabricCore::ClientLicenseType_Interactive;
+
 			s_client = FabricCore::Client(pCallback, nullptr, &options);
 		}
 	}

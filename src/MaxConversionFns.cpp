@@ -438,8 +438,7 @@ void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 	if (pNormalSpec != NULL && pNormalSpec->GetNumNormals() > 0)
 	{
 		// 1 normal per index
-		int nNormals = pNormalSpec->GetNumNormals();
-    MeshNormalFace* pFaces = pNormalSpec->GetFaceArray();
+	  MeshNormalFace* pFaces = pNormalSpec->GetFaceArray();
     Point3* pNormalData = pNormalSpec->GetNormalArray();
     int nFaces = pNormalSpec->GetNumFaces();
 

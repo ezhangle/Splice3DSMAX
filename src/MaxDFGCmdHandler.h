@@ -161,13 +161,13 @@ public:
 		QPointF pos
 		) override;
 
-	void dfgDoSetNodeTitle(
+	void dfgDoSetTitle(
 		FabricCore::DFGBinding const &binding,
 		FTL::CStrRef execPath,
 		FabricCore::DFGExec const &exec,
 		FTL::CStrRef nodeName,
 		FTL::CStrRef newTitle
-		) override;
+		);
 
 	void dfgDoSetNodeComment(
 		FabricCore::DFGBinding const &binding,

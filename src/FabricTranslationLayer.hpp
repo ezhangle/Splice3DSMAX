@@ -998,7 +998,9 @@ bool FabricTranslationLayer<TBaseClass, TResultType>::GraphCanEvaluate()
   if (!rootExec.isValid())
     return false;
 
-  return (rootExec.getErrorCount() == 0);
+  FabricCore::String errors = rootExec.getErrors( false );
+  // An empty error string is "[]"
+  return (errors.getLength() <= 2);
 }
 
 template<typename TBaseClass, typename TResultType>

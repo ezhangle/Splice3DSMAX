@@ -196,8 +196,12 @@ std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding
 
 	if (isPossibleMaxPort)
 	{
+    // It appears that the result will be NULL if called from MxS, and non-NULL
+    // if called from the UI.  It's very difficult to tell what the reason for this
+    // difference is, so here we just detect if the call returned the new ports name
+    const char* resPortName = res.empty() ? desiredPortName.data() : res.c_str();
 		// If we have add a new 'in' port, by default we create a matching 3ds max port.
-		m_pTranslationLayer->SyncMetaDataFromPortToParam(res.c_str());
+		m_pTranslationLayer->SyncMetaDataFromPortToParam( resPortName );
 	}
 	return res;
 }
@@ -283,11 +287,11 @@ void MaxDFGCmdHandler::dfgDoAddBackDrop(FabricCore::DFGBinding const &binding, F
 	return __super::dfgDoAddBackDrop(binding, execPath, exec, title, pos);
 }
 
-void MaxDFGCmdHandler::dfgDoSetNodeTitle(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef nodeName, FTL::CStrRef newTitle)
+void MaxDFGCmdHandler::dfgDoSetTitle(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef nodeName, FTL::CStrRef newTitle)
 {
-	EMIT2(_M("DFGSetNodeTitle"), nodeName, newTitle, execPath);
-	DFGHoldActions hold(_M("DFG Set Node Title"));
-	return __super::dfgDoSetNodeTitle(binding, execPath, exec, nodeName, newTitle);
+	EMIT2(_M("DFGSetTitle"), nodeName, newTitle, execPath);
+	DFGHoldActions hold(_M("DFG Set Title"));
+	return __super::dfgDoSetTitle(binding, execPath, exec, newTitle);
 }
 
 void MaxDFGCmdHandler::dfgDoSetNodeComment(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef nodeName, FTL::CStrRef comment)

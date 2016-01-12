@@ -287,9 +287,9 @@ void MaxDFGCmdHandler::dfgDoAddBackDrop(FabricCore::DFGBinding const &binding, F
 	return __super::dfgDoAddBackDrop(binding, execPath, exec, title, pos);
 }
 
-void MaxDFGCmdHandler::dfgDoSetTitle(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef nodeName, FTL::CStrRef newTitle)
+void MaxDFGCmdHandler::dfgDoSetTitle(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef newTitle)
 {
-	EMIT2(_M("DFGSetTitle"), nodeName, newTitle, execPath);
+	EMIT1(_M("DFGSetTitle"), newTitle, execPath);
 	DFGHoldActions hold(_M("DFG Set Title"));
 	return __super::dfgDoSetTitle(binding, execPath, exec, newTitle);
 }

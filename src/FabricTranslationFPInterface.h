@@ -127,7 +127,7 @@ public:
 		FN_3(fn_dfgImplodeNodes,	TYPE_TSTR_BV,		DFGImplodeNodes,		TYPE_TSTR_TAB_BV,	TYPE_TSTR, TYPE_TSTR);
 		FN_2(fn_dfgExplodeNodes,	TYPE_TSTR_TAB_BV,	DFGExplodeNodes,		TYPE_TSTR,		TYPE_TSTR);
 		VFN_3(fn_dfgAddBackdrop,						DFGAddBackdrop,			TYPE_TSTR,		TYPE_POINT2, TYPE_TSTR);
-		VFN_3(fn_dfgSetTitle,						DFGSetTitle,		TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
+		VFN_2(fn_dfgSetTitle,						DFGSetTitle,		TYPE_TSTR,		TYPE_TSTR);
 		VFN_3(fn_dfgSetNodeComment,						DFGSetNodeComment,		TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
 		VFN_2(fn_dfgSetCode,							DFGSetCode,				TYPE_TSTR,		TYPE_TSTR);
 		FN_3(fn_dfgRenamePort,		TYPE_TSTR_BV,		DFGRenamePort,			TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
@@ -199,7 +199,7 @@ public:
 	MSTR DFGImplodeNodes(Tab<TSTR*> nodeNames, const MSTR& desiredNewNodeName, const MSTR& execPath);
 	Tab<TSTR*> DFGExplodeNodes(const MSTR& nodeName, const MSTR& execPath);
 	void DFGAddBackdrop(const MSTR& title, Point2 pos, const MSTR& execPath);
-	void DFGSetTitle(const MSTR& nodeName, const MSTR& newTitle, const MSTR& execPath);
+	void DFGSetTitle(const MSTR& newTitle, const MSTR& execPath);
 	void DFGSetNodeComment(const MSTR& nodeName, const MSTR& comment, const MSTR& execPath);
 	void DFGSetCode(const MSTR& code, const MSTR& execPath);
 	MSTR DFGRenamePort(const MSTR& oldName, const MSTR& newDesiredName, const MSTR& execPath);
@@ -449,8 +449,7 @@ FPInterfaceDesc* GetDescriptor()
 				_M("pos"), 0, TYPE_POINT2, 
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				
-			FabricTranslationFPInterface::fn_dfgSetTitle, _T("DFGSetTitle"), 0, 0, 0, 3,
-				_M("nodeName"), 0, TYPE_TSTR,
+			FabricTranslationFPInterface::fn_dfgSetTitle, _T("DFGSetTitle"), 0, 0, 0, 2,
 				_M("newTitle"), 0, TYPE_TSTR,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				

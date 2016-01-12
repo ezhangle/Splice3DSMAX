@@ -197,10 +197,10 @@ void FabricTranslationFPInterface::DFGAddBackdrop(const MSTR& title, Point2 pos,
 	return m_fabricCmdHandler.dfgDoAddBackDrop(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(title), Convert(pos));
 	MAXSPLICE_CATCH_END
 }
-void FabricTranslationFPInterface::DFGSetTitle(const MSTR& nodeName, const MSTR& newTitle, const MSTR& execPath)
+void FabricTranslationFPInterface::DFGSetTitle(const MSTR& newTitle, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoSetTitle(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(nodeName), TO_CSTR(newTitle));
+	return m_fabricCmdHandler.dfgDoSetTitle(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(newTitle));
 	MAXSPLICE_CATCH_END
 }
 void FabricTranslationFPInterface::DFGSetNodeComment(const MSTR& nodeName, const MSTR& comment, const MSTR& execPath)

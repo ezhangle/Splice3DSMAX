@@ -5,6 +5,10 @@
 		<IsDebug>$([System.Convert]::ToString( $([System.Text.RegularExpressions.Regex]::IsMatch($(Configuration), '[Dd]ebug'))))</IsDebug>
 		<IsRelease>$([System.Convert]::ToString( $([System.Text.RegularExpressions.Regex]::IsMatch($(Configuration), '[Rr]elease'))))</IsRelease>
 
+		<BuildType>FixMe</BuildType>
+		<BuildType Condition="'$(IsDebug)' == 'True'">Debug</BuildType>
+		<BuildType Condition="'$(IsRelease)' == 'True'">Release</BuildType>
+
 		<!-- variable contains max version -->
 		<MaxVersion>0</MaxVersion>
 		<MaxVersion Condition="'$(Configuration.Contains(2012))'">2012</MaxVersion>
@@ -37,8 +41,7 @@
 		<IsUnicode>true</IsUnicode>
 		<IsUnicode Condition="'$(MaxVersion)' &lt; '2013'">false</IsUnicode>
 
-		<FabricOutDir>$(FABRIC_DIR)\DCCIntegrations\Fabric3dsmax$(MaxVersion)\</FabricOutDir>
-
+		
 		<QtSuffix>4</QtSuffix>
 
 	</PropertyGroup>
@@ -47,12 +50,14 @@
 	<PropertyGroup Label="Configuration">
 		<UseOfMfc>false</UseOfMfc>
 		<UseOfAtl>false</UseOfAtl>
-		<IntDir>build\Fabric3dsmax\obj\$(Configuration)\</IntDir>
-		<OutDir>$(FabricOutDir)plugin\</OutDir>
-		<TargetExt>.dlu</TargetExt>
+		<ProjectDir Condition=" '$(ProjectDir)' == '' ">$(MSBuildProjectDirectory)\</ProjectDir>
+		<IntDir>$(ProjectDir)build\obj\$(BuildType)\$(MaxVersion)\</IntDir>
+		<OutDir>$(ProjectDir)build\$(BuildType)\Fabric3dsmax$(MaxVersion)\plugin\</OutDir>
+		<PackageDir>$(ProjectDir)\stage\Fabric3dsmax$(MaxVersion)\</PackageDir>
 		<ConfigurationType>DynamicLibrary</ConfigurationType>
 		<UseDebugLibraries>false</UseDebugLibraries>
 		<ReferencePath>$(MaxSDKPath)include/;$(QT_DIR)include/</ReferencePath>
+		<TargetExt>.dlu</TargetExt>
 	</PropertyGroup>
 
 	<!-- Rest Unicode values -->
@@ -77,11 +82,25 @@
 	<PropertyGroup><!-- Tmp overwrite VS version, until FE supplies libraries we can link vs earlier VS versions-->
 		<PlatformToolset>v120</PlatformToolset>
 	</PropertyGroup>
+
+	<ImportGroup Label="PropertySheets">
+		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	</ImportGroup>
+
+	<PropertyGroup><!-- Reset our extension, as Default.Props overrides it -->
+		<TargetExt>.dlu</TargetExt>
+	</PropertyGroup>
+	
+	<ImportGroup Label="PropertySheets">
+		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	</ImportGroup>
+
 	
 	<ItemDefinitionGroup>
 		<!-- default values for compiler -->
 		<ClCompile>
-			<AdditionalIncludeDirectories>$(FABRIC_DIR)include;$(FABRIC_DIR)include\FabricServices;$(QT_DIR)include;$(QT_DIR)include/QtGui;$(MaxSDKPath)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;$(FABRIC_DIR)\include\FabricServices;$(QT_DIR)include;$(QT_DIR)include/QtGui;$(MaxSDKPath)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<StringPooling>true</StringPooling>
@@ -126,32 +145,24 @@
 			<AdditionalLibraryDirectories>$(QT_DIR)lib;$(FABRIC_DIR)\lib;$(BOOST_DIR);$(MaxSDKLibPath);$(SolutionDir)qt-solutions\qtwinmigrate\lib</AdditionalLibraryDirectories>
 		</Link>
 	</ItemDefinitionGroup>
-	<ImportGroup Label="PropertySheets">
-		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-	</ImportGroup>
-
-  <!-- Override the MS props file settings -->
-  <PropertyGroup>
-	<TargetExt>.dlo</TargetExt>
-  </PropertyGroup>
 
   <ItemDefinitionGroup>
 	<PostBuildEvent>
-	  <Command>call "$(ProjectDir)/GenerateMaxLauncher.bat" "$(FabricOutDir)/" "$(MaxVersion)"
-copy "$(ProjectDir)SetupMenu.ms" "$(FabricOutDir)" /Y
-xcopy "$(ProjectDir)testingScripts" "$(FabricOutDir)samples" /E /I /Y
-xcopy "$(ProjectDir)qt-solutions\qtwinmigrate\lib\QtSolutions_MFCMigrationFramework-head.dll" "$(FABRIC_DIR)\lib" /E /I /Y
-call "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
+	  <Command>CALL "$(ProjectDir)/GenerateMaxLauncher.bat" "$(PackageDir)" "$(MaxVersion)"
+copy "$(ProjectDir)SetupMenu.ms" "$(PackageDir)" /Y
+xcopy "$(ProjectDir)testingScripts" "$(PackageDir)samples" /E /I /Y
+MKDIR "$(PackageDir)plugin"
+MKLINK /H "$(PackageDir)plugin\QtSolutions_MFCMigrationFramework-head.dll" "$(ProjectDir)qt-solutions\qtwinmigrate\lib\QtSolutions_MFCMigrationFramework-head.dll"
+MKLINK /H "$(PackageDir)plugin\$(TargetFileName)" "$(TargetPath)"
+CALL "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
 	  </Command>
 	</PostBuildEvent>
   </ItemDefinitionGroup>
   <PropertyGroup>
 	<LocalDebuggerCommandArguments>-vo -p "$(ProjectDir)/build/Generated.Plugin.Fabric.ini"</LocalDebuggerCommandArguments>
 	<LocalDebuggerCommand>$(MaxPath)\3dsmax.exe</LocalDebuggerCommand>
-	<LocalDebuggerEnvironment>FABRIC3DSMAXDIR=$(FabricOutDir)
-PATH=$(PATH);$(FABRIC_DIR)\lib
+	<LocalDebuggerEnvironment>FABRIC3DSMAXDIR=$(PackageDir)
+PATH=$(PATH);$(FABRIC_DIR)\lib;$(PackageDir)plugin\
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>
 </Project>

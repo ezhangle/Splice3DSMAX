@@ -12,6 +12,7 @@ set LAUNCHER="%TARGETDIR%3dsmax%MAXVERSION%.bat"
 
 echo Writing: %LAUNCHER%
 
+IF NOT EXIST "%TARGETDIR%" ( MKDIR "%TARGETDIR%")
 REM Clear the contents of the file if it already exists. 
 @echo.>  %LAUNCHER%
 
@@ -40,17 +41,28 @@ REM Clear the contents of the file if it already exists.
 @echo )>> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo set FABRIC3DSMAXDIR=%%~dp0>> %LAUNCHER%
-@echo set FABRIC_DIR=%%FABRIC3DSMAXDIR%%..\..\>> %LAUNCHER%
+@echo if "%%FABRIC_DIR%%" == "" ( >> %LAUNCHER%
+@echo   set FABRIC_DIR=%%FABRIC3DSMAXDIR%%..\..\>> %LAUNCHER%
 @echo.>> %LAUNCHER%
-@echo REM Ensure that the Fabric plugin will be able to find the extensions >> %LAUNCHER%
-@echo set FABRIC_EXTS_PATH=%%FABRIC_EXTS_PATH%%;%%FABRIC_DIR%%Exts>> %LAUNCHER%
+@echo   REM Ensure that the Fabric plugin will be able to find the extensions >> %LAUNCHER%
+@echo   set FABRIC_EXTS_PATH=%%FABRIC_EXTS_PATH%%;%%FABRIC_DIR%%Exts>> %LAUNCHER%
+@echo )>> %LAUNCHER%
+@echo.>> %LAUNCHER%
+@echo IF NOT EXIST "%%FABRIC_DIR%%\bin" GOTO NO_FABRICDIR>> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo REM Enable the system to find the FabricCore and Scintilla dlls>> %LAUNCHER%
-@echo set PATH=%%PATH%%;%%FABRIC3DSMAXDIR%%..\..\lib >> %LAUNCHER%
+@echo set PATH=%%PATH%%;%%FABRIC_DIR%%bin;%%FABRIC3DSMAXDIR%%\plugin>> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo REM Launch Max>> %LAUNCHER%
-@echo call "%%ADSK_3DSMAX_x64_%MAXVERSION%%%\3dsmax.exe" -vo -p "%%FABRIC3DSMAXDIR%%/Generated.Plugin.Fabric.ini">> %LAUNCHER%
+@echo START "3dsMax - Fabric" "%%ADSK_3DSMAX_x64_%MAXVERSION%%%\3dsmax.exe" -vo -p "%%FABRIC3DSMAXDIR%%/Generated.Plugin.Fabric.ini">> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo rem echo on>> %LAUNCHER%
+@echo GOTO END>> %LAUNCHER%
+@echo :NO_FABRICDIR>> %LAUNCHER%
+@echo ECHO FABRIC_DIR not found.  Please either set the FabricDir before running this script, or place the >> %LAUNCHER%
+@echo ECHO Fabric4Max installation in the DCCIntegrations folder under the Fabric install:>> %LAUNCHER%
+@echo ECHO [FABRIC_DIR]\DCCIntegrations\Fabric4Max\[thisscript.bat]>> %LAUNCHER%
+@echo pause>> %LAUNCHER%
+@echo.>> %LAUNCHER%
+@echo :END>> %LAUNCHER%
 
-pause.

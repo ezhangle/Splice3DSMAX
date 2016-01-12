@@ -7,12 +7,12 @@ nodeName = sm.name
 initTriCounts = #(506, 255)
 
 -- Create a sphere
-sm.DFGInstPreset "Fabric.Exts.Geometry.Func.AddSphere" [487.000000,183.000000]   execPath:""
-sm.DFGInstPreset "Fabric.Exts.Geometry.PolygonMesh.EmptyPolygonMesh" [56.000000,178.000000]   execPath:""
-sm.DFGConnect "EmptyPolygonMesh.mesh" "AddSphere.this"   execPath:""
-sm.DFGAddPort "radius" 0 "Scalar" portToConnect:"AddSphere.radius" extDep:"" metaData:"" execPath:""
-sm.DFGAddPort "detail" 0 "Size" portToConnect:"AddSphere.detail" extDep:"" metaData:"" execPath:""
-sm.DFGConnect "AddSphere.this" "outputValue"   execPath:""
+as1 = sm.DFGInstPreset "Fabric.Exts.Geometry.Func.AddSphere" [487.000000,183.000000]   execPath:""
+epm1 = sm.DFGInstPreset "Fabric.Exts.Geometry.PolygonMesh.EmptyPolygonMesh" [56.000000,178.000000]   execPath:""
+sm.DFGConnect (epm1 + ".mesh") (as1 + ".this")  execPath:""
+sm.DFGAddPort "radius" 0 "Scalar" portToConnect:(as1 + ".radius") extDep:"" metaData:"" execPath:""
+sm.DFGAddPort "detail" 0 "Size" portToConnect:(as1 + ".detail") extDep:"" metaData:"" execPath:""
+sm.DFGConnect (as1 + ".this") "outputValue"   execPath:""
 
 sm.detail = 10
 sm.radius= 32
@@ -25,8 +25,8 @@ sm.radius = 50
 FAssert (CompBB sm 172.802) "Bad 5 size"
 
 -- Change input type for PolyMesh from none to INode
-sm.DFGAddPort "this" 0 "PolygonMesh" portToConnect:"AddSphere.this"
-sm.DFGRemoveNodes #("EmptyPolygonMesh")
+sm.DFGAddPort "this" 0 "PolygonMesh" portToConnect:(as1 + ".this")
+sm.DFGRemoveNodes #(epm1)
 sm.DFGRenamePort "this" "inMesh"
 
 -- Pipe in a teapot to copy
@@ -39,10 +39,10 @@ FAssert (CompArray (GetTriMeshFaceCount sm) #(1530, 785)) "Bad Tri Count on Set 
 FAssert (CompBB sm 228.915) "Bad 5 size"
 
 -- Fix normals
-sm.DFGInstPreset "Fabric.Compounds.PolygonMesh.Modify.RecomputeNormals" [647.000000,159.000000]   execPath:""
-sm.DFGMoveNodes #("RecomputeNormals") #([728.000000,188.000000])   execPath:""
-sm.DFGConnect "AddSphere.this" "RecomputeNormals.mesh"   execPath:""
-sm.DFGConnect "RecomputeNormals.result" "outputValue"   execPath:""
+rc1 = sm.DFGInstPreset "Fabric.Compounds.PolygonMesh.Modify.RecomputeNormals" [647.000000,159.000000]   execPath:""
+sm.DFGMoveNodes #(rc1) #([728.000000,188.000000])   execPath:""
+sm.DFGConnect (as1 + ".this") (rc1 + ".mesh")   execPath:""
+sm.DFGConnect (rc1 + ".result") "outputValue"   execPath:""
 
 -- Test clone
 maxOps.cloneNodes sm cloneType:#copy newNodes:&nnl

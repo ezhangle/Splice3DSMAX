@@ -20,7 +20,11 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 for /f "tokens=*" %%i in ('WHERE nmake') do set NMAKE_PATH=%%i
 If "%NMAKE_PATH%"=="%NMAKE_PATH:amd64=%" (
-    echo ERROR: Win32 nmake detected.  We only support x64 versions, please start the right version of VS Command Prompt 
+    echo ERROR: Win32 nmake detected.  We only support x64 versions, please start the 2013 x64 VS Command Prompt 
+    GOTO ERROR_EXIT
+)
+If "%NMAKE_PATH%"=="%NMAKE_PATH:12.0=%" (
+    echo ERROR: We require the VS2013 version of nmake.  We only support x64 versions, please start the 2013 x64 VS Command Prompt 
     GOTO ERROR_EXIT
 )
 ECHO Found nmake...
@@ -59,4 +63,4 @@ echo -- Build Successful
 :ERROR_EXIT
 pause
 :EOF
-REM endlocal
+endlocal

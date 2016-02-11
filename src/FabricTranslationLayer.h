@@ -186,7 +186,7 @@ public:
 	// Returns true if work was performed (initialization was
 	// necessary) or false if no work was performed
 	// (was already initialized).
-	bool Init(BOOL loading);
+	bool Init();
 
 #pragma region Max-required functions
 	// These functions allow a uniform exposure of our

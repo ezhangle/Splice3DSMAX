@@ -23,21 +23,6 @@ MaxDFGWidget::~MaxDFGWidget()
 {
 }
 
-
-void MaxDFGWidget::onValueChanged()
-{
-//	if (theHold.Holding())
-
-}
-
-void MaxDFGWidget::onStructureChanged()
-{
-	//if (theHold.Holding())
-	//	theHold.Accept(_M("Fabric Structure Changed"));
-}
-
-
-
 void MaxDFGWidget::onUndo()
 {
 	//if (theHold.Holding())

@@ -21,8 +21,6 @@ public:
 	~MaxDFGWidget();
 
 public slots:
-	virtual void onValueChanged() override;
-	virtual void onStructureChanged() override;
 	virtual void onUndo() override;
 	virtual void onRedo() override;
 

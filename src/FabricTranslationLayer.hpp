@@ -31,7 +31,7 @@ FabricTranslationLayer<TBaseClass, TResultType>::FabricTranslationLayer(BOOL loa
   InstanceCreated();
 
   if (!loading)
-    Init(loading);
+    Init();
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -51,30 +51,24 @@ FabricTranslationLayer<TBaseClass, TResultType>::~FabricTranslationLayer()
 }
 
 template<typename TBaseClass, typename TResultType>
-bool FabricTranslationLayer<TBaseClass, TResultType>::Init(BOOL loading)
+bool FabricTranslationLayer<TBaseClass, TResultType>::Init()
 {
   MAXSPLICE_CATCH_BEGIN;
 
-  //if (!loading)
-  {
-    // create an empty binding
-    FabricCore::DFGBinding binding = GetHost().createBindingToNewGraph();
-    SetBinding(binding);
+  // create an empty binding
+  FabricCore::DFGBinding binding = GetHost().createBindingToNewGraph();
+  SetBinding( binding );
 
-    // Enforce loading the Util extension to ensure that EvalContext is available to us
-    GetClient().loadExtension("Util", "", false);
-
-    // given a scene base object or modifier, look for a referencing node via successive 
-    // reference enumerations up through the ref hierarchy untill we find an inode.
-    MSTR name;
-    INode* node = GetCOREInterface7()->FindNodeFromBaseObject(m_pblock);
-    if (node)
-      name = node->GetName();
-    else
-      name = _M("3dsMaxDFGGraph");
-    CStr cName = name.ToCStr();
-    m_binding.getExec().setTitle(cName.data());
-  }
+  // given a scene base object or modifier, look for a referencing node via successive 
+  // reference enumerations up through the ref hierarchy untill we find an inode.
+  MSTR name;
+  INode* node = GetCOREInterface7()->FindNodeFromBaseObject( m_pblock );
+  if (node)
+	  name = node->GetName();
+  else
+	  name = _M( "3dsMaxDFGGraph" );
+  CStr cName = name.ToCStr();
+  m_binding.getExec().setTitle( cName.data() );
 
   MAXSPLICE_CATCH_RETURN(false);
 
@@ -1009,6 +1003,10 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SetupEvalContext(TimeValue
   FabricCore::Client& client = GetClient();
   if (!m_evalContext.isValid())
   {
+
+	// Enforce loading the Util extension to ensure that EvalContext is available to us
+	GetClient().loadExtension( "Util", "", false );
+
     m_evalContext = FabricCore::RTVal::Create(client, "EvalContext", 0, 0);
     m_evalContext = m_evalContext.callMethod("EvalContext", "getInstance", 0, 0);
     m_evalContext.setMember("host", FabricCore::RTVal::ConstructString(client, "3dsMax"));

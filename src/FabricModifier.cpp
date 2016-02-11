@@ -27,7 +27,7 @@ void FabricModifier::RefAdded(RefMakerHandle rm)
 {
 	if (!m_binding.isValid())
 	{
-		Init(false);
+		Init();
 		ResetPorts();
 	}
 }

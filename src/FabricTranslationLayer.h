@@ -47,7 +47,7 @@ class DynPBCustAttrClassDesc;
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const MCHAR* sName, ParamID desiredId = -1);
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName);
 void SetMaxParamName(ParamBlockDesc2* pDesc, ParamID pid, const MCHAR* name);
-void SetMaxParamFromFabric(FabricTranslationFPInterface* pOwner, ParamID pid, const char* argName);
+void SetMaxParamFromFabric( IParamBlock2* pblock, ParamID pid, FabricCore::DFGBinding& binding, const char* argName );
 
 /*! Generate a Win32 dialog for the passed pblok
 	\param pblock - The list of parameters to generate UI for

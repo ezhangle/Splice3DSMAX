@@ -780,6 +780,7 @@ int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
       ParamBlockDesc2* pNewDesc = CopyPBDescriptor();
       paramId = AddMaxParameter(pNewDesc, maxType, argName);
       CreateParamBlock(pNewDesc);
+	  SetMaxParamFromFabric( m_pblock, paramId, m_binding, argName );
     }
     else
     {

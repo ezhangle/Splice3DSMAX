@@ -27,6 +27,7 @@ class DockableWindow
 public:
 
 	enum DockFlags {
+		None = 0,
 		Top = 1 << 0,
 		Bottom = 1 << 1,
 		Left = 1 << 2,
@@ -40,7 +41,7 @@ public:
 
 	static DockableWindow* Create(MCHAR* name, 
 								   FabricTranslationFPInterface* owner, 
-								   DockFlags pos = All,
+								   DockFlags pos = None,
 								   DWORD initialPos = 0,
 								   bool isDockedInitially = false, 
 								   bool resizable = true,

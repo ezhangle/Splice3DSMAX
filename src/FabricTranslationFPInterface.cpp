@@ -31,9 +31,7 @@ BOOL FabricTranslationFPInterface::ShowDFGGraphEditor()
 	m_pDFGWidgetWindow = DockableWindow::Create(_T("Fabric DFG"), this);
 	HWND h = m_pDFGWidgetWindow->GetHWND();
 	QWinWidget* dlg = new QWinWidget(h);
-	MaxDFGWidget* pWidget = new MaxDFGWidget(dlg, GetBinding(), &m_fabricCmdHandler);
-	QObject* aParent = pWidget->parent();
-	const QObjectList children = dlg->children();
+	/*MaxDFGWidget* pWidget = */new MaxDFGWidget(dlg, GetBinding(), &m_fabricCmdHandler);
 
 	m_pDFGWidgetWindow->SetWidget(dlg);
 	return TRUE;

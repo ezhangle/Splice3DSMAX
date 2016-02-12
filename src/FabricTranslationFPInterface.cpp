@@ -8,7 +8,6 @@
 #include "DockableWidget.h"
 
 #include "../qt-solutions/qtwinmigrate/src/qwinwidget.h"
-#include "../qt-solutions/qtwinmigrate/src/QMfcApp"
 #include "Fabric3dsmax.h"
 
 FabricTranslationFPInterface::FabricTranslationFPInterface()
@@ -24,15 +23,17 @@ FabricTranslationFPInterface::~FabricTranslationFPInterface()
 	CloseDFGGraphEditor();
 }
 
+
 BOOL FabricTranslationFPInterface::ShowDFGGraphEditor()
 {
-	SAFE_DELETE(m_pDFGWidgetWindow);
+	CloseDFGGraphEditor();
 
-	/*bool ownApplication = */ QMfcApp::pluginInstance(hInstance);	
-	m_pDFGWidgetWindow = DockableWindow::Create(_T("Fabric DFG"));
+	m_pDFGWidgetWindow = DockableWindow::Create(_T("Fabric DFG"), this);
 	HWND h = m_pDFGWidgetWindow->GetHWND();
 	QWinWidget* dlg = new QWinWidget(h);
-	/*MaxDFGWidget* pWidget =*/ new MaxDFGWidget(dlg, GetBinding(), &m_fabricCmdHandler);
+	MaxDFGWidget* pWidget = new MaxDFGWidget(dlg, GetBinding(), &m_fabricCmdHandler);
+	QObject* aParent = pWidget->parent();
+	const QObjectList children = dlg->children();
 
 	m_pDFGWidgetWindow->SetWidget(dlg);
 	return TRUE;

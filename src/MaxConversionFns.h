@@ -71,6 +71,9 @@ void MaxValuesToFabric(FabricCore::DFGBinding & binding, const char* argName, Ti
 	bool canUndo = UndoOn();
 
 	FabricCore::RTVal rtVal = binding.getArgValue(argName);
+	if (!rtVal.isValid())
+		return;
+
 	if (rtVal.isArray())
 	{
 		rtVal.setArraySize(nParams);

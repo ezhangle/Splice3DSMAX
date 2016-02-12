@@ -12,8 +12,9 @@ class DockableWindow
 	ICUIFrame* frame;
 	QWidget* w;
 	CUIPosData posData;
+	FabricTranslationFPInterface* m_owner;
 
-	DockableWindow(HWND hwndCuiFrame);
+	DockableWindow(HWND hwndCuiFrame, FabricTranslationFPInterface* owner);
 
 	void ResizeFrameToContent();
 
@@ -37,8 +38,13 @@ public:
 
 	virtual ~DockableWindow();
 
-	static DockableWindow* Create(MCHAR* name, DockFlags pos = All, DWORD initialPos = 0,
-		bool isDockedInitially = false, bool resizable = true, bool visible = true);
+	static DockableWindow* Create(MCHAR* name, 
+								   FabricTranslationFPInterface* owner, 
+								   DockFlags pos = All,
+								   DWORD initialPos = 0,
+								   bool isDockedInitially = false, 
+								   bool resizable = true,
+								   bool visible = true);
 
 	virtual int ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam);
 

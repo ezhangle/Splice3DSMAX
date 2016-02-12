@@ -2,20 +2,36 @@
 #include "DockableWidget.h"
 #include <QtGui/qwidget.h>
 #include "QApplication"
+#include "../qt-solutions/qtwinmigrate/src/QMfcApp"
 
-DockableWindow::DockableWindow(HWND hwndCuiFrame) : h(hwndCuiFrame), w(NULL), frame(NULL)
+void AcquireQt();
+void ReleaseQt();
+
+//////////////////////////////////////////////////////////////////////////
+
+DockableWindow::DockableWindow(HWND hwndCuiFrame, FabricTranslationFPInterface* owner)
+ : h(hwndCuiFrame)
+ , w(NULL)
+ , frame(NULL)
+ , m_owner(owner)
 {
 	frame = ::GetICUIFrame(h);
 	frame->SetContentType(CUI_HWND);
 	frame->InstallMsgHandler(this);
+
+	// Ensure our QtApp is initialized
+	AcquireQt();
 }
 
 DockableWindow::~DockableWindow()
 {
 	::ReleaseICUIFrame(frame);
+	if (w != NULL)
 	delete w;
 
 	DestroyWindow(h);
+
+	ReleaseQt();
 }
 
 
@@ -70,12 +86,12 @@ int DockableWindow::GetHeight(int sizeType, int orient)
 	return w->height();
 }
 
-DockableWindow* DockableWindow::Create(MCHAR* name, DockFlags pos /*= All*/, DWORD initialPos /*= 0*/, bool isDockedInitially /*= false*/, bool resizable /*= true*/, bool visible /*= true*/)
+DockableWindow* DockableWindow::Create(MCHAR* name, FabricTranslationFPInterface* owner, DockFlags pos /*= All*/, DWORD initialPos /*= 0*/, bool isDockedInitially /*= false*/, bool resizable /*= true*/, bool visible /*= true*/)
 {
 	HWND h = ::CreateCUIFrameWindow(
 		::GetCOREInterface()->GetMAXHWnd(), name, 0, 0, 0, 0);
 	if (!h) return NULL;
-	DockableWindow* r = new DockableWindow(h);
+	DockableWindow* r = new DockableWindow(h, owner);
 	ICUIFrame* f = r->GetICUIFrame();
 	DWORD flags = pos | CUI_FLOATABLE;
 	if (resizable) flags |= CUI_SM_HANDLES;
@@ -85,7 +101,7 @@ DockableWindow* DockableWindow::Create(MCHAR* name, DockFlags pos /*= All*/, DWO
 	return r;
 }
 
-int DockableWindow::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam)
+int DockableWindow::ProcessMessage( UINT message, WPARAM wParam, LPARAM lParam )
 {
 	switch (message) {
 	case WM_ACTIVATE:
@@ -94,6 +110,9 @@ int DockableWindow::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam)
 		// this message internally when switching internal windows.
 		if (LOWORD(wParam) == WA_INACTIVE)
 			EnableAccelerators(); // DFG win Deactivated, max can accelerate
+		break;
+	case WM_CLOSE:
+		m_owner->CloseDFGGraphEditor();
 		break;
 	case WM_SETFOCUS:
 		// When we gain focus, start owning that keyboard shit!
@@ -162,4 +181,24 @@ HWND DockableWindow::GetHWND()
 ICUIFrame* DockableWindow::GetICUIFrame()
 {
 	return frame;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+static int s_qt_count = 0;
+static bool s_own_qt = false;
+void AcquireQt()
+{
+	if (s_qt_count++ == 0)
+	{
+		s_own_qt = QMfcApp::pluginInstance( hInstance );
+	}
+}
+
+void ReleaseQt()
+{
+	if (--s_qt_count == 0 && s_own_qt)
+	{
+		delete qApp;
+	}
 }

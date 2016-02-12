@@ -484,7 +484,7 @@ ReferenceTarget *FabricTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir
     // We can clone our current descriptor though...
     ParamBlockDesc2* pDesc = CopyPBDescriptor();
     // ... create a copy of our parameter block on the target
-    pMyClone->ReplaceReference(0, ::CreateParamBlock(pDesc, m_pblock, this));
+	pMyClone->ReplaceReference( 0, ::CreateParamBlock( pDesc, m_pblock, pMyClone ) );
   }
   BaseClone( this, pMyClone, remap );
 
@@ -780,7 +780,7 @@ int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
       ParamBlockDesc2* pNewDesc = CopyPBDescriptor();
       paramId = AddMaxParameter(pNewDesc, maxType, argName);
       CreateParamBlock(pNewDesc);
-	  SetMaxParamFromFabric( m_pblock, paramId, m_binding, argName );
+	  SetMaxParamFromFabric( m_pblock, ParamID(paramId), m_binding, argName );
     }
     else
     {

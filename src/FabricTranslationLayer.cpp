@@ -221,11 +221,18 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 	case TYPE_ANGLE:	
 	case TYPE_PCNT_FRAC:	
 	case TYPE_WORLD:	
-		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_FLOAT, 0, 0, SPIN_AUTOSCALE, p_end);
+		if (is_tab( type ))
+			pDesc->ParamOption( pid, p_ui, TYPE_FLOATLISTBOX, 0, 0, 0, 0, EDITTYPE_FLOAT, 0, 0, SPIN_AUTOSCALE, p_end );
+		else
+			pDesc->ParamOption( pid, p_ui, TYPE_SPINNER, EDITTYPE_FLOAT, 0, 0, SPIN_AUTOSCALE, p_end );
+
 		pDesc->ParamOption(pid, p_range, -99999999.0, 99999999.0, p_end); 
 		break;
 	case TYPE_INT:		
-		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_INT, 0, 0, SPIN_AUTOSCALE, p_end);  
+		if (is_tab( type ))
+			pDesc->ParamOption( pid, p_ui, TYPE_INTLISTBOX, 0, 0, 0, 0, EDITTYPE_INT, 0, 0, SPIN_AUTOSCALE, p_end );
+		else
+			pDesc->ParamOption( pid, p_ui, TYPE_SPINNER, EDITTYPE_INT, 0, 0, SPIN_AUTOSCALE, p_end );
 		pDesc->ParamOption(pid, p_range, -99999999, 99999999, p_end); 
 		break;
 	case TYPE_POINT2:
@@ -385,6 +392,9 @@ void SetMaxParamFromFabric(IParamBlock2* pblock, ParamID pid, FabricCore::DFGBin
 #define LBL_WIDTH	50
 #define CTRL_WIDTH	(PARAM_X - LBL_WIDTH)
 
+#define LISTBOX_HEIGHT 90
+
+
 /*! Add a UI definition for the specified parameter to m_dialogTemplate.
 	\param[in|out] ypos - The Y position of the element.  Before this function exits, this value should be incremented by 
 		the height of the created dialog element.
@@ -415,11 +425,11 @@ BOOL GenerateParamUI( DynamicDialog::CDynamicDialogTemplate* dialog, SHORT &ypos
 BOOL GenerateParamSpinner( DynamicDialog::CDynamicDialogTemplate* dialog, SHORT &ypos, WORD &ctrlId, int* paramCtrl)
 {
 	// Add our spinner
-	if( dialog->AddControl( WS_CHILD | WS_VISIBLE, 0, PARAM_X - 8, ypos, 8, CTRL_HEIGHT, ctrlId, NULL, L"SpinnerControl" ) )
+	if( dialog->AddControl( WS_CHILD | WS_VISIBLE, 0, PARAM_X - 8, ypos, 8, CTRL_HEIGHT, ctrlId, NULL, SPINNERWINDOWCLASS ) )
 	{
 		paramCtrl[1] = ctrlId++;
 		// And now the editbox.
-		return GenerateParamUI(dialog, ypos, ctrlId, paramCtrl[0], CTRL_WIDTH - 16, L"CustEdit");
+		return GenerateParamUI(dialog, ypos, ctrlId, paramCtrl[0], CTRL_WIDTH - 16, CUSTEDITWINDOWCLASS );
 	}
 	return FALSE;
 }
@@ -445,7 +455,10 @@ int GetDlgSize(IParamBlock2* pblock)
 			dlgSize += PARAM_Y * 4 * count;
 			break;
 		default:
-			dlgSize += PARAM_Y * count;
+			if (is_tab( paramType ))
+				dlgSize += (PARAM_Y * 2) + LISTBOX_HEIGHT;
+			else 
+				dlgSize += PARAM_Y * count;
 			break;
 		}
 	}
@@ -478,6 +491,10 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 		ParamID pid = pDesc->IndextoID(i);
 		ParamDef& pbDef = pDesc->GetParamDef(pid);
 
+		// Skip empty/unsupported types
+		if (pbDef.ctrl_count == 0)
+			continue;
+
 		// Post the name (in unicode)
 		const MCHAR* pName = pbDef.int_name;
 
@@ -485,37 +502,100 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 
 		switch ((int)pbDef.type)
 		{
-		case TYPE_FLOAT:
-		case TYPE_ANGLE:
-		case TYPE_PCNT_FRAC:
-		case TYPE_WORLD:
-		case TYPE_INT:
-		case TYPE_INDEX:
-		case TYPE_TIMEVALUE:
-			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs);
-			break;
-		case TYPE_STRING:	GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTEDITWINDOWCLASS); break;
-		case TYPE_BOOL:		GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, L"Button", BS_AUTOCHECKBOX | WS_TABSTOP | WS_VISIBLE); break;
-		case TYPE_MTL:		GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS); break;
-		case TYPE_TEXMAP:	GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS); break;
-		case TYPE_INODE:	GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS); break;
-		case TYPE_RGBA:		GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, COLORSWATCHWINDOWCLASS ); break;
-		case TYPE_FRGBA:	GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, COLORSWATCHWINDOWCLASS ); break;
-		case TYPE_POINT2:
-			GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs );
-			GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2 );
-			break;
-		case TYPE_POINT3:	
-			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs); 
-			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2); 
-			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 4);
-			break;
-		case TYPE_POINT4:	
-			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs); 
-			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2); 
-			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 4);
-			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 6);
-			break;
+			case TYPE_FLOAT:
+			case TYPE_ANGLE:
+			case TYPE_PCNT_FRAC:
+			case TYPE_WORLD:
+			case TYPE_INT:
+			case TYPE_INDEX:
+			case TYPE_TIMEVALUE:
+				GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs );
+				break;
+			case TYPE_STRING:    GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTEDITWINDOWCLASS ); break;
+			case TYPE_BOOL:        GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, L"Button", BS_AUTOCHECKBOX | WS_TABSTOP | WS_VISIBLE ); break;
+			case TYPE_MTL:        GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS ); break;
+			case TYPE_TEXMAP:    GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS ); break;
+			case TYPE_INODE:    GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS ); break;
+			case TYPE_RGBA:        GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, COLORSWATCHWINDOWCLASS ); break;
+			case TYPE_FRGBA:    GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, COLORSWATCHWINDOWCLASS ); break;
+			case TYPE_POINT2:
+				GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs );
+				GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2 );
+				break;
+			case TYPE_POINT3:
+				GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs );
+				GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2 );
+				GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 4 );
+				break;
+			case TYPE_POINT4:
+				GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs );
+				GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2 );
+				GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 4 );
+				GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 6 );
+				break;
+			case TYPE_FLOAT_TAB:
+			case TYPE_ANGLE_TAB:
+			case TYPE_INT_TAB:
+			{
+				ypos += CTRL_HEIGHT;
+				// Add in the actual list box
+				dialogTemplate->AddControl( (WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL),
+									0,
+									DLG_PAD,
+									ypos,
+									DLG_X - (DLG_PAD * 2),
+									LISTBOX_HEIGHT,
+									ctrlId,
+									NULL,
+									_M("LISTBOX") );
+				pbDef.ctrl_IDs[0] = ctrlId++;
+
+				ypos += LISTBOX_HEIGHT - CTRL_HEIGHT;
+
+				// Add in 3 buttons
+				int btnWidth = (DLG_X - DLG_PAD) / 3;
+				int btnXPos = (DLG_PAD / 2);
+				dialogTemplate->AddControl( (WS_TABSTOP | WS_CHILD | WS_VISIBLE),
+									0,
+									btnXPos,
+									ypos,
+									btnWidth,
+									CTRL_HEIGHT,
+									ctrlId,
+									_M("Add"),
+									CUSTBUTTONWINDOWCLASS );
+				pbDef.ctrl_IDs[1] = ctrlId++;
+				btnXPos += btnWidth;
+				dialogTemplate->AddControl( (WS_TABSTOP | WS_CHILD | WS_VISIBLE),
+									0,
+									btnXPos,
+									ypos,
+									btnWidth,
+									CTRL_HEIGHT,
+									ctrlId,
+									_M( "Swp" ),
+									CUSTBUTTONWINDOWCLASS );
+				pbDef.ctrl_IDs[2] = ctrlId++;
+				btnXPos += btnWidth;
+				dialogTemplate->AddControl( (WS_TABSTOP | WS_CHILD | WS_VISIBLE),
+									0,
+									btnXPos,
+									ypos,
+									btnWidth,
+									CTRL_HEIGHT,
+									ctrlId,
+									_M( "Del" ),
+									CUSTBUTTONWINDOWCLASS );
+				pbDef.ctrl_IDs[3] = ctrlId++;
+				ypos += PARAM_Y;
+
+				dialogTemplate->AddStaticControl( WS_VISIBLE | WS_CHILD | WS_GROUP, 0, DLG_PAD / 2, ypos, LBL_WIDTH, CTRL_HEIGHT, -1, _M("Swap Value") );
+				GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 4 );
+				break;
+			}
+			default:
+				ypos += PARAM_Y;
+				break;
 		}
 	}
 	return dialogTemplate;
@@ -650,12 +730,22 @@ bool SetPortValue(FabricCore::DFGBinding& binding, const char* argName, FPValue*
 // Converting types to/from Fabric
 
 static const std::string _array_denom("Array");
-bool is_array(const std::string& value)
+static const std::string _brackets_denom( "[]" );
+int is_array(const std::string& value)
 {
-	if (_array_denom.size() > value.size()) return false;
-	return std::equal(_array_denom.rbegin(), _array_denom.rend(), value.rbegin());
+	if (_brackets_denom.size() > value.size())
+		return 0;
+	if (std::equal( _brackets_denom.rbegin(), _brackets_denom.rend(), value.rbegin() ))
+		return _brackets_denom.size();
 
+	if (_array_denom.size() > value.size())
+		return 0;
+	if (std::equal(_array_denom.rbegin(), _array_denom.rend(), value.rbegin()))
+		return _array_denom.size();
+
+	return 0;
 }
+
 bool IsPortArray(const FabricCore::DFGExec& exec, const char* argName)
 {
 	return is_array(GetPortType(exec, argName));
@@ -664,8 +754,9 @@ bool IsPortArray(const FabricCore::DFGExec& exec, const char* argName)
 // denominator and return true, else false;
 inline bool sub_array(std::string& type)
 {
-	if (is_array(type)) {
-		type.resize(type.size() - _array_denom.size());
+	int trim_count = is_array( type );
+	if (trim_count) {
+		type.resize(type.size() - trim_count );
 		return true;
 	}
 	return false;
@@ -685,6 +776,7 @@ BitArray FabricTypeToMaxTypes(const char* cType)
 	BitArray res(TYPE_DOUBLE + arr_mod);
 	if (sType == "Integer" ||
 		sType == "Size" ||
+		sType == "Index" ||
 		sType == "UInt32" ||
 		sType == "UInt16" ||
 		sType == "UInt8" ||
@@ -766,6 +858,7 @@ int FabricTypeToMaxType(const char* cType)
 	// overflow anywhere
 	if (sType == "Integer" || 
 		sType == "Size" || 
+		sType == "Index" || 
 		sType == "SInt32" || 
 		sType == "SInt16" || 
 		sType == "UInt32" ||

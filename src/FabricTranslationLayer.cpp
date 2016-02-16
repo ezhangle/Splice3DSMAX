@@ -46,6 +46,7 @@ bool CopyValue(int type, ParamID newId, IParamBlock2* pNewBlock, ParamID oldId, 
 		pNewBlock->SetCount(newId, numValues);
 	}
 
+	TimeValue t = GetCOREInterface()->GetTime();
 	// Copy all values from copy block to newblock
 	for (int i = 0; i < numValues; i++)
 	{
@@ -58,17 +59,17 @@ bool CopyValue(int type, ParamID newId, IParamBlock2* pNewBlock, ParamID oldId, 
 		else
 		{
 			// Constant value, copy it over.
-			switch (type)
+			switch ((int)base_type(type))
 			{
 			case TYPE_FLOAT:
 			case TYPE_ANGLE:
 			case TYPE_PCNT_FRAC:
 			case TYPE_WORLD:
-				pNewBlock->SetValue(newId, i, pCopyBlock->GetFloat(oldId));
+				pNewBlock->SetValue(newId, t, pCopyBlock->GetFloat(oldId, t, i), i);
 				break;
 			case TYPE_BOOL:
 			case TYPE_INT:
-				pNewBlock->SetValue(newId, i, pCopyBlock->GetInt(oldId));
+				pNewBlock->SetValue(newId, t, pCopyBlock->GetInt(oldId, t, i), i);
 				break;
 			case TYPE_POINT2:
 			{
@@ -81,43 +82,43 @@ bool CopyValue(int type, ParamID newId, IParamBlock2* pNewBlock, ParamID oldId, 
 			break;
 			case TYPE_POINT3:
 				{
-					Point3 v = pCopyBlock->GetPoint3(oldId);
-					pNewBlock->SetValue(newId, i, v);
+					Point3 v = pCopyBlock->GetPoint3(oldId, t, i);
+					pNewBlock->SetValue(newId, t, v, i);
 				}
 				break;
 			case TYPE_FRGBA:
 			case TYPE_POINT4:
 				{
-					Point4 v = pCopyBlock->GetPoint4(oldId);
-					pNewBlock->SetValue(newId, i, v);
+					Point4 v = pCopyBlock->GetPoint4(oldId, t, i);
+					pNewBlock->SetValue(newId, t, v, t);
 				}
 				break;
 			case TYPE_MTL:
-				pNewBlock->SetValue(newId, i, pCopyBlock->GetMtl(oldId));
+				pNewBlock->SetValue(newId, t, pCopyBlock->GetMtl(oldId, t, i), i);
 				break;
 			case TYPE_TEXMAP:
-				pNewBlock->SetValue(newId, i, pCopyBlock->GetTexmap(oldId));
+				pNewBlock->SetValue(newId, t, pCopyBlock->GetTexmap(oldId, t, i), i);
 				break;
 			case TYPE_MATRIX3:
 				{
-					Matrix3 v = pCopyBlock->GetMatrix3(oldId);
-					pNewBlock->SetValue(newId, i, v);
+					Matrix3 v = pCopyBlock->GetMatrix3(oldId, t, i);
+					pNewBlock->SetValue(newId, t, v, i);
 					break;
 				}
 			case TYPE_INODE:
-				pNewBlock->SetValue(newId, i, pCopyBlock->GetINode(oldId));
+				pNewBlock->SetValue(newId, t, pCopyBlock->GetINode(oldId, t, i), i);
 				break;
 			case TYPE_STRING:
 				{
-					CONST_2010 MCHAR* theString = pCopyBlock->GetStr(oldId);
+					CONST_2010 MCHAR* theString = pCopyBlock->GetStr(oldId, t, i);
 					if (theString != NULL) 
-						pNewBlock->SetValue(newId, i, theString);
+						pNewBlock->SetValue(newId, t, theString, i);
 				}
 				break;
 			case TYPE_RGBA:
 				{
-					Color c = pCopyBlock->GetColor(oldId);
-					pNewBlock->SetValue(newId, i, c);
+					Color c = pCopyBlock->GetColor(oldId, t, i);
+					pNewBlock->SetValue(newId, t, c, i);
 					break;
 				}
 			default:
@@ -164,6 +165,7 @@ IParamBlock2* CreateParamBlock( ParamBlockDesc2* pDesc, IParamBlock2* pCopyBlock
 					{
 						// Mathing values, copy 'em over.
 						CopyValue(pbNewDef.type, id, pNewBlock, pbOrigDef.ID, pCopyBlock);
+						break;
 					}
 				}
 			}

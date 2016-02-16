@@ -312,10 +312,29 @@ void ConvertToRTVal(const Color& param, FabricCore::RTVal& val)
 	if (!val.isValid())
 		return;
 
-	val.maybeGetMemberRef("a").setFloat32(128);
-	val.maybeGetMemberRef("r").setFloat32(uint16_t(param.r * 128));
-	val.maybeGetMemberRef("g").setFloat32(uint16_t(param.g * 128));
-	val.maybeGetMemberRef("b").setFloat32(uint16_t(param.b * 128));
+	FabricCore::RTVal type = val.getTypeName();
+	const char* spliceType = type.getStringCString();
+
+	if (strcmp( spliceType, "RGB" ) == 0) // 24-bit color
+	{
+		val.maybeGetMemberRef( "r" ).setUInt8( uint8_t( param.r * 128 ) );
+		val.maybeGetMemberRef( "g" ).setUInt8( uint8_t( param.g * 128 ) );
+		val.maybeGetMemberRef( "b" ).setUInt8( uint8_t( param.b * 128 ) );
+	}
+	else if (strcmp( spliceType, "RGBA" ) == 0) // 32-bit color
+	{
+		val.maybeGetMemberRef( "a" ).setUInt8( 128 );
+		val.maybeGetMemberRef( "r" ).setUInt8( uint8_t( param.r * 128 ) );
+		val.maybeGetMemberRef( "g" ).setUInt8( uint8_t( param.g * 128 ) );
+		val.maybeGetMemberRef( "b" ).setUInt8( uint8_t( param.b * 128 ) );
+	}
+	else if (strcmp( spliceType, "Color" ) == 0) // Full 32-bit x 4 channels color
+	{
+		val.maybeGetMemberRef( "a" ).setFloat32( 1.0f );
+		val.maybeGetMemberRef( "r" ).setFloat32( param.r );
+		val.maybeGetMemberRef( "g" ).setFloat32( param.g );
+		val.maybeGetMemberRef( "b" ).setFloat32( param.b );
+	}
 }
 
 void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
@@ -333,6 +352,13 @@ void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
 		val.maybeGetMemberRef("g").setFloat32(param.y);
 		val.maybeGetMemberRef("b").setFloat32(param.z);
 		val.maybeGetMemberRef("a").setFloat32(param.w);
+	}
+	else if (strcmp( spliceType, "RGBA" ) == 0)
+	{
+		val.maybeGetMemberRef( "r" ).setUInt8( (uint8_t)FLto255( param.x ) );
+		val.maybeGetMemberRef( "g" ).setUInt8( (uint8_t)FLto255( param.y ) );
+		val.maybeGetMemberRef( "b" ).setUInt8( (uint8_t)FLto255( param.z ) );
+		val.maybeGetMemberRef( "a" ).setUInt8( (uint8_t)FLto255( param.w ) );
 	}
 	else {
 		val.maybeGetMemberRef("x").setFloat32(param.x);
@@ -804,7 +830,13 @@ void FabricToMaxValue(const FabricCore::RTVal& rtVal, Point4& param)
 	FabricCore::RTVal& ncVal = const_cast<FabricCore::RTVal&>(rtVal);
 	FabricCore::RTVal type = rtVal.getTypeName();
 	const char* spliceType = type.getStringCString();
-	if (strcmp(spliceType, "Color") == 0) {
+	if (strcmp( spliceType, "RGBA" ) == 0) {
+		param[0] = ncVal.maybeGetMemberRef( "r" ).getUInt8() / 255.0f;
+		param[1] = ncVal.maybeGetMemberRef( "g" ).getUInt8() / 255.0f;
+		param[2] = ncVal.maybeGetMemberRef( "b" ).getUInt8() / 255.0f;
+		param[3] = ncVal.maybeGetMemberRef( "a" ).getUInt8() / 255.0f;
+	}
+	else if (strcmp(spliceType, "Color") == 0) {
 		param[0] = ncVal.maybeGetMemberRef("r").getFloat32();
 		param[1] = ncVal.maybeGetMemberRef("g").getFloat32();
 		param[2] = ncVal.maybeGetMemberRef("b").getFloat32();
@@ -820,9 +852,11 @@ void FabricToMaxValue(const FabricCore::RTVal& rtVal, Point4& param)
 
 void FabricToMaxValue(const FabricCore::RTVal& rtVal, Color& param)
 {
-	param.r = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("r").getFloat32();
-	param.g = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("g").getFloat32();
-	param.b = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("b").getFloat32();
+	// Assumed KL RGB type (RGBA & Color map to Point4 type)
+	FabricCore::RTVal& ncVal = const_cast<FabricCore::RTVal&>(rtVal);
+	param.r = ncVal.maybeGetMemberRef( "r" ).getUInt8() / 255.0f;
+	param.g = ncVal.maybeGetMemberRef( "g" ).getUInt8() / 255.0f;
+	param.b = ncVal.maybeGetMemberRef( "b" ).getUInt8() / 255.0f;
 }
 
 void FabricToMaxValue(const FabricCore::RTVal& rtVal, Quat& param)

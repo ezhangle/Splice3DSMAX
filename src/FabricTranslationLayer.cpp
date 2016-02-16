@@ -216,7 +216,6 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_INT, 0, 0, SPIN_AUTOSCALE, p_end);  
 		pDesc->ParamOption(pid, p_range, -99999999, 99999999, p_end); 
 		break;
-	case TYPE_RGBA:		pDesc->ParamOption(pid, p_ui, TYPE_COLORSWATCH, 0, p_end); break;
 	case TYPE_POINT3:	
 		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); 
 		pDesc->ParamOption(pid, p_range, -99999999.0, 99999999.0, p_end); 
@@ -225,6 +224,8 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); 
 		pDesc->ParamOption(pid, p_range, -99999999.0, 99999999.0, p_end); 
 		break;
+	case TYPE_RGBA:		pDesc->ParamOption( pid, p_ui, TYPE_COLORSWATCH, 0, p_end ); break;
+	case TYPE_FRGBA:	pDesc->ParamOption( pid, p_ui, TYPE_COLORSWATCH_FRGBA, 0, p_end ); break;
 	case TYPE_BOOL:		pDesc->ParamOption(pid, p_ui, TYPE_SINGLECHEKBOX, 0, p_end); break;
 	case TYPE_INODE:	pDesc->ParamOption(pid, p_ui, TYPE_PICKNODEBUTTON, 0, p_end); break;
 	case TYPE_MTL:		pDesc->ParamOption(pid, p_ui, TYPE_MTLBUTTON, 0, p_end); break;
@@ -451,12 +452,13 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 		case TYPE_TIMEVALUE:
 			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs);
 			break;
-		case TYPE_STRING:	GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, L"CustEdit"); break;
+		case TYPE_STRING:	GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTEDITWINDOWCLASS); break;
 		case TYPE_BOOL:		GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, L"Button", BS_AUTOCHECKBOX | WS_TABSTOP | WS_VISIBLE); break;
-		case TYPE_MTL:		GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, L"CustButton"); break;
-		case TYPE_TEXMAP:	GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, L"CustButton"); break;
-		case TYPE_INODE:	GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, L"CustButton"); break;
-		case TYPE_RGBA:		GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, L"ColorSwatch"); break;
+		case TYPE_MTL:		GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS); break;
+		case TYPE_TEXMAP:	GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS); break;
+		case TYPE_INODE:	GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS); break;
+		case TYPE_RGBA:		GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, COLORSWATCHWINDOWCLASS ); break;
+		case TYPE_FRGBA:	GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, COLORSWATCHWINDOWCLASS ); break;
 		case TYPE_POINT3:	
 			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs); 
 			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2); 
@@ -728,7 +730,10 @@ int FabricTypeToMaxType(const char* cType)
 		sType == "Float32" ||
 		sType == "Float64")
 		res = TYPE_FLOAT;
-	else if (sType == "Color")
+	else if (sType == "RGB")
+		res = TYPE_RGBA;
+	else if (sType == "Color" ||
+			 sType == "RGBA")
 		res =  TYPE_FRGBA;
 	else if (sType == "Vec2")
 		res =  TYPE_POINT2;

@@ -70,6 +70,15 @@ bool CopyValue(int type, ParamID newId, IParamBlock2* pNewBlock, ParamID oldId, 
 			case TYPE_INT:
 				pNewBlock->SetValue(newId, i, pCopyBlock->GetInt(oldId));
 				break;
+			case TYPE_POINT2:
+			{
+				Point2 v;
+				Interval iv;
+				GetPB2Value( pCopyBlock, oldId, 0, v, iv, i );
+				SetPB2Value( pNewBlock, newId, 0, v, i );
+				break;
+			}
+			break;
 			case TYPE_POINT3:
 				{
 					Point3 v = pCopyBlock->GetPoint3(oldId);

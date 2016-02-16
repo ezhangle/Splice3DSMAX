@@ -295,6 +295,16 @@ void ConvertToRTVal(bool param, FabricCore::RTVal& val)
 	val = FabricCore::RTVal::ConstructBoolean(GetClient(), param);
 }
 
+void ConvertToRTVal( const Point2& param, FabricCore::RTVal& val )
+{
+	DbgAssert( val.isValid() );
+	if (!val.isValid())
+		return;
+
+	val.maybeGetMemberRef( "x" ).setFloat32( param.x );
+	val.maybeGetMemberRef( "y" ).setFloat32( param.y );
+}
+
 void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val)
 {
 	DbgAssert(val.isValid());

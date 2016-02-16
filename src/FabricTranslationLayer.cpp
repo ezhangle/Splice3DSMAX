@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "MeshNormalSpec.h"
+#include "ParameterBlockPatcher.h"
 
 //////////////////////////////////////////////////////////////////////////
 //--- DynPBDefAccessor -------------------------------------------------------
@@ -216,6 +217,10 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_INT, 0, 0, SPIN_AUTOSCALE, p_end);  
 		pDesc->ParamOption(pid, p_range, -99999999, 99999999, p_end); 
 		break;
+	case TYPE_POINT2:
+		pDesc->ParamOption( pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end );
+		pDesc->ParamOption( pid, p_range, -99999999.0, 99999999.0, p_end );
+		break;
 	case TYPE_POINT3:	
 		pDesc->ParamOption(pid, p_ui, TYPE_SPINNER, EDITTYPE_UNIVERSE, 0, 0, 0, 0, 0, 0, SPIN_AUTOSCALE, p_end); 
 		pDesc->ParamOption(pid, p_range, -99999999.0, 99999999.0, p_end); 
@@ -268,9 +273,27 @@ void SetMaxParamValue(IParamBlock2* pblock, TimeValue t, ParamID pid, FabricCore
 	// Check for existence!
 	if (pblock->IDtoIndex(pid) < 0)
 		return;
+	if (!value.isValid())
+		return;
+
 	TType def;
-	FabricToMaxValue(value, def);
-	pblock->SetValue(pid, t, def);
+	if (value.isArray())
+	{
+		int count = value.getArraySize();
+		pblock->SetCount( pid, count );
+
+		for (int i = 0; i < count; i++)
+		{
+			FabricCore::RTVal arrValue = value.getArrayElementRef( i );
+			FabricToMaxValue( arrValue, def );
+			SetPB2Value( pblock, pid, t, def, i );
+		}
+	}
+	else
+	{
+		FabricToMaxValue( value, def );
+		SetPB2Value( pblock, pid, t, def, 0 );
+	}
 }
 
 void SetMaxParamFromFabric(IParamBlock2* pblock, ParamID pid, FabricCore::DFGBinding& binding, const char* argName)
@@ -308,6 +331,11 @@ void SetMaxParamFromFabric(IParamBlock2* pblock, ParamID pid, FabricCore::DFGBin
 	case TYPE_RGBA:
 	{
 		SetMaxParamValue<Color>(pblock, t, pid, currentVal);
+		break;
+	}
+	case TYPE_POINT2:
+	{
+		SetMaxParamValue<Point2>( pblock, t, pid, currentVal );
 		break;
 	}
 	case TYPE_POINT3:
@@ -396,6 +424,9 @@ int GetDlgSize(IParamBlock2* pblock)
 		int count = is_tab(paramType) ? pblock->Count(pid) : 1;
 		switch((int)base_type(paramType))
 		{
+		case TYPE_POINT2:
+				dlgSize += PARAM_Y * 2 * count;
+				break;
 		case TYPE_POINT3:
 			dlgSize += PARAM_Y * 3 * count;
 			break;
@@ -459,6 +490,10 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 		case TYPE_INODE:	GenerateParamUI(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS); break;
 		case TYPE_RGBA:		GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, COLORSWATCHWINDOWCLASS ); break;
 		case TYPE_FRGBA:	GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, COLORSWATCHWINDOWCLASS ); break;
+		case TYPE_POINT2:
+			GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs );
+			GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2 );
+			break;
 		case TYPE_POINT3:	
 			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs); 
 			GenerateParamSpinner(dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs + 2); 
@@ -664,6 +699,10 @@ BitArray FabricTypeToMaxTypes(const char* cType)
 		res.Set(TYPE_POINT3 + arr_mod);
 		res.Set(TYPE_POINT4 + arr_mod);
 		res.Set(TYPE_FRGBA + arr_mod);
+	}
+	else if (sType == "Vec2")
+	{
+		res.Set( TYPE_POINT2 + arr_mod );
 	}
 	else if (sType == "Vec3")
 	{
@@ -952,7 +991,7 @@ void ParameterBlockValuesToFabric(FabricCore::DFGBinding& binding, const char* a
 
 	TResultType* pVals = new TResultType[nParams];
 	for (int i = 0; i < nParams; i++)
-		pblock->GetValue(pid, t, pVals[i], ivValid, i);
+		GetPB2Value( pblock, pid, t, pVals[i], ivValid, i);
 	MaxValuesToFabric<TResultType, TConvertType>(binding, argName, t, ivValid, pVals, nParams);
 	delete pVals;
 
@@ -1059,9 +1098,9 @@ void TransferAllMaxValuesToFabric(TimeValue t, IParamBlock2* pblock, FabricCore:
 		case TYPE_RGBA:
 			ParameterBlockValuesToFabric<Color>(binding, argName, t, pblock, pid, paramValids[pidx]);
 			break;
-		//case TYPE_POINT2:
-		//	MaxValueToFabric(port, pblock->GetPoint3(id, t));
-		//	break;
+		case TYPE_POINT2:
+			ParameterBlockValuesToFabric<Point2>( binding, argName, t, pblock, pid, paramValids[pidx] );
+			break;
 		case TYPE_POINT3:
 			ParameterBlockValuesToFabric<Point3>(binding, argName, t, pblock, pid, paramValids[pidx]);
 			break;

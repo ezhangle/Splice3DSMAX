@@ -40,6 +40,7 @@ FabricCore::Variant GetVariant(const T& param) { ThisShouldNotCompile }
 extern void ConvertToRTVal(int param, FabricCore::RTVal& val);
 extern void ConvertToRTVal(float param, FabricCore::RTVal& val);
 extern void ConvertToRTVal(bool param, FabricCore::RTVal& val);
+extern void ConvertToRTVal( const Point2& param, FabricCore::RTVal& val );
 extern void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val);
 extern void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val);
 extern void ConvertToRTVal(const Color& param, FabricCore::RTVal& val);

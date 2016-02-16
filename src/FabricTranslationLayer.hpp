@@ -606,19 +606,22 @@ IOResult FabricTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 template<typename TBaseClass, typename TResultType>
 void FabricTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 {
-  FabricCore::DFGExec exec = m_binding.getExec();
-  int nPorts = exec.getExecPortCount();
-  for (int i = 0; i < nPorts; i++) {
-    const char* argName = exec.getExecPortName(i);
-    int pid = GetPortParamID(argName);
-    if (pid >= 0)
-    {
-      MSTR str = MSTR::FromACP(argName);
-      SetMaxParamName(m_pblock->GetDesc(), (ParamID)pid, str);
-      // Delete existing autogen UI
-      SAFE_DELETE(m_dialogTemplate);
-    }
-  }
+	if (!m_binding.isValid())
+		return;
+	FabricCore::DFGExec exec = m_binding.getExec();
+	int nPorts = exec.getExecPortCount();
+	for (int i = 0; i < nPorts; i++) 
+	{
+		const char* argName = exec.getExecPortName( i );
+		int pid = GetPortParamID( argName );
+		if (pid >= 0)
+		{
+			MSTR str = MSTR::FromACP( argName );
+			SetMaxParamName( m_pblock->GetDesc(), (ParamID)pid, str );
+			// Delete existing autogen UI
+			SAFE_DELETE( m_dialogTemplate );
+		}
+	}
 }
 #pragma endregion
 
@@ -872,7 +875,6 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SyncMaxParamLimits(const c
     pDesc->ParamOption(pid, p_range, vMin, vMax, p_end);
     break;
   }
-  //case TYPE_RGBA:		pDesc->ParamOption(pid, p_ui, TYPE_COLORSWATCH, 0, p_end); break;
   case TYPE_POINT3:
   {
     //Point3 uiMin = port.getOption()

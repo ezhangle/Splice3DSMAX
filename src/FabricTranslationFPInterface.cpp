@@ -651,9 +651,9 @@ bool FabricTranslationFPInterface::LoadFromFile(const MCHAR* filename, bool crea
 
 	fclose(file);
 
-	RestoreFromJSON(buffer, createMaxParams);
+	bool res = RestoreFromJSON(buffer, createMaxParams);
 	free(buffer);
-	return true;
+	return res;
 };
 
 bool FabricTranslationFPInterface::SaveToFile(const MCHAR* filename)
@@ -680,11 +680,15 @@ bool FabricTranslationFPInterface::SaveToFile(const MCHAR* filename)
 
 bool FabricTranslationFPInterface::RestoreFromJSON(const MSTR& json, bool createMaxParams)
 {
+	MAXSPLICE_CATCH_BEGIN
 	return RestoreFromJSON(TO_CSTR(json), createMaxParams);
+	MAXSPLICE_CATCH_RETURN( false );
 }
 
 bool FabricTranslationFPInterface::RestoreFromJSON(const char* json, bool createMaxParams)
 {
+	MAXSPLICE_CATCH_BEGIN
+
 	// The KL Editor has pointers to the current graph
 
 	FabricCore::DFGBinding binding = GetHost().createBindingFromJSON(json);
@@ -715,6 +719,8 @@ bool FabricTranslationFPInterface::RestoreFromJSON(const char* json, bool create
 	}
 	InvalidateAll();
 	return true;
+
+	MAXSPLICE_CATCH_RETURN( false );
 }
 
 MSTR FabricTranslationFPInterface::ExportToJSON()

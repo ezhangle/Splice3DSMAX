@@ -24,7 +24,8 @@ FabricTranslationLayer<TBaseClass, TResultType>::FabricTranslationLayer(BOOL loa
   ,	m_pMtlInterface(NULL)
   ,	m_dialogTemplate(NULL)
   ,	m_paramMap(NULL)
-  ,	m_pblock(NULL)
+  , m_pblock( NULL )
+  , m_outputBlock( NULL )
   ,	m_valid(NEVER)
   ,	_m_isSyncing(false)
 {
@@ -158,7 +159,80 @@ void FabricTranslationLayer<TBaseClass, TResultType>::CreateParamBlock( ParamBlo
   IParamBlock2* pNewBlock = ::CreateParamBlock(pDesc, m_pblock, this);
   // This line finally assigns us the new parameter block.
   // At this point our old block will most likely be deleted.
-  ReplaceReference(0, pNewBlock);
+  ReplaceReference(in_block, pNewBlock);
+}
+
+#pragma endregion
+
+//---------------------------------------------------------------------------------------------------------------
+// Parameter block dynamic dialog creation methods
+//---------------------------------------------------------------------------------------------------------------
+#pragma region outblock
+
+class OutPortAccessors : PBAccessor
+{
+  virtual void Get( PB2Value& v, ReferenceMaker* owner, ParamID id, int tabIndex, TimeValue t, Interval &valid )
+  {
+    FabricTranslationFPInterface* fabric = GetFabricInterface( static_cast<ReferenceTarget*>(owner) );
+    MSTR portName = fabric->GetPortName( id, _M( "" ) );
+    const FPValue& vfp = fabric->GetArgValue( portName, _M( "" ) );
+    valid.SetInstant( t );
+    switch ((int)vfp.type)
+    {
+      case TYPE_FLOAT:
+        v.f = vfp.f;
+        break;
+    }
+  }
+
+  virtual MSTR GetLocalName( ReferenceMaker* owner, ParamID id, int tabIndex ) override
+  {
+    FabricTranslationFPInterface* fabric = GetFabricInterface( static_cast<ReferenceTarget*>(owner) );
+    return fabric->GetPortName( id, _M( "" ) );
+  }
+
+};
+
+static OutPortAccessors outportAccessor;
+
+template<typename TBaseClass, typename TResultType>
+void FabricTranslationLayer<TBaseClass, TResultType>::GenerateOutBlock()
+{
+  // Create the default new descriptor
+  ParamBlockDesc2* pNewDesc = GetClassDesc()->CreatePBDesc();
+
+  FabricCore::DFGExec exec = m_binding.getExec();
+  for (size_t i = 0; i < exec.getExecPortCount(); i++)
+  {
+    if (exec.getExecPortType( i ) == FabricCore::DFGPortType_Out)
+    {
+      const char* portType = exec.getExecPortResolvedType( i );
+      int maxType = FabricTypeToDefaultMaxType( portType );
+      if (maxType == 0)
+      {
+        pNewDesc->AddParam( ParamID( i ), NULL, maxType, P_READ_ONLY | P_TRANSIENT | P_COMPUTED_NAME | P_ANIMATABLE, 0,
+                         p_accessor, &outportAccessor,
+                         p_end );
+
+        SetMaxParamName( pNewDesc, i, GetPortName( i, _M( "" ) ));
+
+        //pNewDesc->AddParam( ParamID(i), NULL, maxType, P_READ_ONLY | P_TRANSIENT );
+        //pNewDesc->ParamOption( ParamID( i ), p_accessor, &outportAccessor );
+      }
+    }
+  }
+
+  IParamBlock2* pNewBlock = ::CreateParamBlock( pNewDesc, NULL, this );
+  ReplaceReference( out_block, pNewBlock );
+
+  //// Once the new port is created, add aliases to handle naming
+  //for (int i = 0; i < pNewBlock->NumParams(); i++)
+  //{
+  //  ParamID pid = pNewDesc->IndextoID( i );
+  //  const char* portType = exec.getExecPortName( pid );
+  //  MSTR maxParamName = MSTR::FromACP( portType );
+  //  pNewBlock->DefineParamAlias( maxParamName.data(), pid );
+  //}
 }
 
 #pragma endregion
@@ -336,7 +410,7 @@ ParamDlg* FabricTranslationLayer<TBaseClass, TResultType>::CreateMyAutoParamDlg(
 template<typename TBaseClass, typename TResultType>
 void FabricTranslationLayer<TBaseClass, TResultType>::SetReference(int i, RefTargetHandle rtarg)
 {
-  if (i == 0)
+  if (i == in_block)
   {
     m_valid = NEVER;
     // Always delete our dialog template
@@ -374,6 +448,17 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SetReference(int i, RefTar
 
     // Do we need to repost our UI?
     MaybePostParamUI();
+  }
+  else if (i == out_block)
+  {
+    if (m_outputBlock != NULL)
+    {
+      // Unfortunately we can't just delete the descriptor. the
+      // parameter block will still need it later.  Register this
+      // with our CD2 for later clean up
+      GetClassDesc()->SetObsoletePBDesc( m_outputBlock->GetDesc() );
+    }
+    m_outputBlock = (IParamBlock2*)rtarg;
   }
 }
 
@@ -738,6 +823,14 @@ int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
   if (_m_isSyncing)
     return -1;
   DoSyncing ds(*this);
+
+  // If this port is an outport, just recreate the whole out pblock
+  FabricCore::DFGPortType portType = m_binding.getExec().getExecPortType( argName );
+  if (portType == FabricCore::DFGPortType_Out)
+  {
+    GenerateOutBlock();
+    return -1;
+  }
 
   // Does this type already exist?
   int paramId = GetPortParamID(argName);

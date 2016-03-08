@@ -117,11 +117,23 @@ public:
 
 protected:
 #pragma region Max Parameter Management data
+
+  enum pblock_ids {
+    in_block,
+    out_block,
+    num_blocks
+  };
 	// This is the input datablock for the Fabric System.
 	// Input parameters are constructed and placed in this
 	// block.  The parameters are evaluated and passed to the
 	// splice graph for evaluation.
 	IParamBlock2* m_pblock;
+
+  // The output datablock for Fabric.  This parameter
+  // block doesn't actually hold anything, all its contents
+  // are transient.  It allows access to the output
+  // of DFG graphs in a Max-friendly format 
+  IParamBlock2* m_outputBlock;
 
 	//! a handle to our static UI.  This UI panel contains the controls to modify the parameter block
 	HWND										m_hPanel;
@@ -198,10 +210,10 @@ public:
 	// For classes which do not instantiate every parameter block described, this function needs to be
 	// implemented so max can determine which descriptors stored in our ClassDesc2 apply to this instance.
 	// This is mainly used for maxscript.
-	bool						IsParamBlockDesc2Used(ParamBlockDesc2 * desc) { return (m_pblock != NULL) && (m_pblock->GetDesc() == desc); }
-	int							NumParamBlocks()					{ return 1; }								// return number of ParamBlocks in this instance
-	IParamBlock2*				GetParamBlock(int i)				{ return (i == 0) ? m_pblock : NULL; }		// return i'th ParamBlock
-	IParamBlock2*				GetParamBlockByID(BlockID id)		{ return (m_pblock == NULL || m_pblock->ID() == id) ? m_pblock : NULL; }	// return id'd ParamBlock
+	bool						IsParamBlockDesc2Used(ParamBlockDesc2 * desc) { return ((m_pblock != NULL) && (m_pblock->GetDesc() == desc)) || ((m_outputBlock != NULL) && (m_outputBlock->GetDesc() == desc)); }
+	int							NumParamBlocks()					{ return num_blocks; }								// return number of ParamBlocks in this instance
+	IParamBlock2*				GetParamBlock(int i)				{ return (i == in_block) ? m_pblock : m_outputBlock; }		// return i'th ParamBlock
+	IParamBlock2*				GetParamBlockByID(BlockID id)		{ return (m_pblock != NULL && m_pblock->ID() == id) ? m_pblock : (m_outputBlock != NULL && m_outputBlock->ID() == id) ? m_outputBlock : NULL; }	// return id'd ParamBlock
 
 	// UI Begin/End
 	void MaybeRemoveParamUI();
@@ -212,8 +224,8 @@ public:
 	ParamDlg* CreateMyAutoParamDlg(HWND hwMtlEdit, IMtlParams* pMtlParams);
 
 	// Reference management.  We only reference 1 item (the parameter block)
-	int							NumRefs()							{ return 1; }
-	virtual RefTargetHandle		GetReference(int i)					{ return (i == 0) ? m_pblock : NULL; }
+	int							NumRefs()							{ return num_blocks; }
+	virtual RefTargetHandle		GetReference(int i)					{ return (i == in_block) ? m_pblock : m_outputBlock; }
 	virtual void				SetReference(int i, RefTargetHandle rtarg);
 
 #if MAX_VERSION_MAJOR < 17 // Max 2015 is ver 17
@@ -231,8 +243,8 @@ public:
 	void						RefAdded(RefMakerHandle 	rm);
 
 	// Sub-anims are the entities that appear in the TrackView
-	virtual	int					NumSubs()							{ return 1; }
-	virtual	Animatable*			SubAnim(int i)					{ return (i == 0) ? m_pblock : NULL; }
+	virtual	int					NumSubs()							{ return num_blocks; }
+	virtual	Animatable*			SubAnim(int i)					{ return (i == in_block) ? m_pblock : m_outputBlock; }
 	virtual MSTR				SubAnimName(int UNUSED(i))		{ return _T("pblock"); }
 
 	// Save and Load.
@@ -288,6 +300,9 @@ private:
 
 	/*! Update the posted UI spec (not values) */
 	void UpdateUISpec();
+
+  /*! Generate a parameter block to match the output values of the graph */
+  void GenerateOutBlock();
 
 #pragma endregion
 

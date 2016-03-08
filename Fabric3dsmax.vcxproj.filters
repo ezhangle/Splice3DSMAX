@@ -140,6 +140,9 @@
     <ClInclude Include="src\ParameterBlockPatcher.h">
       <Filter>FabricTranslation</Filter>
     </ClInclude>
+    <ClInclude Include="src\OutputParameterBlack.h">
+      <Filter>FabricTranslation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MaxScript files">

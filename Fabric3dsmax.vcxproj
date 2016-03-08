@@ -95,6 +95,7 @@
       <FileType>CppCode</FileType>
     </ClInclude>
     <ClInclude Include="src\FabricWSModifier.h" />
+    <ClInclude Include="src\OutputParameterBlack.h" />
     <ClInclude Include="src\ParameterBlockPatcher.h" />
     <ClInclude Include="src\StdAfx.h" />
   </ItemGroup>

@@ -713,8 +713,7 @@ bool FabricTranslationFPInterface::RestoreFromJSON(const char* json, bool create
 					SetOutPortName(MSTR::FromACP(portName));
 				}
 			}
-			else
-				SyncMetaDataFromPortToParam(portName);
+			SyncMetaDataFromPortToParam(portName);
 		}
 	}
 	InvalidateAll();

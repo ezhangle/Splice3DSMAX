@@ -1026,6 +1026,14 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SetupEvalContext(TimeValue
 }
 
 template<typename TBaseClass, typename TResultType>
+bool FabricTranslationLayer<TBaseClass, TResultType>::IsOutputConnected()
+{
+	FabricCore::DFGExec exec = m_binding.getExec();
+	return exec.haveExecPort(m_outArgName.c_str()) && exec.hasSrcPort(m_outArgName.c_str());
+}
+
+
+template<typename TBaseClass, typename TResultType>
 const TResultType& FabricTranslationLayer<TBaseClass, TResultType>::Evaluate(TimeValue t, Interval& ivValid)
 {
   if (!GraphCanEvaluate())
@@ -1072,8 +1080,7 @@ const TResultType& FabricTranslationLayer<TBaseClass, TResultType>::Evaluate(Tim
     m_binding.execute();
 
     // Get our value back!
-    FabricCore::DFGExec exec = m_binding.getExec();
-    if (exec.haveExecPort(m_outArgName.c_str()) && exec.hasSrcPort(m_outArgName.c_str()))
+    if (IsOutputConnected())
     {
       FabricCore::RTVal rtOutVal = m_binding.getArgValue(m_outArgName.c_str());
       FabricToMaxValue(rtOutVal, m_value);

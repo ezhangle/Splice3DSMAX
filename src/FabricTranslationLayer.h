@@ -358,6 +358,8 @@ public:
 	void Invalidate() { m_valid.SetEmpty(); }
 	// Send DCC info to graph (time, name, etc)
 	void SetupEvalContext(TimeValue t);
+	// Returns true if the graphs output port is connected to the fabric graph
+	bool IsOutputConnected();
 	// Push our parameters to the Fabric system, and get the results back...
 	const TResultType& Evaluate(TimeValue t, Interval& ivValid);
 	// Do an evaluation, but do not return the calculated value

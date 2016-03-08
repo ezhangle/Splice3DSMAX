@@ -25,7 +25,7 @@
 class FabricMesh : public FabricTranslationLayer<GeomObject, Mesh>
 {
 public:
-
+	
 	//Constructor/Destructor
 	FabricMesh(BOOL loading);
 	virtual ~FabricMesh();	
@@ -269,11 +269,16 @@ void FabricMesh::GetWorldBoundBox(TimeValue t, INode* pNode, ViewExp* /*vpt*/, B
 }
 
 void FabricMesh::GetLocalBoundBox(TimeValue t, INode *mat, ViewExp * /*vpt*/, Box3& box )
-{
-	Interval ivDontCare;
-	const Mesh& mesh = Evaluate(t, ivDontCare);
-	Mesh* pMeshNoConst = const_cast<Mesh*>(&mesh);
-	box = pMeshNoConst->getBoundingBox();
+{ 
+	if (IsOutputConnected()) {
+		Interval ivDontCare;
+		const Mesh& mesh = Evaluate(t, ivDontCare);
+		Mesh* pMeshNoConst = const_cast<Mesh*>(&mesh);
+		box = pMeshNoConst->getBoundingBox();
+	} else{
+		Point3 originatzero(0, 0, 0);
+		box.MakeCube(originatzero, 5);
+	}
 }
 
 void FabricMesh::GetDeformBBox(TimeValue t, Box3& box, Matrix3* tm, BOOL useSel )

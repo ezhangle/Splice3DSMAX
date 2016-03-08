@@ -307,7 +307,7 @@ void FabricEvents::HookViewportRender()
 		static DWORD dontShowMsg(0);
 		if (!dontShowMsg && !GetCOREInterface()->GetQuietMode())
 		{
-			MaxMsgBox(NULL, _T("For Fabric Engine rendering, please restart max in OGL graphics mode"), _T("Incompatible Render Mode"), MB_OK, MAX_MB_DONTSHOWAGAIN, &dontShowMsg);
+			MaxMsgBox(NULL, _T("For Fabric Engine inline drawing to work in the viewport, 'Legacy OpenGL' display driver is required."), _T("Incompatible Render Mode"), MB_OK, MAX_MB_DONTSHOWAGAIN, &dontShowMsg);
 		}
 	}
 	else 

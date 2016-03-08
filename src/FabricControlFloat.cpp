@@ -65,7 +65,6 @@ FabricControlFloat::~FabricControlFloat()
 
 void FabricControlFloat::Copy(Control *)
 {
-
 }
 
 void FabricControlFloat::GetValue(TimeValue t, void *val, Interval &interval, GetSetMethod method)

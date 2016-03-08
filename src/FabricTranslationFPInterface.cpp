@@ -28,7 +28,7 @@ BOOL FabricTranslationFPInterface::ShowDFGGraphEditor()
 {
 	CloseDFGGraphEditor();
 
-	m_pDFGWidgetWindow = DockableWindow::Create(_T("Fabric DFG"), this);
+	m_pDFGWidgetWindow = DockableWindow::Create(_T("Fabric Engine - Canvas"), this);
 	HWND h = m_pDFGWidgetWindow->GetHWND();
 	QWinWidget* dlg = new QWinWidget(h);
 	/*MaxDFGWidget* pWidget = */new MaxDFGWidget(dlg, GetBinding(), &m_fabricCmdHandler);

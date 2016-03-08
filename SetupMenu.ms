@@ -23,21 +23,6 @@ autoUndoEnabled:false
     on isChecked return Fabric.Manipulation
 )
 
--- macro script to load a Fabric preset
-macroScript LoadFabricPreset
-category:"FabricEngine"
-internalCategory:"FabricEngine"
-tooltip:"Load a Fabric Canvas Preset File"
-buttontext:"Load Preset"
-autoUndoEnabled:false
-(
-  f = getOpenFileName caption:"Select a canvas Preset File:" types:"Fabric Canvas Preset(*.canvas)|*.canvas"
-  if f != undefined then
-  (
-    Fabric.LoadFromFile f
-  )
-)
-
 -- macro script to open the help for Fabric. 
 macroScript FabricHelp 
 category:"FabricEngine" 
@@ -78,14 +63,7 @@ fn RegisterFabricEngineMenu = (
 
     local sepItem = menuMan.createSeparatorItem()
     FabricMenu.addItem sepItem -1
-
-    local loadFabricPresetAction = menuMan.createActionItem "LoadFabricPreset" "FabricEngine"
-    --add the ActionItem to the menu
-    FabricMenu.addItem loadFabricPresetAction -1
-
-    local sepItem = menuMan.createSeparatorItem()
-    FabricMenu.addItem sepItem -1
-
+	  
     local FabricHelpAction = menuMan.createActionItem "FabricHelp" "FabricEngine"
     --add the ActionItem to the menu
     FabricMenu.addItem FabricHelpAction -1

@@ -806,6 +806,10 @@ void FabricToMaxValue(const FabricCore::RTVal& rtVal, int& param)
 	else if (strcmp(spliceType, "Index") == 0)
 		param = (int)ncrtVal.getUInt64();
 
+	// boolean option
+	else if (strcmp(spliceType, "Boolean") == 0)
+		param = (int)ncrtVal.getBoolean(); 
+
 	else // default
 		param = ncrtVal.getSInt32();
 }

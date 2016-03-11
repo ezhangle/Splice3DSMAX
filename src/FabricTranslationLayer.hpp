@@ -825,7 +825,7 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SyncMaxParamLimits(const c
   ParamDef& def = pDesc->GetParamDef(pid);
   int baseType = base_type(def.type);
 
-  std::string rangeStr = GetPortMetaData(argName, "uiRange");
+  std::string rangeStr = GetPortMetaData(argName, "uiHardRange");
   if (rangeStr.empty())
   {
     // If nothing set, reset to default.

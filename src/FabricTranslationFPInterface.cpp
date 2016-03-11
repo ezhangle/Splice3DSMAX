@@ -588,7 +588,7 @@ bool FabricTranslationFPInterface::SetArgUIMinMax(const MSTR& argName, FPValue* 
 		}
 
 		CStr cArgName = argName.ToCStr();
-		if (SetPortMetaData(cArgName.data(), "uiRange", buffer, nullptr))
+		if (SetPortMetaData(cArgName.data(), "uiHardRange", buffer, nullptr))
 		{
 			SyncMetaDataFromPortToParam(cArgName.data());
 			return true;

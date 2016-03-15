@@ -260,6 +260,8 @@ void ConvertToRTVal(int param, FabricCore::RTVal& rtVal)
 		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
 	else if (strcmp(spliceType, "Index") == 0)
 		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
+	else if (strcmp(spliceType, "Integer") == 0)
+		rtVal = FabricCore::RTVal::ConstructSInt32(GetClient(), param);
 
 	// These can come through sometimes
 	else if (strcmp(spliceType, "Float32") == 0 || strcmp(spliceType, "Scalar") == 0)

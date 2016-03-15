@@ -1,4 +1,6 @@
 
+
+
 -- macro script to toggle Fabric rendering
 macroScript FabricRendering 
 category:"FabricEngine"
@@ -7,8 +9,13 @@ tooltip:"Enable Fabric Viewport Rendering"
 buttontext:"Viewport Render"
 autoUndoEnabled:false
 (
-    on execute do Fabric.Rendering = not Fabric.Rendering
-    on isChecked return Fabric.Rendering
+    on isEnabled do (Fabric!=undefined)
+	on execute do(
+		if (Fabric!=undefined) do ( Fabric.Rendering = not Fabric.Rendering )
+	)
+    on isChecked do(
+		if(Fabric!=undefined) do ( return Fabric.Rendering )
+	)
 )
 
 -- macro script to toggle Fabric manipulation
@@ -19,8 +26,14 @@ tooltip:"Enable Fabric Manipulation"
 buttontext:"Manipulation"
 autoUndoEnabled:false
 (
-    on execute do Fabric.Manipulation = not Fabric.Manipulation
-    on isChecked return Fabric.Manipulation
+    on isEnabled do (Fabric!=undefined)
+	on execute do(
+		if (Fabric!=undefined) do ( Fabric.Manipulation = not Fabric.Manipulation )
+	)
+    on isChecked do(
+		if(Fabric!=undefined) do ( return Fabric.Manipulation )
+	)
+
 )
 
 -- macro script to open the help for Fabric. 
@@ -53,7 +66,7 @@ fn RegisterFabricEngineMenu = (
     -- Create a new menu
     local FabricMenu = menuMan.createMenu __FE_MENU_NAME
 
-    local toggleRenderingAction = menuMan.createActionItem "FabricRendering" "FabricEngine"
+	local toggleRenderingAction = menuMan.createActionItem "FabricRendering" "FabricEngine"
     --add the ActionItem to the menu
     FabricMenu.addItem toggleRenderingAction -1
 

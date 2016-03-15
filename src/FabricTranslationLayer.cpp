@@ -752,6 +752,43 @@ bool IsPortArray(const FabricCore::DFGExec& exec, const char* argName)
 {
 	return is_array(GetPortType(exec, argName));
 }
+
+bool AreTypesCompatible(int type1, int type2) {
+	switch (type1)
+	{
+	case TYPE_FLOAT:
+	case TYPE_ANGLE:
+	case TYPE_PCNT_FRAC:
+	case TYPE_WORLD:
+	{
+		switch (type2)
+		{
+			case TYPE_FLOAT:
+			case TYPE_ANGLE:
+			case TYPE_PCNT_FRAC:
+			case TYPE_WORLD:
+			{
+				return TRUE;
+				break;
+			}
+			default:
+			{
+				return False;
+				break;
+			}
+		}
+		break;
+	}
+		default:
+		{
+			return False;
+			break;
+		}
+	}
+
+}
+
+
 // If the 'value' string is an array type, remove the Array
 // denominator and return true, else false;
 inline bool sub_array(std::string& type)

@@ -89,6 +89,7 @@ int GetPortParamID(const FabricCore::DFGExec& exec, const char* argName);
 int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName);
 const char* GetPortType(const FabricCore::DFGExec& exec, const char* argName);
 bool IsPortArray(const FabricCore::DFGExec& exec, const char* argName);
+bool AreTypesCompatible(int type1, int type2);
 
 std::string GetPortConnection(FabricTranslationFPInterface* pOwner, const char* argName);
 void SetPortConnection(FabricTranslationFPInterface* pOwner, const char* argName, const char* name);

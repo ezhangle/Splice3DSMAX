@@ -769,9 +769,13 @@ int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
         // Check that its not the correct type already
         if (m_pblock->GetParamDef((ParamID)paramId).type != maxType)
         {
-          // Is the type incompatible?  For now... guess so...
-          DeleteMaxParameter((ParamID)paramId);
-          paramId = -1;
+			
+			// Check that the types are compatible
+			if(!AreTypesCompatible(m_pblock->GetParamDef((ParamID)paramId).type, maxType)) 
+			{
+				DeleteMaxParameter((ParamID)paramId);
+				paramId = -1;
+			}
         }
       }
     }

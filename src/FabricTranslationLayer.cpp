@@ -68,6 +68,8 @@ bool CopyValue(int type, ParamID newId, IParamBlock2* pNewBlock, ParamID oldId, 
 				pNewBlock->SetValue(newId, t, pCopyBlock->GetFloat(oldId, t, i), i);
 				break;
 			case TYPE_BOOL:
+				pNewBlock->SetValue(newId, t, pCopyBlock->GetInt(oldId, t, i), i);
+				break;
 			case TYPE_INT:
 				pNewBlock->SetValue(newId, t, pCopyBlock->GetInt(oldId, t, i), i);
 				break;
@@ -512,7 +514,7 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 				GenerateParamSpinner( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs );
 				break;
 			case TYPE_STRING:    GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTEDITWINDOWCLASS ); break;
-			case TYPE_BOOL:        GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, L"Button", BS_AUTOCHECKBOX | WS_TABSTOP | WS_VISIBLE ); break;
+			case TYPE_BOOL:        GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, L"Button", BS_AUTOCHECKBOX | WS_TABSTOP | WS_VISIBLE | WS_CHILD); break;
 			case TYPE_MTL:        GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS ); break;
 			case TYPE_TEXMAP:    GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS ); break;
 			case TYPE_INODE:    GenerateParamUI( dialogTemplate, ypos, ctrlId, pbDef.ctrl_IDs[0], CTRL_WIDTH, CUSTBUTTONWINDOWCLASS ); break;

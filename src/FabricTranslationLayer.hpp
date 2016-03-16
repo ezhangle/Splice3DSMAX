@@ -771,10 +771,27 @@ int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
         {
 			
 			// Check that the types are compatible
-			if(!AreTypesCompatible(m_pblock->GetParamDef((ParamID)paramId).type, maxType)) 
+			ParamDef& pdef = m_pblock->GetParamDef( (ParamID)paramId );
+			if(!AreTypesCompatible(pdef.type, maxType)) 
 			{
 				DeleteMaxParameter((ParamID)paramId);
 				paramId = -1;
+			}
+			else
+			{
+				// Replace the param definition without changing the pblock
+				// This is only possible because although the definition is different
+				// the data is identical so the pblock doesn't care about the change
+				ParamBlockDesc2* pDesc = m_pblock->GetDesc();
+
+				SetMaxParamName( pDesc, (ParamID)paramId, NULL );
+				pDesc->DeleteParam( (ParamID)paramId );
+				AddMaxParameter( pDesc, maxType, MSTR::FromACP(argName), (ParamID)paramId );
+
+				// They are all float types, so we can safely change
+				// from one type to the next without changing the actual pblock
+				//pdef.type = (ParamType2)maxType;
+				UpdateUISpec();
 			}
         }
       }

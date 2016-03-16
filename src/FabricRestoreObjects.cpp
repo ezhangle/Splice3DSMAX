@@ -65,12 +65,14 @@ void FabricCoreRestoreObj::Restore(int isUndo)
 {
 	bool didUndo = GetHost().maybeUndo();
 	DbgAssert(didUndo);
+	didUndo; // No warn in release mode thanks
 }
 
 void FabricCoreRestoreObj::Redo()
 {
 	bool didRedo = GetHost().maybeRedo();
 	DbgAssert(didRedo);
+	didRedo; // No warn in release mode thanks
 }
 
 QUndoStack* GetQtUndoStack()

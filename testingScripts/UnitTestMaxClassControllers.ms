@@ -6,6 +6,7 @@ fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
 p1 = point()
 dfgCtrller = FabricMatrixController()
 p1.controller = dfgCtrller
+dfgCtrller.ShowDFGGraphEditor()
 
 evalNode = dfgCtrller.DFGInstPreset "Fabric.Exts.Util.EvalContext.CurrentEvalContext" [341.000000,183.000000]   execPath:""
 setTransNode = dfgCtrller.DFGInstPreset "Fabric.Exts.Math.Mat44.SetTranslation" [237.000000,183.000000]   execPath:""

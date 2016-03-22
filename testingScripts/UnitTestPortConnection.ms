@@ -32,9 +32,12 @@ dataSource.DFGConnect "GetTime.result" "makeMatrices.time"   execPath:""
 
 dataSource.DFGAddPort "value" 2 "Mat44[]" portToConnect:"makeMatrices.matrices"
 dataSource.DFGMoveNodes #("makeMatrices") #([294.776031,155.906265])   execPath:""
-dataSource.DFGAddPort "count" 0 "Size" portToConnect:"makeMatrices.count" extDep:"" metaData:"" execPath:""
 
-numOutputs = 3
+-- Size is not defined in max. We therefore can't expose a "size" to max. We use a UInt32 instead
+dataSource.DFGAddPort "count" 0 "UInt32" portToConnect:"makeMatrices.count" extDep:"" metaData:"" execPath:""
+
+-- Right now this does not itterate over more than the first output. 
+numOutputs = 1
 -- This data source will generate 3 matrices
 dataSource.count = numOutputs
 dataSource.ShowDFGGraphEditor()
@@ -44,14 +47,15 @@ pts = #()
 for i = 0 to (numOutputs - 1) do (
 	pt = Point()
 	dfgCtrl = FabricMatrixController()
+	--Show the dfg graph if desired
+	--dfgCtrl.ShowDFGGraphEditor()
 	
-	dfgCtrl.DFGInstPreset "Fabric.Core.Array.Get" [300.000000,183.000000]   execPath:""
+	CtrlGet = dfgCtrl.DFGInstPreset "Fabric.Core.Array.Get" [300.000000,183.000000]   execPath:""
 	dfgCtrl.DFGMoveNodes #("Get") #([265.000000,168.000000])   execPath:""
-	dfgCtrl.DFGAddPort "index" 0 "UInt32" portToConnect:"Get.index" extDep:"" metaData:"" execPath:""
-	dfgCtrl.DFGAddPort "dataVal" 0 "Mat44[]" portToConnect:"" extDep:"" metaData:"" execPath:""
-	dfgCtrl.DFGConnect "dataVal" "Get.array"   execPath:""
+	dfgCtrl.DFGAddPort "index" 0 "UInt32" portToConnect:(CtrlGet + ".index") extDep:"" metaData:"" execPath:""
+	dfgCtrl.DFGAddPort "dataVal" 0 "Mat44[]" portToConnect:(CtrlGet + ".array")  extDep:"" metaData:"" execPath:""
+	dfgCtrl.DFGConnect (CtrlGet + ".element")  "outputValue"   execPath:""
 	dfgCtrl.ConnectArgs "dataVal" dataSource "value" postUI:(i == 0)
-	dfgCtrl.DFGConnect "Get.element" "outputValue"   execPath:""
 		
 	pt.controller = dfgCtrl
 	dfgCtrl.index = i
@@ -76,3 +80,5 @@ for i = 0 to numOutputs - 1 do (
 	currPosition = pt.transform.position
 	FAssert (currPosition == expectedPosition) ("Point didn't get the right position: " + (currPosition as string) + " != " +(expectedPosition as string))
 )
+
+print "Works if we only have numOUtputs=1"

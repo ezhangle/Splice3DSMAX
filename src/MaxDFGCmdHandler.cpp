@@ -3,7 +3,14 @@
 
 #include <macrorec.h>
 
+//////////////////////////////////////////////////////////////////////////
+// defines
 
+const MSTR s_PortTypeEnumOUT = _M("DFGPortOUT");
+const MSTR s_PortTypeEnumIO = _M("DFGPortIO");
+const MSTR s_PortTypeEnumIN = _M("DFGPortIN");
+
+//////////////////////////////////////////////////////////////////////////
 
 MaxDFGCmdHandler::MaxDFGCmdHandler(FabricTranslationFPInterface* pTranslation)
 	: DFGUICmdHandler_QUndo(GetQtUndoStack())
@@ -176,10 +183,23 @@ std::string MaxDFGCmdHandler::dfgDoAddSet(FabricCore::DFGBinding const &binding,
 std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef desiredPortName, FabricCore::DFGPortType portType, FTL::CStrRef typeSpec, FTL::CStrRef portToConnect, FTL::StrRef extDep, FTL::CStrRef metaData)
 {
 	MSTR cmd;
-	cmd.printf(_M("$.%s %s %i %s portToConnect:%s extDep:%s metaData:%s execPath:%s"),
+	MSTR portTypeEnum = _M( "#" );
+	switch (portType)
+	{
+		case FabricCore::DFGPortType_Out:
+			portTypeEnum.Append(s_PortTypeEnumOUT);
+			break;
+		case FabricCore::DFGPortType_In:
+			portTypeEnum.Append(s_PortTypeEnumIN);
+			break;
+		case FabricCore::DFGPortType_IO:
+			portTypeEnum.Append(s_PortTypeEnumIO);
+			break;
+	}
+	cmd.printf(_M("$.%s %s %s %s portToConnect:%s extDep:%s metaData:%s execPath:%s"),
 		_M("DFGAddPort"),
 		TO_MCHAR(desiredPortName),
-		portType,
+		portTypeEnum.data(),
 		TO_MCHAR(typeSpec),
 		TO_MCHAR(portToConnect),
 		TO_MCHAR(extDep),
@@ -196,10 +216,10 @@ std::string MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding
 	// I think that the issue with the boolean input is located here. I'm not sure what it is exactly...
 	if (isPossibleMaxPort)
 	{
-    // It appears that the result will be NULL if called from MxS, and non-NULL
-    // if called from the UI.  It's very difficult to tell what the reason for this
-    // difference is, so here we just detect if the call returned the new ports name
-    const char* resPortName = res.empty() ? desiredPortName.data() : res.c_str();
+		// It appears that the result will be NULL if called from MxS, and non-NULL
+		// if called from the UI.  It's very difficult to tell what the reason for this
+		// difference is, so here we just detect if the call returned the new ports name
+		const char* resPortName = res.empty() ? desiredPortName.data() : res.c_str();
 		// If we have add a new 'in' port, by default we create a matching 3ds max port.
 		m_pTranslationLayer->SyncMetaDataFromPortToParam( resPortName );
 	}

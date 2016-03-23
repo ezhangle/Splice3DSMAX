@@ -578,13 +578,13 @@ bool FabricTranslationFPInterface::SetArgUIMinMax(const MSTR& argName, FPValue* 
 		{
 			float min = uiMin->f;
 			float max = uiMax->f;
-			sprintf(buffer, "(%f,%f)", min, max);
+			sprintf(buffer, "(%f, %f)", min, max);
 		}
 		else
 		{
 			int min = uiMin->i;
 			int max = uiMax->i;
-			sprintf(buffer, "(%i,%i)", min, max);
+			sprintf(buffer, "(%i, %i)", min, max);
 		}
 
 		CStr cArgName = argName.ToCStr();

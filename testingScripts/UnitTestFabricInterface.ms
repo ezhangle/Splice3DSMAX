@@ -41,37 +41,37 @@ FAssert($.GetNodeType epm == 0) "Erroring getting node type"
 
 $.DFGConnect (epm + ".mesh") (func + ".inVal")  execPath:""
 
-res = $.DFGAddPort "aport" 0 "UInt32" portToConnect:"" extDep:"" execPath:""
+res = $.DFGAddPort "aport" #DFGPortIN "UInt32" portToConnect:"" extDep:"" execPath:""
 FAssert($.GetPortType res == "UInt32") "Error creating port type"
 FAssert($.GetMaxTypeForArg res == 1) "Created bad Max type"
 FAssert($.GetPortCount() == 2) "Error in port count"
-$.DFGRenamePort res "aDiffPort"  execPath:""
-FAssert($.GetPortName 2 == "aDiffPort") "Error in port name"
-$.DFGRemovePort "aDiffPort"   execPath:""
+res = $.DFGRenamePort res "aDiffPort"  execPath:""
+FAssert($.GetPortName 2 == res) "Error in port name"
+$.DFGRemovePort res execPath:""
 	
 graph = $.DFGAddGraph "graph" [317.000000,137.000000]  execPath:""
 $.DFGMoveNodes (graph) ([78.000000,96.000000])  execPath:""
-$.DFGAddBackDrop "backdrop" [180.000000,196.000000]  execPath:""
+$.DFGAddBackDrop "backdrop" [180.000000,196.000000]  execPath:"" -- Note, this call does not return a string (all other adds do)
 $.DFGResizeBackDrop "backDrop" [180.000000,196.000000] [230.000000,94.000000] execPath:""
 $.DFGMoveNodes ("backDrop") ([92.000000,146.000000])  execPath:""
 FAssert($.GetNodeCount() == 4) "Erroring making new nodes"
 $.DFGRemoveNodes #("backDrop", graph)  execPath:""
 FAssert($.GetNodeCount() == 2) "Erroring deleting new nodes"
 
-res = $.DFGAddPort "aport" 0 "UInt32" portToConnect:"" extDep:"" execPath:""
+res = $.DFGAddPort "aport" #DFGPortIN "UInt32" portToConnect:"" extDep:"" execPath:""
 aVar = $.DFGAddVar "myVar" "UInt32" "" [255.000000,267.000000] execPath:""
-FAssert($.GetNodeCount() == 3) "Erroring deleting new nodes"
+FAssert($.GetNodeCount() == 3) "Erroring creating var node"
 $.DFGSetNodeComment aVar "This is a variable"  execPath:""
 $.DFGDisconnect (epm + ".mesh") (func + ".inVal")  execPath:""
 $.DFGConnect (aVar + ".value") (func + ".inVal")  execPath:""
-$.DFGAddPort "inVal" 2 "UInt32" portToConnect:(func + ".inVal") extDep:"" execPath:""
+$.DFGAddPort "outVal" #DFGPortOUT "UInt32" portToConnect:(func + ".inVal") extDep:"" execPath:""
 $.DFGSetPortDefaultValue (func + ".inVal") 10   execPath:""
 $.DFGConnect "aport" (aVar + ".value")  execPath:""
 
 aGet = $.DFGAddGet "get" "myVar" [172.000000,270.000000] execPath:""
 aSet = $.DFGAddSet "set" "myVar" [171.000000,312.000000] execPath:""
 $.DFGMoveNodes (aSet) ([58.000000,152.000000])  execPath:""
-FAssert($.GetNodeCount() == 5) "Erroring deleting new nodes"
+FAssert($.GetNodeCount() == 5) "Erroring creating Get/Set"
 
 $.DFGSetTitle "PrintFunc"  execPath:func
 func = "PrintFunc"
@@ -85,6 +85,7 @@ FAssert($.GetMaxTypeForArg "aport" == 0) "Resetting port type"
 
 $.DFGConnect "aport" (aVar + ".value")  execPath:""
 
+-- Test changing the input type to Percent
 legalTypes = $.GetLegalMaxTypesForArg "aport"
 FAssert legalTypes[6] "Get legal types"
 $.SetMaxTypeForArg "aport" 6
@@ -92,23 +93,25 @@ $.SetMaxTypeForArg "aport" 6
 maxType = $.GetPortMetaData "aport" "MaxType"
 FAssert (maxType == "6") "Set MaxType"
 
--- Test this
+-- Test that the input type is appropriately reflected in the values coming through
+$.aport = 17
+FAssert($.GetArgValue "aport" == 0.17) "Getting val"
+
 $.DFGEditPort "aport" desiredNewPortName:"aport" typeSpec:"Float32" metadata:"{
   \"uiHidden\" : \"\",
   \"uiOpaque\" : \"\",
   \"uiPersistValue\" : \"\",
-  \"uiRange\" : \"(0, 10)\",
+  \"uiHardRange\" : \"(0, 10)\",
   \"uiCombo\" : \"\",
-  \"MaxType\" : 1
+  \"MaxType\" : \"6\"
   }" execPath:""
 
-uiRange = $.GetPortMetaData "aport" "uiRange"
+uiRange = $.GetPortMetaData "aport" "uiHardRange"
 FAssert (uiRange == "(0, 10)") "Set UIRange"
 
--- There seems to be an issue with SetArgUIMinMax
---$.SetArgUIMinMax "aport" 0 5
---uiRange = $.GetPortMetaData "aport" "uiRange"
---FAssert (uiRange == "(0, 5)") "ReSet UIRange"
+$.SetArgMinMax "aport" 0 5
+uiRange = $.GetPortMetaData "aport" "uiHardRange"
+FAssert (uiRange == "(0, 5)") "ReSet UIRange"
 
 $.DFGImplodeNodes #(func, aGet, aSet) "graph"  execPath:""
 FAssert($.GetNodeCount() == 3) "imploding nodes"
@@ -116,10 +119,6 @@ $.DFGExplodeNode "graph"   execPath:""
 FAssert($.GetNodeCount() == 5) "Explode nodes"
 
 $.DFGSetExtDeps ("Geometry")    execPath:""
-
-$.aport = 17 -- Note, this won't trigger an evaluate, so won't get pushed through the graph
-$.DFGSetArgValue "aport" 17
-FAssert($.GetArgValue "aport" == 0.17) "Getting val"
 
 $.DFGReorderPorts #(1, 2, 0)    execPath:""
 
@@ -146,4 +145,4 @@ $.RestoreFromJSON jsonString true
 FAssert($.GetNodeCount() == 5) "JSON Restore"
 
 sm.CloseDFGGraphEditor()
-print "All works, except the function setArgUIMinMax!!!"
+print "All works"

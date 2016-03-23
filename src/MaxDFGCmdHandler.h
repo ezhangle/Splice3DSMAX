@@ -249,3 +249,6 @@ public:
 };
 
 
+extern const MSTR s_PortTypeEnumOUT;
+extern const MSTR s_PortTypeEnumIO;
+extern const MSTR s_PortTypeEnumIN;

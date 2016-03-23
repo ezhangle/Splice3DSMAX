@@ -579,9 +579,9 @@ FPInterfaceDesc* GetDescriptor()
 
 		enums,
 			FabricTranslationFPInterface::port_mode_enum, 3,
-				_T("IN"), FabricCore::DFGPortType_In,
-				_T("IO"), FabricCore::DFGPortType_IO,
-				_T("OUT"), FabricCore::DFGPortType_Out,
+				s_PortTypeEnumIN.data(), FabricCore::DFGPortType_In,
+				s_PortTypeEnumIO.data(), FabricCore::DFGPortType_IO,
+				s_PortTypeEnumOUT.data(), FabricCore::DFGPortType_Out,
 		p_end
 		);
 	return &_ourDesc;

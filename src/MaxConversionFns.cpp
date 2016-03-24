@@ -257,7 +257,7 @@ void ConvertToRTVal(int param, FabricCore::RTVal& rtVal)
 
 	// These last two param types may be deprecated
 	else if (strcmp(spliceType, "Size") == 0)
-		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
+		rtVal = FabricCore::RTVal::ConstructUInt32(GetClient(), param);
 	else if (strcmp(spliceType, "Index") == 0)
 		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
 	else if (strcmp(spliceType, "Integer") == 0)
@@ -804,7 +804,7 @@ void FabricToMaxValue(const FabricCore::RTVal& rtVal, int& param)
 
 	// These last two param types may be deprecated
 	else if (strcmp(spliceType, "Size") == 0)
-		param = (int)ncrtVal.getUInt64();
+		param = (int)ncrtVal.getUInt32();
 	else if (strcmp(spliceType, "Index") == 0)
 		param = (int)ncrtVal.getUInt64();
 

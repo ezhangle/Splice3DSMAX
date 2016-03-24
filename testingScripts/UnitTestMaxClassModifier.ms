@@ -51,6 +51,6 @@ assert (CompArray (GetTriMeshFaceCount m) #(20000, 10201)) message:"Bad Init Tri
 m.baseobject.widthSegs = 200
 
 -- The following assertion does not work correctly, however the graph seems to build correctly	
---assert (CompArray (GetTriMeshFaceCount m) #(40000, 20301)) message:"Bad Init Tri Count" options:#(#dialog)	
+assert (CompArray (GetTriMeshFaceCount m) #(40000, 20301)) message:"Bad Init Tri Count" options:#(#dialog)	
 	
-print "Final Assertion does not hold!"	
+print "All Works"

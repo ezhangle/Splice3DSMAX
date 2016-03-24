@@ -83,6 +83,6 @@ bb1 = GetBBSize(v2)
 wsmClone = copy sp.modifiers[1]
 addModifier v2 wsmClone
 bb2 = GetBBSize(v2)
-FAssert (bb1 != bb2) "Clone WSM had no effect"FAssert (bb1 != bb2) "Clone WSM had no effect"
+FAssert (bb1 != bb2) "Clone WSM had no effect"
 
 print "All working!!!"

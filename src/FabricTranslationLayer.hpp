@@ -661,12 +661,12 @@ bool FabricTranslationLayer<TBaseClass, TResultType>::ConnectArgs(const MSTR& my
       return false;
   
     // Ok - these ports are good to go.  Connect 'em up.
-    int res = SetMaxTypeForArg(cDstPort, TYPE_REFTARG);
+	SetPortConnection( this, cDstPort, cSrcPort );
+	SetPortPostConnectionUI( this, cDstPort, postConnectionsUI );
+	int res = SetMaxTypeForArg( cDstPort, TYPE_REFTARG );
     if (res < 0)
       return false;
     m_pblock->SetValue((ParamID)res, 0, pSrcContainer);
-    SetPortConnection(this, cDstPort, cSrcPort);
-    SetPortPostConnectionUI(this, cDstPort, postConnectionsUI);
   
   MAXSPLICE_CATCH_RETURN(false)
   

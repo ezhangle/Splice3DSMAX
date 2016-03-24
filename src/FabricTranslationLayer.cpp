@@ -620,9 +620,13 @@ int GetPortParamID(const FabricCore::DFGExec& exec, const char* argName)
 	return -1;
 }
 
+std::string GetPortConnection( FabricCore::DFGExec exec, const char* argName )
+{
+	return exec.getExecPortMetadata( argName, MAX_SRC_OPT );
+}
 std::string GetPortConnection(FabricCore::DFGBinding& binding, const char* argName) 
 {
-	return binding.getExec().getExecPortMetadata(argName, MAX_SRC_OPT);
+	return GetPortConnection( binding.getExec(), argName);
 }
 
 void SetPortConnection(FabricTranslationFPInterface* pOwner, const char* argName, const char* name)
@@ -697,6 +701,12 @@ int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName)
 	if (idstr != nullptr && idstr[0] != '\0') {
 		maxType = atoi(idstr);
 	}
+
+	// A connected port is assumed always valid 
+	// (we assume the connection has been made to a valid source)
+	if (maxType == TYPE_REFTARG && !GetPortConnection( exec, argName ).empty())
+		return maxType;
+
 
 	const char* portType = GetPortType(exec, argName);
 	if (maxType > 0)

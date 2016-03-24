@@ -10,7 +10,7 @@ fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
 
 dataSource = FabricReferenceTarget()
 
-dataSource.DFGAddFunc "makeMatrices" "dfgEntry {
+mm = dataSource.DFGAddFunc "makeMatrices" "dfgEntry {
   // result = a + b;
 }
 " [506.776030,168.906259]  execPath:""
@@ -25,19 +25,18 @@ dataSource.DFGSetCode "dfgEntry {
   }
 }
 "    execPath:"makeMatrices"
-dataSource.DFGInstPreset "Fabric.Exts.Util.EvalContext.CurrentEvalContext" [-66.000000,137.000000]   execPath:""
-dataSource.DFGInstPreset "Fabric.Exts.Util.EvalContext.GetTime" [-5.000000,126.000000]   execPath:""
-dataSource.DFGConnect "CurrentEvalContext.context" "GetTime.this"   execPath:""
-dataSource.DFGConnect "GetTime.result" "makeMatrices.time"   execPath:""
+eval = dataSource.DFGInstPreset "Fabric.Exts.Util.EvalContext.CurrentEvalContext" [-66.000000,137.000000]   execPath:""
+getTime = dataSource.DFGInstPreset "Fabric.Exts.Util.EvalContext.GetTime" [-5.000000,126.000000]   execPath:""
+dataSource.DFGConnect (eval + ".context") (getTime + ".this")   execPath:""
+dataSource.DFGConnect (getTime + ".result") (mm + ".time")   execPath:""
 
-dataSource.DFGAddPort "value" 2 "Mat44[]" portToConnect:"makeMatrices.matrices"
-dataSource.DFGMoveNodes #("makeMatrices") #([294.776031,155.906265])   execPath:""
+dataSource.DFGAddPort "value" 2 "Mat44[]" portToConnect:(mm + ".matrices")
+dataSource.DFGMoveNodes #(mm) #([294.776031,155.906265])   execPath:""
+dataSource.DFGMoveNodes #(getTime) #([152.000000,72.000000])   execPath:""
 
--- Size is not defined in max. We therefore can't expose a "size" to max. We use a UInt32 instead
-dataSource.DFGAddPort "count" 0 "UInt32" portToConnect:"makeMatrices.count" extDep:"" metaData:"" execPath:""
+dataSource.DFGAddPort "count" 0 "Size" portToConnect:(mm + ".count") extDep:"" metaData:"" execPath:""
 
--- Right now this does not itterate over more than the first output. 
-numOutputs = 1
+numOutputs = 3
 -- This data source will generate 3 matrices
 dataSource.count = numOutputs
 dataSource.ShowDFGGraphEditor()
@@ -81,4 +80,4 @@ for i = 0 to numOutputs - 1 do (
 	FAssert (currPosition == expectedPosition) ("Point didn't get the right position: " + (currPosition as string) + " != " +(expectedPosition as string))
 )
 
-print "Works if we only have numOUtputs=1"
+print "All Works"

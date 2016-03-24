@@ -8,11 +8,8 @@
 -----------------------------------------------------------------------------
 
 fn DoLoadFile filepath = (
-	numObjects = objects.count
-	res = Fabric.loadFromFile filepath
-	-- We should have a newly created mesh object
-	assert (objects.count == numObjects + 1) message:("Did not create node for:" + filepath) options:#(#dialog)
-	fabricObj = objects[numObjects + 1]
+	fabricObj = FabricMesh()
+	res = fabricObj.LoadFromFile filepath true
 	fabricObj
 )
 
@@ -22,7 +19,7 @@ fn IsEquivVec a b = (
 -- Common data
 rootFolder = systemTools.getEnvVariable("FABRIC3DSMAXDIR")
 fabricDir = systemTools.getEnvVariable("FABRIC_DIR")
-sampleDir = fabricDir + "Samples\\Canvas\\"
+sampleDir = fabricDir + "\\Samples\\Canvas\\"
 tempFile = systemTools.getEnvVariable("TEMP") + "\\temp.canvas"
 -- Bring in util functions
 fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
@@ -31,15 +28,28 @@ fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
 Fabric.rendering = true
 
 -------------------------------------------------------------------
-alembic_inspectfile = DoLoadFile (sampleDir + "alembic_inspectfile.canvas")
-alembic_inspectfile.filePath = fabricDir + "Resources\\boxes.abc"
-alembic_inspectfile.index = 1
-FAssert(IsEquivVec (alembic_inspectfile.getArgValue "animatedPos") [4.97493,0,0]) "Bad pos from abc file"
-alembic_inspectfile.index = 2
-FAssert(IsEquivVec (alembic_inspectfile.getArgValue "animatedPos") [-1.07305,0,0]) "Bad pos from abc file"
+alembic_inspectfile = DoLoadFile (sampleDir + "Alembic\\02_alembic_get_transforms.canvas")
+RedrawViews()
+
+fget = alembic_inspectfile.DFGInstPreset "Fabric.Core.Array.Get" [967.773605,381.943403]   execPath:""
+alembic_inspectfile.DFGMoveNodes #(fget) #([949.848755,357.415253])   execPath:""
+alembic_inspectfile.DFGConnect "GetTransformArray_2.xfos" (fget + ".array")   execPath:""
+tomat = alembic_inspectfile.DFGInstPreset "Fabric.Exts.Math.Xfo.ToMat44" [944.188698,231.943395]   execPath:""
+alembic_inspectfile.DFGMoveNodes #(tomat) #([1116.830078,387.603516])   execPath:""
+alembic_inspectfile.DFGConnect (fget + ".element") (tomat + ".this")   execPath:""
+alembic_inspectfile.DFGAddPort "result" #DFGPortOUT "Mat44" portToConnect:(tomat + ".result")
+
+m = $.GetArgValue "result"
+FAssert(IsEquivVec m.pos [0,0,0]) "Bad pos from abc file"
+$.DFGSetPortDefaultValue "Get_1.index" 1 execPath:""
+m = $.GetArgValue "result"
+FAssert(IsEquivVec m.pos [0,4.37156,0]) "Bad pos from abc file"
+$.DFGSetPortDefaultValue "Get_1.index" 2 execPath:""
+m = $.GetArgValue "result"
+FAssert(IsEquivVec m.pos [0,8.68887,0]) "Bad pos from abc file"
 
 -------------------------------------------------------------------
-arrays_grid_points = DoLoadFile (sampleDir + "arrays_grid_points.dfg.canvas")
+arrays_grid_points = DoLoadFile (sampleDir + "Miscellaneous\\arrays_grid_points.dfg.canvas")
 -- This is rendered, so we can't check it.
 arrays_grid_points.U = 10
 arrays_grid_points.h = 10
@@ -47,17 +57,17 @@ arrays_grid_points.width = 10
 arrays_grid_points.height = 10
 
 -------------------------------------------------------------------
-arrays_interpolate_on_array = DoLoadFile (sampleDir + "arrays_interpolate_on_array.canvas")
+arrays_interpolate_on_array = DoLoadFile (sampleDir + "Miscellaneous\\arrays_interpolate_on_array.canvas")
 arrays_interpolate_on_array.timeline = 10
 
 -------------------------------------------------------------------
-arrays_random_points = DoLoadFile (sampleDir + "arrays_random_points.canvas")
+arrays_random_points = DoLoadFile (sampleDir + "Miscellaneous\\arrays_random_points.canvas")
 arrays_random_points.count = 50
 
 -------------------------------------------------------------------
 -- Do full load/save/load loop here
 
-bullet_boxes = DoLoadFile (sampleDir + "bullet_boxes.canvas");
+bullet_boxes = DoLoadFile (sampleDir + "Bullet\\bullet_boxes.canvas");
 -- Ironically, the bullet op doesn't take advantage of the EvalContext time parameter
 
 bullet_boxes.SaveToFile tempFile

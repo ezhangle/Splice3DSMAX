@@ -39,6 +39,7 @@
 #define MAXSPLICE_CATCH_BEGIN
 #define MAXSPLICE_CATCH_END
 #define MAXSPLICE_CATCH_RETURN(value)
+#define MAXSCRIPT_CATCH_END
 #endif
 
 

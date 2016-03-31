@@ -4,9 +4,6 @@
 #include "QApplication"
 #include "../qt-solutions/qtwinmigrate/src/QMfcApp"
 
-void AcquireQt();
-void ReleaseQt();
-
 //////////////////////////////////////////////////////////////////////////
 
 DockableWindow::DockableWindow(HWND hwndCuiFrame, FabricTranslationFPInterface* owner)
@@ -31,7 +28,10 @@ DockableWindow::~DockableWindow()
 
 	DestroyWindow(h);
 
-	ReleaseQt();
+	// #FABMAX-50 - Only release Qt on plugin release,
+	// Doing so frequently will cause Qt to re-initialize itself
+	// and write over changes FabricUI has made
+	//ReleaseQt();
 }
 
 
@@ -189,15 +189,16 @@ static int s_qt_count = 0;
 static bool s_own_qt = false;
 void AcquireQt()
 {
-	if (s_qt_count++ == 0)
+	if (s_qt_count == 0)
 	{
+		s_qt_count++;
 		s_own_qt = QMfcApp::pluginInstance( hInstance );
 	}
 }
 
 void ReleaseQt()
 {
-	if (--s_qt_count == 0 && s_own_qt)
+	if (s_qt_count != 0 && s_own_qt)
 	{
 		delete qApp;
 	}

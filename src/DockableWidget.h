@@ -63,3 +63,6 @@ public:
 
 	ICUIFrame* GetICUIFrame();
 };
+
+extern void AcquireQt();
+extern void ReleaseQt();

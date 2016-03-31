@@ -15,6 +15,7 @@ CREATED BY:		Stephen Taylor, T&A Development
 #include <notify.h>
 #include <MaxScript/MaxScript.h>
 #include "FabricEvents.h"
+#include "DockableWidget.h"
 
 // This function is called by Windows when the DLL is loaded.  This 
 // function may also be called many times during time critical operations
@@ -124,6 +125,8 @@ void OnShutdown(void* param, NotifyInfo* info)
 	FabricStaticFPInterface::GetInstance()->DestroyClient(true);
 	UnRegisterNotification(OnShutdown, nullptr);
 	// Cleanup once callback is done.
+
+	ReleaseQt();
 }
 
 __declspec( dllexport ) int LibInitialize(void)

@@ -5,7 +5,7 @@ m.width = 50
 m.lengthSegs = 100
 m.widthSegs = 100
 
-spliceMod = SpliceModifier()
+spliceMod = FabricModifier()
 spliceMod.AddInputPort "matrixA" "Mat44" 17
 spliceMod.AddInputPort "matrixB" "Mat44" 17
 spliceMod.AddInputPort "tangentLength" "Scalar" -2

@@ -1,3 +1,9 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  A simple RAII critical section handler.  Used
+//  to sync messages coming back from N FE threads
+//  to our single Max UI thread.
+//
 #pragma once
 #include <winbase.h>
 

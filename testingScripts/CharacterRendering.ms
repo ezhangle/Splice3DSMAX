@@ -1,8 +1,11 @@
 resetMaxFile #noPrompt
-thisfile = getThisScriptFilename()
-witcherFbx =  (getFilenamePath thisfile) + "testfiles/Witcher_Creep.fbx"
 
-m = SpliceMesh()
+-- Get "%FABRIC_DIR%" Environment Variable, set by the launcher script
+Environment = dotNetClass "System.Environment"
+fabricDir = Environment.GetEnvironmentVariable "FABRIC_DIR"
+witcherFbx =  fabricDir + "resources/Witcher_Creep.fbx"
+
+m = FabricMesh()
 m.AddInputPort "FbxFile" "String" -2
 m.AddInputPort "fbxCharacter" "FbxCharacter" -1 Extension:"FbxHelpers"
 m.AddInputPort "poseTexture" "InlineMatrixArrayTexture" -1 Extension:"InlineDrawing"
@@ -60,4 +63,4 @@ operator characterDrawing(
 m.SetKLCode entryPt klCode
 m.FbxFile = witcherFbx
 
-Splice.Rendering = true
+Fabric.Rendering = true

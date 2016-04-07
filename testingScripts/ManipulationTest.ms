@@ -1,5 +1,5 @@
 resetMaxFile #noPrompt
-m = SpliceMesh()
+m = FabricMesh()
 
 entryPt = "eventLogger";
 klCode = "
@@ -44,4 +44,4 @@ operator eventLogger() {
 "
 m.SetKLCode entryPt klCode
 
-Splice.manipulation = true
+Fabric.manipulation = true

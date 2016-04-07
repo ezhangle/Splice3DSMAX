@@ -1,0 +1,144 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "WinResrc.h"
+#define IDC_STATIC  -1
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PARAM_GENERATION_UI DIALOGEX 0, 0, 108, 43
+STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    PUSHBUTTON      "Open Canvas",IDC_BTN_EDIT_KL,7,7,94,14
+    PUSHBUTTON      "Load",IDC_LOAD,7,22,44,14,0,WS_EX_ACCEPTFILES
+    PUSHBUTTON      "Save",IDC_SAVE,58,22,44,14
+END
+
+IDD_UTIL_UI DIALOGEX 0, 0, 108, 83
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Add Custom Attribute",IDC_STATIC,7,7,94,69
+    PUSHBUTTON      "Launch Editor",IDC_BTN_LAUNCH_EDITOR,7,18,94,15
+    PUSHBUTTON      "Load File",IDC_BTN_LOAD_FILE,7,36,94,15
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_PARAM_GENERATION_UI, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 27
+    END
+
+    IDD_UTIL_UI, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 101
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 76
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_LIBDESCRIPTION      "Fabric Engines DFG for 3ds Max"
+    IDS_CATEGORY            "FabricMax"
+    IDS_CLASS_NAME          "DynPBCustAttr"
+    IDS_PARAMS              "Parameters"
+    IDS_SPIN                "Spin"
+    IDS_SPLICE_WSMODIFIER_CLASS "Fabric WSModifier"
+    IDS_SAVE_PRESET         "Save Preset"
+    IDS_SPLICEMESH_CLASS_NAME "FabricMesh"
+    IDS_UNINITIALIZED_PORT  "__UnIntialized__"
+    IDS_FabricModifier_CLASS_NAME "FabricModifier"
+    IDS_SPLICE_MAT_CTRL_CLASS_NAME "Fabric Transform"
+    IDS_SPLICE_POS_CTRL_CLASS_NAME "Fabric Position"
+    IDS_SPLICE_ROT_CTRL_CLASS_NAME "Fabric Rotation"
+    IDS_SPLICE_SCL_CTRL_CLASS_NAME "Fabric Scale"
+    IDS_SPLICE_FLT_CTRL_CLASS_NAME "Fabric Float"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_SPLICE_REFTARG_CLASS_NAME "Reference Target"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_LOAD_PRESET         "Load Preset"
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

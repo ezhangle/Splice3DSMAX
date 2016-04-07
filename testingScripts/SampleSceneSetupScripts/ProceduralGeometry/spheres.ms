@@ -1,6 +1,6 @@
 
 
-spheresMesh = SpliceMesh()
+spheresMesh = FabricMesh()
 spheresMesh.AddInputPort "nbSpheres" "Integer" -2
 spheresMesh.AddInputPort "spans" "Integer" -2
 spheresMesh.AddInputPort "spans2" "Integer" -2
@@ -14,7 +14,7 @@ spheresMesh.AddInputPort "angleC" "Scalar" -2
 spheresMesh.AddInputPort "thickness" "Scalar" -2
 spheresMesh.AddInputPort "scaleFactor" "Scalar" -2
 
-spheresMesh.OutPort = "SpliceMeshVal"
+spheresMesh.OutPort = "FabricMeshVal"
 
 spheresMesh.nbSpheres = 5;
 spheresMesh.spans = 11;
@@ -35,7 +35,7 @@ spheresMesh.rootMat = p1;
 spheresMesh.offsetMat = p2;
 
 
-entryPt = "SpliceMesh";
+entryPt = "FabricMesh";
 klCode = "require Math;
 require Geometry;
 
@@ -67,8 +67,8 @@ function createSphere(Xfo root, Integer spans, Integer spans2, io PolygonMesh sp
   sphere.addExtrusion(xfos, profile, false);
 }
 
-operator SpliceMesh(
-  io PolygonMesh SpliceMeshVal, 
+operator FabricMesh(
+  io PolygonMesh FabricMeshVal, 
   in Scalar angleA, 
   in Scalar angleB, 
   in Scalar angleC, 
@@ -82,7 +82,7 @@ operator SpliceMesh(
   in Integer spans2, 
   in Scalar thickness
 ) {
-  SpliceMeshVal.clear();
+  FabricMeshVal.clear();
   
   Xfo root;
   root.setFromMat44(rootMat);
@@ -111,13 +111,13 @@ operator SpliceMesh(
     {
       PolygonMesh sphere = PolygonMesh();
       createSphere(base, spans, spans2, sphere, angleA, angleB);
-      SpliceMeshVal.mergeMesh(sphere);
+      FabricMeshVal.mergeMesh(sphere);
       base = base * inc;
     }
   }
   
-  SpliceMeshVal.addShell(thickness);
-  SpliceMeshVal.recomputePointNormals(Math_degToRad(60));
+  FabricMeshVal.addShell(thickness);
+  FabricMeshVal.recomputePointNormals(Math_degToRad(60));
 }
 ";
 spheresMesh.SetKLCode entryPt klCode

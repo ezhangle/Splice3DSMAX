@@ -5,7 +5,7 @@ m.width = 50
 m.lengthSegs = 100
 m.widthSegs = 100
 
-spliceMod = SpliceModifier()
+spliceMod = FabricModifier()
 spliceMod.AddInputPort "amplitude" "Scalar" -2
 spliceMod.AddInputPort "frequency" "Scalar" -2
 

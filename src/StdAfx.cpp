@@ -15,5 +15,11 @@ const Matrix3 Matrix3::Identity(1);
 
 // The following 
 #ifdef _DEBUG
-explicit_bool ifThisDoesntCompileUpdateSpliceVersion;
+explicit_bool ifThisDoesntCompileUpdateFabricVersion;
 #endif
+
+const MSTR* EmptyStr()
+{
+  static MSTR empty( _M("") );
+  return &empty;
+}

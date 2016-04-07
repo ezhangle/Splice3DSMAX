@@ -1,4 +1,4 @@
-m = SpliceMesh()
+m = FabricMesh()
 m.AddInputPort "numPoints" "Integer" -2
 m.AddInputPort "radius" "Scalar" -2
 m.AddInputPort "points" "Points" -1
@@ -46,4 +46,4 @@ m.SetKLCode entryPt klCode
 m.radius = 10.0f
 m.numPoints = 100
 
-Splice.Rendering = true
+Fabric.Rendering = true

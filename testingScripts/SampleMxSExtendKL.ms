@@ -50,7 +50,7 @@ name:"Twisted Boxes"
 classID:#(0x133067, 0x54374)
 category:"KL Primitives"
 replaceUI:true
-extends:SpliceMesh
+extends:FabricMesh
 (
 	local clickAt
 	

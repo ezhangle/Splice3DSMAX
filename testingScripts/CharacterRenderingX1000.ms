@@ -1,9 +1,11 @@
 resetMaxFile #noPrompt
-thisfile = getThisScriptFilename()
-witcherFbx =  (getFilenamePath thisfile) + "testfiles/Witcher_Creep.fbx"
 
+-- Get "%FABRIC_DIR%" Environment Variable, set by the launcher script
+Environment = dotNetClass "System.Environment"
+fabricDir = Environment.GetEnvironmentVariable "FABRIC_DIR"
+witcherFbx =  fabricDir + "resources/Witcher_Creep.fbx"
 
-m = SpliceMesh()
+m = FabricMesh()
 m.AddInputPort "filePath" "String" -2
 m.AddInputPort "numCharacters" "Integer" -2
 m.AddInputPort "spacing" "Scalar" -2
@@ -129,5 +131,5 @@ m.numCharacters =600
 Sphere radius:2.0 smooth:on segs:32 chop:0 slice:off sliceFrom:0 sliceTo:0 mapcoords:on recenter:off pos:[6538.58,6780.46,0] isSelected:on
 	Sphere radius:96.3105 smooth:on segs:32 chop:0 slice:off sliceFrom:0 sliceTo:0 mapcoords:on recenter:off pos:[-5148.51,-5426.51,0] isSelected:on
 
-select $SpliceMesh001
-Splice.Rendering = true
+select $FabricMesh001
+Fabric.Rendering = true

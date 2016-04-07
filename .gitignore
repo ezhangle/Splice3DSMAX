@@ -11,5 +11,8 @@
 *.sdf
 *.suo
 *.user
-*.filters
-Generated.Plugin.Splice.ini
+Generated.Plugin.Fabric.ini
+src/moc_MaxDFGWidget.cpp
+stage/
+Fabric3dsmax.VC.db
+Fabric3dsmax.VC.opendb

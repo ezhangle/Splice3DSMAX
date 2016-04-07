@@ -1,24 +1,11 @@
 //**************************************************************************/
-// Copyright (c) 1998-2005 Autodesk, Inc.
-// All rights reserved.
-// 
-// These coded instructions, statements, and computer programs contain
-// unpublished proprietary information written by Autodesk, Inc., and are
-// protected by Federal copyright law. They may not be disclosed to third
-// parties or copied or duplicated in any form, in whole or in part, without
-// the prior written consent of Autodesk, Inc.
-//**************************************************************************/
-// DESCRIPTION: Include this file before including any 3ds Max SDK files. It 
-//              define the macros required to add linkable todo compile-time 
-//              messages and lower the warning level to 3.
-// AUTHOR: Jean-Francois Yelle - created Mar.20.2007
+// DESCRIPTION: Basic compiler setup, pre-compiled header to import most-used headers
+// AUTHOR: Stephen Taylor
 //***************************************************************************/
 
 #pragma once
 
 // useful for #pragma message
-#define STRING2(x) #x
-#define STRING(x) STRING2(x)
 #define TODO(x) __FILE__ "(" STRING(__LINE__) "): TODO: "x
 #define SAFE_DELETE(x) { if (x) { delete (x); (x) = NULL; } }
 #define SAFE_FREE(x) { if (x) { free (x); (x) = NULL; } }
@@ -32,16 +19,14 @@
 #pragma warning(disable:4267) //  conversion from 'size_t' to 'uint32_t', possible loss of data
 #pragma warning(disable:4245) //  signed/unsigned mismatch
 #pragma warning(disable:4238) //  class rvalue used as lvalue
-
-#pragma warning(push, 3)	// set to compiler warning level 3 for Max includes
+#pragma warning(disable:4481) // nonstandard extenion used: override specifier override
 
 // Max includes
 #include "Max.h"
 #include "istdplug.h"
 #include "iparamb2.h"
 #include "iparamm2.h"
-
-#pragma warning(pop)		// revert to current build warning level
+#include "macrorec.h"
 
 // Max 2010 changes a lot of SDK functions to be const CHAR* instead of CHAR* 
 #if MAX_VERSION_MAJOR > 12
@@ -56,11 +41,30 @@
 extern HINSTANCE hInstance;
 extern TCHAR *GetString(int id);
 
+#define TO_CSTR(x) (x).ToCStr().data()
+#define TO_MSTR(x) MSTR::FromACP(x)
+
+extern const MSTR* EmptyStr();
+
+#pragma warning(push, 0)
 // Fabric includes
-#include <FabricSplice.h>
+#include <FabricCore.h>
+
+#include <FabricUI/DFG/DFGUICmdHandler.h>
+#include <FabricUI/DFG/Dialogs/DFGEditPortDialog.h>
+
+#include <FTL/CStrRef.h>
+#include <FTL/OwnedPtr.h>
+#include <FTL/JSONDec.h>
+#include <FTL/JSONValue.h>
+
+#include <QtGui/qwidget.h>
+
+#pragma warning(pop)
 
 // Local includes
 #include "DynamicParamBlocks\DynamicDialog\resource.h"
-#include "SpliceTranslationLayer.hpp"
+#include "FabricTranslationLayer.hpp"
+#include "Fabric3dsmax.h"
 
 

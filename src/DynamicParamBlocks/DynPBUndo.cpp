@@ -1,13 +1,4 @@
 //**************************************************************************/
-// Copyright (c) 1998-2007 Autodesk, Inc.
-// All rights reserved.
-// 
-// These coded instructions, statements, and computer programs contain
-// unpublished proprietary information written by Autodesk, Inc., and are
-// protected by Federal copyright law. They may not be disclosed to third
-// parties or copied or duplicated in any form, in whole or in part, without
-// the prior written consent of Autodesk, Inc.
-//**************************************************************************/
 // DESCRIPTION: Manages the undo system for our Dynamic Attributes, and
 //				is responsible for releasing descriptors no longer needed.
 // AUTHOR: Stephen Taylor
@@ -18,7 +9,7 @@
 #include "DynPBCustAttrClassDesc.h"
 
 DynPBUndo::DynPBUndo(ParamBlockDesc2* pbdesc, ReferenceTarget* pDynPB)
-:	m_pSpliceClient(pDynPB)
+:	m_pFabricClient(pDynPB)
 ,	m_pbOldDesc(pbdesc)
 ,	m_pDynPBClassDesc(dynamic_cast<DynPBCustAttrClassDesc*>(pbdesc->cd))
 ,	m_pbNewDesc(NULL)
@@ -97,7 +88,7 @@ void DynPBUndo::EndHold() {
 	// This is called when the undo operation is complete.
 	// Now, if we have been accepted, there is a new
 	// block in residence on the cust attrib.
-	IParamBlock2* newPB = m_pSpliceClient->GetParamBlock(0);
+	IParamBlock2* newPB = m_pFabricClient->GetParamBlock(0);
 	// We will need this new descriptor later if we undo/redo.
 	if (newPB != NULL) m_pbNewDesc = newPB->GetDesc();
 

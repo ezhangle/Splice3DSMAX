@@ -1,0 +1,231 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src/DllEntry.cpp" />
+    <ClCompile Include="src\StdAfx.cpp" />
+    <ClCompile Include="src\FabricControlFloat.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricControlMatrix.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricControlPosition.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricControlRotation.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricModifier.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricMesh.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricReferenceTarget.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MouseCallbacks\FabricCommandMode.cpp">
+      <Filter>FabricCallbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricEvents.cpp">
+      <Filter>FabricCallbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricLogging.cpp">
+      <Filter>FabricCallbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MouseCallbacks\FabricMouseCallback.cpp">
+      <Filter>FabricCallbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricTranslationFPInterface.cpp">
+      <Filter>FabricTranslation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricTranslationLayer.cpp">
+      <Filter>FabricTranslation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.cpp">
+      <Filter>DynPB</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DynamicParamBlocks\DynPBUndo.cpp">
+      <Filter>DynPB</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MaxConversionFns.cpp">
+      <Filter>FabricTranslation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricStaticFPInterface.cpp">
+      <Filter>FabricTranslation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricWSModifier.cpp">
+      <Filter>MaxImplementations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DockableWidget.cpp">
+      <Filter>DFGWidget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MaxDFGWidget.cpp">
+      <Filter>DFGWidget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\moc_MaxDFGWidget.cpp">
+      <Filter>DFGWidget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MaxDFGCmdHandler.cpp">
+      <Filter>Undo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FabricRestoreObjects.cpp">
+      <Filter>Undo</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\resource.h" />
+    <ClInclude Include="src\Fabric3dsmax.h" />
+    <ClInclude Include="src\StdAfx.h" />
+    <ClInclude Include="src\MouseCallbacks\KbdTranslation.h">
+      <Filter>FabricCallbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MouseCallbacks\FabricCommandMode.h">
+      <Filter>FabricCallbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FabricEvents.h">
+      <Filter>FabricCallbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FabricLogging.h">
+      <Filter>FabricCallbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MouseCallbacks\FabricMouseCallback.h">
+      <Filter>FabricCallbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FabricTranslationFPInterface.h">
+      <Filter>FabricTranslation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FabricTranslationLayer.h">
+      <Filter>FabricTranslation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FabricTranslationLayer.hpp">
+      <Filter>FabricTranslation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DynamicParamBlocks\DynPBCustAttrClassDesc.h">
+      <Filter>DynPB</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DynamicParamBlocks\DynamicDialog\DynamicDialogTemplate.h">
+      <Filter>DynPB</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DynamicParamBlocks\DynPBUndo.h">
+      <Filter>DynPB</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MaxConversionFns.h">
+      <Filter>FabricTranslation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FabricStaticFPInterface.h">
+      <Filter>FabricTranslation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FabricModifier.h">
+      <Filter>MaxImplementations</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FabricWSModifier.h">
+      <Filter>MaxImplementations</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DockableWidget.h">
+      <Filter>DFGWidget</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FabricControl.hpp">
+      <Filter>MaxImplementations</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MaxDFGCmdHandler.h">
+      <Filter>Undo</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FabricRestoreObjects.h">
+      <Filter>Undo</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CriticalSection.h">
+      <Filter>FabricCallbacks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ParameterBlockPatcher.h">
+      <Filter>FabricTranslation</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="MaxScript files">
+      <UniqueIdentifier>{9ae255cb-73c2-4c66-b8d8-18722b47a112}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MaxScript files\TestingScripts">
+      <UniqueIdentifier>{474ee0e7-6c3c-4766-8ded-aebcfabdd882}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MaxImplementations">
+      <UniqueIdentifier>{ce0a263a-6d21-4212-a37f-7e7374e168a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FabricCallbacks">
+      <UniqueIdentifier>{baf95174-c1ae-4f6c-a13e-dc1593cbe437}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DynPB">
+      <UniqueIdentifier>{664c627d-631b-4a9a-a225-e71e1f107ebf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FabricTranslation">
+      <UniqueIdentifier>{eb571dd0-6f53-4b39-8436-a3fe36f08537}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DFGWidget">
+      <UniqueIdentifier>{3c16cf14-eb20-4a24-b03e-944679a9f2a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Undo">
+      <UniqueIdentifier>{8516ec32-5c11-422e-af56-3b35cab5c45f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SetupMenu.ms">
+      <Filter>MaxScript files</Filter>
+    </None>
+    <None Include="testingScripts\CharacterRendering.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\CharacterRenderingX1000.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\InlineDrawingTest.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\InlineDrawingTest_NoisyTorus.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\ManipulationTest.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\SampleMxSExtendKL.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\StartupMeshTimer.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\SurfaceAttrPaintManipulation.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestAddRemovePort.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestLoadSaveFabricFile.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestPortConnection.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestPortOptions.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestRegisterReloadExtns.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestFabricControllers.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestFabricModifier.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+    <None Include="testingScripts\UnitTestFabricObject.ms">
+      <Filter>MaxScript files\TestingScripts</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\DynamicParamBlocks\DynamicDialog\Fabric3dsmax.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="src\MaxDFGWidget.h">
+      <Filter>DFGWidget</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

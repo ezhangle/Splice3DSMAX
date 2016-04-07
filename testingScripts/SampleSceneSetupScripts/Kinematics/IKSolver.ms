@@ -1,11 +1,11 @@
 resetMaxFile #noPrompt
 
 -- Create the solver object.
-customIKSolver = SpliceMatrixController()
+customIKSolver = FabricMatrixController()
 customIKSolver.addOutputPort "transforms" "Xfo" isArray:true extension:"RiggingToolbox"
 customIKSolver.addInputPort "root" "Mat44" 17
 customIKSolver.addInputPort "iktarget" "Mat44" 17
-customIKSolver.OutPort = "SpliceMatrixControllerVal"
+customIKSolver.OutPort = "FabricMatrixControllerVal"
 
 boneLengths = #(50.1, 40.1, 30.1)
 customIKSolver.addInputPort "bone0Length" "Scalar" -2
@@ -22,14 +22,14 @@ require RiggingToolbox;
 
 operator solveIK(
 	in Mat44 parentValue,
-	io Mat44 SpliceMatrixControllerVal,
+	io Mat44 FabricMatrixControllerVal,
 	in Mat44 iktarget,
 	io Xfo transforms[],
 	Scalar bone0Length,
 	Scalar bone1Length,
 	Scalar bone2Length
 ) {
-  SpliceMatrixControllerVal = parentValue;
+  FabricMatrixControllerVal = parentValue;
 	UInt32 numJoints = 4;// including a 'nub' joint.
 	Xfo basePose[];
 	basePose.resize(numJoints);
@@ -64,23 +64,23 @@ customIKSolver.iktarget = target
 
 fn createJoint name id length = (
 
-	spliceCtrl = SpliceMatrixController()
+	spliceCtrl = FabricMatrixController()
 	spliceCtrl.addInputPort "transforms" "Xfo" -1 isArray:true
 	spliceCtrl.addInputPort "id" "Size" -2
-	spliceCtrl.OutPort = "SpliceMatrixControllerVal"
+	spliceCtrl.OutPort = "FabricMatrixControllerVal"
 	klCode = "require Math;
 
-	operator SpliceMatrixController(
-	  io Mat44 SpliceMatrixControllerVal, 
+	operator FabricMatrixController(
+	  io Mat44 FabricMatrixControllerVal, 
 	  in Mat44 parentValue,
 	  in Xfo transforms[],
 	  in Size id
 	) {
 	  if(id < transforms.size)
-			SpliceMatrixControllerVal = transforms[id].toMat44();
+			FabricMatrixControllerVal = transforms[id].toMat44();
 	}
 	";
-	spliceCtrl.SetKLCode "SpliceMatrixController" klCode
+	spliceCtrl.SetKLCode "FabricMatrixController" klCode
 	spliceCtrl.id = id
 	b = Box()
 	b.length = 5

@@ -5,17 +5,17 @@ FILE: DllEntry.cpp
 DESCRIPTION:	Returns the ClassDesc (factory pattern) classes 
 				to allow Max to create our plugins
 
-CREATED BY:		Ingenuity Engine
-				Coded by Stephen Taylor, T&A Development
+CREATED BY:		Stephen Taylor, T&A Development
 
 *>
 **********************************************************************/
 
 #include "StdAfx.h"
-#include "SpliceStaticFPInterface.h"
+#include "FabricStaticFPInterface.h"
 #include <notify.h>
 #include <MaxScript/MaxScript.h>
-#include "SpliceEvents.h"
+#include "FabricEvents.h"
+#include "DockableWidget.h"
 
 // This function is called by Windows when the DLL is loaded.  This 
 // function may also be called many times during time critical operations
@@ -35,7 +35,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID /*lpvReserved*/)
 
 
 extern ClassDesc2* GetDynPBlockClassDesc();;
-extern DynPBCustAttrClassDesc* GetSpliceControllerDesc();
+extern DynPBCustAttrClassDesc* GetFabricControllerDesc();
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
@@ -60,17 +60,16 @@ __declspec( dllexport ) int LibNumberClasses()
 __declspec( dllexport ) ClassDesc* LibClassDesc(int i)
 {
 	switch(i) {
-	case 0: return SpliceTranslationLayer<Control, float>::GetClassDesc();
-	case 1: return SpliceTranslationLayer<Control, Point3>::GetClassDesc();
-	case 2: return SpliceTranslationLayer<Control, Quat>::GetClassDesc();
-	case 3: return SpliceTranslationLayer<Control, Matrix3>::GetClassDesc();
-	case 8: return SpliceTranslationLayer<OSModifier, Mesh>::GetClassDesc();
-	case 9: return SpliceTranslationLayer<GeomObject, Mesh>::GetClassDesc();
-	case 10: return SpliceTranslationLayer<ReferenceTarget, int>::GetClassDesc();
-//	case 3: return GetDynPBlockClassDesc();
-		default: return 0;
+	case 0: return FabricTranslationLayer<Control, float>::GetClassDesc();
+	case 1: return FabricTranslationLayer<Control, Point3>::GetClassDesc();
+	case 2: return FabricTranslationLayer<Control, Quat>::GetClassDesc();
+	case 3: return FabricTranslationLayer<Control, Matrix3>::GetClassDesc();
+	case 7: return FabricTranslationLayer<OSModifier, Mesh>::GetClassDesc();
+	case 8: return FabricTranslationLayer<WSModifier, Mesh>::GetClassDesc();
+	case 9: return FabricTranslationLayer<GeomObject, Mesh>::GetClassDesc();
+	case 10: return FabricTranslationLayer<ReferenceTarget, int>::GetClassDesc();
+	default: return nullptr;
 	}
-	return NULL;
 }
 
 // This function returns a pre-defined constant indicating the version of 
@@ -88,28 +87,12 @@ __declspec( dllexport ) ULONG CanAutoDefer()
 	return FALSE;
 }
 
-// Clean up all traces of Splice, and unhook vpt/mouse hooks
-void OnReset(void* /*param*/, NotifyInfo* /*info*/)
-{
-	SpliceEvents::ReleaseInstance();
-	FabricSplice::DestroyClient();
-}
-
 // Initialize things
 void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 {
-	FabricSplice::Initialize();
-
 	// setup the callback functions
 	InitLoggingTimer();
-	SpliceStaticFPInterface::GetInstance()->EnableLogging(SpliceStaticFPInterface::LOG_ALL);
 
-	// Pre-load a client
-	RegisterNotification(OnReset, NULL, NOTIFY_SYSTEM_POST_RESET);
-	RegisterNotification(OnReset, NULL, NOTIFY_SYSTEM_POST_NEW);
-	RegisterNotification(OnReset, NULL, NOTIFY_FILE_PRE_OPEN);
-
-	
 	// Magic initialization stuff for maxscript.
 	static bool menus_setup = false;
 	if (!menus_setup) {
@@ -119,33 +102,46 @@ void OnStartup(void* /*param*/, NotifyInfo* /*info*/)
 		// On first run, evaluate the script that defines our function
 		char* mxsMenuSetup = nullptr;
 		size_t buffSize = 0;
-		if (_dupenv_s(&mxsMenuSetup, &buffSize, "SPLICE3DSMAXDIR") == 0) {
+		if (_dupenv_s(&mxsMenuSetup, &buffSize, "FABRIC3DSMAXDIR") == 0) {
 			MSTR mxsMenuSetupPath = MSTR::FromACP(mxsMenuSetup, buffSize);
 			mxsMenuSetupPath = mxsMenuSetupPath + _T("SetupMenu.ms");
 			filein_script(mxsMenuSetupPath.data());
 			free(mxsMenuSetup);
 		}
+		else
+		{
+			logMessage("** Error loading Fabric menu: env variable FABRIC3DSMAXDIR not set **");
+		}
 	}
+
+	// Cleanup once callback is done.
+	UnRegisterNotification(OnStartup, nullptr);
 }
 
 // Clean up splice, and unhook all notifications.
 void OnShutdown(void* param, NotifyInfo* info)
 {
 	// On shutdown we release all info
-	OnReset(param, info);
-	UnRegisterNotification(OnReset, NULL);
+	FabricStaticFPInterface::GetInstance()->DestroyClient(true);
+	UnRegisterNotification(OnShutdown, nullptr);
+	// Cleanup once callback is done.
+
+	ReleaseQt();
 }
 
 __declspec( dllexport ) int LibInitialize(void)
 {
 	// We need to initialize our MaxScript exposure for all classes as well.
-	SpliceTranslationLayer<Control, float>::InitMixinInterface();
-	SpliceTranslationLayer<Control, Point3>::InitMixinInterface();
-	SpliceTranslationLayer<Control, Quat>::InitMixinInterface();
-	SpliceTranslationLayer<Control, Matrix3>::InitMixinInterface();
-	SpliceTranslationLayer<OSModifier, Mesh>::InitMixinInterface();
-	SpliceTranslationLayer<GeomObject, Mesh>::InitMixinInterface();
-	SpliceTranslationLayer<ReferenceTarget, int>::InitMixinInterface();
+	FabricTranslationLayer<Control, float>::InitMixinInterface();
+	FabricTranslationLayer<Control, Point3>::InitMixinInterface();
+	FabricTranslationLayer<Control, Quat>::InitMixinInterface();
+	FabricTranslationLayer<Control, Matrix3>::InitMixinInterface();
+	FabricTranslationLayer<OSModifier, Mesh>::InitMixinInterface();
+	FabricTranslationLayer<WSModifier, Mesh>::InitMixinInterface();
+	FabricTranslationLayer<GeomObject, Mesh>::InitMixinInterface();
+	FabricTranslationLayer<ReferenceTarget, int>::InitMixinInterface();
+
+	FabricStaticFPInterface::GetInstance();
 
 	// Force init/cleanup of client
 	RegisterNotification(OnStartup, NULL, NOTIFY_SYSTEM_STARTUP);
@@ -159,13 +155,13 @@ __declspec( dllexport ) int LibInitialize(void)
 __declspec( dllexport ) int LibShutdown(void)
 {
 	// Disable logging, the MaxScript system has already exit
-	FabricSplice::Logging::setLogFunc(nullptr);
-	FabricSplice::Logging::setLogErrorFunc(nullptr);
-	FabricSplice::Logging::setCompilerErrorFunc(nullptr);
-	FabricSplice::Logging::setKLReportFunc(nullptr);
-	FabricSplice::Logging::setKLStatusFunc(nullptr);
+	//Fabric::Logging::setLogFunc(nullptr);
+	//Fabric::Logging::setLogErrorFunc(nullptr);
+	//Fabric::Logging::setCompilerErrorFunc(nullptr);
+	//Fabric::Logging::setKLReportFunc(nullptr);
+	//Fabric::Logging::setKLStatusFunc(nullptr);
 
-    FabricSplice::Finalize();
+	//Fabric::Finalize();
 	return TRUE;
 }
 

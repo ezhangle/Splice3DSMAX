@@ -43,9 +43,14 @@ void FabricControl<TResultType>::ResetPorts()
 {
 	MACROREC_GUARD;
 
+	const char* metadata = "{ \n\
+			\"uiHidden\" : \"true\", \n\
+			\"uiPersistValue\" : \"false\" \n \
+		}";
+
 	m_parentArgName = "parentValue";
-	AddFabricParameter(this, GetParentValueType(), m_parentArgName.c_str(), FabricCore::DFGPortType_In);
-	SetPortMetaData(m_parentArgName.c_str(), FABRIC_UI_HIDDEN, "true", "");
+	AddFabricParameter(this, GetParentValueType(), m_parentArgName.c_str(), FabricCore::DFGPortType_In, "Math", metadata );
+
 	__super::ResetPorts();
 }
 

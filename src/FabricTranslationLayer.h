@@ -384,6 +384,8 @@ public:
 	/*! Invalidate all caches, notify Max, and request a redraw */
 	void InvalidateAll()
 	{
+		if (_m_isSyncing)
+			return;
 		Invalidate();
 		NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
 		Interface* pCore = GetCOREInterface();

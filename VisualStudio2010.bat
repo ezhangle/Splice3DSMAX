@@ -12,10 +12,6 @@ IF NOT DEFINED FABRIC_DIR (
 echo Allow the system to load FabricCore dll
 SET PATH=%FABRIC_DIR%/lib;%PATH%
 
-IF NOT DEFINED BOOST_DIR ( 
-  set BOOST_DIR=%REPODIR%..\..\..\ThirdParty\PreBuilt\Windows\x86_64\Release\boost\1.55.0\lib
-)
-
 set DISTDIR=%FABRIC_DIR%\DCCIntegrations\Fabric3dsmax2014\
 set SCINTILLANETDIR=%DISTDIR%ScintillaNET\
 

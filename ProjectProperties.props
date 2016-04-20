@@ -142,7 +142,7 @@
 			<AdditionalDependencies Condition="'$(MaxVersion)'!='2012'">GraphicsUtility.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies>FabricSplitSearch.lib;FabricCore-2.1.lib;FabricServices-MSVC-12.0-mt.lib;FabricUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies>QtSolutions_MFCMigrationFramework-head.lib;QtCore$(QtSuffix).lib;QtGui$(QtSuffix).lib;QtOpenGL$(QtSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalLibraryDirectories>$(QT_DIR)\lib;$(FABRIC_DIR)\lib;$(BOOST_DIR);$(MaxSDKLibPath);$(SolutionDir)qt-solutions\qtwinmigrate\lib</AdditionalLibraryDirectories>
+			<AdditionalLibraryDirectories>$(QT_DIR)\lib;$(FABRIC_DIR)\lib;$(MaxSDKLibPath);$(SolutionDir)qt-solutions\qtwinmigrate\lib;$(QTWINMIGRATE_DIR)</AdditionalLibraryDirectories>
 		</Link>
 	</ItemDefinitionGroup>
 

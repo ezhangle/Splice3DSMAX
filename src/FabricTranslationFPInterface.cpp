@@ -742,6 +742,32 @@ MSTR FabricTranslationFPInterface::GetGraphName()
 }
 
 
+static void BindingNotificationCallback(void * userData, char const *jsonCString, uint32_t jsonLength)
+{
+	FTL::CStrRef jsonStr( jsonCString );
+
+	FTL::JSONStrWithLoc jsonStrWithLoc( jsonStr );
+	FTL::OwnedPtr<FTL::JSONObject const> jsonObject(
+		FTL::JSONValue::Decode( jsonStrWithLoc )->cast<FTL::JSONObject>()
+		);
+
+	FTL::CStrRef descStr = jsonObject->getString( FTL_STR( "desc" ) );
+
+	if (descStr == FTL_STR( "dirty" ))
+	{
+
+		FabricTranslationFPInterface * owner =
+			static_cast<FabricTranslationFPInterface *>(userData);
+		owner->InvalidateAll();
+	}
+}
+
+void FabricTranslationFPInterface::SetBinding( FabricCore::DFGBinding binding )
+{
+	m_binding = binding;
+	m_binding.setNotificationCallback( BindingNotificationCallback, this );
+}
+
 MaxDFGCmdHandler* FabricTranslationFPInterface::GetCommandHandler()
 {
 	return &m_fabricCmdHandler;

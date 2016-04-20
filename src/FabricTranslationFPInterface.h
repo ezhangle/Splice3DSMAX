@@ -321,7 +321,7 @@ public:
 	// Access a few of the internals
 	FabricCore::DFGBinding& GetBinding() { return m_binding; }
 	const FabricCore::DFGBinding& GetBinding() const { return m_binding; }
-	void SetBinding(FabricCore::DFGBinding binding) { m_binding = binding; }
+	void SetBinding(FabricCore::DFGBinding binding);
 	MaxDFGCmdHandler* GetCommandHandler();
 
 	FabricCore::DFGExec GetExec(const char* execPath);

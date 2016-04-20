@@ -23,7 +23,7 @@ DockableWindow::DockableWindow(HWND hwndCuiFrame, FabricTranslationFPInterface* 
 DockableWindow::~DockableWindow()
 {
 	::ReleaseICUIFrame(frame);
-	if (w != NULL)
+
 	delete w;
 
 	DestroyWindow(h);

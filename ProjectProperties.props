@@ -24,14 +24,14 @@
 		<MaxPath Condition="'$(MaxVersion)'=='2015' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2015)</MaxPath>
 		<MaxPath Condition="'$(MaxVersion)'=='2016' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2016)</MaxPath>
 
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2012'">$(ADSK_3DSMAX_SDK_2012)\maxsdk\</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2013'">$(ADSK_3DSMAX_SDK_2013)\maxsdk\</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2014'">$(ADSK_3DSMAX_SDK_2014)\</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2015'">$(ADSK_3DSMAX_SDK_2015)\</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2016'">$(ADSK_3DSMAX_SDK_2016)\</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2012'">$(ADSK_3DSMAX_SDK_2012)</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2013'">$(ADSK_3DSMAX_SDK_2013)</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2014'">$(ADSK_3DSMAX_SDK_2014)</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2015'">$(ADSK_3DSMAX_SDK_2015)</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxVersion)'=='2016'">$(ADSK_3DSMAX_SDK_2016)</MaxSDKPath>
 
 		<!-- If no install of Max SDK is present, default to the fabric system build values  -->
-		<MaxSDKPath Condition="'$(MaxSDKPath)'==''">$(FABRIC_SCENE_GRAPH_DIR)\ThirdParty\PreBuilt\Windows\x86_64\Release\3dsmax\3ds Max $(MaxVersion) SDK\</MaxSDKPath>
+		<MaxSDKPath Condition="'$(MaxSDKPath)'==''">$(FABRIC_SCENE_GRAPH_DIR)\ThirdParty\PreBuilt\Windows\x86_64\Release\3dsmax\3ds Max $(MaxVersion) SDK\maxsdk\</MaxSDKPath>
 
 		<!-- Autodesc changed the folder structure of the SDK from 2014 onwards -->
 		<MaxSDKLibPath>$(MaxSDKPath)\lib\x64\Release</MaxSDKLibPath>

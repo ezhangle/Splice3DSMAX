@@ -25,6 +25,9 @@ env['ENV']['QT_DIR'] = qt_dir
 qtwinmigrate_dir = os.path.join(prebuilt_dir, 'qt-solutions', 'qtwinmigrate')
 env['ENV']['QTWINMIGRATE_DIR'] = qtwinmigrate_dir
 
+# reset the Max SDK so it gets the one in our repo, just in case :)
+env['ENV']['MaxSDKPath'] = ''
+
 maxFiles = []
 #'/property:Configuration=Release 2016',
 for maxVersion in maxVersions:
@@ -32,7 +35,7 @@ for maxVersion in maxVersions:
         'build max '+maxVersion,
         [],
         [
-            ['C:\\Program Files (x86)\\MSBuild\\12.0\\Bin\\MSBuild.exe', '/m:8', '/p:Configuration=Release ' + maxVersion, '/p:Platform=x64', os.path.join(scenegraph_dir,'Splice','Applications','Splice3DSMAX', 'Fabric3dsmax.vcxproj')],
+            ['C:\\Program Files (x86)\\MSBuild\\12.0\\Bin\\MSBuild.exe', '/m:8', '/p:Configuration=Release ' + maxVersion, '/p:Platform=x64', os.path.join(scenegraph_dir,'Splice','Applications','Splice3DSMAX', 'Fabric3dsmax.sln')],
         ]
     )
     maxFiles.append(maxBuild)

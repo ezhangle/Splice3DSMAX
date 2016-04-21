@@ -84,8 +84,8 @@
 	</PropertyGroup>
 
 	<ImportGroup Label="PropertySheets">
-		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+		<Import Project="$(VCTargetsPath12)\Microsoft.Cpp.Default.props" />
+		<Import Project="$(VCTargetsPath12)\Microsoft.Cpp.props" />
 	</ImportGroup>
 
 	<PropertyGroup><!-- Reset our extension, as Default.Props overrides it -->
@@ -93,14 +93,14 @@
 	</PropertyGroup>
 	
 	<ImportGroup Label="PropertySheets">
-		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+		<Import Project="$(VCTargetsPath12)\Microsoft.Cpp.targets" />
 	</ImportGroup>
 
 	
 	<ItemDefinitionGroup>
 		<!-- default values for compiler -->
 		<ClCompile>
-			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;$(FABRIC_DIR)\include\FabricServices;$(QT_DIR)\include;$(QT_DIR)\include/QtGui;$(MaxSDKPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;$(FABRIC_DIR)\include\FabricServices;$(SolutionDir)\qt-solutions\qtwinmigrate\;$(QTWINMIGRATE_DIR)\src;$(QT_DIR)\include;$(QT_DIR)\include/QtGui;$(MaxSDKPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<StringPooling>true</StringPooling>
@@ -142,7 +142,7 @@
 			<AdditionalDependencies Condition="'$(MaxVersion)'!='2012'">GraphicsUtility.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies>FabricSplitSearch.lib;FabricCore-2.1.lib;FabricServices-MSVC-12.0-mt.lib;FabricUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies>QtSolutions_MFCMigrationFramework-head.lib;QtCore$(QtSuffix).lib;QtGui$(QtSuffix).lib;QtOpenGL$(QtSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalLibraryDirectories>$(QT_DIR)\lib;$(FABRIC_DIR)\lib;$(MaxSDKLibPath);$(SolutionDir)qt-solutions\qtwinmigrate\lib;$(QTWINMIGRATE_DIR)</AdditionalLibraryDirectories>
+			<AdditionalLibraryDirectories>$(QT_DIR)\lib;$(FABRIC_DIR)\lib;$(MaxSDKLibPath);$(SolutionDir)\qt-solutions\qtwinmigrate\lib;$(QTWINMIGRATE_DIR)\lib</AdditionalLibraryDirectories>
 		</Link>
 	</ItemDefinitionGroup>
 
@@ -153,6 +153,7 @@ copy "$(ProjectDir)SetupMenu.ms" "$(PackageDir)" /Y
 xcopy "$(ProjectDir)testingScripts" "$(PackageDir)samples" /E /I /Y
 MKDIR "$(PackageDir)plugin"
 MKLINK /H "$(PackageDir)plugin\QtSolutions_MFCMigrationFramework-head.dll" "$(ProjectDir)qt-solutions\qtwinmigrate\lib\QtSolutions_MFCMigrationFramework-head.dll"
+MKLINK /H "$(PackageDir)plugin\QtSolutions_MFCMigrationFramework-head.dll" "$(QTWINMIGRATE_DIR)\lib\QtSolutions_MFCMigrationFramework-head.dll"
 MKLINK /H "$(PackageDir)plugin\$(TargetFileName)" "$(TargetPath)"
 CALL "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
 	  </Command>

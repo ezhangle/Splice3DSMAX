@@ -7,7 +7,7 @@
 #include "MaxDFGWidget.h"
 #include "DockableWidget.h"
 
-#include "../qt-solutions/qtwinmigrate/src/qwinwidget.h"
+#include <qwinwidget.h>
 #include "Fabric3dsmax.h"
 
 FabricTranslationFPInterface::FabricTranslationFPInterface()

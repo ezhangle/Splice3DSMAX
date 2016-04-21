@@ -2,7 +2,7 @@
 #include "DockableWidget.h"
 #include <QtGui/qwidget.h>
 #include "QApplication"
-#include "../qt-solutions/qtwinmigrate/src/QMfcApp"
+#include <QMfcApp>
 
 //////////////////////////////////////////////////////////////////////////
 

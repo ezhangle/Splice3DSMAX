@@ -11,7 +11,7 @@ buildArch = 'x86_64'
 buildType = 'Release'
 
 scenegraph_dir = os.environ['FABRIC_SCENE_GRAPH_DIR']
-prebuilt_dir = os.path.join(scenegraph_dir, 'ThirdParty', 'PreBuilt', buildOS, buildArch, 'Release', 'VS2013')
+prebuilt_dir = os.path.join(scenegraph_dir, 'ThirdParty', 'PreBuilt', buildOS, buildArch, 'VS2013', 'Release')
 
 env = parentEnv.Clone()
 
@@ -19,6 +19,12 @@ stageDir = env.Dir(scenegraph_dir).Dir('stage').Dir(buildOS).Dir(buildArch).Dir(
 
 maxVersions = ['2014', '2015', '2016']
 
+if os.environ.has_key('FABRIC_SPLICE_MAX_VERSION'):
+  maxVersions = [os.environ['FABRIC_SPLICE_MAX_VERSION']]
+
+
+env['ENV'] = os.environ
+  
 qt_dir = os.path.join(prebuilt_dir, 'qt', '4.8.7')
 env['ENV']['QT_DIR'] = qt_dir
 
@@ -27,15 +33,19 @@ env['ENV']['QTWINMIGRATE_DIR'] = qtwinmigrate_dir
 
 # reset the Max SDK so it gets the one in our repo, just in case :)
 env['ENV']['MaxSDKPath'] = ''
+env['ENV']['FABRIC_DIR'] = os.environ['FABRIC_DIR']# It doesn't work unless I direct this to a SDK version 'C:\fabric\FabricEngine-pablo-Windows-x86_64-20160323-025118'
+env['ENV']['FABRIC_DIR'] = r'C:\fabric\FabricEngine-pablo-Windows-x86_64-20160323-025118'
+env['ENV']['FABRIC_SCENE_GRAPH_DIR'] = scenegraph_dir
+
 
 maxFiles = []
-#'/property:Configuration=Release 2016',
+srcnodeDir = env.Dir('.').srcnode().abspath
 for maxVersion in maxVersions:
     maxBuild = env.Command(
         'build max '+maxVersion,
         [],
         [
-            ['C:\\Program Files (x86)\\MSBuild\\12.0\\Bin\\MSBuild.exe', '/m:8', '/p:Configuration=Release ' + maxVersion, '/p:Platform=x64', os.path.join(scenegraph_dir,'Splice','Applications','Splice3DSMAX', 'Fabric3dsmax.sln')],
+            ['cmd.exe', '/c', os.path.join(srcnodeDir, 'build.bat'), '16', 'Release ' + maxVersion, 'x64', os.path.join(srcnodeDir, 'Fabric3dsmax.sln')],
         ]
     )
     maxFiles.append(maxBuild)

@@ -84,8 +84,8 @@
 	</PropertyGroup>
 
 	<ImportGroup Label="PropertySheets">
-		<Import Project="$(VCTargetsPath12)\Microsoft.Cpp.Default.props" />
-		<Import Project="$(VCTargetsPath12)\Microsoft.Cpp.props" />
+		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
 	</ImportGroup>
 
 	<PropertyGroup><!-- Reset our extension, as Default.Props overrides it -->
@@ -93,7 +93,7 @@
 	</PropertyGroup>
 	
 	<ImportGroup Label="PropertySheets">
-		<Import Project="$(VCTargetsPath12)\Microsoft.Cpp.targets" />
+		<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 	</ImportGroup>
 
 	

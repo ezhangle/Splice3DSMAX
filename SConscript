@@ -33,8 +33,7 @@ env['ENV']['QTWINMIGRATE_DIR'] = qtwinmigrate_dir
 
 # reset the Max SDK so it gets the one in our repo, just in case :)
 env['ENV']['MaxSDKPath'] = ''
-env['ENV']['FABRIC_DIR'] = os.environ['FABRIC_DIR']# It doesn't work unless I direct this to a SDK version 'C:\fabric\FabricEngine-pablo-Windows-x86_64-20160323-025118'
-env['ENV']['FABRIC_DIR'] = r'C:\fabric\FabricEngine-pablo-Windows-x86_64-20160323-025118'
+env['ENV']['FABRIC_DIR'] = os.environ['FABRIC_DIR']
 env['ENV']['FABRIC_SCENE_GRAPH_DIR'] = scenegraph_dir
 
 
@@ -51,8 +50,8 @@ for maxVersion in maxVersions:
     maxFiles.append(maxBuild)
 
     maxModuleDir = stageDir.Dir('DCCIntegrations').Dir('FabricMax'+maxVersion)
-    maxModuleFile = env.Dir('.').File('FIXME-max-dll.dll')
-    maxFiles.append(env.Install(maxModuleDir.Dir('FIXME-plug-in', maxModuleFile)))
+    maxModuleFile = env.Dir('.').File('Fabric3dsmax.dlu')
+    maxFiles.append(env.Install(maxModuleDir.Dir('FabricMax', maxModuleFile)))
 
 alias = env.Alias('splicemax', maxFiles)
 spliceData = (alias, maxFiles)

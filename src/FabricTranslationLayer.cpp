@@ -970,7 +970,7 @@ std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, const char*
 	try
 	{
 		std::string res = pOwner->GetCommandHandler()->dfgDoAddPort(pOwner->GetBinding(), "", pOwner->GetBinding().getExec(), cName, mode, type, "", inExtension, metadata).toStdString();
-		return res; // r3d res?. The original code returned cName 
+		return cName; // r3d shouldn't return res?
 	}
 	catch(FabricCore::Exception e) 
 	{

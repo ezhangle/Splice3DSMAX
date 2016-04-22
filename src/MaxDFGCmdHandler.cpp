@@ -28,7 +28,7 @@ MaxDFGCmdHandler::~MaxDFGCmdHandler()
 
 MSTR ToMSTR(const QString& v) {
 	MSTR r;
-	r.printf(_M("#(%s)"), v.toStdString().c_str());
+	r.printf(_M("#(%s)"), v.data());
 	return r;
 }
 
@@ -212,13 +212,13 @@ QString MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding, QS
 	}
 	cmd.printf(_M("$.%s %s %s %s portToConnect:%s extDep:%s metaData:%s execPath:%s"),
 		_M("DFGAddPort"),
-		TO_MCHAR(desiredPortName),
+		desiredPortName.data(),
 		portTypeEnum.data(),
-		TO_MCHAR(typeSpec),
-		TO_MCHAR(portToConnect),
-		TO_MCHAR(extDep),
-		TO_MCHAR(metaData),
-		TO_MCHAR(execPath));
+		typeSpec.data(),
+		portToConnect.data(),
+		extDep.data(),
+		metaData.data(),
+		execPath.data());
 	macroRecorder->ScriptString(cmd.data());
 	macroRecorder->EmitScript();
 
@@ -233,9 +233,8 @@ QString MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding, QS
 		// It appears that the result will be NULL if called from MxS, and non-NULL
 		// if called from the UI.  It's very difficult to tell what the reason for this
 		// difference is, so here we just detect if the call returned the new ports name
-		const char* resPortName = res.isEmpty() ? desiredPortName.toStdString().c_str() : res.toStdString().c_str();
 		// If we have add a new 'in' port, by default we create a matching 3ds max port.
-		m_pTranslationLayer->SyncMetaDataFromPortToParam( resPortName );
+		m_pTranslationLayer->SyncMetaDataFromPortToParam(res.isEmpty() ? desiredPortName.toStdString().c_str() : res.toStdString().c_str());
 	}
 	return res;
 }
@@ -245,12 +244,12 @@ QString MaxDFGCmdHandler::dfgDoEditPort(FabricCore::DFGBinding const &binding, Q
 	MSTR cmd;
 	cmd.printf(_M("$.%s %s desiredNewPortName:%s typeSpec:%s extDep:%s metadata:%s execPath:%s"),
 		_M("DFGEditPort"),
-		TO_MCHAR(oldPortName),
-		TO_MCHAR(desiredNewPortName),
-		TO_MCHAR(typeSpec),
-		TO_MCHAR(extDep),
-		TO_MCHAR(uiMetadata),
-		TO_MCHAR(execPath));
+		oldPortName.data(),
+		desiredNewPortName.data(),
+		typeSpec.data(),
+		extDep.data(),
+		uiMetadata.data(),
+		execPath.data());
 	macroRecorder->ScriptString(cmd.data());
 	macroRecorder->EmitScript();
 
@@ -320,14 +319,7 @@ void MaxDFGCmdHandler::dfgDoAddBackDrop(FabricCore::DFGBinding const &binding, Q
 	DFGHoldActions hold(_M("DFG Add BackDrop"));
 	return __super::dfgDoAddBackDrop(binding, execPath, exec, title, pos);
 }
-/*
-void MaxDFGCmdHandler::dfgDoSetTitle(FabricCore::DFGBinding const &binding, FTL::CStrRef execPath, FabricCore::DFGExec const &exec, FTL::CStrRef newTitle)
-{
-	EMIT1(_M("DFGSetTitle"), newTitle, execPath);
-	DFGHoldActions hold(_M("DFG Set Title"));
-	return __super::dfgDoSetTitle(binding, execPath, exec, newTitle);
-}
-*/
+
 void MaxDFGCmdHandler::dfgDoSetNodeComment( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString nodeName, QString comment)
 {
 	EMIT2(_M("DFGSetNodeComment"), nodeName, comment, execPath);
@@ -358,31 +350,11 @@ QStringList MaxDFGCmdHandler::dfgDoPaste(FabricCore::DFGBinding const &binding, 
 	DFGHoldActions hold(_M("DFG Paste"));
 	return __super::dfgDoPaste(binding, execPath, exec, json, cursorPos);
 }
-/*
-void MaxDFGCmdHandler::dfgDoSetArgType(FabricCore::DFGBinding const &binding, FTL::CStrRef argName, FTL::CStrRef typeName)
-{
-	macroRecorder->FunctionCall(_M("$.DFGSetArgType"), 2, 0,
-		mr_string, TO_MCHAR(argName),
-		mr_string, TO_MCHAR(typeName)
-		);
-
-	DFGHoldActions hold(_M("DFG Set Arg Type"));
-
-	if (binding.getExec().getExecPortType(argName.c_str()) == FabricCore::DFGPortType_In)
-	{
-		int type = m_pTranslationLayer->GetMaxTypeForArg(argName.c_str());
-		// Attempt to set the same type back.  If the max type is no
-		// longer legitimate, the type will be reset to default.
-		m_pTranslationLayer->SetMaxTypeForArg(argName.c_str(), type);
-	}
-	return __super::dfgDoSetArgType(binding, argName, typeName);
-}
-*/
 
 void MaxDFGCmdHandler::dfgDoSetArgValue(FabricCore::DFGBinding const &binding, QString argName, FabricCore::RTVal const &value)
 {
 	macroRecorder->FunctionCall(_M("$.DFGSetArgValue"), 2, 0,
-		mr_string, TO_MCHAR(argName),
+		mr_string, argName.data(),
 		mr_string, TO_MCHAR(value)
 		);
 

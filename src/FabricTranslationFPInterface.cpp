@@ -196,15 +196,6 @@ void FabricTranslationFPInterface::DFGAddBackdrop(const MSTR& title, Point2 pos,
 	return m_fabricCmdHandler.dfgDoAddBackDrop(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(title), Convert(pos));
 	MAXSPLICE_CATCH_END
 }
-/* r3d
-void FabricTranslationFPInterface::DFGSetTitle(const MSTR& newTitle, const MSTR& execPath)
-{
-	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoSetTitle(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(newTitle));
-	MAXSPLICE_CATCH_END
-}
-*/
-
 void FabricTranslationFPInterface::DFGSetNodeComment(const MSTR& nodeName, const MSTR& comment, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
@@ -234,16 +225,6 @@ Tab<TSTR*> FabricTranslationFPInterface::DFGPaste(const MSTR& json, Point2 pos, 
 	return Convert(res);
 	MAXSPLICE_CATCH_RETURN(Tab<TSTR*>())
 }
-/* r3d
-void FabricTranslationFPInterface::DFGSetArgType(const MSTR& argName, const MSTR& argType)
-{
-	MAXSPLICE_CATCH_BEGIN
-	m_fabricCmdHandler.dfgDoSetArgType(m_binding, TO_CSTR(argName), TO_CSTR(argType));
-	SyncMetaDataFromPortToParam(TO_CSTR(argName));
-	MAXSPLICE_CATCH_END
-}
-*/
-
 void FabricTranslationFPInterface::DFGSetArgValue(const MSTR& argName, const FPValue* argValue)
 {
 	MAXSPLICE_CATCH_BEGIN

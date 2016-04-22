@@ -49,10 +49,6 @@ for maxVersion in maxVersions:
     )
     maxFiles.append(maxBuild)
 
-    maxModuleDir = stageDir.Dir('DCCIntegrations').Dir('FabricMax'+maxVersion)
-    maxModuleFile = env.Dir('.').File('Fabric3dsmax.dlu')
-    maxFiles.append(env.Install(maxModuleDir.Dir('FabricMax', maxModuleFile)))
-
 alias = env.Alias('splicemax', maxFiles)
 spliceData = (alias, maxFiles)
 Return('spliceData')

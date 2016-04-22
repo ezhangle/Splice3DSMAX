@@ -140,7 +140,7 @@
 			<SubSystem>Windows</SubSystem>
 			<AdditionalDependencies>assetmanagement.lib;atscore.lib;biped.lib;bmm.lib;core.lib;crowd.lib;custdlg.lib;databridge.lib;edmodel.lib;expr.lib;flt.lib;geom.lib;gfx.lib;GraphicsDriver.lib;gup.lib;igame.lib;imageviewers.lib;manipsys.lib;maxnet.lib;maxscrpt.lib;maxutil.lib;menuman.lib;menus.lib;mesh.lib;mnmath.lib;paramblk2.lib;particle.lib;particleflow.lib;physique.lib;poly.lib;polypaint.lib;renderutil.lib;rtmax.lib;tessint.lib;viewfile.lib;zlibdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies Condition="'$(MaxVersion)'!='2012'">GraphicsUtility.lib;%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalDependencies>FabricSplitSearch.lib;FabricCore-2.1.lib;FabricServices-MSVC-12.0-mt.lib;FabricUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>FabricSplitSearch.lib;FabricCore-2.2.lib;FabricServices-MSVC-12.0-mt.lib;FabricUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies>QtSolutions_MFCMigrationFramework-head.lib;QtCore$(QtSuffix).lib;QtGui$(QtSuffix).lib;QtOpenGL$(QtSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalLibraryDirectories>$(QT_DIR)\lib;$(FABRIC_DIR)\lib;$(MaxSDKLibPath);$(SolutionDir)\qt-solutions\qtwinmigrate\lib;$(QTWINMIGRATE_DIR)\lib</AdditionalLibraryDirectories>
 		</Link>

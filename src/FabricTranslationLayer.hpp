@@ -1050,7 +1050,7 @@ template<typename TBaseClass, typename TResultType>
 bool FabricTranslationLayer<TBaseClass, TResultType>::IsOutputConnected()
 {
 	FabricCore::DFGExec exec = m_binding.getExec();
-	return exec.haveExecPort(m_outArgName.c_str()) && exec.hasSrcPort(m_outArgName.c_str());
+	return exec.haveExecPort(m_outArgName.c_str()) && exec.hasSrcPorts(m_outArgName.c_str());
 }
 
 

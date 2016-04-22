@@ -81,7 +81,7 @@ void FabricModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os,
 			// case we don't want to change the base mesh, so ensure
 			// that is what is in the cache.
 			FabricCore::DFGExec exec = GetExec(nullptr);
-			if (!(exec.haveExecPort(m_outArgName.c_str()) && exec.hasSrcPort(m_outArgName.c_str()))) {
+			if (!(exec.haveExecPort(m_outArgName.c_str()) && exec.hasSrcPorts(m_outArgName.c_str()))) {
 				m_value = pTriObj->GetMesh();
 			}
 		}

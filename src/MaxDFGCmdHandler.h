@@ -202,8 +202,8 @@ virtual void dfgDoRemoveNodes(
     FabricCore::DFGBinding const &binding,
     QString execPath,
     FabricCore::DFGExec const &exec,
-    QString oldName,
-    QString desiredNewName
+    QString portPath,
+    QString desiredNewPortName
     ) override;
 
   virtual QStringList dfgDoPaste(

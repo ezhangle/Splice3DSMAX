@@ -335,11 +335,11 @@ void MaxDFGCmdHandler::dfgDoSetCode(FabricCore::DFGBinding const &binding, QStri
 	m_pTranslationLayer->InvalidateAll();
 }
 
-QString MaxDFGCmdHandler::dfgDoRenamePort(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString oldName, QString desiredNewName)
+QString MaxDFGCmdHandler::dfgDoRenamePort(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString portPath, QString desiredNewPortName)
 {
-	EMIT2(_M("DFGRenamePort"), oldName, desiredNewName, execPath);
+	EMIT2(_M("DFGRenamePort"), portPath, desiredNewPortName, execPath);
 	DFGHoldActions hold(_M("DFG Rename Port"));
-	QString res = __super::dfgDoRenamePort(binding, execPath, exec, oldName, desiredNewName);
+	QString res = __super::dfgDoRenamePort(binding, execPath, exec, portPath, desiredNewPortName);
 	m_pTranslationLayer->SyncMetaDataFromPortToParam(res.toStdString().c_str());
 	return res;
 }

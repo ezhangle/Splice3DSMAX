@@ -1033,15 +1033,10 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SetupEvalContext(TimeValue
 
     m_evalContext = FabricCore::RTVal::Create(client, "EvalContext", 0, 0);
     m_evalContext = m_evalContext.callMethod("EvalContext", "getInstance", 0, 0);
-    m_evalContext.setMember("host", FabricCore::RTVal::ConstructString(client, "3dsMax"));
-
-    CStr filename = GetCOREInterface()->GetCurFilePath().ToCStr();
-    m_evalContext.setMember("currentFilePath", FabricCore::RTVal::ConstructString(client, filename.data()));
   }
   if (m_evalContext.isValid())
   {
     CStr graphName = GetGraphName().ToCStr();
-    m_evalContext.setMember("graph", FabricCore::RTVal::ConstructString(client, graphName.data()));
     m_evalContext.setMember("time", FabricCore::RTVal::ConstructFloat32(client, TicksToSec(t)));
   }
 }

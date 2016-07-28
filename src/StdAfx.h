@@ -53,7 +53,7 @@ extern TCHAR *GetString(int id);
 #include <FTL/JSONDec.h>
 #include <FTL/JSONValue.h>
 
-#include <QtGui/qwidget.h>
+#include <qwidget.h>
 
 #pragma warning(pop)
 

@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "DockableWidget.h"
-#include <QtGui/qwidget.h>
+#include <qwidget.h>
 #include "QApplication"
 #include <QMfcApp>
 

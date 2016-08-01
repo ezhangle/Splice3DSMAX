@@ -1033,6 +1033,7 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SetupEvalContext(TimeValue
 
     m_evalContext = FabricCore::RTVal::Create(client, "EvalContext", 0, 0);
     m_evalContext = m_evalContext.callMethod("EvalContext", "getInstance", 0, 0);
+    m_evalContext.setMember("host", FabricCore::RTVal::ConstructString(client, "3dsMax"));
   }
   if (m_evalContext.isValid())
   {

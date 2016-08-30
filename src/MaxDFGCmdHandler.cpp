@@ -144,11 +144,11 @@ void MaxDFGCmdHandler::dfgDoConnect(FabricCore::DFGBinding const &binding, QStri
 	m_pTranslationLayer->InvalidateAll();
 }
 
-void MaxDFGCmdHandler::dfgDoDisconnect(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString srcPath, QString dstPath)
+void MaxDFGCmdHandler::dfgDoDisconnect( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QStringList srcPaths, QStringList dstPaths)
 {
-	EMIT2(_M("DFGDisconnect"), srcPath, dstPath, execPath);
-	DFGHoldActions hold(_M("DFG Disconnect"));
-	__super::dfgDoDisconnect(binding, execPath, exec, srcPath, dstPath);
+	EMIT2( _M( "DFGDisconnect" ), srcPaths, dstPaths, execPath );
+	DFGHoldActions hold( _M( "DFG Disconnect" ) );
+	__super::dfgDoDisconnect( binding, execPath, exec, srcPaths, dstPaths );
 	m_pTranslationLayer->InvalidateAll();
 }
 
@@ -239,7 +239,7 @@ QString MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding, QS
 	return res;
 }
 
-QString MaxDFGCmdHandler::dfgDoEditPort(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString oldPortName, QString desiredNewPortName, QString typeSpec, QString extDep, QString uiMetadata)
+QString MaxDFGCmdHandler::dfgDoEditPort(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString oldPortName, QString desiredNewPortName, FabricCore::DFGPortType portType, QString typeSpec, QString extDep, QString uiMetadata)
 {
 	MSTR cmd;
 	cmd.printf(_M("$.%s %s desiredNewPortName:%s typeSpec:%s extDep:%s metadata:%s execPath:%s"),
@@ -254,7 +254,7 @@ QString MaxDFGCmdHandler::dfgDoEditPort(FabricCore::DFGBinding const &binding, Q
 	macroRecorder->EmitScript();
 
 	DFGHoldActions hold(_M("DFG Edit Port"));
-	QString res = __super::dfgDoEditPort(binding, execPath, exec, oldPortName, desiredNewPortName, typeSpec, extDep, uiMetadata);
+	QString res = __super::dfgDoEditPort(binding, execPath, exec, oldPortName, desiredNewPortName, portType, typeSpec, extDep, uiMetadata);
 
 	FabricCore::DFGPortType portMode = const_cast<FabricCore::DFGExec&>(exec).getExecPortType(res.toStdString().c_str());
 	bool isPossibleMaxPort = portMode != FabricCore::DFGPortType_Out && execPath.isEmpty();
@@ -387,11 +387,11 @@ void MaxDFGCmdHandler::dfgDoSetRefVarPath(FabricCore::DFGBinding const &binding,
 	return __super::dfgDoSetRefVarPath(binding, execPath, exec, refName, varPath);
 }
 
-void MaxDFGCmdHandler::dfgDoReorderPorts(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QList<int> indices)
+void MaxDFGCmdHandler::dfgDoReorderPorts(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString itemPath, QList<int> indices)
 {
 	EMIT1(_M("DFGReorderPorts"), indices, execPath);
 	DFGHoldActions hold(_M("DFG Re-order Ports"));
-	return __super::dfgDoReorderPorts(binding, execPath, exec, indices);
+	return __super::dfgDoReorderPorts(binding, execPath, exec, itemPath, indices);
 }
 
 void MaxDFGCmdHandler::dfgDoSetExtDeps(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QStringList extDeps)

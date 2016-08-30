@@ -555,8 +555,8 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 				ypos += LISTBOX_HEIGHT - CTRL_HEIGHT;
 
 				// Add in 3 buttons
-				int btnWidth = (DLG_X - DLG_PAD) / 3;
-				int btnXPos = (DLG_PAD / 2);
+				short btnWidth = (DLG_X - DLG_PAD) / 3;
+				short btnXPos = (DLG_PAD / 2);
 				dialogTemplate->AddControl( (WS_TABSTOP | WS_CHILD | WS_VISIBLE),
 									0,
 									btnXPos,

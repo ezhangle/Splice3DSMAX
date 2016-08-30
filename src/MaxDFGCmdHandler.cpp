@@ -28,7 +28,7 @@ MaxDFGCmdHandler::~MaxDFGCmdHandler()
 
 MSTR ToMSTR(const QString& v) {
 	MSTR r;
-	r.printf(_M("#(%s)"), v.data());
+	r.printf(_M("\"%s\""), v.data());
 	return r;
 }
 
@@ -104,8 +104,9 @@ MSTR ToMSTR(const std::vector<T>& v) {
 	return r;
 }
 
+// This template overload returns empty string for non-existant parameters
 class nothing {};
-MSTR ToMSTR(nothing v) {
+MSTR ToMSTR(const nothing& v) {
 	return MSTR();
 }
 
@@ -239,13 +240,14 @@ QString MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding, QS
 	return res;
 }
 
-QString MaxDFGCmdHandler::dfgDoEditPort(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString oldPortName, QString desiredNewPortName, FabricCore::DFGPortType portType, QString typeSpec, QString extDep, QString uiMetadata)
+QString MaxDFGCmdHandler::dfgDoEditPort(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString oldPortName, QString desiredNewPortName, FabricCore::DFGPortType portMode, QString typeSpec, QString extDep, QString uiMetadata)
 {
 	MSTR cmd;
-	cmd.printf(_M("$.%s %s desiredNewPortName:%s typeSpec:%s extDep:%s metadata:%s execPath:%s"),
+	cmd.printf(_M("$.%s %s desiredNewPortName:%s portType:%i typeSpec:%s extDep:%s metadata:%s execPath:%s"),
 		_M("DFGEditPort"),
 		oldPortName.data(),
 		desiredNewPortName.data(),
+		portMode,
 		typeSpec.data(),
 		extDep.data(),
 		uiMetadata.data(),
@@ -253,11 +255,13 @@ QString MaxDFGCmdHandler::dfgDoEditPort(FabricCore::DFGBinding const &binding, Q
 	macroRecorder->ScriptString(cmd.data());
 	macroRecorder->EmitScript();
 
-	DFGHoldActions hold(_M("DFG Edit Port"));
-	QString res = __super::dfgDoEditPort(binding, execPath, exec, oldPortName, desiredNewPortName, portType, typeSpec, extDep, uiMetadata);
+	FabricCore::DFGPortType oldPortMode = const_cast<FabricCore::DFGExec&>(exec).getExecPortType( oldPortName.toStdString().c_str() );
 
-	FabricCore::DFGPortType portMode = const_cast<FabricCore::DFGExec&>(exec).getExecPortType(res.toStdString().c_str());
-	bool isPossibleMaxPort = portMode != FabricCore::DFGPortType_Out && execPath.isEmpty();
+	DFGHoldActions hold(_M("DFG Edit Port"));
+	QString res = __super::dfgDoEditPort(binding, execPath, exec, oldPortName, desiredNewPortName, portMode, typeSpec, extDep, uiMetadata);
+
+	
+	bool isPossibleMaxPort = portMode != FabricCore::DFGPortType_Out && execPath.isEmpty() || oldPortMode != portMode;
 	if (isPossibleMaxPort)
 	{
 		// If we have add a new 'in' port, by default we create a matching 3ds max port.
@@ -389,7 +393,7 @@ void MaxDFGCmdHandler::dfgDoSetRefVarPath(FabricCore::DFGBinding const &binding,
 
 void MaxDFGCmdHandler::dfgDoReorderPorts(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString itemPath, QList<int> indices)
 {
-	EMIT1(_M("DFGReorderPorts"), indices, execPath);
+	EMIT2(_M("DFGReorderPorts"), itemPath, indices, execPath);
 	DFGHoldActions hold(_M("DFG Re-order Ports"));
 	return __super::dfgDoReorderPorts(binding, execPath, exec, itemPath, indices);
 }

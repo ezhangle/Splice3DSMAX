@@ -11,7 +11,7 @@ rootFolder = systemTools.getEnvVariable("FABRIC3DSMAXDIR")
 fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
 
 sm = FabricMesh pos:[-27.1141,-29.5166,0] isSelected:on
-FAssert((sm.GetPortCount() == 1) and ((sm.GetPortName 1) == "outputValue")) "Error Initializing FabricMesh"
+FAssert((sm.GetPortCount() == 2) and ((sm.GetPortName 2) == "outputValue")) "Error Initializing FabricMesh"
 sm.ShowDFGGraphEditor() -- No way to test this
 
 epm = $.DFGInstPreset "Fabric.Exts.Geometry.PolygonMesh.EmptyPolygonMesh" [212.000000,39.000000]  execPath:""
@@ -24,9 +24,9 @@ func = $.DFGAddFunc "func" code [412,167] execPath:""
 FAssert(func == "func") ("Error creating empy func")
 code_ = $.GetExecCode func
 
-FAssert(sm.GetPortCount execPath:func == 0) "Error Initializing func"
+FAssert(sm.GetPortCount execPath:func == 1 and sm.GetPortName 1 execPath:func == "exec") "Error Initializing func"
 $.DFGAddPort "inVal" 0 "$TYPE$" portToConnect:"" extDep:"" execPath:func
-FAssert(sm.GetPortCount execPath:func == 1) "Error Initializing func port"
+FAssert(sm.GetPortCount execPath:func == 2) "Error Initializing func port"
 
 code = "dfgEntry {
   report(inVal);
@@ -44,9 +44,9 @@ $.DFGConnect (epm + ".mesh") (func + ".inVal")  execPath:""
 res = $.DFGAddPort "aport" #DFGPortIN "UInt32" portToConnect:"" extDep:"" execPath:""
 FAssert($.GetPortType res == "UInt32") "Error creating port type"
 FAssert($.GetMaxTypeForArg res == 1) "Created bad Max type"
-FAssert($.GetPortCount() == 2) "Error in port count"
+FAssert($.GetPortCount() == 3) "Error in port count"
 res = $.DFGRenamePort res "aDiffPort"  execPath:""
-FAssert($.GetPortName 2 == res) "Error in port name"
+FAssert($.GetPortName 3 == res) "Error in port name"
 $.DFGRemovePort res execPath:""
 	
 graph = $.DFGAddGraph "graph" [317.000000,137.000000]  execPath:""
@@ -58,13 +58,13 @@ FAssert($.GetNodeCount() == 4) "Erroring making new nodes"
 $.DFGRemoveNodes #("backDrop", graph)  execPath:""
 FAssert($.GetNodeCount() == 2) "Erroring deleting new nodes"
 
-res = $.DFGAddPort "aport" #DFGPortIN "UInt32" portToConnect:"" extDep:"" execPath:""
+aport = $.DFGAddPort "aport" #DFGPortIN "UInt32" portToConnect:"" extDep:"" execPath:""
 aVar = $.DFGAddVar "myVar" "UInt32" "" [255.000000,267.000000] execPath:""
 FAssert($.GetNodeCount() == 3) "Erroring creating var node"
 $.DFGSetNodeComment aVar "This is a variable"  execPath:""
 $.DFGDisconnect (epm + ".mesh") (func + ".inVal")  execPath:""
 $.DFGConnect (aVar + ".value") (func + ".inVal")  execPath:""
-$.DFGAddPort "outVal" #DFGPortOUT "UInt32" portToConnect:(func + ".inVal") extDep:"" execPath:""
+outVal = $.DFGAddPort "outVal" #DFGPortOUT "UInt32" portToConnect:(func + ".inVal") extDep:"" execPath:""
 $.DFGSetPortDefaultValue (func + ".inVal") 10   execPath:""
 $.DFGConnect "aport" (aVar + ".value")  execPath:""
 
@@ -73,22 +73,19 @@ aSet = $.DFGAddSet "set" "myVar" [171.000000,312.000000] execPath:""
 $.DFGMoveNodes (aSet) ([58.000000,152.000000])  execPath:""
 FAssert($.GetNodeCount() == 5) "Erroring creating Get/Set"
 
-$.DFGSetTitle "PrintFunc"  execPath:func
-func = "PrintFunc"
-	
 --// We need to change the port type of mVar before we change the port type of aport
 $.DFGRemoveNodes aVar  execPath:""
 aVar = $.DFGAddVar "myVar" "Float32" "" [255.000000,267.000000] execPath:""
 
-$.DFGSetArgType "aport" "Float32"
-FAssert($.GetMaxTypeForArg "aport" == 0) "Resetting port type"
+$.DFGEditPort aport #DFGPortIN typeSpec:"Float32"
+FAssert($.GetMaxTypeForArg aport == 0) "Resetting port type"
 
-$.DFGConnect "aport" (aVar + ".value")  execPath:""
+$.DFGConnect aport (aVar + ".value")  execPath:""
 
 -- Test changing the input type to Percent
-legalTypes = $.GetLegalMaxTypesForArg "aport"
+legalTypes = $.GetLegalMaxTypesForArg aport
 FAssert legalTypes[6] "Get legal types"
-$.SetMaxTypeForArg "aport" 6
+$.SetMaxTypeForArg aport 6
 
 maxType = $.GetPortMetaData "aport" "MaxType"
 FAssert (maxType == "6") "Set MaxType"
@@ -97,7 +94,7 @@ FAssert (maxType == "6") "Set MaxType"
 $.aport = 17
 FAssert($.GetArgValue "aport" == 0.17) "Getting val"
 
-$.DFGEditPort "aport" desiredNewPortName:"aport" typeSpec:"Float32" metadata:"{
+$.DFGEditPort aport #DFGPortIN metadata:"{
   \"uiHidden\" : \"\",
   \"uiOpaque\" : \"\",
   \"uiPersistValue\" : \"\",
@@ -106,21 +103,21 @@ $.DFGEditPort "aport" desiredNewPortName:"aport" typeSpec:"Float32" metadata:"{
   \"MaxType\" : \"6\"
   }" execPath:""
 
-uiRange = $.GetPortMetaData "aport" "uiHardRange"
+uiRange = $.GetPortMetaData aport "uiHardRange"
 FAssert (uiRange == "(0, 10)") "Set UIRange"
 
 $.SetArgMinMax "aport" 0 5
-uiRange = $.GetPortMetaData "aport" "uiHardRange"
+uiRange = $.GetPortMetaData aport "uiHardRange"
 FAssert (uiRange == "(0, 5)") "ReSet UIRange"
 
-$.DFGImplodeNodes #(func, aGet, aSet) "graph"  execPath:""
+impGraph = $.DFGImplodeNodes #(func, aGet, aSet) "graph"  execPath:""
 FAssert($.GetNodeCount() == 3) "imploding nodes"
-$.DFGExplodeNode "graph"   execPath:""
+$.DFGExplodeNode impGraph   execPath:""
 FAssert($.GetNodeCount() == 5) "Explode nodes"
 
 $.DFGSetExtDeps ("Geometry")    execPath:""
 
-$.DFGReorderPorts #(1, 2, 0)    execPath:""
+$.DFGReorderPorts "" #(0, 3, 1, 2)    execPath:""
 
 tmpFile = systemTools.getEnvVariable("TEMP") + "\\tmpFile.canvas"
 $.SaveToFile tmpFile

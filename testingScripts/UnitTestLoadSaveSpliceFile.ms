@@ -42,17 +42,17 @@ fn TestLoadSaveSpliceFile =
 	alembic_inspectfile.DFGConnect (fget + ".element") (tomat + ".this")   execPath:""
 	alembic_inspectfile.DFGAddPort "result" #DFGPortOUT "Mat44" portToConnect:(tomat + ".result")
 
-	m = $.GetArgValue "result"
+	m = alembic_inspectfile.GetArgValue "result"
 	FAssert(IsEquivVec m.pos [0,0,0]) "Bad pos from abc file"
-	$.DFGSetPortDefaultValue "Get_1.index" 1 execPath:""
-	m = $.GetArgValue "result"
+	alembic_inspectfile.DFGSetPortDefaultValue "Get_1.index" 1 execPath:""
+	m = alembic_inspectfile.GetArgValue "result"
 	FAssert(IsEquivVec m.pos [0,4.37156,0]) "Bad pos from abc file"
-	$.DFGSetPortDefaultValue "Get_1.index" 2 execPath:""
-	m = $.GetArgValue "result"
+	alembic_inspectfile.DFGSetPortDefaultValue "Get_1.index" 2 execPath:""
+	m = alembic_inspectfile.GetArgValue "result"
 	FAssert(IsEquivVec m.pos [0,8.68887,0]) "Bad pos from abc file"
 
 	-------------------------------------------------------------------
-	arrays_grid_points = DoLoadFile (sampleDir + "Miscellaneous\\arrays_grid_points.dfg.canvas")
+	arrays_grid_points = DoLoadFile (sampleDir + "Miscellaneous\\arrays_grid_points.canvas")
 	-- This is rendered, so we can't check it.
 	arrays_grid_points.U = 10
 	arrays_grid_points.h = 10

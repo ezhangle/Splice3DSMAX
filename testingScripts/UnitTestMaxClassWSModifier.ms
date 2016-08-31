@@ -22,7 +22,8 @@ fn TestMaxClassWSModifier =
 	dfgMod.DFGAddPort "targetTrans" 0 "Mat44" portToConnect:"" extDep:"" metaData:"" execPath:"shrinkWrap"
 	dfgMod.DFGAddPort "offset" 0 "Float32" portToConnect:"" extDep:"" metaData:"" execPath:"shrinkWrap"
 	dfgMod.DFGSetCode "
-	operator ParallelShrinkWrap<<<index>>>( io PolygonMesh source, SpatialQueryable target, Scalar offset, Mat44 srcToTarget, Mat44 targToSource ) {
+
+	operator DoParallelShrinkWrap( UInt32 index, io PolygonMesh source, SpatialQueryable target, Scalar offset, Mat44 srcToTarget, Mat44 targToSource ) {
 	  Ray ray;
 	  ray.start = srcToTarget * source.getPointPosition( index );
 	  ray.direction = -ray.start.unit();//Unit vector toward targets center
@@ -42,6 +43,17 @@ fn TestMaxClassWSModifier =
 	  }
 	}
 
+	operator ParallelShrinkWrap<<<index>>>( io PolygonMesh source, SpatialQueryable target, Scalar offset, Mat44 srcToTarget, Mat44 targToSource ) {
+		DoParallelShrinkWrap(index, source, target, offset, srcToTarget, targToSource);
+	}
+
+	operator ParallelShrinkWrapST( io PolygonMesh source, SpatialQueryable target, Scalar offset, Mat44 srcToTarget, Mat44 targToSource ) {
+    for (UInt32 i = 0; i < source.pointCount(); i++)
+    {
+  		DoParallelShrinkWrap(i, source, target, offset, srcToTarget, targToSource);
+    }
+	}
+
 	dfgEntry {
 	  //Initialize options to use a sparse grid
 	  GenericValueContainer options = GenericValueContainer();
@@ -53,7 +65,8 @@ fn TestMaxClassWSModifier =
 	  Mat44 targToSource = srcToTarget.inverse();
 	  
 	  target.prepareForSpatialQueries( source.pointCount(), options );
-	  ParallelShrinkWrap<<<source.pointCount()>>>( source, target, offset, srcToTarget, targToSource );
+	  //ParallelShrinkWrap<<<source.pointCount()>>>( source, target, offset, srcToTarget, targToSource );
+    ParallelShrinkWrapST( source, target, offset, srcToTarget, targToSource );
 	}
 	"    execPath:"shrinkWrap"
 

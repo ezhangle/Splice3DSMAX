@@ -1379,20 +1379,26 @@ FabricCore::RTVal& GetDrawing()
 	return s_drawing;
 }
 
+#ifdef _DEBUG
 std::list<ReferenceTarget*> s_instances;
+#endif
 void InstanceCreated( ReferenceTarget* instance )
 { 
+#ifdef _DEBUG
 	s_instances.push_back( instance );
+#endif
 	s_nInstances++;  
 }
 
 void InstanceDeleted( ReferenceTarget* instance)
 {
+#ifdef _DEBUG
 	for (auto itr = s_instances.begin(); itr != s_instances.end(); itr++)
 	{
 		if (*itr == instance)
 			*itr = nullptr;
 	}
+#endif
 
 	s_nInstances--;  
 	// If there are no instances left, release the client.

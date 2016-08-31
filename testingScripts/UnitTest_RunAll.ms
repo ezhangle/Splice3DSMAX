@@ -2,27 +2,36 @@
 -- Bring in util functions
 rootFolder = systemTools.getEnvVariable("FABRIC3DSMAXDIR")
 fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
--- Bring in each function and test it
+
 filein (rootFolder + "samples\\UnitTestFabricInterface.ms")
-TestFunction TestFabricInterface
-
 filein (rootFolder + "samples\\UnitTestMaxClassObject.ms")
-TestFunction TestMaxClassObject
-
 filein (rootFolder + "samples\\UnitTestMaxClassModifier.ms")
-TestFunction TestMaxClassModifier
-
 filein (rootFolder + "samples\\UnitTestMaxClassWSModifier.ms")
-TestFunction TestMaxClassWSModifier
-
 filein (rootFolder + "samples\\UnitTestMaxClassControllers.ms")
-TestFunction TestMaxClassControllers
-
 filein (rootFolder + "samples\\UnitTestPortConnection.ms")
-TestFunction TestPortConnection
-
 filein (rootFolder + "samples\\UnitTestLoadSaveMaxFile.ms")
-TestFunction TestLoadSaveMaxFile
-
 filein (rootFolder + "samples\\UnitTestLoadSaveSpliceFile.ms")
-TestFunction TestLoadSaveSpliceFile
+	
+fn DoTestAll = 
+(
+	-- Test each function and make sure it runs cleanly
+	--if not (TestFunction TestFabricInterface) do ( return false )
+
+	--if not (TestFunction TestMaxClassObject) do ( return false )
+
+	--if not (TestFunction TestMaxClassModifier) do ( return false )
+
+	if not (TestFunction TestMaxClassWSModifier) do ( return false )
+
+	--if not (TestFunction TestMaxClassControllers) do ( return false )
+
+	--if not (TestFunction TestPortConnection) do ( return false )
+
+	if not (TestFunction TestLoadSaveMaxFile) do ( return false )
+
+	--if not (TestFunction TestLoadSaveSpliceFile) do ( return false )
+	
+	true
+)
+
+DoTestAll()

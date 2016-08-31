@@ -5,7 +5,7 @@
 --   and validate the result
 --
 ----------------------------------------------------------------------
-
+rootFolder = systemTools.getEnvVariable("FABRIC3DSMAXDIR")
 fileIn (rootFolder + "samples\\UnitTestMaxClassControllers.ms")
 fileIn (rootFolder + "samples\\UnitTestMaxClassObject.ms")
 fileIn (rootFolder + "samples\\UnitTestMaxClassModifier.ms")
@@ -13,7 +13,6 @@ fileIn (rootFolder + "samples\\UnitTestMaxClassWSModifier.ms")
 
 fn TestLoadSaveMaxFile = 
 (
-	rootFolder = systemTools.getEnvVariable("FABRIC3DSMAXDIR")
 	tempFile = systemTools.getEnvVariable("TEMP") + "\\temp.max"
 	--------------------------------------------------------------------------------
 	-- First test, controllers

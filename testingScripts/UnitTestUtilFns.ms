@@ -1,6 +1,9 @@
+
+global fabric_do_break = true
 fn FAssert b msg = (
 	assert (b) message:msg options:#(#dialog)
 	if not b do (
+		if fabric_do_break then break()
 		throw ("Error running script: " + msg)
 	)
 	true
@@ -61,4 +64,5 @@ fn TestFunction pfn doReset:true=
 	
 	-- If we were here, it was a successful test
 	print "--- All Passed ---!"
+	return true
 )

@@ -6,7 +6,7 @@
 -- functionality
 
 -----------------------------------------------------------
-fn TestInterface = 
+fn TestFabricInterface = 
 (
 	sm = FabricMesh pos:[-27.1141,-29.5166,0] isSelected:on
 	FAssert((sm.GetPortCount() == 2) and ((sm.GetPortName 2) == "outputValue")) "Error Initializing FabricMesh"

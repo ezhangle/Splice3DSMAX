@@ -52,7 +52,7 @@ DynPBUndo::~DynPBUndo()
 	}
 }
 
-void DynPBUndo::Restore(int UNUSED(isUndo))
+void DynPBUndo::Restore(int isUndo)
 {
 	// Sanity
 	if (m_pDynPBClassDesc == NULL)
@@ -65,9 +65,14 @@ void DynPBUndo::Restore(int UNUSED(isUndo))
 
 	// Wire the desc back into the CD, to make it available to the scene
 	m_pDynPBClassDesc->AddParamBlockDesc(m_pbOldDesc);
-	// The new block is in UNDO limbo too.  Release the block, so it
-	// does not get save in the scene (but DO NOT DELETE it).
-	m_pDynPBClassDesc->ReleasePBDesc(m_pbNewDesc, FALSE);
+
+	// If this action has been cancelled, we may not have a new descriptor to release
+	if (isUndo && m_pbNewDesc != NULL)
+	{
+		// The new block is in UNDO limbo too.  Release the block, so it
+		// does not get save in the scene (but DO NOT DELETE it).
+		m_pDynPBClassDesc->ReleasePBDesc( m_pbNewDesc, FALSE );
+	}
 }
 
 void DynPBUndo::Redo() {

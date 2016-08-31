@@ -5,33 +5,40 @@
 --   and validate the result
 --
 ----------------------------------------------------------------------
+
+fileIn (rootFolder + "samples\\UnitTestMaxClassControllers.ms")
+fileIn (rootFolder + "samples\\UnitTestMaxClassObject.ms")
+fileIn (rootFolder + "samples\\UnitTestMaxClassModifier.ms")
+fileIn (rootFolder + "samples\\UnitTestMaxClassWSModifier.ms")
+
 fn TestLoadSaveMaxFile = 
 (
+	rootFolder = systemTools.getEnvVariable("FABRIC3DSMAXDIR")
 	tempFile = systemTools.getEnvVariable("TEMP") + "\\temp.max"
 	--------------------------------------------------------------------------------
 	-- First test, controllers
-	fileIn (rootFolder + "samples\\UnitTestMaxClassControllers.ms")
-	throw "fuck"
-	TestFunction TestControllers doReset:false
+
+
+	TestMaxClassControllers()
 	res = saveMaxFile tempFile useNewFile:false quiet:true
 	FAssert res "Failed saving file UnitTestMaxClassControllers"
 	res = loadMaxFile tempFile quiet:true
-	FAssert res "Failed saving file UnitTestMaxClassControllers"
+	FAssert res "Failed loading file UnitTestMaxClassControllers"
 
 	-- Validate load was successfuly
 	sliderTime = 50f
 	FAssert (($Point002.transform as string) == "(matrix3 [1,-2.38419e-007,-2.5332e-007] [2.45869e-007,0.798292,0.60227] [1.3411e-007,-0.60227,0.798292] [8.39596,-11.0702,13.6661])") "Bad rotation after setting dfg float input"
 	FAssert (($Point003.transform as string) == "(matrix3 [0.739942,0.516122,0.431398] [-0.620885,0.277274,0.733227] [0.258819,-0.810393,0.525619] [1.66667,10,0])") "Bad rotation values"
-	throw "fuck"
 	print(" -- Saved/Loaded Controllers successfully --")
 	--------------------------------------------------------------------------------
 	-- Next, test object
 	resetMaxFile #noPrompt
-	fileIn (rootFolder + "samples\\UnitTestMaxClassObject.ms")
+	TestMaxClassObject()
+
 	res = saveMaxFile tempFile useNewFile:false quiet:true
 	FAssert res "Failed saving file UnitTestMaxClassObject"
 	res = loadMaxFile tempFile quiet:true
-	FAssert res "Failed saving file UnitTestMaxClassObject"
+	FAssert res "Failed loading file UnitTestMaxClassObject"
 
 	FAssert (CompArray (GetTriMeshFaceCount $FabricMesh001) #(1530, 785)) "Bad Tri Count on Set Mesh"
 	FAssert (CompBB $FabricMesh001 228.915) "Bad 5 size"
@@ -41,11 +48,12 @@ fn TestLoadSaveMaxFile =
 	--------------------------------------------------------------------------------
 	-- Test Modifiers
 	resetMaxFile #noPrompt
-	fileIn (rootFolder + "samples\\UnitTestMaxClassModifier.ms")
+	TestMaxClassModifier()
+		
 	res = saveMaxFile tempFile useNewFile:false quiet:true
-	FAssert res "Failed saving file UnitTestMaxClassObject"
+	FAssert res "Failed saving file UnitTestMaxClassModifier"
 	res = loadMaxFile tempFile quiet:true
-	FAssert res "Failed saving file UnitTestMaxClassObject"
+	FAssert res "Failed loading file UnitTestMaxClassModifier"
 
 	FAssert (CompBB $Plane001 207.122) "Bad modified object size"
 
@@ -54,7 +62,8 @@ fn TestLoadSaveMaxFile =
 	--------------------------------------------------------------------------------
 	-- Test WSModifiers
 	resetMaxFile #noPrompt
-	fileIn (rootFolder + "samples\\UnitTestMaxClassWSModifier.ms")
+	TestMaxClassWSModifier()
+
 	res = saveMaxFile tempFile useNewFile:false quiet:true
 	FAssert res "Failed saving file UnitTestMaxClassObject"
 	res = loadMaxFile tempFile quiet:true

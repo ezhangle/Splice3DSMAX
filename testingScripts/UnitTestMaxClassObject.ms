@@ -3,7 +3,7 @@
 -- Tests creation of geometry objects
 
 -----------------------------------------------------------
-fn TestObject = 
+fn TestMaxClassObject = 
 (
 	sm = FabricMesh()
 	-- Init required params

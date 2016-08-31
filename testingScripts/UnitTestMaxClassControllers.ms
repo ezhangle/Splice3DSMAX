@@ -1,4 +1,4 @@
-fn FabricControllers =
+fn TestMaxClassControllers =
 (
 	-----------------------------------------------------------------------------------------------------------
 	-- Test basic controller structure, time change

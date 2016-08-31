@@ -3,7 +3,7 @@
 -- Tests creating a geometry that modifies its object based on the position in the world
 --
 -----------------------------------------------------------
-fn TestWSModifier = 
+fn TestMaxClassWSModifier = 
 (
 	tp = Teapot radius:40 pos:[-14.2223,31.2546,0]
 	sp = Sphere radius:40 smooth:on segs:32 pos:[58.9291,-39.6191,0]

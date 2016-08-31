@@ -402,7 +402,7 @@ extern FabricCore::Client& GetClient(bool doCreate= true, const char* contextId=
 extern FabricCore::DFGHost& GetHost();
 extern FabricCore::RTVal& GetDrawing();
 
-extern void InstanceCreated();
-extern void InstanceDeleted();
+extern void InstanceCreated(ReferenceTarget* instance);
+extern void InstanceDeleted( ReferenceTarget* instance );
 extern bool AnyInstances();
 extern void ReleaseAll();

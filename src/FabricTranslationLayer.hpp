@@ -28,7 +28,7 @@ FabricTranslationLayer<TBaseClass, TResultType>::FabricTranslationLayer(BOOL loa
   ,	m_valid(NEVER)
   ,	_m_isSyncing(false)
 {
-  InstanceCreated();
+  InstanceCreated( this );
 
   if (!loading)
     Init();
@@ -47,7 +47,7 @@ FabricTranslationLayer<TBaseClass, TResultType>::~FabricTranslationLayer()
   DynPBCustAttrClassDesc* ourCD = GetClassDesc();
   ourCD->ReleaseObsoletePBDesc();
 
-  InstanceDeleted();
+  InstanceDeleted( this );
 }
 
 template<typename TBaseClass, typename TResultType>

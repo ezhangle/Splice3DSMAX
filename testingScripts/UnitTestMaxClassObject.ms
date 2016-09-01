@@ -47,6 +47,10 @@ fn TestMaxClassObject =
 	sm.DFGMoveNodes #(rc1) #([728.000000,188.000000])   execPath:""
 	sm.DFGConnect (as1 + ".this") (rc1 + ".mesh")   execPath:""
 	sm.DFGConnect (rc1 + ".result") "outputValue"   execPath:""
+		
+	cloneNode = sm.DFGInstPreset "Fabric.Exts.Geometry.PolygonMesh.ClonePolygonMesh" [123.000000,233.000000]   execPath:""
+	sm.DFGConnect "inMesh" (cloneNode + ".value")
+	sm.DFGConnect (cloneNode + ".result") (as1 + ".this")   execPath:""
 
 	-- Test clone
 	maxOps.cloneNodes sm cloneType:#copy newNodes:&nnl

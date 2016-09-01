@@ -169,10 +169,16 @@ protected:
 		FabricTranslationLayer<TBaseClass, TResultType>& m_owner;
 		DoSyncing& operator=(const DoSyncing &tmp); // Suppress couldnt generate assignment error
 	public:
-		DoSyncing(FabricTranslationLayer<TBaseClass, TResultType>& owner) : m_owner(owner)
-		{ m_owner._m_isSyncing = true;  }
+		DoSyncing( FabricTranslationLayer<TBaseClass, TResultType>& owner ) : m_owner( owner )
+		{
+			DbgAssert( !m_owner._m_isSyncing );
+			m_owner._m_isSyncing = true;
+		}
 		~DoSyncing()
-		{ m_owner._m_isSyncing = false; }
+		{ 
+			DbgAssert( m_owner._m_isSyncing );
+			m_owner._m_isSyncing = false; 
+		}
 	};
 	friend DoSyncing;
 

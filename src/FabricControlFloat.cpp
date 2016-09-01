@@ -71,14 +71,23 @@ void FabricControlFloat::GetValue(TimeValue t, void *val, Interval &interval, Ge
 {
 	HoldSuspend hs; // Prevents us from creating undo objects when setting values to Fabric
 	float* pVal = reinterpret_cast<float*>(val);
-	if(method == CTRL_RELATIVE)
 	{
-		Invalidate(); // Evaluate every time in case parent changes too
-		MaxValueToFabric(m_binding, m_parentArgName.c_str(), 0, interval, *pVal);
-	}
-	else
-	{
-		MaxValueToFabric(m_binding, m_parentArgName.c_str(), 0, interval, float(0));
+		// We set our synching flag here to indicate that we are sending
+		// values to Fabric.  This is theoretically to prevent our params changing
+		// while evaluating, but in reality is to prevent re-entry if 
+		// we pop a dialog due to an exception.  If that happens, then Max starts
+		// processing it's messages, and we recurse straight back into this function.
+		DoSyncing ds( *this );
+		if (method == CTRL_RELATIVE)
+		{
+			Invalidate(); // Evaluate every time in case parent changes too
+			MaxValueToFabric( m_binding, m_parentArgName.c_str(), 0, interval, *pVal );
+		}
+		else
+		{
+			MaxValueToFabric( m_binding, m_parentArgName.c_str(), 0, interval, float( 0 ) );
+		}
+
 	}
 
 	// Evaluate value from splice

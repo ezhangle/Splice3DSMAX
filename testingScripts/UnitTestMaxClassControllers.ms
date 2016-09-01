@@ -4,7 +4,7 @@ fn TestMaxClassControllers =
 	-- Test basic controller structure, time change
 	print "Test basic controller"
 	p1 = point()
-	local dfgCtrller = FabricMatrixController()
+	dfgCtrller = FabricMatrixController()
 	p1.controller = dfgCtrller
 	dfgCtrller.ShowDFGGraphEditor()
 
@@ -36,7 +36,7 @@ fn TestMaxClassControllers =
 	print "Test parenting"
 	-- Test Position controller, parenting
 	p2 = point()
-	local dfgCtrl = FabricPositionController()
+	dfgCtrl = FabricPositionController()
 	p2.controller.position.controller = dfgCtrl
 	p2.parent = p1
 
@@ -62,7 +62,7 @@ fn TestMaxClassControllers =
 	-- Test Rotation controller, transform order
 	print "Test rotation"
 	p3 = point()
-	local dfgCtrl = FabricRotationController()
+	dfgCtrl = FabricRotationController()
 	p3.controller.rotation.controller = dfgCtrl
 
 	euler = dfgCtrl.DFGInstPreset "Fabric.Exts.Math.Euler.Euler" [185.000000,183.000000]   execPath:""
@@ -97,7 +97,7 @@ fn TestMaxClassControllers =
 	-------------------------------------------------------------------------------------------------------------
 	-- Test float controller, input chaining
 	print "Test floats, input chaining"
-	local dfgFloatCtrl = FabricFloatController()
+	dfgFloatCtrl = FabricFloatController()
 
 	evalCtxt = dfgFloatCtrl.DFGInstPreset "Fabric.Exts.Util.EvalContext.CurrentEvalContext" [302.000000,183.000000]   execPath:""
 	timeNode = dfgFloatCtrl.DFGInstPreset "Fabric.Exts.Util.EvalContext.GetTime" [408.000000,183.000000]   execPath:""

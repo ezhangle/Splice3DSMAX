@@ -82,18 +82,26 @@ void FabricControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, G
 	Invalidate();
 	HoldSuspend hs; // Prevents us from creating undo objects when setting values to Fabric
 	Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
-	if(method == CTRL_ABSOLUTE)
 	{
-		MaxValueToFabric(m_binding, m_parentArgName.c_str(), t, interval, Matrix3::Identity);
-	}
-	else
-	{
-		// if our parents value has changed, invalidate our cache
-		if (!(m_cachedParentVal == *pInVal))
-			Invalidate();
-		MaxValueToFabric(m_binding, m_parentArgName.c_str(), t, interval, *pInVal);
-		// Cache parent transform for next eval
-		m_cachedParentVal = *pInVal;
+		// We set our synching flag here to indicate that we are sending
+		// values to Fabric.  This is theoretically to prevent our params changing
+		// while evaluating, but in reality is to prevent re-entry if 
+		// we pop a dialog due to an exception.  If that happens, then Max starts
+		// processing it's messages, and we recurse straight back into this function.
+		DoSyncing ds( *this );
+		if (method == CTRL_ABSOLUTE)
+		{
+			MaxValueToFabric( m_binding, m_parentArgName.c_str(), t, interval, Matrix3::Identity );
+		}
+		else
+		{
+			// if our parents value has changed, invalidate our cache
+			if (!(m_cachedParentVal == *pInVal))
+				Invalidate();
+			MaxValueToFabric( m_binding, m_parentArgName.c_str(), t, interval, *pInVal );
+			// Cache parent transform for next eval
+			m_cachedParentVal = *pInVal;
+		}
 	}
 	*pInVal = Evaluate(t, interval);
 

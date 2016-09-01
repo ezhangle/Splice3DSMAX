@@ -91,6 +91,7 @@ void FabricWSModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* o
 #pragma message("TODO: Clean up caching based on Fabric's version number")
 		//if (!m_inputValid.InInterval(t))
 		{
+			DoSyncing ds( *this );
 			m_inputValid.SetInfinite();
 			MaxValuesToFabric<Object*, Mesh>(m_binding, m_baseMeshArgName.c_str(), t, m_inputValid, &os->obj, 1);
 			ivValid &= m_inputValid;
@@ -105,8 +106,11 @@ void FabricWSModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* o
 			}
 		}
 
-		// A WSModifier is a special kind of modifier that has access to its nodes transform
-		MaxValueToFabric(m_binding, m_baseMeshTransformArgName.c_str(), t, ivValid, tmNode);
+		{
+			DoSyncing ds( *this );
+			// A WSModifier is a special kind of modifier that has access to its nodes transform
+			MaxValueToFabric( m_binding, m_baseMeshTransformArgName.c_str(), t, ivValid, tmNode );
+		}
 
 		// Set our output.
 		if (GraphCanEvaluate())

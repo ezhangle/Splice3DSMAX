@@ -1226,8 +1226,8 @@ void TransferAllMaxValuesToFabric(TimeValue t, IParamBlock2* pblock, FabricCore:
 			paramValids.resize(pidx + 1);
 		else
 		{
-			//if (paramValids[pidx].ininterval(t))
-			//	continue;
+			if (paramValids[pidx].InInterval(t))
+				continue;
 		}
 		paramValids[pidx].SetInfinite();
 

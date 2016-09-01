@@ -42,15 +42,18 @@ fn TestLoadSaveSpliceFile =
 	alembic_inspectfile.DFGConnect (fget + ".element") (tomat + ".this")   execPath:""
 	alembic_inspectfile.DFGAddPort "result" #DFGPortOUT "Mat44" portToConnect:(tomat + ".result")
 
+	RedrawViews()
 	m = alembic_inspectfile.GetArgValue "result"
-	FAssert(IsEquivVec m.pos [0,0,0]) "Bad pos from abc file"
+	FAssert(IsEquivVec m.pos [0,0,0]) "Bad pos 1 from abc file"
 	alembic_inspectfile.DFGSetPortDefaultValue "Get_1.index" 1 execPath:""
+	RedrawViews()
 	m = alembic_inspectfile.GetArgValue "result"
-	FAssert(IsEquivVec m.pos [0,4.37156,0]) "Bad pos from abc file"
+	FAssert(IsEquivVec m.pos [0,4.37156,0]) "Bad pos 2 from abc file"
 	alembic_inspectfile.DFGSetPortDefaultValue "Get_1.index" 2 execPath:""
+	RedrawViews()
 	m = alembic_inspectfile.GetArgValue "result"
-	FAssert(IsEquivVec m.pos [0,8.68887,0]) "Bad pos from abc file"
-
+	FAssert(IsEquivVec m.pos [0,8.68887,0]) "Bad pos 3 from abc file"
+	print ("Validated Load: AlembicFile inpection")
 	-------------------------------------------------------------------
 	arrays_grid_points = DoLoadFile (sampleDir + "Miscellaneous\\arrays_grid_points.canvas")
 	-- This is rendered, so we can't check it.
@@ -58,15 +61,17 @@ fn TestLoadSaveSpliceFile =
 	arrays_grid_points.h = 10
 	arrays_grid_points.width = 10
 	arrays_grid_points.height = 10
-
+	print ("Loaded: Arrays Grid Points")
+	
 	-------------------------------------------------------------------
 	arrays_interpolate_on_array = DoLoadFile (sampleDir + "Miscellaneous\\arrays_interpolate_on_array.canvas")
 	arrays_interpolate_on_array.timeline = 10
-
+	print ("Loaded: Arrays Grid Points")
 	-------------------------------------------------------------------
 	arrays_random_points = DoLoadFile (sampleDir + "Miscellaneous\\arrays_random_points.canvas")
 	arrays_random_points.count = 50
-
+	print ("Loaded: Arrays Random Points")
+	
 	-------------------------------------------------------------------
 	-- Do full load/save/load loop here
 
@@ -83,4 +88,5 @@ fn TestLoadSaveSpliceFile =
 		bullet_boxes.timeline = i as float / 30 
 		RedrawViews()
 	)
+	print ("Saved/Loaded: Bullet Boxes.  Check viewport for visual confirmation (TODO: Implement screenshot comparisons)")
 )

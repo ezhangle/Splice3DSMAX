@@ -1063,7 +1063,7 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SetupEvalContext(TimeValue
   }
   if (m_evalContext.isValid())
   {
-    CStr graphName = GetGraphName().ToCStr();
+    //CStr graphName = GetGraphName().ToCStr();
     m_evalContext.setMember("time", FabricCore::RTVal::ConstructFloat32(client, TicksToSec(t)));
   }
 }

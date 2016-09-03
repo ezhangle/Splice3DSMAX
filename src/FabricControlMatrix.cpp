@@ -97,10 +97,12 @@ void FabricControlMatrix::GetValue(TimeValue t, void *val, Interval &interval, G
 		{
 			// if our parents value has changed, invalidate our cache
 			if (!(m_cachedParentVal == *pInVal))
+			{
 				Invalidate();
-			MaxValueToFabric( m_binding, m_parentArgName.c_str(), t, interval, *pInVal );
-			// Cache parent transform for next eval
-			m_cachedParentVal = *pInVal;
+				MaxValueToFabric( m_binding, m_parentArgName.c_str(), t, interval, *pInVal );
+				// Cache parent transform for next eval
+				m_cachedParentVal = *pInVal;
+			}
 		}
 	}
 	*pInVal = Evaluate(t, interval);

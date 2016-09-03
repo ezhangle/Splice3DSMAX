@@ -228,52 +228,104 @@ extern FabricCore::Variant GetVariant(const FPValue& value)
 #pragma endregion // GetVariants
 
 #pragma region Get RTVals
+
+template<typename T>
+void ConvertToSimpleRTVal( T param, FabricCore::RTVal& rtVal )
+{
+	FEC_RTValSimpleData sd;
+	rtVal.maybeGetSimpleData( &sd );
+	switch (sd.type)
+	{
+		case FEC_RTVAL_SIMPLE_TYPE_BOOLEAN:
+			rtVal.setBoolean( param != 0 );
+			break;
+
+		case FEC_RTVAL_SIMPLE_TYPE_UINT8:
+			rtVal.setUInt8( (uint8_t)param );
+			break;
+
+		case FEC_RTVAL_SIMPLE_TYPE_UINT16:
+			rtVal.setUInt16( (uint16_t)param );
+			break;
+
+		case FEC_RTVAL_SIMPLE_TYPE_UINT32:
+			rtVal.setUInt32( (uint32_t)param );
+			break;
+		case FEC_RTVAL_SIMPLE_TYPE_UINT64:
+			rtVal.setUInt64( (uint64_t)param );
+			break;
+
+		case FEC_RTVAL_SIMPLE_TYPE_SINT8:
+			rtVal.setSInt8( (int8_t)param );
+			break;
+
+		case FEC_RTVAL_SIMPLE_TYPE_SINT16:
+			rtVal.setSInt16( (int16_t)param );
+			break;
+		case FEC_RTVAL_SIMPLE_TYPE_SINT32:
+			rtVal.setSInt32( (int32_t)param );
+			break;
+		case FEC_RTVAL_SIMPLE_TYPE_SINT64:
+			rtVal.setSInt64( (int64_t)param );
+			break;
+		case FEC_RTVAL_SIMPLE_TYPE_FLOAT32:
+			rtVal.setFloat32( (float)param );
+			break;
+		case FEC_RTVAL_SIMPLE_TYPE_FLOAT64:
+			rtVal.setFloat64( (double)param );
+			break;
+		default:
+			DbgAssert( FALSE && "Unknown type" );
+			break;
+	}
+}
+
 void ConvertToRTVal(int param, FabricCore::RTVal& rtVal)
 {
 	DbgAssert(rtVal.isValid());
 	if (!rtVal.isValid())
 		return;
+	ConvertToSimpleRTVal( param, rtVal );
+	//FabricCore::RTVal type = rtVal.getTypeName();
+	//const char* spliceType = type.getStringCString();
+	//if (strcmp(spliceType, "SInt32") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructSInt32(GetClient(), param);
+	//else if (strcmp(spliceType, "UInt32") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructUInt32(GetClient(), param);
 
-	FabricCore::RTVal type = rtVal.getTypeName();
-	const char* spliceType = type.getStringCString();
-	if (strcmp(spliceType, "SInt32") == 0)
-		rtVal = FabricCore::RTVal::ConstructSInt32(GetClient(), param);
-	else if (strcmp(spliceType, "UInt32") == 0)
-		rtVal = FabricCore::RTVal::ConstructUInt32(GetClient(), param);
+	//else if (strcmp(spliceType, "SInt8") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructSInt8(GetClient(), (int8_t)param);
+	//else if (strcmp(spliceType, "SInt16") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructSInt16(GetClient(), (int16_t)param);
+	//else if (strcmp(spliceType, "SInt64") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructSInt64(GetClient(), param);
 
-	else if (strcmp(spliceType, "SInt8") == 0)
-		rtVal = FabricCore::RTVal::ConstructSInt8(GetClient(), (int8_t)param);
-	else if (strcmp(spliceType, "SInt16") == 0)
-		rtVal = FabricCore::RTVal::ConstructSInt16(GetClient(), (int16_t)param);
-	else if (strcmp(spliceType, "SInt64") == 0)
-		rtVal = FabricCore::RTVal::ConstructSInt64(GetClient(), param);
+	//else if (strcmp(spliceType, "UInt8") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructUInt8(GetClient(), (uint8_t)param);
+	//else if (strcmp(spliceType, "UInt16") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructUInt16(GetClient(), (uint16_t)param);
+	//else if (strcmp(spliceType, "UInt64") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
 
-	else if (strcmp(spliceType, "UInt8") == 0)
-		rtVal = FabricCore::RTVal::ConstructUInt8(GetClient(), (uint8_t)param);
-	else if (strcmp(spliceType, "UInt16") == 0)
-		rtVal = FabricCore::RTVal::ConstructUInt16(GetClient(), (uint16_t)param);
-	else if (strcmp(spliceType, "UInt64") == 0)
-		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
+	//// These last two param types may be deprecated
+	//else if (strcmp(spliceType, "Size") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructUInt32(GetClient(), param);
+	//else if (strcmp(spliceType, "Index") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
+	//else if (strcmp(spliceType, "Integer") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructSInt32(GetClient(), param);
 
-	// These last two param types may be deprecated
-	else if (strcmp(spliceType, "Size") == 0)
-		rtVal = FabricCore::RTVal::ConstructUInt32(GetClient(), param);
-	else if (strcmp(spliceType, "Index") == 0)
-		rtVal = FabricCore::RTVal::ConstructUInt64(GetClient(), param);
-	else if (strcmp(spliceType, "Integer") == 0)
-		rtVal = FabricCore::RTVal::ConstructSInt32(GetClient(), param);
-
-	// These can come through sometimes
-	else if (strcmp(spliceType, "Float32") == 0 || strcmp(spliceType, "Scalar") == 0)
-		rtVal = FabricCore::RTVal::ConstructFloat32(GetClient(), (float)param);
-	else if (strcmp(spliceType, "Float64") == 0)
-		rtVal = FabricCore::RTVal::ConstructFloat64(GetClient(), param);
-	else
-	{
-		// Set a default val
-		rtVal = FabricCore::RTVal::ConstructSInt32(GetClient(), param);
-		DbgAssert(false && "Missing translation when setting int to Fabric");
-	}
+	//// These can come through sometimes
+	//else if (strcmp(spliceType, "Float32") == 0 || strcmp(spliceType, "Scalar") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructFloat32(GetClient(), (float)param);
+	//else if (strcmp(spliceType, "Float64") == 0)
+	//	rtVal = FabricCore::RTVal::ConstructFloat64(GetClient(), param);
+	//else
+	//{
+	//	// Set a default val
+	//	rtVal = FabricCore::RTVal::ConstructSInt32(GetClient(), param);
+	//	DbgAssert(false && "Missing translation when setting int to Fabric");
+	//}
 }
 
 void ConvertToRTVal(float param, FabricCore::RTVal& val)
@@ -281,20 +333,26 @@ void ConvertToRTVal(float param, FabricCore::RTVal& val)
 	DbgAssert(val.isValid());
 	if (!val.isValid())
 		return;
+	ConvertToSimpleRTVal( param, val );
 
-	FabricCore::RTVal type = val.getTypeName();
-	const char* spliceType = type.getStringCString();
+	//FabricCore::RTVal type = val.getTypeName();
+	//const char* spliceType = type.getStringCString();
 
-	if (strcmp(spliceType, "Float64") == 0)
-		val = FabricCore::RTVal::ConstructFloat64(GetClient(), param);
-	else
-		val.setFloat32(param);
+	//if (strcmp(spliceType, "Float64") == 0)
+	//	val = FabricCore::RTVal::ConstructFloat64(GetClient(), param);
+	//else
+	//	val.setFloat32(param);
 }
 
 void ConvertToRTVal(bool param, FabricCore::RTVal& val)
 {
-	DbgAssert(val.isValid());
-	val = FabricCore::RTVal::ConstructBoolean(GetClient(), param);
+	DbgAssert( val.isValid() );
+	if (!val.isValid())
+		return;
+	ConvertToSimpleRTVal( param, val );
+
+	//DbgAssert(val.isValid());
+	//val = FabricCore::RTVal::ConstructBoolean(GetClient(), param);
 }
 
 void ConvertToRTVal( const Point2& param, FabricCore::RTVal& val )
@@ -303,8 +361,8 @@ void ConvertToRTVal( const Point2& param, FabricCore::RTVal& val )
 	if (!val.isValid())
 		return;
 
-	val.maybeGetMemberRef( "x" ).setFloat32( param.x );
-	val.maybeGetMemberRef( "y" ).setFloat32( param.y );
+	val.getMemberRef( 0 ).setFloat32( param.x );
+	val.getMemberRef( 1 ).setFloat32( param.y );
 }
 
 void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val)
@@ -313,9 +371,9 @@ void ConvertToRTVal(const Point3& param, FabricCore::RTVal& val)
 	if (!val.isValid())
 		return;
 
-	val.maybeGetMemberRef("x").setFloat32(param.x);
-	val.maybeGetMemberRef("y").setFloat32(param.y);
-	val.maybeGetMemberRef("z").setFloat32(param.z);
+	val.getMemberRef( 0 ).setFloat32(param.x);
+	val.getMemberRef( 1 ).setFloat32(param.y);
+	val.getMemberRef( 2 ).setFloat32(param.z);
 }
 
 void ConvertToRTVal(const Color& param, FabricCore::RTVal& val)
@@ -349,35 +407,56 @@ void ConvertToRTVal(const Color& param, FabricCore::RTVal& val)
 	}
 }
 
+void ConvertToColorRTVal( const Point4& param, FabricCore::RTVal& val )
+{
+	// Callee assumes responsibility for RTVal validity
+	DbgAssert( strcmp( val.getMemberName( 0 ), "r" ) == 0 );
+	DbgAssert( strcmp( val.getMemberName( 3 ), "a" ) == 0 );
+
+	val.getMemberRef( 0 ).setFloat32( param.x );
+	val.getMemberRef( 1 ).setFloat32( param.y );
+	val.getMemberRef( 2 ).setFloat32( param.z );
+	val.getMemberRef( 3 ).setFloat32( param.w );
+}
+
+void ConvertToRGBARTVal( const Point4& param, FabricCore::RTVal& val )
+{
+	// Callee assumes responsibility for RTVal validity
+	DbgAssert( strcmp( val.getMemberName( 0 ), "r" ) == 0 );
+	DbgAssert( strcmp( val.getMemberName( 3 ), "a" ) == 0 );
+
+	val.getMemberRef( 0 ).setUInt8( (uint8_t)FLto255( param.x ) );
+	val.getMemberRef( 1 ).setUInt8( (uint8_t)FLto255( param.y ) );
+	val.getMemberRef( 2 ).setUInt8( (uint8_t)FLto255( param.z ) );
+	val.getMemberRef( 3 ).setUInt8( (uint8_t)FLto255( param.w ) );
+}
+
+void ConvertToVec4RTVal( const Point4& param, FabricCore::RTVal& val )
+{
+	// Callee assumes responsibility for RTVal validity
+	DbgAssert( strcmp( val.getMemberName( 0 ), "x" ) == 0 );
+	DbgAssert( strcmp( val.getMemberName( 3 ), "t" ) == 0 );
+
+	val.getMemberRef( 0 ).setFloat32( param.x );
+	val.getMemberRef( 1 ).setFloat32( param.y );
+	val.getMemberRef( 2 ).setFloat32( param.z );
+	val.getMemberRef( 3 ).setFloat32( param.w );
+}
+
 void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
 {
 	DbgAssert(val.isValid());
 	if (!val.isValid())
 		return;
 
-	FabricCore::RTVal type = val.getTypeName();
-	const char* spliceType = type.getStringCString();
+	const char* spliceType = val.getTypeNameCStr();
 
-	if (strcmp(spliceType, "Color") == 0)
-	{
-		val.maybeGetMemberRef("r").setFloat32(param.x);
-		val.maybeGetMemberRef("g").setFloat32(param.y);
-		val.maybeGetMemberRef("b").setFloat32(param.z);
-		val.maybeGetMemberRef("a").setFloat32(param.w);
-	}
+	if (strcmp( spliceType, "Color" ) == 0)
+		ConvertToColorRTVal( param, val );
 	else if (strcmp( spliceType, "RGBA" ) == 0)
-	{
-		val.maybeGetMemberRef( "r" ).setUInt8( (uint8_t)FLto255( param.x ) );
-		val.maybeGetMemberRef( "g" ).setUInt8( (uint8_t)FLto255( param.y ) );
-		val.maybeGetMemberRef( "b" ).setUInt8( (uint8_t)FLto255( param.z ) );
-		val.maybeGetMemberRef( "a" ).setUInt8( (uint8_t)FLto255( param.w ) );
-	}
-	else {
-		val.maybeGetMemberRef("x").setFloat32(param.x);
-		val.maybeGetMemberRef("y").setFloat32(param.y);
-		val.maybeGetMemberRef("z").setFloat32(param.z);
-		val.maybeGetMemberRef("t").setFloat32(param.w);
-	}
+		ConvertToRGBARTVal( param, val );
+	else
+		ConvertToVec4RTVal( param, val );
 }
 
 void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val)
@@ -386,9 +465,9 @@ void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val)
 	if (!val.isValid())
 		return;
 
-	FabricCore::RTVal v = val.maybeGetMemberRef("v");
+	FabricCore::RTVal v = val.getMemberRef( 0 );
 	ConvertToRTVal(Point3(param.x, param.y, param.z), v);
-	val.maybeGetMemberRef("w").setFloat32(param.w);
+	val.getMemberRef( 1 ).setFloat32(param.w);
 }
 
 void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val)
@@ -398,15 +477,15 @@ void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val)
 		return;
 
 	const MRow* pInMtx = param.GetAddr();
-	FabricCore::RTVal row0 = val.maybeGetMemberRef("row0");
-	FabricCore::RTVal row1 = val.maybeGetMemberRef("row1");
-	FabricCore::RTVal row2 = val.maybeGetMemberRef("row2");
-	FabricCore::RTVal row3 = val.maybeGetMemberRef("row3");
+	FabricCore::RTVal row0 = val.getMemberRef( 0 );
+	FabricCore::RTVal row1 = val.getMemberRef( 1 );
+	FabricCore::RTVal row2 = val.getMemberRef( 2 );
+	FabricCore::RTVal row3 = val.getMemberRef( 3 );
 
-	ConvertToRTVal(Point4(pInMtx[0][0], pInMtx[1][0], pInMtx[2][0], pInMtx[3][0]), row0);
-	ConvertToRTVal(Point4(pInMtx[0][1], pInMtx[1][1], pInMtx[2][1], pInMtx[3][1]), row1);
-	ConvertToRTVal(Point4(pInMtx[0][2], pInMtx[1][2], pInMtx[2][2], pInMtx[3][2]), row2);
-	ConvertToRTVal(Point4(0, 0, 0, 1), row3);
+	ConvertToVec4RTVal(Point4(pInMtx[0][0], pInMtx[1][0], pInMtx[2][0], pInMtx[3][0]), row0);
+	ConvertToVec4RTVal(Point4(pInMtx[0][1], pInMtx[1][1], pInMtx[2][1], pInMtx[3][1]), row1);
+	ConvertToVec4RTVal(Point4(pInMtx[0][2], pInMtx[1][2], pInMtx[2][2], pInMtx[3][2]), row2);
+	ConvertToVec4RTVal(Point4(0, 0, 0, 1), row3);
 }
 
 
@@ -414,14 +493,14 @@ void ConvertToRTVal(const MSTR& param, FabricCore::RTVal& val)
 {
 	DbgAssert(val.isValid());
 	CStr cStr = param.ToCStr();
-	val = FabricCore::RTVal::ConstructString(GetClient(), cStr.data());
+	val.setString( cStr.data(), cStr.Length() );
 }
 
 void ConvertToRTVal(const MCHAR* param, FabricCore::RTVal& val)
 {
 	DbgAssert(val.isValid());
 	CStr cStr = CStr::FromMCHAR(param);
-	val = FabricCore::RTVal::ConstructString(GetClient(), cStr.data());
+	val.setString( cStr.data(), cStr.Length() );
 }
 
 void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
@@ -528,6 +607,27 @@ void ConvertToRTVal(const Mesh& param, FabricCore::RTVal& rtMesh)
 	return;
 }
 
+template<typename T>
+void ConvertArrayToRTVal( Tab<T> tab, FabricCore::RTVal& rtArray )
+{
+	int cnt = tab.Count();
+	rtArray.setArraySize( cnt );
+	for (int i = 0; i < cnt; i++) {
+		FabricCore::RTVal arrayItem = rtArray.getArrayElementRef( i );
+		ConvertToRTVal( tab[i], arrayItem );
+	}
+}
+template<typename T>
+void ConvertDRArrayToRTVal( Tab<T> tab, FabricCore::RTVal& rtArray )
+{
+	int cnt = tab.Count();
+	rtArray.setArraySize( cnt );
+	for (int i = 0; i < cnt; i++) {
+		FabricCore::RTVal arrayItem = rtArray.getArrayElementRef( i );
+		ConvertToRTVal( *tab[i], arrayItem );
+	}
+}
+
 void ConvertToRTVal(const FPValue& param, FabricCore::RTVal& val)
 {
 	DbgAssert(val.isValid());
@@ -535,12 +635,44 @@ void ConvertToRTVal(const FPValue& param, FabricCore::RTVal& val)
 	{
 		if (is_tab(param.type) && val.isArray())
 		{
-			int cnt = param.aa_tab->Count();
-			val.setArraySize(cnt);
+			switch ((int)root_type( param.type ))
+			{
+				case TYPE_BOOL:
+					return ConvertArrayToRTVal( *param.b_tab, val );
+				case TYPE_INT:
+					return ConvertArrayToRTVal( *param.i_tab, val );
+				case TYPE_FLOAT:
+				case TYPE_ANGLE:
+				case TYPE_WORLD:
+				case TYPE_PCNT_FRAC:
+					return ConvertArrayToRTVal( *param.f_tab, val );
+				case TYPE_RGBA:
+					return ConvertDRArrayToRTVal( *param.clr_tab, val );
+				case TYPE_FRGBA:
+					return ConvertDRArrayToRTVal( *param.p4_tab, val );
+				case TYPE_POINT3:
+					return ConvertDRArrayToRTVal( *param.p_tab, val );
+				case TYPE_POINT4:
+					return ConvertDRArrayToRTVal( *param.p4_tab, val );
+				case TYPE_QUAT:
+					return ConvertDRArrayToRTVal( *param.q_tab, val );
+				//case TYPE_ANGAXIS:
+				//{
+				//	// Fabric has no AngAxis, so try converting to Quat
+				//	//AngAxis& aa = *param.aa;
+				//	//Quat q( aa );
+				//	//return ConvertToRTVal( q_tab, val );
+				//}
+				case TYPE_TSTR:
+				{
+					return ConvertDRArrayToRTVal( *param.tstr_tab, val );
+				}
 
-			/*for (int i = 0; i < cnt; i++) {
-				ConvertToRTVal()
-				}*/
+				case TYPE_MESH:
+					return ConvertDRArrayToRTVal( *param.msh_tab, val );
+				default:
+					DbgAssert( _T( "Implement Me" ) );
+			}
 		}
 	}
 	else
@@ -774,105 +906,161 @@ void FabricToMaxValue(const FabricCore::Variant& var, MSTR& param)
 // Convert from RTVal to Max value
 void FabricToMaxValue(const FabricCore::RTVal& rtVal, bool& param)
 {
-	FabricCore::RTVal& ncrtVal = const_cast<FabricCore::RTVal&>(rtVal);
-	param = ncrtVal.getBoolean();
+	param = rtVal.getBoolean();
 }
 
-void FabricToMaxValue(const FabricCore::RTVal& rtVal, int& param)
+template<typename T>
+void FabricValToMaxValue(const FabricCore::RTVal& rtVal, T& param)
 {
-	FabricCore::RTVal& ncrtVal = const_cast<FabricCore::RTVal&>(rtVal);
-	FabricCore::RTVal type = rtVal.getTypeName();
-	const char* spliceType = type.getStringCString();
-	if (strcmp(spliceType, "SInt32") == 0)
-		param = ncrtVal.getSInt32();
-	else if (strcmp(spliceType, "UInt32") == 0)
-		param = ncrtVal.getUInt32();
+	FEC_RTValSimpleData sd;
+	rtVal.maybeGetSimpleData( &sd );
+	switch (sd.type)
+	{
+		case FEC_RTVAL_SIMPLE_TYPE_BOOLEAN:
+			param = T(sd.value.boolean ? 1 : 0);
+			break;
 
-	else if (strcmp(spliceType, "SInt8") == 0)
-		param = ncrtVal.getSInt8();
-	else if (strcmp(spliceType, "SInt16") == 0)
-		param = ncrtVal.getSInt16();
-	else if (strcmp(spliceType, "SInt64") == 0)
-		param = (int)ncrtVal.getSInt64();
+		case FEC_RTVAL_SIMPLE_TYPE_UINT8:
+			param = sd.value.uint8;
+			break;
 
-	else if (strcmp(spliceType, "UInt8") == 0)
-		param = (int)ncrtVal.getUInt8();
-	else if (strcmp(spliceType, "UInt16") == 0)
-		param = (int)ncrtVal.getUInt16();
-	else if (strcmp(spliceType, "UInt64") == 0)
-		param = (int)ncrtVal.getUInt64();
+		case FEC_RTVAL_SIMPLE_TYPE_UINT16:
+			param = sd.value.uint16;
+			break;
 
-	// These last two param types may be deprecated
-	else if (strcmp(spliceType, "Size") == 0)
-		param = (int)ncrtVal.getUInt32();
-	else if (strcmp(spliceType, "Index") == 0)
-		param = (int)ncrtVal.getUInt64();
+		case FEC_RTVAL_SIMPLE_TYPE_UINT32:
+			param = (T)sd.value.uint32;
+			break;
+		case FEC_RTVAL_SIMPLE_TYPE_UINT64:
+			param = (T)sd.value.uint64;
+			break;
 
-	// boolean option
-	else if (strcmp(spliceType, "Boolean") == 0)
-		param = (int)ncrtVal.getBoolean(); 
+		case FEC_RTVAL_SIMPLE_TYPE_SINT8:
+			param = sd.value.sint8;
+			break;
 
-	else // default
-		param = ncrtVal.getSInt32();
+		case FEC_RTVAL_SIMPLE_TYPE_SINT16:
+			param = sd.value.sint16;
+			break;
+		case FEC_RTVAL_SIMPLE_TYPE_SINT32:
+			param = (T)sd.value.sint32;
+			break;
+		case FEC_RTVAL_SIMPLE_TYPE_SINT64:
+			param = (T)sd.value.sint64;
+			break;
+		case FEC_RTVAL_SIMPLE_TYPE_FLOAT32:
+			param = (T)sd.value.float32;
+			break;
+		case FEC_RTVAL_SIMPLE_TYPE_FLOAT64:
+			param = (T)sd.value.float32;
+			break;
+		default:
+			DbgAssert( FALSE && "Unknown type" );
+			break;
+	}
+	//FabricCore::RTVal& ncrtVal = const_cast<FabricCore::RTVal&>(rtVal);
+	//FabricCore::RTVal type = rtVal.getTypeName();
+	//const char* spliceType = type.getStringCString();
+	//if (strcmp(spliceType, "SInt32") == 0)
+	//	param = ncrtVal.getSInt32();
+	//else if (strcmp(spliceType, "UInt32") == 0)
+	//	param = ncrtVal.getUInt32();
+
+	//else if (strcmp(spliceType, "SInt8") == 0)
+	//	param = ncrtVal.getSInt8();
+	//else if (strcmp(spliceType, "SInt16") == 0)
+	//	param = ncrtVal.getSInt16();
+	//else if (strcmp(spliceType, "SInt64") == 0)
+	//	param = (int)ncrtVal.getSInt64();
+
+	//else if (strcmp(spliceType, "UInt8") == 0)
+	//	param = (int)ncrtVal.getUInt8();
+	//else if (strcmp(spliceType, "UInt16") == 0)
+	//	param = (int)ncrtVal.getUInt16();
+	//else if (strcmp(spliceType, "UInt64") == 0)
+	//	param = (int)ncrtVal.getUInt64();
+
+	//// These last two param types may be deprecated
+	//else if (strcmp(spliceType, "Size") == 0)
+	//	param = (int)ncrtVal.getUInt32();
+	//else if (strcmp(spliceType, "Index") == 0)
+	//	param = (int)ncrtVal.getUInt64();
+
+	//// boolean option
+	//else if (strcmp(spliceType, "Boolean") == 0)
+	//	param = (int)ncrtVal.getBoolean(); 
+
+	//else // default
+	//	param = ncrtVal.getSInt32();
+}
+
+void FabricToMaxValue( const FabricCore::RTVal& rtVal, int& param )
+{
+	FabricValToMaxValue( rtVal, param );
 }
 
 void FabricToMaxValue(const FabricCore::RTVal& rtVal, float& param)
 {
-	FabricCore::RTVal& ncrtVal = const_cast<FabricCore::RTVal&>(rtVal);
-	FabricCore::RTVal type = rtVal.getTypeName();
-	const char* spliceType = type.getStringCString();
-
-	if (strcmp(spliceType, "Float64") == 0)
-		param = (float)ncrtVal.getFloat64();
-	else // default
-		param = ncrtVal.getFloat32();
+	FabricValToMaxValue( rtVal, param );
 }
 
 void FabricToMaxValue(const FabricCore::RTVal& rtVal, Point2& param)
 {
-	param[0] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("x").getFloat32();
-	param[1] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("y").getFloat32();
+	param[0] = const_cast<FabricCore::RTVal&>(rtVal).getMember( 0 ).getFloat32();
+	param[1] = const_cast<FabricCore::RTVal&>(rtVal).getMember( 1 ).getFloat32();
 }
 
 void FabricToMaxValue(const FabricCore::RTVal& rtVal, Point3& param)
 {
-	param[0] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("x").getFloat32();
-	param[1] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("y").getFloat32();
-	param[2] = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("z").getFloat32();
+	param[0] = const_cast<FabricCore::RTVal&>(rtVal).getMember( 0 ).getFloat32();
+	param[1] = const_cast<FabricCore::RTVal&>(rtVal).getMember( 1 ).getFloat32();
+	param[2] = const_cast<FabricCore::RTVal&>(rtVal).getMember( 2 ).getFloat32();
+}
+
+void FabricColorToMaxValue( const FabricCore::RTVal& rtVal, Point4& param )
+{
+	param[0] = rtVal.getMember( 0 ).getFloat32();
+	param[1] = rtVal.getMember( 1 ).getFloat32();
+	param[2] = rtVal.getMember( 2 ).getFloat32();
+	param[3] = rtVal.getMember( 3 ).getFloat32();
+}
+
+void FabricRGBAToMaxValue( const FabricCore::RTVal& rtVal, Point4& param )
+{
+	param[0] = rtVal.getMember( 0 ).getUInt8() / 255.0f;
+	param[1] = rtVal.getMember( 1 ).getUInt8() / 255.0f;
+	param[2] = rtVal.getMember( 2 ).getUInt8() / 255.0f;
+	param[3] = rtVal.getMember( 3 ).getUInt8() / 255.0f;
+}
+
+void FabricVec4ToMaxValue( const FabricCore::RTVal& rtVal, Point4& param )
+{
+	param[0] = rtVal.getMember( 0 ).getFloat32();
+	param[1] = rtVal.getMember( 1 ).getFloat32();
+	param[2] = rtVal.getMember( 2 ).getFloat32();
+	param[3] = rtVal.getMember( 3 ).getFloat32();
 }
 
 void FabricToMaxValue(const FabricCore::RTVal& rtVal, Point4& param)
 {
-	FabricCore::RTVal& ncVal = const_cast<FabricCore::RTVal&>(rtVal);
-	FabricCore::RTVal type = rtVal.getTypeName();
-	const char* spliceType = type.getStringCString();
+	const char* spliceType = rtVal.getTypeNameCStr();
 	if (strcmp( spliceType, "RGBA" ) == 0) {
-		param[0] = ncVal.maybeGetMemberRef( "r" ).getUInt8() / 255.0f;
-		param[1] = ncVal.maybeGetMemberRef( "g" ).getUInt8() / 255.0f;
-		param[2] = ncVal.maybeGetMemberRef( "b" ).getUInt8() / 255.0f;
-		param[3] = ncVal.maybeGetMemberRef( "a" ).getUInt8() / 255.0f;
+		FabricRGBAToMaxValue( rtVal, param );
 	}
 	else if (strcmp(spliceType, "Color") == 0) {
-		param[0] = ncVal.maybeGetMemberRef("r").getFloat32();
-		param[1] = ncVal.maybeGetMemberRef("g").getFloat32();
-		param[2] = ncVal.maybeGetMemberRef("b").getFloat32();
-		param[3] = ncVal.maybeGetMemberRef("a").getFloat32();
+		FabricColorToMaxValue( rtVal, param );
 	}
 	else { // Assumed type == "Vec4"
-		param[0] = ncVal.maybeGetMemberRef("x").getFloat32();
-		param[1] = ncVal.maybeGetMemberRef("y").getFloat32();
-		param[2] = ncVal.maybeGetMemberRef("z").getFloat32();
-		param[3] = ncVal.maybeGetMemberRef("t").getFloat32();
+		FabricVec4ToMaxValue( rtVal, param );
 	}
 }
 
 void FabricToMaxValue(const FabricCore::RTVal& rtVal, Color& param)
 {
 	// Assumed KL RGB type (RGBA & Color map to Point4 type)
-	FabricCore::RTVal& ncVal = const_cast<FabricCore::RTVal&>(rtVal);
-	param.r = ncVal.maybeGetMemberRef( "r" ).getUInt8() / 255.0f;
-	param.g = ncVal.maybeGetMemberRef( "g" ).getUInt8() / 255.0f;
-	param.b = ncVal.maybeGetMemberRef( "b" ).getUInt8() / 255.0f;
+	param.r = rtVal.getMember( 0 ).getUInt8() / 255.0f;
+	param.g = rtVal.getMember( 1 ).getUInt8() / 255.0f;
+	param.b = rtVal.getMember( 2 ).getUInt8() / 255.0f;
 }
 
 void FabricToMaxValue(const FabricCore::RTVal& rtVal, Quat& param)
@@ -881,7 +1069,7 @@ void FabricToMaxValue(const FabricCore::RTVal& rtVal, Quat& param)
 	FabricCore::RTVal rtV = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("v");
 	Point3 maxV;
 	FabricToMaxValue(rtV, maxV);
-	float w = const_cast<FabricCore::RTVal&>(rtVal).maybeGetMemberRef("w").getFloat32();
+	float w = const_cast<FabricCore::RTVal&>(rtVal).getMember( 1 ).getFloat32();
 	param.Set(maxV, w);
 	// When converting from Fabrics Y up to Max's Z up, our
 	// rotations come out -ve.  Invert the Quat, and we 
@@ -891,9 +1079,9 @@ void FabricToMaxValue(const FabricCore::RTVal& rtVal, Quat& param)
 
 void FabricToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param)
 {
-	FabricCore::RTVal pRow0 = dgPort.maybeGetMemberRef("row0");
-	FabricCore::RTVal pRow1 = dgPort.maybeGetMemberRef("row1");
-	FabricCore::RTVal pRow2 = dgPort.maybeGetMemberRef("row2");
+	FabricCore::RTVal pRow0 = dgPort.getMember( 0 );
+	FabricCore::RTVal pRow1 = dgPort.getMember( 1 );
+	FabricCore::RTVal pRow2 = dgPort.getMember( 2 );
 	
 	if (!pRow0.isValid() ||
 		!pRow1.isValid() ||
@@ -904,9 +1092,9 @@ void FabricToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param)
 	}
 
 	Point4 columns[3];
-	FabricToMaxValue(pRow0, columns[0]);
-	FabricToMaxValue(pRow1, columns[1]);
-	FabricToMaxValue(pRow2, columns[2]);
+	FabricVec4ToMaxValue(pRow0, columns[0]);
+	FabricVec4ToMaxValue(pRow1, columns[1]);
+	FabricVec4ToMaxValue(pRow2, columns[2]);
 
 	param.SetColumn(0, columns[0]);
 	param.SetColumn(1, columns[1]);

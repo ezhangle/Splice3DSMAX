@@ -75,6 +75,10 @@ void MaxValuesToFabric(FabricCore::DFGBinding & binding, const char* argName, Ti
 	if (!rtVal.isValid())
 		return;
 
+	// Structs/Classes are passed by-reference, and do not need to be reset
+	// However, data values (and NULL pointers) need to be re-assigned once calculated
+	bool reAssign = !rtVal.isStruct() && (!rtVal.isObject() || rtVal.isNullObject());
+
 	if (rtVal.isArray())
 	{
 		rtVal.setArraySize(nParams);
@@ -94,9 +98,17 @@ void MaxValuesToFabric(FabricCore::DFGBinding & binding, const char* argName, Ti
 			ConvertToRTVal(convert, rtVal);
 		}
 	}
-	binding.setArgValue(argName, rtVal, canUndo);
 
-	// Is resetting the value necessary?
+	if (reAssign)
+	{
+		binding.setArgValue( argName, rtVal, canUndo );
+		FEC_RTValSimpleData sd;
+		if (!rtVal.maybeGetSimpleData( &sd ))
+		{
+			return;
+		}
+	}
+
 	if (canUndo)
 		theHold.Put(new FabricCoreRestoreObj());
 

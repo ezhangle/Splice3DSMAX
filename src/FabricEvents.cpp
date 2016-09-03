@@ -141,16 +141,16 @@ public:
 
 	bool ConfigureDrawContext(TimeValue t, ViewExp* pView)
 	{
+		FabricCore::RTVal drawContext = GetFabricDrawContext( pView );
+		if (!drawContext.isValid())
+			return false;
+
 		GraphicsWindow* gw = pView->getGW();
 		
 		ViewExp13* vp13 = NULL;
 		if (pView->IsAlive())
 			vp13 = reinterpret_cast<ViewExp13*>(pView->Execute(ViewExp::kEXECUTE_GET_VIEWEXP_13));
 		else
-			return false;
-
-		FabricCore::RTVal drawContext = GetFabricDrawContext(pView);
-		if (!drawContext.isValid())
 			return false;
 
 		// update the camera

@@ -11,6 +11,7 @@ filein (rootFolder + "samples\\UnitTestMaxClassControllers.ms")
 filein (rootFolder + "samples\\UnitTestPortConnection.ms")
 filein (rootFolder + "samples\\UnitTestLoadSaveMaxFile.ms")
 filein (rootFolder + "samples\\UnitTestLoadSaveSpliceFile.ms")
+filein (rootFolder + "samples\\UnitTestControllerPerformance.ms")
 	
 fn DoTestAll = 
 (
@@ -30,6 +31,11 @@ fn DoTestAll =
 	if not (TestFunction TestLoadSaveMaxFile) do ( return false )
 
 	if not (TestFunction TestLoadSaveSpliceFile) do ( return false )
+	
+	-- This test is of dubious benefit - it tries to measure performance but has
+	-- not history to track against so simply makes assumptions about how fast 
+	-- fabric 'should' be relative to baisc Max controllers
+	if not (TestFunction TestControllerPerformance) do ( return false )
 	
 	true
 )

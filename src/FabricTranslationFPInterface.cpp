@@ -652,7 +652,7 @@ bool FabricTranslationFPInterface::LoadFromFile(const MCHAR* filename, bool crea
 	buffer[fileSize] = '\0';
 
 	size_t readBytes = fread(buffer, 1, fileSize, file);
-	assert(readBytes == fileSize);
+	DbgAssert(readBytes == fileSize);
 
 	fclose(file);
 

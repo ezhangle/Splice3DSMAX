@@ -72,13 +72,19 @@ void FabricControlPosition::GetValue(TimeValue t, void *val, Interval &interval,
 	{
 		Invalidate(); // Evaluate every time in case parent changes too
 		Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
-		MaxValueToFabric(m_binding, m_parentArgName.c_str(), 0, interval, *pInVal);
+		{
+			DoSyncing ds( *this );
+			MaxValueToFabric( m_binding, m_parentArgName.c_str(), 0, interval, *pInVal );
+		}
 		pInVal->SetTrans(Evaluate(t, interval));
 	}
 	else
 	{
 		Point3* pOutVal = reinterpret_cast<Point3*>(val);
-		MaxValueToFabric(m_binding, m_parentArgName.c_str(), 0, interval, Matrix3::Identity);
+		{
+			DoSyncing ds( *this );
+			MaxValueToFabric( m_binding, m_parentArgName.c_str(), 0, interval, Matrix3::Identity );
+		}
 		*pOutVal = Evaluate(t, interval);
 	}
 }

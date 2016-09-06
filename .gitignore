@@ -16,3 +16,4 @@ src/moc_MaxDFGWidget.cpp
 stage/
 Fabric3dsmax.VC.db
 Fabric3dsmax.VC.opendb
+profiler_data/

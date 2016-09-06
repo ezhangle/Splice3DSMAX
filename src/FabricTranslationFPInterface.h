@@ -60,7 +60,6 @@ public:
 		fn_dfgSetNodeComment,
 		fn_dfgSetCode,
 		fn_dfgPaste,
-		fn_dfgSetArgType,
 		fn_dfgSetArgValue,
 		fn_dfgSetRefVarPath,
 		fn_dfgReorderPorts,
@@ -103,7 +102,7 @@ public:
 
 		num_params,
 
-		port_mode_enum
+		port_mode_enum,
 	};
 
 	BEGIN_FUNCTION_MAP	
@@ -112,7 +111,7 @@ public:
 
 		VFN_2(fn_dfgRemoveNodes,						DFGRemoveNodes,			TYPE_TSTR_TAB_BV,	TYPE_TSTR);
 		VFN_3(fn_dfgConnect,							DFGConnect,				TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
-		VFN_3(fn_dfgDisconnect,							DFGDisconnect,			TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
+		VFN_3(fn_dfgDisconnect,							DFGDisconnect,			TYPE_TSTR_TAB_BV, TYPE_TSTR_TAB_BV, TYPE_TSTR );
 		FN_3(fn_dfgAddGraph,		TYPE_TSTR_BV,		DFGAddGraph,			TYPE_TSTR,		TYPE_POINT2, TYPE_TSTR);
 		FN_4(fn_dfgAddFunc,			TYPE_TSTR_BV,		DFGAddFunc,				TYPE_TSTR,		TYPE_TSTR, TYPE_POINT2, TYPE_TSTR);
 		FN_3(fn_dfgInstPreset,		TYPE_TSTR_BV,		DFGInstPreset,			TYPE_TSTR,		TYPE_POINT2, TYPE_TSTR);
@@ -120,7 +119,7 @@ public:
 		FN_4(fn_dfgAddGet,			TYPE_TSTR_BV,		DFGAddGet,				TYPE_TSTR,		TYPE_TSTR, TYPE_POINT2, TYPE_TSTR);
 		FN_4(fn_dfgAddSet,			TYPE_TSTR_BV,		DFGAddSet,				TYPE_TSTR,		TYPE_TSTR, TYPE_POINT2, TYPE_TSTR);
 		FN_7(fn_dfgAddPort,			TYPE_TSTR_BV,		DFGAddPort,				TYPE_TSTR,		TYPE_ENUM, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR);
-		FN_6(fn_dfgEditPort,		TYPE_TSTR_BV,		DFGEditPort,			TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR);
+		FN_7(fn_dfgEditPort,		TYPE_TSTR_BV,		DFGEditPort,			TYPE_TSTR,		TYPE_ENUM, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR);
 		VFN_2(fn_dfgRemovePort,							DFGRemovePort,			TYPE_TSTR,		TYPE_TSTR);
 		VFN_4(fn_dfgResizeBackdrop,						DFGResizeBackdrop,		TYPE_TSTR,		TYPE_POINT2, TYPE_POINT2, TYPE_TSTR);
 		VFN_3(fn_dfgMoveNodes,							DFGMoveNodes,			TYPE_TSTR_TAB_BV,	TYPE_POINT2_TAB_BR, TYPE_TSTR);
@@ -134,7 +133,7 @@ public:
 		VFN_2(fn_dfgSetArgValue,						DFGSetArgValue,			TYPE_TSTR,		TYPE_FPVALUE);
 		VFN_3(fn_dfgSetPortDefaultValue,				DFGSetPortDefaultValue,	TYPE_TSTR,		TYPE_FPVALUE, TYPE_TSTR);
 		VFN_3(fn_dfgSetRefVarPath,						DFGSetRefVarPath,		TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
-		VFN_2(fn_dfgReorderPorts,						DFGReorderPorts,		TYPE_INT_TAB_BR,	TYPE_TSTR);
+		VFN_3(fn_dfgReorderPorts,						DFGReorderPorts,		TYPE_TSTR,		TYPE_INT_TAB_BR,	TYPE_TSTR);
 		VFN_2(fn_dfgSetExtDeps,							DFGSetExtDeps,			TYPE_TSTR_TAB_BV,	TYPE_TSTR);
 		VFN_1(fn_dfgSplitFromPreset,					DFGSplitFromPreset,		TYPE_TSTR)		
 
@@ -182,7 +181,7 @@ public:
 	// The following are direct mappers to the commands defined by the DFGCmdHandler classed.
 	void DFGRemoveNodes(const Tab<TSTR*>& nodeNames, const MSTR& execPath);
 	void DFGConnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath);
-	void DFGDisconnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath);
+	void DFGDisconnect( const Tab<TSTR*>&  srcPaths, const Tab<TSTR*>&  destPaths, const MSTR& execPath );
 	MSTR DFGAddGraph(const MSTR& title, Point2 pos, const MSTR& execPath);
 	MSTR DFGAddFunc(const MSTR& title, const MSTR& initialCode, Point2 pos, const MSTR& execPath);
 	MSTR DFGInstPreset(const MSTR& filename, Point2 pos, const MSTR& execPath);
@@ -190,7 +189,7 @@ public:
 	MSTR DFGAddGet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath);
 	MSTR DFGAddSet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath);
 	MSTR DFGAddPort(const MSTR& desiredPortName, int portType, const MSTR& portSpec, const MSTR& portToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath);
-	MSTR DFGEditPort(const MSTR& portName, const MSTR& desiredNewPortName, const MSTR& typeSpec, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath);
+	MSTR DFGEditPort(const MSTR& portName, int portType, const MSTR& desiredNewPortName, const MSTR& typeSpec, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath);
 	void DFGRemovePort(const MSTR& portName, const MSTR& execPath);
 	void DFGResizeBackdrop(const MSTR& backDropNodeName, Point2 topLeft, Point2 size, const MSTR& execPath);
 	void DFGMoveNodes(Tab<TSTR*> nodeNames, Tab<Point2*> topLeftPoss, const MSTR& execPath);
@@ -204,7 +203,7 @@ public:
 	void DFGSetArgValue(const MSTR& argName, const FPValue* argValue);
 	void DFGSetPortDefaultValue(const MSTR& portName, const FPValue* value, const MSTR& execPath);
 	void DFGSetRefVarPath(const MSTR& refName, const MSTR& varPath, const MSTR& execPath);
-	void DFGReorderPorts(Tab<int> indices, const MSTR& execPath);
+	void DFGReorderPorts( const MSTR& itemPath, Tab<int> indices, const MSTR& execPath);
 	void DFGSetExtDeps(Tab<TSTR*> extDeps, const MSTR& execPath);
 	void DFGSplitFromPreset(const MSTR& execPath);
 
@@ -360,8 +359,8 @@ FPInterfaceDesc* GetDescriptor()
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				
 			FabricTranslationFPInterface::fn_dfgDisconnect, _T("DFGDisconnect"), 0, 0, 0, 3,
-				_M("srcPath"), 0, TYPE_TSTR,
-				_M("destPath"), 0, TYPE_TSTR,
+				_M("srcPaths"), 0, TYPE_TSTR_TAB_BV,
+				_M("destPaths"), 0, TYPE_TSTR_TAB_BV,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				
 			FabricTranslationFPInterface::fn_dfgAddGraph, _T("DFGAddGraph"), 0, TYPE_TSTR_BV, 0, 3,
@@ -408,9 +407,10 @@ FPInterfaceDesc* GetDescriptor()
 				_M("metaData"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				
-			FabricTranslationFPInterface::fn_dfgEditPort, _T("DFGEditPort"), 0, TYPE_TSTR_BV, 0, 6,
+			FabricTranslationFPInterface::fn_dfgEditPort, _T("DFGEditPort"), 0, TYPE_TSTR_BV, 0, 7,
 				_M("portName"), 0, TYPE_TSTR,
-				_M("desiredNewPortName"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "portType" ), 0, TYPE_ENUM, FabricTranslationFPInterface::port_mode_enum,
+				_M( "desiredNewPortName" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				_M("typeSpec"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				_M("extDep"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				_M("metaData"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
@@ -445,10 +445,6 @@ FPInterfaceDesc* GetDescriptor()
 				_M("pos"), 0, TYPE_POINT2, 
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				
-			FabricTranslationFPInterface::fn_dfgSetTitle, _T("DFGSetTitle"), 0, 0, 0, 2,
-				_M("newTitle"), 0, TYPE_TSTR,
-				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
-				
 			FabricTranslationFPInterface::fn_dfgSetNodeComment, _T("DFGSetNodeComment"), 0, 0, 0, 3,
 				_M("nodeName"), 0, TYPE_TSTR,
 				_M("comment"), 0, TYPE_TSTR,
@@ -468,10 +464,6 @@ FPInterfaceDesc* GetDescriptor()
 				_M("pos"), 0, TYPE_POINT2, 
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				
-			FabricTranslationFPInterface::fn_dfgSetArgType, _T("DFGSetArgType"), 0, 0, 0, 2,
-				_M("argName"), 0, TYPE_TSTR,
-				_M("argType"), 0, TYPE_TSTR,
-				
 			FabricTranslationFPInterface::fn_dfgSetArgValue, _T("DFGSetArgValue"), 0, 0, 0, 2,
 				_M("argName"), 0, TYPE_TSTR,
 				_M("argValue"), 0, TYPE_FPVALUE_BR,
@@ -486,7 +478,8 @@ FPInterfaceDesc* GetDescriptor()
 				_M("varPath"), 0, TYPE_TSTR,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				
-			FabricTranslationFPInterface::fn_dfgReorderPorts, _T("DFGReorderPorts"), 0, 0, 0, 2,
+			FabricTranslationFPInterface::fn_dfgReorderPorts, _T("DFGReorderPorts"), 0, 0, 0, 3,
+				_M( "itemPath" ), 0, TYPE_TSTR, 
 				_T("indices"), 0, TYPE_INT_TAB_BR,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				

@@ -33,6 +33,9 @@
 		<!-- If no install of Max SDK is present, default to the fabric system build values  -->
 		<MaxSDKPath Condition="'$(MaxSDKPath)'==''">$(FABRIC_SCENE_GRAPH_DIR)\ThirdParty\PreBuilt\Windows\x86_64\Release\3dsmax\3ds Max $(MaxVersion) SDK\maxsdk\</MaxSDKPath>
 
+		<!-- It is expected that the user will set the QtWinMigrate directory -->
+		<QTWINMIGRATE_DIR Condition="'$(QTWINMIGRATE_DIR)'==''">$(SolutionDir)\qt-solutions\qtwinmigrate</QTWINMIGRATE_DIR>
+
 		<!-- Autodesc changed the folder structure of the SDK from 2014 onwards -->
 		<MaxSDKLibPath>$(MaxSDKPath)\lib\x64\Release</MaxSDKLibPath>
 		<MaxSDKLibPath Condition="'$(MaxVersion)' &lt; '2013'">$(MaxSDKPath)x64\lib\</MaxSDKLibPath>
@@ -100,7 +103,7 @@
 	<ItemDefinitionGroup>
 		<!-- default values for compiler -->
 		<ClCompile>
-			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;$(FABRIC_DIR)\include\FabricServices;$(SolutionDir)\qt-solutions\qtwinmigrate\;$(QTWINMIGRATE_DIR)\src;$(QT_DIR)\include;$(QT_DIR)\include/QtGui;$(MaxSDKPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;$(FABRIC_DIR)\include\FabricServices;$(QTWINMIGRATE_DIR)\src;$(QT_DIR)\include;$(QT_DIR)\include/QtGui;$(MaxSDKPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<StringPooling>true</StringPooling>
@@ -140,9 +143,9 @@
 			<SubSystem>Windows</SubSystem>
 			<AdditionalDependencies>assetmanagement.lib;atscore.lib;biped.lib;bmm.lib;core.lib;crowd.lib;custdlg.lib;databridge.lib;edmodel.lib;expr.lib;flt.lib;geom.lib;gfx.lib;GraphicsDriver.lib;gup.lib;igame.lib;imageviewers.lib;manipsys.lib;maxnet.lib;maxscrpt.lib;maxutil.lib;menuman.lib;menus.lib;mesh.lib;mnmath.lib;paramblk2.lib;particle.lib;particleflow.lib;physique.lib;poly.lib;polypaint.lib;renderutil.lib;rtmax.lib;tessint.lib;viewfile.lib;zlibdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies Condition="'$(MaxVersion)'!='2012'">GraphicsUtility.lib;%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalDependencies>FabricSplitSearch.lib;FabricCore-2.2.lib;FabricServices-MSVC-12.0-mt.lib;FabricUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>FabricSplitSearch.lib;FabricCore-2.3.lib;FabricServices-MSVC-12.0-mt.lib;FabricUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<AdditionalDependencies>QtSolutions_MFCMigrationFramework-head.lib;QtCore$(QtSuffix).lib;QtGui$(QtSuffix).lib;QtOpenGL$(QtSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
-			<AdditionalLibraryDirectories>$(QT_DIR)\lib;$(FABRIC_DIR)\lib;$(MaxSDKLibPath);$(SolutionDir)\qt-solutions\qtwinmigrate\lib;$(QTWINMIGRATE_DIR)\lib</AdditionalLibraryDirectories>
+			<AdditionalLibraryDirectories>$(QT_DIR)\lib;$(FABRIC_DIR)\lib;$(MaxSDKLibPath);$(QTWINMIGRATE_DIR)\lib</AdditionalLibraryDirectories>
 		</Link>
 	</ItemDefinitionGroup>
 
@@ -152,7 +155,6 @@
 copy "$(ProjectDir)SetupMenu.ms" "$(PackageDir)" /Y
 xcopy "$(ProjectDir)testingScripts" "$(PackageDir)samples" /E /I /Y
 MKDIR "$(PackageDir)plugin"
-MKLINK /H "$(PackageDir)plugin\QtSolutions_MFCMigrationFramework-head.dll" "$(ProjectDir)qt-solutions\qtwinmigrate\lib\QtSolutions_MFCMigrationFramework-head.dll"
 MKLINK /H "$(PackageDir)plugin\QtSolutions_MFCMigrationFramework-head.dll" "$(QTWINMIGRATE_DIR)\lib\QtSolutions_MFCMigrationFramework-head.dll"
 MKLINK /H "$(PackageDir)plugin\$(TargetFileName)" "$(TargetPath)"
 CALL "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"

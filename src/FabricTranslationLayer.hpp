@@ -28,7 +28,7 @@ FabricTranslationLayer<TBaseClass, TResultType>::FabricTranslationLayer(BOOL loa
   ,	m_valid(NEVER)
   ,	_m_isSyncing(false)
 {
-  InstanceCreated();
+  InstanceCreated( this );
 
   if (!loading)
     Init();
@@ -47,7 +47,7 @@ FabricTranslationLayer<TBaseClass, TResultType>::~FabricTranslationLayer()
   DynPBCustAttrClassDesc* ourCD = GetClassDesc();
   ourCD->ReleaseObsoletePBDesc();
 
-  InstanceDeleted();
+  InstanceDeleted( this );
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -396,12 +396,38 @@ RefResult FabricTranslationLayer<TBaseClass, TResultType>::NotifyRefChanged(cons
     {
       // Invalidate the input value for the param that changed
       ParamID pid = m_pblock->LastNotifyParamID();
-      int pidx = m_pblock->IDtoIndex(pid);
-      if (pidx < m_portValidities.size())
-        m_portValidities[pidx].SetEmpty();
+	  if (pid != -1)
+	  {
+		  int pidx = m_pblock->IDtoIndex( pid );
+
+		  // Note - if the same ReferenceTarget has been assigned
+		  // to multiple parameters, the pblock will only ever
+		  // send notifications with id of the first parameter.
+		  ParamDef* pdefs = m_pblock->GetDesc()->paramdefs;
+		  if (reftarg_type( pdefs[pidx].type ))
+		  {
+			  // Ensure	no duplicates of this type exist
+			  ReferenceTarget* changedRef = m_pblock->GetReferenceTarget( pid );
+			  int nParams = m_pblock->NumParams();
+			  // We do not guarantee every parameter will have a validity
+			  nParams = min( nParams, m_portValidities.size() );
+			  for (int ridx = 0; ridx < nParams; ridx++)
+			  {
+				  if (ridx != pidx && reftarg_type( pdefs[ridx].type ))
+				  {
+					  ParamID rid = m_pblock->IndextoID( ridx );
+					  ReferenceTarget* otherRef = m_pblock->GetReferenceTarget( rid );
+					  if (otherRef == changedRef)
+						  m_portValidities[ridx].SetEmpty();
+				  }
+			  }
+		  }
+		  if (pidx < m_portValidities.size())
+			  m_portValidities[pidx].SetEmpty();
+	  }
     }
   }
-  else if (message == REFMSG_SUBANIM_STRUCTURE_CHANGED)
+  else if (message == REFMSG_SUBANIM_STRUCTURE_CHANGED || message == REFMSG_CONTROLREF_CHANGE)
   {
     // If our structure changes, then erase all validities
     m_portValidities.clear();
@@ -1037,7 +1063,7 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SetupEvalContext(TimeValue
   }
   if (m_evalContext.isValid())
   {
-    CStr graphName = GetGraphName().ToCStr();
+    //CStr graphName = GetGraphName().ToCStr();
     m_evalContext.setMember("time", FabricCore::RTVal::ConstructFloat32(client, TicksToSec(t)));
   }
 }

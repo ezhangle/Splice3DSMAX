@@ -20,7 +20,11 @@ public:
 	MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding, FabricUI::DFG::DFGUICmdHandler* cmdHandler);
 	~MaxDFGWidget();
 
-public slots:
+	virtual void onSelectCanvasNodeInDCC() override;
+	virtual void onImportGraphInDCC() override;
+	virtual void onExportGraphInDCC() override;
+
+	public slots:
 	virtual void onUndo() override;
 	virtual void onRedo() override;
 

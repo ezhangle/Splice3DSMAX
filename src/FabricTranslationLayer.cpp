@@ -555,8 +555,8 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 				ypos += LISTBOX_HEIGHT - CTRL_HEIGHT;
 
 				// Add in 3 buttons
-				int btnWidth = (DLG_X - DLG_PAD) / 3;
-				int btnXPos = (DLG_PAD / 2);
+				short btnWidth = (DLG_X - DLG_PAD) / 3;
+				short btnXPos = (DLG_PAD / 2);
 				dialogTemplate->AddControl( (WS_TABSTOP | WS_CHILD | WS_VISIBLE),
 									0,
 									btnXPos,
@@ -1226,8 +1226,8 @@ void TransferAllMaxValuesToFabric(TimeValue t, IParamBlock2* pblock, FabricCore:
 			paramValids.resize(pidx + 1);
 		else
 		{
-			//if (paramValids[pidx].ininterval(t))
-			//	continue;
+			if (paramValids[pidx].InInterval(t))
+				continue;
 		}
 		paramValids[pidx].SetInfinite();
 
@@ -1378,13 +1378,28 @@ FabricCore::RTVal& GetDrawing()
 	}
 	return s_drawing;
 }
-void InstanceCreated() 
+
+#ifdef _DEBUG
+std::list<ReferenceTarget*> s_instances;
+#endif
+void InstanceCreated( ReferenceTarget* instance )
 { 
+#ifdef _DEBUG
+	s_instances.push_back( instance );
+#endif
 	s_nInstances++;  
 }
 
-void InstanceDeleted() 
-{ 
+void InstanceDeleted( ReferenceTarget* instance)
+{
+#ifdef _DEBUG
+	for (auto itr = s_instances.begin(); itr != s_instances.end(); itr++)
+	{
+		if (*itr == instance)
+			*itr = nullptr;
+	}
+#endif
+
 	s_nInstances--;  
 	// If there are no instances left, release the client.
 	if (s_nInstances == 0)

@@ -23,6 +23,21 @@ MaxDFGWidget::~MaxDFGWidget()
 {
 }
 
+void MaxDFGWidget::onSelectCanvasNodeInDCC()
+{
+	throw std::logic_error( "The method or operation is not implemented." );
+}
+
+void MaxDFGWidget::onImportGraphInDCC()
+{
+	throw std::logic_error( "The method or operation is not implemented." );
+}
+
+void MaxDFGWidget::onExportGraphInDCC()
+{
+	throw std::logic_error( "The method or operation is not implemented." );
+}
+
 void MaxDFGWidget::onUndo()
 {
 	//if (theHold.Holding())

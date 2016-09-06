@@ -71,6 +71,7 @@ void FabricModifier::ModifyObject( TimeValue t, ModContext &mc, ObjectState* os,
 		// takes an input mesh and modifies it
 		if (!m_inputValid.InInterval(t)) 
 		{
+			DoSyncing ds( *this );
 			HoldSuspend hs; // Suspend undo, there is no need for FE to record this action
 			m_inputValid.SetInfinite();
 			MaxValuesToFabric<Object*, Mesh>(m_binding, m_inMeshPort.c_str(), t, m_inputValid, &os->obj, 1);

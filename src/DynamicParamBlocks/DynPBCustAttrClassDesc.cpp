@@ -304,8 +304,13 @@ ParamBlockDesc2* DynPBCustAttrClassDesc::CreatePBDesc( BlockID blockID /*!=-1*/ 
 
 void DynPBCustAttrClassDesc::ReleasePBDesc( ParamBlockDesc2* pbDesc, BOOL doDelete/*=TRUE*/ )
 {
-	DbgAssert(pbDesc != NULL);
-
+	// Its possible we may be called with a NULL desc
+	// if an undo object is released that was not 
+	// completed (ie - action was canceled before
+	// completion, or some other issue caused the action to fail
+	if (pbDesc == NULL)
+		return;
+	
 	// Our ClassDescriptor contains pointers to all the
 	// parameter block descriptors created.  If we want
 	// to release the pblock descriptor, we need to remove

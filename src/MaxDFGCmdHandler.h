@@ -31,12 +31,12 @@ virtual void dfgDoRemoveNodes(
     ) override;
 
   virtual void dfgDoDisconnect(
-    FabricCore::DFGBinding const &binding,
-    QString execPath,
-    FabricCore::DFGExec const &exec,
-    QString srcPath, 
-    QString dstPath
-    ) override;
+	  FabricCore::DFGBinding const &binding,
+	  QString execPath,
+	  FabricCore::DFGExec const &exec,
+	  QStringList srcPaths,
+	  QStringList dstPaths
+  ) override;
 
   virtual QString dfgDoAddGraph(
     FabricCore::DFGBinding const &binding,
@@ -120,6 +120,7 @@ virtual void dfgDoRemoveNodes(
     FabricCore::DFGExec const &exec,
     QString oldPortName,
     QString desiredNewPortName,
+	FabricCore::DFGPortType portType,
     QString typeSpec,
     QString extDep,
     QString uiMetadata
@@ -237,11 +238,12 @@ virtual void dfgDoRemoveNodes(
     ) override;
 
   virtual void dfgDoReorderPorts(
-    FabricCore::DFGBinding const &binding,
-    QString execPath,
-    FabricCore::DFGExec const &exec,
-    QList<int> indices
-    ) override;
+	FabricCore::DFGBinding const &binding,
+	QString execPath,
+	FabricCore::DFGExec const &exec,
+	QString itemPath,
+	QList<int> indices
+	) override;
 
   virtual void dfgDoSetExtDeps(
     FabricCore::DFGBinding const &binding,

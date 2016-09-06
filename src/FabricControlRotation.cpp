@@ -74,7 +74,10 @@ void FabricControlRotation::GetValue(TimeValue t, void *val, Interval &interval,
 		Invalidate(); // Evaluate every time in case parent changes too
 		Matrix3* pInVal = reinterpret_cast<Matrix3*>(val);
 		Point3 pos = pInVal->GetTrans();
-		MaxValueToFabric(m_binding, m_parentArgName.c_str(), 0, interval, *pInVal);
+		{
+			DoSyncing ds( *this );
+			MaxValueToFabric( m_binding, m_parentArgName.c_str(), 0, interval, *pInVal );
+		}
 		const Quat& res = Evaluate(t, interval);
 		// To apply the value relatively, we pre-rotate by the result
 		Matrix3 tmRot;
@@ -85,7 +88,10 @@ void FabricControlRotation::GetValue(TimeValue t, void *val, Interval &interval,
 	else
 	{
 		Quat* pOutVal = reinterpret_cast<Quat*>(val);
-		MaxValueToFabric(m_binding, m_parentArgName.c_str(), 0, interval, Matrix3(1));
+		{
+			DoSyncing ds( *this );
+			MaxValueToFabric( m_binding, m_parentArgName.c_str(), 0, interval, Matrix3( 1 ) );
+		}
 		*pOutVal = Evaluate(t, interval);
 	}
 

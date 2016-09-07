@@ -450,9 +450,6 @@ void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
 	if (!val.isValid())
 		return;
 
-	FabricCore::RTVal rawPtrRTVal = val.callMethod( "Data", "data", 0, 0 );
-	void *ptr = rawPtrRTVal.getData();
-
 	const char* spliceType = val.getTypeNameCStr();
 
 	if (strcmp( spliceType, "Color" ) == 0)
@@ -460,7 +457,11 @@ void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
 	else if (strcmp( spliceType, "RGBA" ) == 0)
 		ConvertToRGBARTVal( param, val );
 	else
+	{
+		FabricCore::RTVal rawPtrRTVal = val.callMethod( "Data", "data", 0, 0 );
+		void *ptr = rawPtrRTVal.getData();
 		ConvertToVec4RTVal( param, reinterpret_cast<KL::Vec4*>(ptr) );
+	}
 }
 
 void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val)

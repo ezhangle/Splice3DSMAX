@@ -27,8 +27,12 @@ fn TestLoadSaveMaxFile =
 	-- Validate load was successfuly
 	sliderTime = 50f
 	RedrawViews()
-	FAssert (matricesAreEquivalent $Point002.transform (matrix3 [1,-2.38419e-007,-2.5332e-007] [2.45869e-007,0.798292,0.60227] [1.3411e-007,-0.60227,0.798292] [8.39596,-11.0702,13.6661])) "Bad rotation after setting dfg float input"
-	FAssert (matricesAreEquivalent $Point003.transform (matrix3 [0.739942,0.516122,0.431398] [-0.620885,0.277274,0.733227] [0.258819,-0.810393,0.525619] [1.66667,10,0])) "Bad rotation values"
+	m1 = $Point002.transform
+	m2 = (matrix3 [1,-2.38419e-007,-2.5332e-007] [2.45869e-007,0.798292,0.60227] [1.3411e-007,-0.60227,0.798292] [8.39596,-11.0702,13.6661])
+	FAssert (matricesAreEquivalent m1 m2) "Bad rotation after setting dfg float input"
+	m1 = $Point003.transform 
+	m2= (matrix3 [0.739942,0.516122,0.431398] [-0.620885,0.277274,0.733227] [0.258819,-0.810393,0.525619] [1.66667,10,0])
+	FAssert (matricesAreEquivalent m1 m2) "Bad rotation values"
 	print(" -- Saved/Loaded Controllers successfully --")
 	--------------------------------------------------------------------------------
 	-- Next, test object

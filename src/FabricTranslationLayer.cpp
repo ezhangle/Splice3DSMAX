@@ -974,8 +974,9 @@ std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, const char*
 	}
 	catch(FabricCore::Exception e) 
 	{
-		CStr message = "ERROR on AddPort to Fabric: ";
-		logMessage(message + e.getDesc_cstr());
+		CStr message;
+		message.printf( "ERROR on AddPort to Fabric: %s", e.getDesc_cstr() );
+		logMessage(message);
 		return nullptr;
 	}
 }

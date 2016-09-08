@@ -66,6 +66,16 @@ public:
 		fn_dfgSetExtDeps,
 		fn_dfgSplitFromPreset,
 
+		/// New in 2.3
+		fn_dfgDoEditNode,
+		fn_dfgDoDismissLoadDiags,
+		fn_dfgDoCreatePreset,
+		fn_dfgDoAddInstPort,
+		fn_dfgDoAddInstBlockPort,
+		fn_dfgDoAddBlock,
+		fn_dfgDoAddBlockPort,
+
+		// Max-specific fn's
 		fn_loadFromFile,
 		fn_saveToFile,
 
@@ -135,8 +145,17 @@ public:
 		VFN_3(fn_dfgSetRefVarPath,						DFGSetRefVarPath,		TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
 		VFN_3(fn_dfgReorderPorts,						DFGReorderPorts,		TYPE_TSTR,		TYPE_INT_TAB_BR,	TYPE_TSTR);
 		VFN_2(fn_dfgSetExtDeps,							DFGSetExtDeps,			TYPE_TSTR_TAB_BV,	TYPE_TSTR);
-		VFN_1(fn_dfgSplitFromPreset,					DFGSplitFromPreset,		TYPE_TSTR)		
+		VFN_1( fn_dfgSplitFromPreset,					DFGSplitFromPreset, TYPE_TSTR )
+		// New items Fabric 2.3
+		FN_5(fn_dfgDoEditNode,		TYPE_TSTR_BV,		DFGDoEditNode,			TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR);
+		VFN_1(fn_dfgDoDismissLoadDiags,					DFGDoDismissLoadDiags,	TYPE_INT_TAB_BR);
+		FN_4(fn_dfgDoCreatePreset, TYPE_TSTR_BV,		DFGDoCreatePreset,		TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR, TYPE_TSTR );
 
+		FN_9(fn_dfgDoAddInstPort,	TYPE_TSTR_BV,		DFGDoAddInstPort,		TYPE_TSTR, TYPE_TSTR, TYPE_ENUM, TYPE_TSTR, TYPE_TSTR, TYPE_ENUM, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR );
+		FN_8(fn_dfgDoAddInstBlockPort, TYPE_TSTR_BV,	DFGDoAddInstBlockPort,	TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR );
+		FN_3(fn_dfgDoAddBlock,		TYPE_TSTR_BV,		DFGDoAddBlock,			TYPE_TSTR, TYPE_POINT2, TYPE_TSTR);
+		FN_9(fn_dfgDoAddBlockPort,	TYPE_TSTR_BV,		DFGDoAddBlockPort,		TYPE_TSTR, TYPE_TSTR, TYPE_ENUM, TYPE_TSTR, TYPE_TSTR, TYPE_ENUM, TYPE_TSTR, TYPE_TSTR, TYPE_TSTR );
+			// Max specific fns
 
 		FN_2(fn_loadFromFile, TYPE_bool, LoadFromFile, TYPE_FILENAME, TYPE_bool);
 		FN_1(fn_saveToFile, TYPE_bool, SaveToFile, TYPE_FILENAME);
@@ -206,6 +225,16 @@ public:
 	void DFGReorderPorts( const MSTR& itemPath, Tab<int> indices, const MSTR& execPath);
 	void DFGSetExtDeps(Tab<TSTR*> extDeps, const MSTR& execPath);
 	void DFGSplitFromPreset(const MSTR& execPath);
+
+	// New in 2.3
+	MSTR DFGDoEditNode(const MSTR& oldNodeName, const MSTR& desiredNewNodeName, const MSTR& nodeMetadata, const MSTR& execMetadata, const MSTR& execPath);
+	void DFGDoDismissLoadDiags(Tab<int>& indices);
+	MSTR DFGDoCreatePreset(const MSTR& nodeName, const MSTR& presetDirPath, const MSTR& presetName, const MSTR& execPath );
+
+	MSTR DFGDoAddInstPort(const MSTR& instName, const MSTR& desiredPortName, int portType, const MSTR& typeSpec, const MSTR& pathToConnect, int connectType, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath );
+	MSTR DFGDoAddInstBlockPort(const MSTR& instName, const MSTR& blockName, const MSTR& desiredPortName, const MSTR& typeSpec, const MSTR& pathToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath );
+	MSTR DFGDoAddBlock(const MSTR& desiredName, Point2 pos, const MSTR& execPath );
+	MSTR DFGDoAddBlockPort(const MSTR& blockName, const MSTR& desiredPortName, int portType, const MSTR& typeSpec, const MSTR& pathToConnect, int connectType, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath );
 
 	//////////////////////////////////////////////////////////////////////////
 	// Allow introspecting the ports on this graph
@@ -489,6 +518,58 @@ FPInterfaceDesc* GetDescriptor()
 				
 			FabricTranslationFPInterface::fn_dfgSplitFromPreset, _T("DFGSplitFromPreset"), 0, 0, 0, 1,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+
+			// New in 2.3
+			FabricTranslationFPInterface::fn_dfgDoEditNode, _T("DFGDoEditNode"), 0, TYPE_TSTR_BV, 0, 5,
+				_M( "oldNodeName" ), 0, TYPE_TSTR,
+				_M( "desiredNewNodeName" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "nodeMetadata" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "execMetadata" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "execPath" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+			FabricTranslationFPInterface::fn_dfgDoDismissLoadDiags, _T("DFGDoDismissLoadDiags"), 0, 0, 0, 1,
+				_M( "diagIndices" ), 0, TYPE_INT_TAB,
+			FabricTranslationFPInterface::fn_dfgDoCreatePreset, _T("DFGDoCreatePreset"), 0, TYPE_TSTR_BV, 0, 4,
+				_M( "nodeName" ), 0, TYPE_TSTR,
+				_M( "presetDirPath" ), 0, TYPE_TSTR,
+				_M( "presetName" ), 0, TYPE_TSTR,
+				_M( "execPath" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+
+			FabricTranslationFPInterface::fn_dfgDoAddInstPort, _T( "DFGDoAddInstPort" ), 0, TYPE_TSTR_BV, 0, 9,
+				_M( "instName" ), 0, TYPE_TSTR,
+				_M( "desiredPortName" ), 0, TYPE_TSTR, 
+				_M( "portType" ), 0, TYPE_ENUM, FabricTranslationFPInterface::port_mode_enum,
+				_M( "typeSpec" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "pathToConnect" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "connectType" ), 0, TYPE_ENUM, FabricTranslationFPInterface::port_mode_enum, f_keyArgDefault, FabricCore::DFGPortType_Out,
+				_M( "extDep" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "metaData" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "execPath" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+
+			FabricTranslationFPInterface::fn_dfgDoAddInstBlockPort, _T( "DFGDoAddInstBlockPort" ), 0, TYPE_TSTR_BV, 0, 8,
+				_M( "instName" ), 0, TYPE_TSTR,
+				_M( "blockName" ), 0, TYPE_TSTR,
+				_M( "desiredPortName" ), 0, TYPE_TSTR, 
+				_M( "typeSpec" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "pathToConnect" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "extDep" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "metaData" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "execPath" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+			
+			FabricTranslationFPInterface::fn_dfgDoAddBlock, _T( "DFGDoAddBlock" ), 0, TYPE_TSTR_BV, 0, 3,
+				_M( "desiredName" ), 0, TYPE_TSTR,
+				_M( "pos" ), 0, TYPE_POINT2,
+				_M( "execPath" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				
+			FabricTranslationFPInterface::fn_dfgDoAddBlockPort, _T( "DFGDoAddBlockPort" ), 0, TYPE_TSTR_BV, 0, 9,
+				_M( "blockName" ), 0, TYPE_TSTR,
+				_M( "desiredPortName" ), 0, TYPE_TSTR,
+				_M( "portType" ), 0, TYPE_ENUM, FabricTranslationFPInterface::port_mode_enum,
+				_M( "typeSpec" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "pathToConnect" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "connectType" ), 0, TYPE_ENUM, FabricTranslationFPInterface::port_mode_enum, f_keyArgDefault, FabricCore::DFGPortType_Out,
+				_M( "extDep" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "metaData" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+				_M( "execPath" ), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 
 			//////////////////////////////////////////////////////////////////////////
 			// FabricMax custom functions

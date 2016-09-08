@@ -304,6 +304,60 @@ void FabricTranslationFPInterface::DFGSplitFromPreset(const MSTR& execPath)
 	MAXSPLICE_CATCH_END
 }
 
+MSTR FabricTranslationFPInterface::DFGDoEditNode( const MSTR& oldNodeName, const MSTR& desiredNewNodeName, const MSTR& nodeMetadata, const MSTR& execMetadata, const MSTR& execPath )
+{
+	MAXSPLICE_CATCH_BEGIN
+	return m_fabricCmdHandler.dfgDoEditNode( m_binding, execPath, GetExec( execPath ), oldNodeName, desiredNewNodeName, nodeMetadata, execMetadata );
+	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
+}
+
+void FabricTranslationFPInterface::DFGDoDismissLoadDiags( Tab<int>& indices )
+{
+	MAXSPLICE_CATCH_BEGIN
+		//return m_fabricCmdHandler.dfgDoDismissLoadDiags( m_binding, );
+	MAXSPLICE_CATCH_END
+}
+
+MSTR FabricTranslationFPInterface::DFGDoCreatePreset( const MSTR& nodeName, const MSTR& presetDirPath, const MSTR& presetName, const MSTR& execPath )
+{
+	MAXSPLICE_CATCH_BEGIN
+		return m_fabricCmdHandler.dfgDoCreatePreset( m_binding, execPath, GetExec( execPath ), nodeName, presetDirPath, presetName );
+	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
+}
+
+MSTR FabricTranslationFPInterface::DFGDoAddInstPort( const MSTR& instName, const MSTR& desiredPortName, int portType, const MSTR& typeSpec, const MSTR& pathToConnect, int connectType, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath )
+{
+	MAXSPLICE_CATCH_BEGIN
+		FabricCore::DFGPortType pt = (FabricCore::DFGPortType)portType;
+		FabricCore::DFGPortType ct = (FabricCore::DFGPortType)connectType;
+		return m_fabricCmdHandler.dfgDoAddInstPort( m_binding, execPath, GetExec( execPath ), instName, desiredPortName, pt, typeSpec, pathToConnect, ct, extDep, metaData );
+	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
+}
+
+MSTR FabricTranslationFPInterface::DFGDoAddInstBlockPort( const MSTR& instName, const MSTR& blockName, const MSTR& desiredPortName, const MSTR& typeSpec, const MSTR& pathToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath )
+{
+	MAXSPLICE_CATCH_BEGIN
+		return m_fabricCmdHandler.dfgDoAddInstBlockPort( m_binding, execPath, GetExec( execPath ), instName, blockName, desiredPortName, typeSpec, pathToConnect, extDep, metaData );
+	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
+}
+
+MSTR FabricTranslationFPInterface::DFGDoAddBlock( const MSTR& desiredName, Point2 pos, const MSTR& execPath )
+{
+	MAXSPLICE_CATCH_BEGIN
+		QPointF qp = Convert( pos );
+		return m_fabricCmdHandler.dfgDoAddBlock( m_binding, execPath, GetExec( execPath ), desiredName, qp);
+	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
+}
+
+MSTR FabricTranslationFPInterface::DFGDoAddBlockPort( const MSTR& blockName, const MSTR& desiredPortName, int portType, const MSTR& typeSpec, const MSTR& pathToConnect, int connectType, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath )
+{
+	MAXSPLICE_CATCH_BEGIN
+		FabricCore::DFGPortType pt = (FabricCore::DFGPortType)portType;
+		FabricCore::DFGPortType ct = (FabricCore::DFGPortType)connectType;
+		return m_fabricCmdHandler.dfgDoAddBlockPort( m_binding, execPath, GetExec( execPath ), blockName, desiredPortName, pt, typeSpec, pathToConnect, ct, extDep, metaData );
+	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
+}
+
 // Allow introspecting the ports on this graph
 int FabricTranslationFPInterface::GetPortCount(const MSTR& execPath)
 {

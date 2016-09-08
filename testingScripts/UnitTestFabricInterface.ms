@@ -117,7 +117,27 @@ fn TestFabricInterface =
 	sm.DFGSetExtDeps ("Geometry")    execPath:""
 
 	sm.DFGReorderPorts "" #(0, 3, 1, 2)    execPath:""
+	
+	-- Test adding/removing blocks
+	graph = sm.DFGAddGraph "graph" [570,80]  execPath:""
+	dfgBlock = sm.DFGDoAddBlock "block" [250.000000,114.000000]   execPath:graph
+	dfgBlockPort = sm.DFGDoAddBlockPort dfgBlock "aBlockPort" #DFGPortIN "Float32" "" #DFGPortIN extDep:"" metaData:"" execPath:graph
 
+	inBlockPrt = sm.DFGDoAddInstBlockPort graph dfgBlock "instBlkPrt" typeSpec:"UInt32" 
+	
+	instPort = sm.DFGDoAddInstPort graph "instPort" #DFGPortIn pathToConnect:"func.inVal" connectType:#DFGPortIn
+  
+    metadata = "{
+	  \"uiTooltip\" : \"\",
+	  \"uiDocUrl\" : \"\",
+	  \"uiNodeColor\" : \"{\n  'r' : 143,\n  'g' : 5,\n  'b' : 102\n  }\",
+	  \"uiTextColor\" : \"{\n  'r' : 20,\n  'g' : 20,\n  'b' : 20\n  }\",
+	  \"uiHeaderColor\" : \"\"
+	  }" 
+	graph = sm.DFGDoEditNode graph desiredNewNodeName:"graphics" nodeMetadata:metadata
+	
+	sm.DFGDoCreatePreset graph "User" "graphPreset"  execPath:""
+  
 	tmpFile = systemTools.getEnvVariable("TEMP") + "\\tmpFile.canvas"
 	sm.SaveToFile tmpFile
 	jsonString = sm.ExportToJSON()

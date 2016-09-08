@@ -72,11 +72,15 @@ fn TestLoadSaveMaxFile =
 	resetMaxFile #noPrompt
 	TestMaxClassWSModifier()
 
+	$Sphere001.modifiers[1].enabled = false
+	
 	res = saveMaxFile tempFile useNewFile:false quiet:true
 	FAssert res "Failed saving file UnitTestMaxClassObject"
 	res = loadMaxFile tempFile quiet:true
 	FAssert res "Failed loading file UnitTestMaxClassObject"
 
+	FAssert (not $Sphere001.modifiers[1].enabled) "Did not save/load enabled state"
+	$Sphere001.modifiers[1].enabled = true
 	FAssert (CompBB $Sphere001 131.938) "Bad WSModifier loaded size"
 	print(" -- Saved/Loaded WSModifiers successfully --")
 )

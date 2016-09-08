@@ -205,6 +205,7 @@ void FabricWSModifier::ResetPorts()
 //////////////////////////////////////////////////////////////////////////
 #define BASE_MESH_PORT_NAME		0x100
 #define BASE_TRANS_PORT_NAME	0x200
+#define IS_ENABLED_NAME			0x400
 
 bool FabricWSModifier::CloneFabricData( ParentClass* pMyClone )
 {
@@ -224,6 +225,13 @@ IOResult FabricWSModifier::SaveImpData( ISave* isave )
 	isave->BeginChunk(BASE_TRANS_PORT_NAME);
 	isave->WriteCString(m_baseMeshTransformArgName.c_str());
 	isave->EndChunk();
+
+	ULONG dontcare;
+	bool isenabled = Modifier::IsEnabled();
+	isave->BeginChunk( IS_ENABLED_NAME );
+	isave->Write( &isenabled, sizeof( isenabled ), &dontcare );
+	isave->EndChunk();
+
 	return IO_OK;
 
 }
@@ -251,7 +259,18 @@ IOResult FabricWSModifier::LoadImpData(ILoad* iload)
 			}
 			break;
 		}
-
+		case IS_ENABLED_NAME:
+		{
+			bool isEnabled;
+			ULONG dontcare;
+			if (iload->Read( &isEnabled, sizeof( isEnabled ), &dontcare ) == IO_OK) {
+				if (isEnabled)
+					EnableMod();
+				else
+					DisableMod();
+			}
+			break;
+		}
 		}
 		iload->CloseChunk();
 	}

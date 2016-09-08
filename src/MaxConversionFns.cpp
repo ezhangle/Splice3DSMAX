@@ -276,7 +276,7 @@ void ConvertToSimpleRTVal( T param, FabricCore::RTVal& rtVal )
 			rtVal.setFloat32( (float)param );
 			break;
 		case FEC_RTVAL_SIMPLE_TYPE_FLOAT64:
-			rtVal.setFloat64( (double)param );
+			rtVal.setFloat64( (float)param ); // FE-7246 - Convert to double once rtVal argument is correct type
 			break;
 		default:
 			DbgAssert( FALSE && "Unknown type" );

@@ -190,10 +190,14 @@ void FabricWSModifier::ResetPorts()
 		}";
 
 	// Add an in-port to send in the Max mesh to be modified.
-	m_baseMeshArgName = AddFabricParameter(this, GetValueType(), "baseMesh", FabricCore::DFGPortType_In, "Geometry", metadata);
-	// We add a transform value so that our Fabric operator can evaluate relative to the input matrix
-	m_baseMeshTransformArgName = AddFabricParameter(this, TYPE_MATRIX3, "baseMeshTransform", FabricCore::DFGPortType_In, "Math", metadata);
+	const char* portSpec = MaxTypeToFabricType( GetValueType() );
+	QString res = m_fabricCmdHandler.dfgDoAddPort( GetBinding(), "", GetExec( "" ), "baseMesh", FabricCore::DFGPortType_In, portSpec, "", "Geometry", metadata );
+	m_baseMeshArgName = res.toStdString();
 
+	// We add a transform value so that our Fabric operator can evaluate relative to the input matrix
+	portSpec = MaxTypeToFabricType( TYPE_MATRIX3 );
+	res = m_fabricCmdHandler.dfgDoAddPort( GetBinding(), "", GetExec( "" ), "baseMeshTransform", FabricCore::DFGPortType_In, portSpec, "", "Math", metadata );
+	m_baseMeshTransformArgName = res.toStdString();
 
 	ParentClass::ResetPorts();
 }

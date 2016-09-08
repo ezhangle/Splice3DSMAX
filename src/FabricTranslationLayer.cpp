@@ -603,12 +603,6 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 	return dialogTemplate;
 }
 
-// Add a parameter to the splice graph
-std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
-{
-	return AddFabricParameter(pOwner, type, CStr::FromMCHAR(pName).data(), mode, inExtension, metadata);
-}
-
 //////////////////////////////////////////////////////////////////////////
 // Helper functions for accessing options
 int GetPortParamID(const FabricCore::DFGExec& exec, const char* argName)
@@ -952,6 +946,61 @@ int FabricTypeToMaxType(const char* cType)
 	return res;
 }
 
+const char* MaxTypeToFabricType( int paramType )
+{
+	switch ((int)paramType)
+	{
+		case TYPE_INT:
+			return "SInt32";
+		case TYPE_INDEX:
+			return "UInt32";
+			break;
+		case TYPE_FLOAT:
+		case TYPE_TIMEVALUE:
+		case TYPE_ANGLE:
+		case TYPE_WORLD:
+		case TYPE_PCNT_FRAC:
+			return "Scalar";
+			break;
+		case TYPE_FRGBA:
+		case TYPE_RGBA:
+			return "Color";
+			break;
+		case TYPE_POINT2:
+			return "Vec2";
+			break;
+		case TYPE_POINT3:
+			return "Vec3";
+			break;
+		case TYPE_POINT4:
+			return "Vec4";
+			break;
+		case TYPE_BOOL:
+			return "Boolean";
+			break;
+		case TYPE_MATRIX3:
+			return "Mat44";
+			break;
+		case TYPE_QUAT:
+			return "Quat";
+			break;
+		case TYPE_STRING:
+		case TYPE_FILENAME:
+			return "String";
+			break;
+		case TYPE_MESH:
+			return "PolygonMesh";
+			break;
+		case TYPE_INODE:
+		case TYPE_MTL:
+		case TYPE_TEXMAP:
+
+		default:
+			DbgAssert( false ); // What do we have here?
+			return "";
+	}
+
+}
 // This function is simply here to override the default PB2 type for PolygonMesh.
 // The correct type for PolyMesh is TYPE_MESH, but unfortunately the PB2
 // doesn't support that data, so we need it to create an INODE parameter instead.
@@ -963,79 +1012,6 @@ int FabricTypeToDefaultMaxType(const char* cType)
 	if (strcmp(cType, "PolygonMesh") == 0)
 		return TYPE_INODE;
 	return FabricTypeToMaxType(cType);
-}
-
-std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
-{
-	try
-	{
-		std::string res = pOwner->GetCommandHandler()->dfgDoAddPort(pOwner->GetBinding(), "", pOwner->GetBinding().getExec(), cName, mode, type, "", inExtension, metadata).toStdString();
-		return cName; // r3d shouldn't return res?
-	}
-	catch(FabricCore::Exception e) 
-	{
-		CStr message;
-		message.printf( "ERROR on AddPort to Fabric: %s", e.getDesc_cstr() );
-		logMessage(message);
-		return nullptr;
-	}
-}
-
-std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, int type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
-{
-	std::string strType;
-	switch ((int)type)
-	{
-	case TYPE_INT:		
-	case TYPE_INDEX:
-		strType = "Integer";
-		break;
-	case TYPE_FLOAT:
-	case TYPE_TIMEVALUE:
-	case TYPE_ANGLE:
-	case TYPE_WORLD:
-	case TYPE_PCNT_FRAC:
-		strType = "Scalar";
-		break;
-	case TYPE_FRGBA:
-	case TYPE_RGBA:
-		strType = "Color";
-		break;
-	case TYPE_POINT2:
-		strType = "Vec2";
-		break;
-	case TYPE_POINT3:
-		strType = "Vec3";
-		break;
-	case TYPE_POINT4:
-		strType = "Vec4";
-		break;
-	case TYPE_BOOL:
-		strType = "Boolean";
-		break;
-	case TYPE_MATRIX3:
-		strType = "Mat44";
-		break;
-	case TYPE_QUAT:
-		strType = "Quat";
-		break;
-	case TYPE_STRING:
-	case TYPE_FILENAME:
-		strType = "String";
-		break;
-	case TYPE_MESH:
-		strType = "PolygonMesh";
-		break;
-	case TYPE_INODE:
-	case TYPE_MTL:
-	case TYPE_TEXMAP:
-
-	default:
-		DbgAssert(false); // What do we have here?
-		return std::string();
-	}
-
-	return AddFabricParameter(pOwner, strType.data(), cName, mode, inExtension, metadata);
 }
 
 #pragma endregion

@@ -93,6 +93,7 @@
 			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;$(FABRIC_DIR)\include\FabricServices;$(QTWINMIGRATE_DIR)\src;$(QT_DIR)\include;$(QT_DIR)\include/QtGui;$(MaxSDKPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
+			<ExceptionHandling>Async</ExceptionHandling>
 			<StringPooling>true</StringPooling>
 			<FunctionLevelLinking>true</FunctionLevelLinking>
 			<PrecompiledHeader>Use</PrecompiledHeader>

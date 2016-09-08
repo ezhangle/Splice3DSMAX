@@ -174,7 +174,9 @@ void FabricModifier::ResetPorts()
 			\"uiPersistValue\" : \"false\" \n \
 		}";
 
-		m_inMeshPort = AddFabricParameter(this, GetValueType(), "baseMesh", FabricCore::DFGPortType_In, "Geometry", metadata);
+		const char* portSpec = MaxTypeToFabricType( GetValueType() );
+		QString res = m_fabricCmdHandler.dfgDoAddPort( GetBinding(), "", GetExec( "" ), "baseMesh", FabricCore::DFGPortType_In, portSpec, "", "Geometry", metadata );
+		m_inMeshPort = res.toStdString();
 
     ParentClass::ResetPorts();
 

@@ -748,7 +748,10 @@ void FabricTranslationLayer<TBaseClass, TResultType>::ResetPorts()
   MACROREC_GUARD;
 
   // Setup any necessary ports for the current graph
-  m_outArgName = AddFabricParameter(this, GetValueType(), "outputValue", FabricCore::DFGPortType_Out, "", "{ \"uiPersistValue\": \"false\" }");
+  const char* metadata = "{ \"uiPersistValue\": \"false\" }";
+  const char* portSpec = MaxTypeToFabricType( GetValueType() );
+  QString res = m_fabricCmdHandler.dfgDoAddPort( GetBinding(), "", GetExec( "" ), "outputValue", FabricCore::DFGPortType_Out, portSpec, "", "Math", metadata );
+  m_outArgName = res.toStdString();
 }
 
 template<typename TBaseClass, typename TResultType>

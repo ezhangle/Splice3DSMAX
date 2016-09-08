@@ -121,7 +121,7 @@ fn TestFabricInterface =
 	-- Test adding/removing blocks
 	graph = sm.DFGAddGraph "graph" [570,80]  execPath:""
 	dfgBlock = sm.DFGDoAddBlock "block" [250.000000,114.000000]   execPath:graph
-	dfgBlockPort = sm.DFGDoAddBlockPort dfgBlock "aBlockPort" #DFGPortIN "Float32" "" #DFGPortIN extDep:"" metaData:"" execPath:graph
+	dfgBlockPort = sm.DFGDoAddBlockPort dfgBlock "aBlockPort" #DFGPortIN typeSpec:"Float32" execPath:graph
 
 	inBlockPrt = sm.DFGDoAddInstBlockPort graph dfgBlock "instBlkPrt" typeSpec:"UInt32" 
 	
@@ -135,6 +135,9 @@ fn TestFabricInterface =
 	  \"uiHeaderColor\" : \"\"
 	  }" 
 	graph = sm.DFGDoEditNode graph desiredNewNodeName:"graphics" nodeMetadata:metadata
+	
+	FAssert(sm.GetNodeCount() == 6) "Creating block graph"
+	FAssert(sm.GetPortCount execPath:graph == 2) "Error in block-graph port count"
 	
 	sm.DFGDoCreatePreset graph "User" "graphPreset"  execPath:""
   
@@ -150,15 +153,15 @@ fn TestFabricInterface =
 	--res == jsonString
 	-- From KDIff3  Files are equivalent, but not binary equal (so our test fails)
 
-	FAssert(sm.GetNodeCount() == 5) "InitValue"
+	FAssert(sm.GetNodeCount() == 6) "InitValue"
 	sm.DFGRemoveNodes #(epm, func)    execPath:""
-	FAssert(sm.GetNodeCount() == 3) "First Removed"
+	FAssert(sm.GetNodeCount() == 4) "First Removed"
 	sm.LoadFromFile tmpFile true
-	FAssert(sm.GetNodeCount() == 5) "File Restore"
+	FAssert(sm.GetNodeCount() == 6) "File Restore"
 	sm.DFGRemoveNodes #(epm, func)    execPath:""
-	FAssert(sm.GetNodeCount() == 3) "Second Removed"
+	FAssert(sm.GetNodeCount() == 4) "Second Removed"
 	sm.RestoreFromJSON jsonString true
-	FAssert(sm.GetNodeCount() == 5) "JSON Restore"
+	FAssert(sm.GetNodeCount() == 6) "JSON Restore"
 
 	sm.CloseDFGGraphEditor()
 )

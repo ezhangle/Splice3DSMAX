@@ -54,11 +54,15 @@ fn TestLoadSaveMaxFile =
 	resetMaxFile #noPrompt
 	TestMaxClassModifier()
 		
+	$Plane001.modifiers[1].enabled = false
+		
 	res = saveMaxFile tempFile useNewFile:false quiet:true
 	FAssert res "Failed saving file UnitTestMaxClassModifier"
 	res = loadMaxFile tempFile quiet:true
 	FAssert res "Failed loading file UnitTestMaxClassModifier"
 
+	FAssert (not $Plane001.modifiers[1].enabled) "Did not save/load enabled state"
+	$Plane001.modifiers[1].enabled = true
 	FAssert (CompBB $Plane001 207.122) "Bad modified object size"
 
 	print(" -- Saved/Loaded Modifiers successfully --")

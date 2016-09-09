@@ -35,12 +35,12 @@ MSTR ToMstr( const QString& qs )
 	return str;
 }
 
-extern MSTR ToMstr( const std::string& str )
+MSTR ToMstr( const std::string& str )
 {
 	return MSTR::FromACP( str.data() );
 }
 
-extern MSTR ToMstr( const char* str )
+MSTR ToMstr( const char* str )
 {
 	return MSTR::FromACP( str );
 }

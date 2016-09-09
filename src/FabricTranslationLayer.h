@@ -309,10 +309,8 @@ public:
 		return FabricTranslationFPInterface::GetDescByID(id);
 	}
 
-	ReferenceTarget* CastToRefTarg() { return this; }
-	//FabricCore::DFGBinding& GetBinding()	{ return m_binding; }
+	ReferenceTarget* CastToRefTarg() override { return this; }
 
-	//FabricUI::DFG::DFGUICmdHandler* GetCmdHandler() { return &m_maxCmdHandler; }
 
 #pragma endregion
 

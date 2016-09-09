@@ -354,6 +354,7 @@ public:
 	FabricCore::DFGExec GetExec(const char* execPath);
 	FabricCore::DFGExec GetExec(const MSTR& execPath);
 
+	virtual ReferenceTarget* CastToRefTarg() = 0;
 #pragma endregion
 };
 

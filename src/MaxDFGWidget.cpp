@@ -5,6 +5,7 @@
 
 MaxDFGWidget::MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding, FabricUI::DFG::DFGUICmdHandler* cmdHandler)
 	: m_binding(binding)
+	, m_pOwner(NULL)
 	, DFG::DFGCombinedWidget(parent)
 {
 	FabricCore::Client client = GetClient();
@@ -25,7 +26,23 @@ MaxDFGWidget::~MaxDFGWidget()
 
 void MaxDFGWidget::onSelectCanvasNodeInDCC()
 {
-	throw std::logic_error( "The method or operation is not implemented." );
+	if (m_pOwner != nullptr)
+	{
+		// First, attempt to find a referencing node for this item
+		ULONG handle = 0;
+		m_pOwner->NotifyDependents( FOREVER, (PartID)&handle, REFMSG_GET_NODE_HANDLE );
+		if (handle != 0)
+		{
+			INode* pNode = GetCOREInterface()->GetINodeByHandle( handle );
+			if (pNode != nullptr)
+				GetCOREInterface()->SelectNode( pNode );
+		}
+		else
+		{
+			// What else could we do?  Maybe select 
+			// item in Material editor (once materials are supported)
+		}
+	}
 }
 
 void MaxDFGWidget::onImportGraphInDCC()

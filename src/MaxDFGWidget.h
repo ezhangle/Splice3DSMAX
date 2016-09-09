@@ -15,6 +15,8 @@ class MaxDFGWidget : public DFG::DFGCombinedWidget {
 	Q_OBJECT
 
 	FabricCore::DFGBinding& m_binding;
+
+	ReferenceTarget* m_pOwner;
 public:
 	
 	MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding, FabricUI::DFG::DFGUICmdHandler* cmdHandler);
@@ -23,6 +25,9 @@ public:
 	virtual void onSelectCanvasNodeInDCC() override;
 	virtual void onImportGraphInDCC() override;
 	virtual void onExportGraphInDCC() override;
+
+	//  We require an owner pointer in order to execute onSelectCanvasNodeInDCC
+	void SetCallbackItem( ReferenceTarget* owner ) { m_pOwner = owner; }
 
 	public slots:
 	virtual void onUndo() override;

@@ -40,7 +40,8 @@ fn TestFabricInterface =
 	sm.DFGConnect (epm + ".mesh") (func + ".inVal")  execPath:""
 
 	res = sm.DFGAddPort "aport" #DFGPortIN "UInt32" portToConnect:"" extDep:"" execPath:""
-	FAssert(sm.GetPortType res == "UInt32") "Error creating port type"
+	FAssert(sm.GetPortType res == #DFGPortIN) "Error creating port type"
+	FAssert(sm.GetPortSpec res == "UInt32") "Error creating port Spec"
 	FAssert(sm.GetMaxTypeForArg res == 1) "Created bad Max type"
 	FAssert(sm.GetPortCount() == 3) "Error in port count"
 	res = sm.DFGRenamePort res "aDiffPort"  execPath:""

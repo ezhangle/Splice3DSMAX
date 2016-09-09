@@ -76,7 +76,7 @@ int FabricTypeToDefaultMaxType(const char* cType);
 	from the UI layer */
 int GetPortParamID(const FabricCore::DFGExec& exec, const char* argName);
 int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName);
-const char* GetPortType(const FabricCore::DFGExec& exec, const char* argName);
+const char* GetPortSpec(const FabricCore::DFGExec& exec, const char* argName);
 bool IsPortArray(const FabricCore::DFGExec& exec, const char* argName);
 bool AreTypesCompatible(int type1, int type2);
 

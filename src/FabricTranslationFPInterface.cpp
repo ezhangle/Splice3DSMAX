@@ -373,16 +373,23 @@ MSTR FabricTranslationFPInterface::GetPortName(int i, const MSTR& execPath)
 	MAXSPLICE_CATCH_RETURN(_M(" ** Exception Occured"));
 }
 
-const char* FabricTranslationFPInterface::GetPortType(const char* portName, const char* execPath)
-{
-
-	return ::GetPortType(GetExec(execPath), portName);
-}
-
-MSTR FabricTranslationFPInterface::GetPortType(const MSTR& portName, const MSTR& execPath)
+FabricCore::DFGPortType FabricTranslationFPInterface::GetPortType( const MSTR& portName, const MSTR& execPath )
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(GetPortType(TO_CSTR(portName), TO_CSTR(execPath)));
+		return GetExec( execPath ).getExecPortType( TO_CSTR( portName ) );
+	MAXSPLICE_CATCH_RETURN( FabricCore::DFGPortType_In );
+}
+
+const char* FabricTranslationFPInterface::GetPortSpec(const char* portName, const char* execPath)
+{
+
+	return ::GetPortSpec(GetExec(execPath), portName);
+}
+
+MSTR FabricTranslationFPInterface::GetPortSpec(const MSTR& portName, const MSTR& execPath)
+{
+	MAXSPLICE_CATCH_BEGIN
+	return MSTR::FromACP(GetPortSpec(TO_CSTR(portName), TO_CSTR(execPath)));
 	MAXSPLICE_CATCH_RETURN(_M(" ** Exception Occured"));
 }
 
@@ -438,11 +445,8 @@ bool FabricTranslationFPInterface::GetArgValue(const char* argName, FPValue& val
 {
 	MAXSPLICE_CATCH_BEGIN
 
-	//FabricCore::DFGExec exec = GetExec(execPath);
-
-	//exec.getPort
 	FabricCore::RTVal rtVal = m_binding.getArgValue(argName);
-	const char* cType = GetPortType(argName);
+	const char* cType = GetPortSpec(argName);
 	int type = FabricTypeToMaxType(cType);
 
 	switch (type)
@@ -589,7 +593,7 @@ int FabricTranslationFPInterface::SetMaxTypeForArg(const MSTR& argName, int type
 BitArray FabricTranslationFPInterface::GetLegalMaxTypesForArg(const MSTR& argName)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return FabricTypeToMaxTypes(GetPortType(TO_CSTR(argName)));
+	return FabricTypeToMaxTypes(GetPortSpec(TO_CSTR(argName)));
 	MAXSPLICE_CATCH_RETURN(BitArray());
 }
 
@@ -765,7 +769,7 @@ bool FabricTranslationFPInterface::RestoreFromJSON(const char* json, bool create
 			if (exec.getExecPortType(i) == FabricCore::DFGPortType_Out)
 			{
 				exec.getExecPortResolvedType(i);
-				BitArray compatibleTypes = FabricTypeToMaxTypes(GetPortType(portName));
+				BitArray compatibleTypes = FabricTypeToMaxTypes(GetPortSpec(portName));
 				// If this splice type is compatible with this classes output,
 				// set this port as our outport
 				if (compatibleTypes[GetValueType()]) {

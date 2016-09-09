@@ -677,7 +677,7 @@ void SetPortPostConnectionUI(FabricTranslationFPInterface* pOwner, const char* a
 //	return aPort->getName();
 //}
 //
-const char* GetPortType( const FabricCore::DFGExec& exec, const char* argName )
+const char* GetPortSpec( const FabricCore::DFGExec& exec, const char* argName )
 {
 	return const_cast<FabricCore::DFGExec&>(exec).getExecPortResolvedType(argName);
 }
@@ -702,7 +702,7 @@ int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName)
 		return maxType;
 
 
-	const char* portType = GetPortType(exec, argName);
+	const char* portType = GetPortSpec(exec, argName);
 	if (maxType > 0)
 	{
 		// If our type is not legal for our current port type,
@@ -754,7 +754,7 @@ int is_array(const std::string& value)
 
 bool IsPortArray(const FabricCore::DFGExec& exec, const char* argName)
 {
-	return is_array(GetPortType(exec, argName));
+	return is_array(GetPortSpec(exec, argName));
 }
 
 bool AreTypesCompatible(int type1, int type2) {

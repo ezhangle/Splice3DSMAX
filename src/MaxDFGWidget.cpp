@@ -199,7 +199,7 @@ void MaxDFGWidget::onPortEditDialogCreated(DFG::DFGBaseDialog * dialog)
 		// Do not enable 
 		if (GetPortParamID(exec, portName) >= 0)
 		{
-			const char* fabricType = GetPortType(exec, portName);
+			const char* fabricType = GetPortSpec(exec, portName);
 			BitArray br = FabricTypeToMaxTypes(fabricType);
 			if (br.AnyBitSet())
 			{

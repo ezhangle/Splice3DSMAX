@@ -86,6 +86,7 @@ public:
 		fn_getPortCount,
 		fn_getPortName,
 		fn_getPortType,
+		fn_getPortSpec,
 		fn_getArgValue,
 
 		fn_hasSrcPort,
@@ -165,7 +166,8 @@ public:
 
 		FN_1(fn_getPortCount, TYPE_INT, GetPortCount, TYPE_TSTR);
 		FN_2(fn_getPortName, TYPE_TSTR_BV, GetPortName, TYPE_INDEX, TYPE_TSTR);
-		FN_2(fn_getPortType, TYPE_TSTR_BV, GetPortType, TYPE_TSTR, TYPE_TSTR);
+		FN_2(fn_getPortType, TYPE_ENUM, GetPortType, TYPE_TSTR, TYPE_TSTR);
+		FN_2( fn_getPortSpec, TYPE_TSTR_BV, GetPortSpec, TYPE_TSTR, TYPE_TSTR );
 		FN_2(fn_getArgValue, TYPE_FPVALUE_BR, GetArgValue, TYPE_TSTR, TYPE_TSTR);
 
 		FN_1(fn_hasSrcPort, TYPE_bool, HasSrcPort, TYPE_TSTR);
@@ -240,8 +242,9 @@ public:
 	// Allow introspecting the ports on this graph
 	int GetPortCount(const MSTR& execPath);
 	MSTR GetPortName(int i, const MSTR& execPath);
-	const char* GetPortType(const char* portName, const char* execPath = "");
-	MSTR GetPortType(const MSTR& portName, const MSTR& execPath);
+	FabricCore::DFGPortType GetPortType( const MSTR& portName, const MSTR& execPath );
+	const char* GetPortSpec(const char* portName, const char* execPath = "");
+	MSTR GetPortSpec(const MSTR& portName, const MSTR& execPath);
 
 	bool HasSrcPort(const MSTR& portName);
 	bool HasSrcPort(const char* portName);
@@ -368,7 +371,7 @@ FPInterfaceDesc* GetDescriptor()
 	static FPInterfaceDesc _ourDesc(
 		// Describe our interface
 		ISPLICE__INTERFACE, 
-		_T("CreationPlatform"), 
+		_T("FabricInterface"), 
 		0, 
 		FabricTranslationLayer<TBaseClass, TResultType>::GetClassDesc(), 
 		0,
@@ -591,7 +594,11 @@ FPInterfaceDesc* GetDescriptor()
 			FabricTranslationFPInterface::fn_getPortName, _T("GetPortName"), 0, TYPE_TSTR_BV, 0, 2,
 				_M("portIndex"),	0,	TYPE_INDEX,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
-			FabricTranslationFPInterface::fn_getPortType, _T("GetPortType"), 0, TYPE_TSTR_BV, 0, 2,
+
+			FabricTranslationFPInterface::fn_getPortType, _T("GetPortType"), 0, TYPE_ENUM, FabricTranslationFPInterface::port_mode_enum, 0, 2,
+				_M("portName"),		0,	TYPE_TSTR,
+				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
+			FabricTranslationFPInterface::fn_getPortSpec, _T("GetPortSpec"), 0, TYPE_TSTR_BV, 0, 2,
 				_M("portName"),		0,	TYPE_TSTR,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 			FabricTranslationFPInterface::fn_getArgValue, _T("GetArgValue"), 0, TYPE_FPVALUE_BR, 0, 2,

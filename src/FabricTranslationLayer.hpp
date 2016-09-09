@@ -683,7 +683,7 @@ bool FabricTranslationLayer<TBaseClass, TResultType>::ConnectArgs(const MSTR& my
       return false;
 
     // Are they of the same type?
-    if (strcmp(pSrcContInterface->GetPortType(cSrcPort), GetPortType(cDstPort)) != 0)
+    if (strcmp(pSrcContInterface->GetPortSpec(cSrcPort), GetPortSpec(cDstPort)) != 0)
       return false;
   
     // Ok - these ports are good to go.  Connect 'em up.
@@ -725,7 +725,7 @@ bool FabricTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 
   // can this port be translated to our out-type?
   CStr cname = name.ToCStr();
-  const char* portType = GetPortType(cname.data());
+  const char* portType = GetPortSpec(cname.data());
   BitArray legalTypes = FabricTypeToMaxTypes(portType);
   if (!legalTypes[GetValueType()])
     return false;
@@ -961,7 +961,7 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SyncMaxParamDefault(const 
   if (pid < 0)
     return;
 
-  char const *resolvedType = GetPortType(argName);
+  char const *resolvedType = GetPortSpec(argName);
   if (!resolvedType)
     return;
 

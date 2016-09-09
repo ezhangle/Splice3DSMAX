@@ -23,3 +23,38 @@ const MSTR* EmptyStr()
   static MSTR empty( _M("") );
   return &empty;
 }
+
+
+MSTR ToMstr( const QString& qs )
+{
+	// NOTE - this copy should get RVO'ed away
+	MSTR str = MSTR::FromACP( qs.toStdString().data() );
+	//wchar_t* guts = str.dataForWrite( qs.size() );
+	
+	//qs.toWCharArray( guts );
+	return str;
+}
+
+extern MSTR ToMstr( const std::string& str )
+{
+	return MSTR::FromACP( str.data() );
+}
+
+extern MSTR ToMstr( const char* str )
+{
+	return MSTR::FromACP( str );
+}
+
+CStr ToCStr( const MSTR& ms )
+{
+	// NOTE - this copy should get RVO'ed away
+	CStr str = ms.ToCStr();
+	return str;
+}
+
+QString ToQStr( const MSTR& ms )
+{
+	// NOTE - this copy should get RVO'ed away
+	QString str = ms.ToCStr().data();
+	return str;
+}

@@ -435,7 +435,7 @@ bool SendKLEvent(FabricCore::RTVal& klevent, ViewExp& pView, int eventType)
 			if (fabricUndoVal.getArraySize() == 1){
 				std::string desc(fabricUndoVal.getArrayElement(0).callMethod("String", "getDesc", 0, 0).getStringCString());
 #ifdef _UNICODE
-				theHold.Accept(MSTR::FromACP(desc.data()));
+				theHold.Accept(ToMstr(desc));
 #else
 				theHold.Accept((desc + std::string("\n")).data());
 #endif

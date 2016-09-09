@@ -266,7 +266,7 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName )
 {
-	MSTR sName = MSTR::FromACP(cName);
+	MSTR sName = ToMstr(cName);
 	return AddMaxParameter(pDesc, type, sName.data());
 }
 
@@ -1041,7 +1041,7 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			// A few static vars are shared between save and load
 			static int filterIndex = 0;
-			static MSTR initialDir = MSTR::FromACP(std::getenv("FABRIC_DIR"));
+			static MSTR initialDir = ToMstr(std::getenv("FABRIC_DIR"));
 
 			// If we are the KL editor button, pop that editor
 			if (wParam == IDC_BTN_EDIT_KL)

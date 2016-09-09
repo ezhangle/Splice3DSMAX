@@ -910,7 +910,7 @@ void FabricToMaxValue(const FabricCore::Variant& var, MSTR& param)
 		return;
 
 	const char* val = var.getString_cstr();
-	param = MSTR::FromACP(val);
+	param = ToMstr(val);
 }
 #pragma endregion // Variants
 

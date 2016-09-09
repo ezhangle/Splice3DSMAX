@@ -624,7 +624,7 @@ IOResult FabricTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 
   iload->RegisterPostLoadCallback(new RenameMaxParamsCallback(this));
   // Get our output port
-  SetOutPortName(MSTR::FromACP(outName.data()));
+  SetOutPortName(ToMstr(outName.data()));
 
   return IO_OK;
 }
@@ -642,7 +642,7 @@ void FabricTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 		int pid = GetPortParamID( argName );
 		if (pid >= 0)
 		{
-			MSTR str = MSTR::FromACP( argName );
+			MSTR str = ToMstr( argName );
 			SetMaxParamName( m_pblock->GetDesc(), (ParamID)pid, str );
 			// Delete existing autogen UI
 			SAFE_DELETE( m_dialogTemplate );
@@ -715,7 +715,7 @@ bool FabricTranslationLayer<TBaseClass, TResultType>::DisconnectArgs(const MSTR&
 template<typename TBaseClass, typename TResultType>
 MSTR FabricTranslationLayer<TBaseClass, TResultType>::GetOutPortName()
 {
-  return MSTR::FromACP(m_outArgName.c_str());
+  return ToMstr(m_outArgName.c_str());
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -815,7 +815,7 @@ int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
 
 				SetMaxParamName( pDesc, (ParamID)paramId, NULL );
 				pDesc->DeleteParam( (ParamID)paramId );
-				AddMaxParameter( pDesc, maxType, MSTR::FromACP(argName), (ParamID)paramId );
+				AddMaxParameter( pDesc, maxType, ToMstr(argName), (ParamID)paramId );
 
 				// They are all float types, so we can safely change
 				// from one type to the next without changing the actual pblock
@@ -860,7 +860,7 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SyncMaxParamName(const cha
     return;
 
   // Assume argName is valid, and matches id
-  MSTR v = MSTR::FromACP(argName);
+  MSTR v = ToMstr(argName);
   SetMaxParamName(m_pblock->GetDesc(), ParamID(id), v.data());
   UpdateUISpec();
 }

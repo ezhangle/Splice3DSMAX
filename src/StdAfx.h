@@ -41,10 +41,16 @@
 extern HINSTANCE hInstance;
 extern TCHAR *GetString(int id);
 
-#define TO_CSTR(x) (x).ToCStr().data()
-#define TO_MSTR(x) MSTR::FromACP(x)
+//#define TO_CSTR(x) (x).ToCStr().data()
+//#define TO_MSTR(x) MSTR::FromACP(x)
 
 extern const MSTR* EmptyStr();
+
+extern MSTR ToMstr( const std::string& str );
+extern MSTR ToMstr( const QString& qs );
+extern MSTR ToMstr( const char* str );
+extern CStr ToCStr( const MSTR& ms );
+extern QString ToQStr( const MSTR& ms );
 
 #pragma warning(push, 0)
 // Fabric includes

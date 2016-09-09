@@ -297,7 +297,7 @@ void MaxDFGCmdHandler::dfgDoRemovePort(FabricCore::DFGBinding const &binding, QS
 		int pid = GetPortParamID(exec, portName.toStdString().c_str());
 		if (pid >= 0)
 		{
-			m_pTranslationLayer->SetMaxTypeForArg(MSTR::FromACP(portName.toStdString().c_str()), -1);
+			m_pTranslationLayer->SetMaxTypeForArg(ToMstr(portName), -1);
 		}
 	}
 

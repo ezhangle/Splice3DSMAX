@@ -106,7 +106,8 @@ fn RegisterFabricEngineMenu = (
 	wireQMItem = menuMan.createActionItem "WireFabricParameters" "FabricTools"
 	-- Add to end of menu  
 	qmBottomRight.addItem sepItem -1
-	qmBottomRight.addItem wireQMItem -1	
+	qmBottomRight.addItem wireQMItem -1
+  )
 )
 
 fn DeRegisterFabricEngineMenu = (

@@ -2,6 +2,7 @@
 
 #include "MaxDFGWidget.h"
 #include "plugin.h"
+#include <iInstanceMgr.h>
 
 MaxDFGWidget::MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding, FabricUI::DFG::DFGUICmdHandler* cmdHandler)
 	: m_binding(binding)
@@ -24,35 +25,41 @@ MaxDFGWidget::~MaxDFGWidget()
 {
 }
 
+//
+// Find all INodes that reference this class in any way
+class GatherINodes : public DependentEnumProc {
+public:
+	INodeTab m_gatheredNodes;
+
+	virtual int proc( ReferenceMaker *rm ) override
+	{
+		INode* pNode = dynamic_cast<INode*>(rm);
+		if (pNode != nullptr)
+		{
+			m_gatheredNodes.AppendNode( pNode );
+			return REF_ENUM_SKIP;
+		}
+		return REF_ENUM_CONTINUE;
+	}
+
+};
 void MaxDFGWidget::onSelectCanvasNodeInDCC()
 {
 	if (m_pOwner != nullptr)
 	{
-		// First, attempt to find a referencing node for this item
-		ULONG handle = 0;
-		m_pOwner->NotifyDependents( FOREVER, (PartID)&handle, REFMSG_GET_NODE_HANDLE );
-		if (handle != 0)
-		{
-			INode* pNode = GetCOREInterface()->GetINodeByHandle( handle );
-			if (pNode != nullptr)
-				GetCOREInterface()->SelectNode( pNode );
-		}
-		else
-		{
-			// What else could we do?  Maybe select 
-			// item in Material editor (once materials are supported)
-		}
+		GatherINodes gatherer;
+		m_pOwner->DoEnumDependents( &gatherer );
+		GetCOREInterface()->SelectNodeTab( gatherer.m_gatheredNodes, TRUE, TRUE );
 	}
 }
 
 void MaxDFGWidget::onImportGraphInDCC()
 {
-	throw std::logic_error( "The method or operation is not implemented." );
+
 }
 
 void MaxDFGWidget::onExportGraphInDCC()
 {
-	throw std::logic_error( "The method or operation is not implemented." );
 }
 
 void MaxDFGWidget::onUndo()

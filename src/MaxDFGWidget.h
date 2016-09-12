@@ -29,7 +29,9 @@ public:
 	//  We require an owner pointer in order to execute onSelectCanvasNodeInDCC
 	void SetCallbackItem( ReferenceTarget* owner ) { m_pOwner = owner; }
 
-	public slots:
+	bool eventFilter( QObject *obj, QEvent *event );
+
+public slots:
 	virtual void onUndo() override;
 	virtual void onRedo() override;
 

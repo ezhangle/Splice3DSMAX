@@ -109,15 +109,15 @@ int DockableWindow::ProcessMessage( UINT message, WPARAM wParam, LPARAM lParam )
 		// If our window is deactivated, let max have it's kb accelerators back.
 		// We cannot use WM_KILLFOCUS unfortunately, because the dialog sends
 		// this message internally when switching internal windows.
-		if (LOWORD(wParam) == WA_INACTIVE)
-			EnableAccelerators(); // DFG win Deactivated, max can accelerate
+		//if (LOWORD(wParam) == WA_INACTIVE)
+		//	EnableAccelerators(); // DFG win Deactivated, max can accelerate
 		break;
 	case WM_CLOSE:
 		m_owner->CloseDFGGraphEditor();
 		break;
 	case WM_SETFOCUS:
 		// When we gain focus, start owning that keyboard shit!
-		DisableAccelerators();
+		//DisableAccelerators();
 		break;
 	case CUI_POSDATA_MSG: {
 		CUIPosData **cpd = (CUIPosData **)lParam;
@@ -127,7 +127,7 @@ int DockableWindow::ProcessMessage( UINT message, WPARAM wParam, LPARAM lParam )
 	case WM_SHOWWINDOW:
 		// On creation, we do not receive a message WM_ACTIVATE, so
 		// we assume (yes, risky) that we have focus and will be accepting keys
-		DisableAccelerators();
+		//DisableAccelerators();
 		break;
 	case WM_SIZING:
 		ResizeContentToFrame();

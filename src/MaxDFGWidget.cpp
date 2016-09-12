@@ -4,6 +4,7 @@
 #include "plugin.h"
 #include <iInstanceMgr.h>
 
+
 MaxDFGWidget::MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding, FabricUI::DFG::DFGUICmdHandler* cmdHandler)
 	: m_binding(binding)
 	, m_pOwner(NULL)
@@ -19,6 +20,8 @@ MaxDFGWidget::MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding, Fa
 		this, SLOT(onPortEditDialogCreated(FabricUI::DFG::DFGBaseDialog*)));
 	QObject::connect(this, SIGNAL(portEditDialogInvoked(FabricUI::DFG::DFGBaseDialog*)),
 		this, SLOT(onPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog*)));
+
+	qApp->installEventFilter( this );
 }
 
 MaxDFGWidget::~MaxDFGWidget()
@@ -279,4 +282,107 @@ void MaxDFGWidget::onPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog * dialog
 			}
 		}
 	}
+}
+
+
+bool IsTextEntry( QObject* obj )
+{
+	if (qobject_cast<QTextEdit*>(obj) != nullptr || qobject_cast<QLineEdit*>(obj) != nullptr || qobject_cast<QPlainTextEdit*>(obj) != nullptr)
+		return true;
+
+	const char* name = obj->metaObject()->className();
+	if (strcmp( name, "FabricUI::DFG::DFGTabSearchWidget" ) == 0)
+		return true;
+	//if (strcmp( name, "FabricUI::KLEditor::KLSourceCodeWidget" ) == 0)
+	//	return true;
+	return false;
+}
+
+bool MaxDFGWidget::eventFilter( QObject *obj, QEvent *event )
+{
+
+	static bool kbd_pressed;
+	switch (event->type())
+	{
+		//case QEvent::MouseMove:
+		//{
+		//	//const char* name = obj->metaObject()->className();
+		//	//logMessage( name );
+		//	QSizeGrip *sg = qobject_cast<QSizeGrip*>(obj);
+		//	if (sg)
+		//	{
+		//		//			qDebug() << sg->parentWidget();
+
+		//		QWidget* qw = sg->parentWidget();
+		//		QString name = qw->objectName();
+		//		ToMstr( name );
+		//	}
+		//	break;
+		//}
+
+		//case QEvent::KeyPress:
+		//{
+		//	QKeyEvent* qKeyEvent = static_cast<QKeyEvent*>(event);
+		//	if (!kbd_pressed && qKeyEvent->matches( QKeySequence::Undo ))
+		//		//if (qKeyEvent->modifiers() & Qt::CTRL && qKeyEvent->key() == Qt::Key_Z)
+		//	{
+		//		kbd_pressed = true; // We are receiving way too many auto-repeats!
+		//		// Send the undo to Max
+		//		//if (theHold.GetBeginDepth() == 0)
+		//		//	theHold.
+		//		PostMessage( GetCOREInterface()->GetMAXHWnd(), WM_COMMAND, 50034, 0 );
+		//		return false;
+		//	}
+		//}
+		//case QEvent::KeyRelease:
+		//{
+		//	kbd_pressed = false;
+		//	break;
+		//}
+
+		case QEvent::FocusIn:
+		{
+			//const char* name = obj->metaObject()->className();
+			//logMessage( CStr(name) + " focused\n");
+			if (IsTextEntry(obj))
+			{
+				// 
+				DisableAccelerators();
+			}
+			break;
+		}
+		case QEvent::FocusOut:
+		{
+			//The unfocus logic is not identical to the focus
+			// to account for a strange notification issue
+			// when working with DFGRegisteredTypeLineEdit.
+			// The issue stems from the drop-down list displayed
+			// as the user types in the box.  Technically, the
+			// line-edit loses focus when this new UI is displayed,
+			// which triggers our enableaccelerators call, however,
+			// the user is still actually typing in the edit box
+			// We can't catch the Focus on the new element (not sure
+			// why)
+			// However, experiments have shown that every element that we
+			// focus off on also includes a FocusOut for a style sheet-
+			// except this drop-down list focus.  So, if we enable on every
+			// focus out, then we call the fn way too many times, but
+			// will actually not trigger for this one edge case
+			const char* name = obj->metaObject()->className();
+			if (strcmp( name, "QStyleSheetStyle" ) == 0)
+			{
+				EnableAccelerators();
+			}
+			else if (strcmp( name, "FabricUI::DFG::DFGRegisteredTypeLineEdit" ) == 0)
+			{
+				/* Do nothing */
+			}
+			else if (IsTextEntry( obj ))
+			{
+				EnableAccelerators();
+			}
+			//logMessage( CStr( name ) + " unfocused\n" );
+		}
+	}
+	return QWidget::eventFilter(obj, event);
 }

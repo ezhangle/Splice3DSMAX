@@ -141,7 +141,8 @@
   <ItemDefinitionGroup>
 	<PostBuildEvent>
 	  <Command>CALL "$(ProjectDir)/GenerateMaxLauncher.bat" "$(PackageDir)" "$(MaxVersion)"
-copy "$(ProjectDir)SetupMenu.ms" "$(PackageDir)" /Y
+MKLINK /H "$(PackageDir)\SetupMenu.ms" "$(ProjectDir)SetupMenu.ms" 
+MKLINK /H "$(PackageDir)WireParameters.ms" "$(ProjectDir)WireParameters.ms"
 xcopy "$(ProjectDir)testingScripts" "$(PackageDir)samples" /E /I /Y
 MKDIR "$(PackageDir)plugin"
 MKLINK /H "$(PackageDir)plugin\QtSolutions_MFCMigrationFramework-head.dll" "$(QTWINMIGRATE_DIR)\lib\QtSolutions_MFCMigrationFramework-head.dll"

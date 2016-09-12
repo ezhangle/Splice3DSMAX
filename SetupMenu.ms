@@ -1,5 +1,5 @@
 
-
+include "WireParameters.ms"
 
 -- macro script to toggle Fabric rendering
 macroScript FabricRendering 

@@ -336,16 +336,18 @@ MSTR FabricTranslationFPInterface::DFGDoCreatePreset( const MSTR& nodeName, cons
 MSTR FabricTranslationFPInterface::DFGDoAddInstPort( const MSTR& instName, const MSTR& desiredPortName, int portType, const MSTR& typeSpec, const MSTR& pathToConnect, int connectType, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath )
 {
 	MAXSPLICE_CATCH_BEGIN
-		FabricCore::DFGPortType pt = (FabricCore::DFGPortType)portType;
-		FabricCore::DFGPortType ct = (FabricCore::DFGPortType)connectType;
-		return m_fabricCmdHandler.dfgDoAddInstPort( m_binding, execPath, GetExec( execPath ), instName, desiredPortName, pt, typeSpec, pathToConnect, ct, extDep, metaData );
+	FabricCore::DFGPortType pt = (FabricCore::DFGPortType)portType;
+	FabricCore::DFGPortType ct = (FabricCore::DFGPortType)connectType;
+	QString res = m_fabricCmdHandler.dfgDoAddInstPort( m_binding, ToQStr( execPath ), GetExec( execPath ), ToQStr( instName ), ToQStr( desiredPortName ), pt, ToQStr( typeSpec ), ToQStr( pathToConnect ), ct, ToQStr( extDep ), ToQStr( metaData ) );
+	return ToMstr( res );
 	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
 }
 
 MSTR FabricTranslationFPInterface::DFGDoAddInstBlockPort( const MSTR& instName, const MSTR& blockName, const MSTR& desiredPortName, const MSTR& typeSpec, const MSTR& pathToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath )
 {
 	MAXSPLICE_CATCH_BEGIN
-		return m_fabricCmdHandler.dfgDoAddInstBlockPort( m_binding, execPath, GetExec( execPath ), instName, blockName, desiredPortName, typeSpec, pathToConnect, extDep, metaData );
+	QString res = m_fabricCmdHandler.dfgDoAddInstBlockPort( m_binding, ToQStr( execPath ), GetExec( execPath ), ToQStr( instName ), ToQStr( blockName ), ToQStr( desiredPortName ), ToQStr( typeSpec ), ToQStr( pathToConnect ), ToQStr( extDep ), ToQStr( metaData ) );
+	return ToMstr( res );
 	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
 }
 
@@ -353,7 +355,8 @@ MSTR FabricTranslationFPInterface::DFGDoAddBlock( const MSTR& desiredName, Point
 {
 	MAXSPLICE_CATCH_BEGIN
 		QPointF qp = Convert( pos );
-		return m_fabricCmdHandler.dfgDoAddBlock( m_binding, execPath, GetExec( execPath ), desiredName, qp);
+		QString res = m_fabricCmdHandler.dfgDoAddBlock( m_binding, ToQStr( execPath ), GetExec( execPath ), ToQStr( desiredName ), qp);
+		return ToMstr( res );
 	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
 }
 
@@ -362,7 +365,8 @@ MSTR FabricTranslationFPInterface::DFGDoAddBlockPort( const MSTR& blockName, con
 	MAXSPLICE_CATCH_BEGIN
 		FabricCore::DFGPortType pt = (FabricCore::DFGPortType)portType;
 		FabricCore::DFGPortType ct = (FabricCore::DFGPortType)connectType;
-		return m_fabricCmdHandler.dfgDoAddBlockPort( m_binding, execPath, GetExec( execPath ), blockName, desiredPortName, pt, typeSpec, pathToConnect, ct, extDep, metaData );
+		QString res = m_fabricCmdHandler.dfgDoAddBlockPort( m_binding, ToQStr( execPath ), GetExec( execPath ), ToQStr( blockName ), ToQStr( desiredPortName ), pt, ToQStr( typeSpec ), ToQStr( pathToConnect ), ct, ToQStr( extDep ), ToQStr( metaData ) );
+		return ToMstr( res );
 	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
 }
 
@@ -409,7 +413,7 @@ bool FabricTranslationFPInterface::HasSrcPort(const char* portName)
 bool FabricTranslationFPInterface::HasSrcPort(const MSTR& portName)
 {
 	MAXSPLICE_CATCH_BEGIN
-		return HasSrcPort(ToQStr(portName));
+	return HasSrcPort(ToCStr(portName));
 	MAXSPLICE_CATCH_RETURN(_M(" ** Exception Occured"));
 }
 
@@ -421,7 +425,7 @@ bool FabricTranslationFPInterface::HasDstPort(const char* portName)
 bool FabricTranslationFPInterface::HasDstPort(const MSTR& portName)
 {
 	MAXSPLICE_CATCH_BEGIN
-		return HasDstPort(ToQStr(portName));
+		return HasDstPort(ToCStr(portName));
 	MAXSPLICE_CATCH_RETURN(_M(" ** Exception Occured"));
 }
 
@@ -801,7 +805,7 @@ MSTR FabricTranslationFPInterface::ExportToJSON()
 
 MSTR FabricTranslationFPInterface::GetExecCode(const MSTR& execPath) {
 	MAXSPLICE_CATCH_BEGIN
-		return ToMstr(GetExec(ToQStr(execPath)).getCode());
+		return ToMstr(GetExec(execPath).getCode());
 	MAXSPLICE_CATCH_RETURN(_M("Exception getting code"));
 }
 //////////////////////////////////////////////////////////////////////////

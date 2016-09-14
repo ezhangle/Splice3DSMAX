@@ -29,8 +29,6 @@ public:
 	//  We require an owner pointer in order to execute onSelectCanvasNodeInDCC
 	void SetCallbackItem( ReferenceTarget* owner ) { m_pOwner = owner; }
 
-	bool eventFilter( QObject *obj, QEvent *event );
-
 	void keyPressEvent( QKeyEvent * event );
 
 public slots:

@@ -764,6 +764,9 @@ bool FabricTranslationFPInterface::RestoreFromJSON(const char* json, bool create
 {
 	MAXSPLICE_CATCH_BEGIN
 
+	// First, remove all current parameters
+	CastToRefTarg()->DeleteReference(0);
+
 	// The KL Editor has pointers to the current graph
 
 	FabricCore::DFGBinding binding = GetHost().createBindingFromJSON(json);
@@ -792,6 +795,7 @@ bool FabricTranslationFPInterface::RestoreFromJSON(const char* json, bool create
 				SyncMetaDataFromPortToParam(portName);
 		}
 	}
+	CloseDFGGraphEditor();
 	InvalidateAll();
 	return true;
 

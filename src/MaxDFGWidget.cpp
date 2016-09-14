@@ -21,7 +21,7 @@ MaxDFGWidget::MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding, Fa
 	QObject::connect(this, SIGNAL(portEditDialogInvoked(FabricUI::DFG::DFGBaseDialog*)),
 		this, SLOT(onPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog*)));
 
-	qApp->installEventFilter( this );
+	//qApp->installEventFilter( this );
 }
 
 MaxDFGWidget::~MaxDFGWidget()
@@ -67,14 +67,14 @@ void MaxDFGWidget::onExportGraphInDCC()
 
 void MaxDFGWidget::onUndo()
 {
-	//if (theHold.Holding())
-	//	theHold.Accept(_M("Fabric Structure Changed"));
+	// Undo triggered in the Fabric Window menu
+	PostMessage( GetCOREInterface()->GetMAXHWnd(), WM_COMMAND, 50034, 0 );
 }
 
 void MaxDFGWidget::onRedo()
 {
-	//if (theHold.Holding())
-	//	theHold.Accept(_M("Fabric Structure Changed"));
+	// Redo triggered in the Fabric Window menu
+	PostMessage( GetCOREInterface()->GetMAXHWnd(), WM_COMMAND, 50035, 0 );
 }
 
 
@@ -320,69 +320,96 @@ bool MaxDFGWidget::eventFilter( QObject *obj, QEvent *event )
 		//	break;
 		//}
 
-		//case QEvent::KeyPress:
-		//{
-		//	QKeyEvent* qKeyEvent = static_cast<QKeyEvent*>(event);
-		//	if (!kbd_pressed && qKeyEvent->matches( QKeySequence::Undo ))
-		//		//if (qKeyEvent->modifiers() & Qt::CTRL && qKeyEvent->key() == Qt::Key_Z)
-		//	{
-		//		kbd_pressed = true; // We are receiving way too many auto-repeats!
-		//		// Send the undo to Max
-		//		//if (theHold.GetBeginDepth() == 0)
-		//		//	theHold.
-		//		PostMessage( GetCOREInterface()->GetMAXHWnd(), WM_COMMAND, 50034, 0 );
-		//		return false;
-		//	}
-		//}
-		//case QEvent::KeyRelease:
-		//{
-		//	kbd_pressed = false;
-		//	break;
-		//}
-
-		case QEvent::FocusIn:
+		case QEvent::KeyPress:
 		{
-			//const char* name = obj->metaObject()->className();
-			//logMessage( CStr(name) + " focused\n");
-			if (IsTextEntry(obj))
+			QKeyEvent* qKeyEvent = static_cast<QKeyEvent*>(event);
+			if (!kbd_pressed && qKeyEvent->matches( QKeySequence::Undo ))
+				//if (qKeyEvent->modifiers() & Qt::CTRL && qKeyEvent->key() == Qt::Key_Z)
 			{
-				// 
-				DisableAccelerators();
+				kbd_pressed = true; // We are receiving way too many auto-repeats!
+				// Send the undo to Max
+				//PostMessage( GetCOREInterface()->GetMAXHWnd(), WM_COMMAND, 50034, 0 );
+				logMessage( "KeyPressed\n" );
+				return false;
 			}
+
+			if (qKeyEvent->matches( QKeySequence::SelectAll ))
+			{
+				return false;
+			}
+		}
+		case QEvent::KeyRelease:
+		{
+			QKeyEvent* qKeyEvent = static_cast<QKeyEvent*>(event);
+			QString msg = "Released: ";
+			msg += qKeyEvent->text();
+			msg += "\n";
+			logMessage( ToCStr(ToMstr(msg)) );
+			kbd_pressed = false;
 			break;
 		}
-		case QEvent::FocusOut:
-		{
-			//The unfocus logic is not identical to the focus
-			// to account for a strange notification issue
-			// when working with DFGRegisteredTypeLineEdit.
-			// The issue stems from the drop-down list displayed
-			// as the user types in the box.  Technically, the
-			// line-edit loses focus when this new UI is displayed,
-			// which triggers our enableaccelerators call, however,
-			// the user is still actually typing in the edit box
-			// We can't catch the Focus on the new element (not sure
-			// why)
-			// However, experiments have shown that every element that we
-			// focus off on also includes a FocusOut for a style sheet-
-			// except this drop-down list focus.  So, if we enable on every
-			// focus out, then we call the fn way too many times, but
-			// will actually not trigger for this one edge case
-			const char* name = obj->metaObject()->className();
-			if (strcmp( name, "QStyleSheetStyle" ) == 0)
-			{
-				EnableAccelerators();
-			}
-			else if (strcmp( name, "FabricUI::DFG::DFGRegisteredTypeLineEdit" ) == 0)
-			{
-				/* Do nothing */
-			}
-			else if (IsTextEntry( obj ))
-			{
-				EnableAccelerators();
-			}
-			//logMessage( CStr( name ) + " unfocused\n" );
-		}
+
+		//case QEvent::FocusIn:
+		//{
+		//	//const char* name = obj->metaObject()->className();
+		//	//logMessage( CStr(name) + " focused\n");
+		//	if (IsTextEntry(obj))
+		//	{
+		//		// 
+		//		DisableAccelerators();
+		//	}
+		//	break;
+		//}
+		//case QEvent::FocusOut:
+		//{
+		//	//The unfocus logic is not identical to the focus
+		//	// to account for a strange notification issue
+		//	// when working with DFGRegisteredTypeLineEdit.
+		//	// The issue stems from the drop-down list displayed
+		//	// as the user types in the box.  Technically, the
+		//	// line-edit loses focus when this new UI is displayed,
+		//	// which triggers our enableaccelerators call, however,
+		//	// the user is still actually typing in the edit box
+		//	// We can't catch the Focus on the new element (not sure
+		//	// why)
+		//	// However, experiments have shown that every element that we
+		//	// focus off on also includes a FocusOut for a style sheet-
+		//	// except this drop-down list focus.  So, if we enable on every
+		//	// focus out, then we call the fn way too many times, but
+		//	// will actually not trigger for this one edge case
+		//	const char* name = obj->metaObject()->className();
+		//	if (strcmp( name, "QStyleSheetStyle" ) == 0)
+		//	{
+		//		EnableAccelerators();
+		//	}
+		//	else if (strcmp( name, "FabricUI::DFG::DFGRegisteredTypeLineEdit" ) == 0)
+		//	{
+		//		/* Do nothing */
+		//	}
+		//	else if (IsTextEntry( obj ))
+		//	{
+		//		EnableAccelerators();
+		//	}
+		//	//logMessage( CStr( name ) + " unfocused\n" );
+		//}
 	}
 	return QWidget::eventFilter(obj, event);
+}
+
+void MaxDFGWidget::keyPressEvent( QKeyEvent * event )
+{
+	if (event->matches( QKeySequence::Undo ))
+	{
+		onUndo();
+		event->accept();
+	}
+	else if (event->matches( QKeySequence::Redo ))
+	{
+		onRedo();
+		event->accept();
+	}
+	else
+	{
+		return __super::keyPressEvent( event );
+	}
 }

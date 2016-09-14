@@ -31,6 +31,8 @@ public:
 
 	bool eventFilter( QObject *obj, QEvent *event );
 
+	void keyPressEvent( QKeyEvent * event );
+
 public slots:
 	virtual void onUndo() override;
 	virtual void onRedo() override;

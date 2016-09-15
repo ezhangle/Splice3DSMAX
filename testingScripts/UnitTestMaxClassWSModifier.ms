@@ -65,8 +65,8 @@ fn TestMaxClassWSModifier =
 	  Mat44 targToSource = srcToTarget.inverse();
 	  
 	  target.prepareForSpatialQueries( source.pointCount(), options );
-	  //ParallelShrinkWrap<<<source.pointCount()>>>( source, target, offset, srcToTarget, targToSource );
-    ParallelShrinkWrapST( source, target, offset, srcToTarget, targToSource );
+	  ParallelShrinkWrap<<<source.pointCount()>>>( source, target, offset, srcToTarget, targToSource );
+     //ParallelShrinkWrapST( source, target, offset, srcToTarget, targToSource );
 	}
 	"    execPath:"shrinkWrap"
 

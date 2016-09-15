@@ -500,7 +500,11 @@ void FabricTranslationLayer<TBaseClass, TResultType>::RefAdded(	RefMakerHandle 	
 template<typename TBaseClass, typename TResultType>
 ReferenceTarget *FabricTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir &remap)
 {
+
   FabricTranslationLayer *pMyClone = reinterpret_cast<FabricTranslationLayer*>(GetClassDesc()->Create(TRUE));
+
+  // Clone the fabric graph
+  pMyClone->RestoreFromJSON( m_binding.exportJSON().getCStr(), false );
 
   // If we are cloning - lets clone the parameter block
   if (m_pblock != NULL)
@@ -513,9 +517,6 @@ ReferenceTarget *FabricTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir
 	pMyClone->ReplaceReference( 0, ::CreateParamBlock( pDesc, m_pblock, pMyClone ) );
   }
   BaseClone( this, pMyClone, remap );
-
-  // Clone the fabric graph
-  pMyClone->RestoreFromJSON( m_binding.exportJSON().getCStr(), false );
 
   // Set out-value connection
   pMyClone->m_outArgName = m_outArgName;

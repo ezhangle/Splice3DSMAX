@@ -1,5 +1,5 @@
-
-include "WireParameters.ms"
+-- force WireParameters execution so a .mcr is created
+filein ( "WireParameters.ms")
 
 -- macro script to toggle Fabric rendering
 macroScript FabricRendering 

@@ -60,6 +60,24 @@ MSTR ToMSTR(unsigned int v) {
 	return s;
 }
 
+MSTR ToMSTR( FabricCore::DFGPortType portType )
+{
+	MSTR portTypeEnum = _M( "#" );
+	switch (portType)
+	{
+		case FabricCore::DFGPortType_Out:
+			portTypeEnum.Append( s_PortTypeEnumOUT );
+			break;
+		case FabricCore::DFGPortType_In:
+			portTypeEnum.Append( s_PortTypeEnumIN );
+			break;
+		case FabricCore::DFGPortType_IO:
+			portTypeEnum.Append( s_PortTypeEnumIO );
+			break;
+	}
+	return portTypeEnum;
+}
+
 MSTR ToMSTR(const QStringList& v) {
 	MSTR r;
 	MSTR contents;
@@ -116,6 +134,10 @@ MSTR ToMSTR(const nothing& v) {
 template<typename T1, typename T2, typename T3, typename T4>
 void doEmit(const MCHAR* fn, const T1& t1, const T2& t2, const T3& t3, const T4& t4, QString& execPath)
 {
+	// No need to do anything if the user won't see it
+	if (!macroRecorder->Enabled())
+		return;
+
 	MSTR cmd;
 	cmd.printf(_M("$.%s %s %s %s %s execPath:%s"), fn, TO_MCHAR(t1), TO_MCHAR(t2), TO_MCHAR(t3), TO_MCHAR(t4), TO_MCHAR(execPath));
 	macroRecorder->ScriptString(cmd.data());
@@ -197,31 +219,22 @@ QString MaxDFGCmdHandler::dfgDoAddSet(FabricCore::DFGBinding const &binding, QSt
 
 QString MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString desiredPortName, FabricCore::DFGPortType portType, QString typeSpec, QString portToConnect, QString extDep, QString metaData)
 {
-	MSTR cmd;
-	MSTR portTypeEnum = _M( "#" );
-	switch (portType)
+	if (macroRecorder->Enabled())
 	{
-		case FabricCore::DFGPortType_Out:
-			portTypeEnum.Append(s_PortTypeEnumOUT);
-			break;
-		case FabricCore::DFGPortType_In:
-			portTypeEnum.Append(s_PortTypeEnumIN);
-			break;
-		case FabricCore::DFGPortType_IO:
-			portTypeEnum.Append(s_PortTypeEnumIO);
-			break;
+		MSTR cmd;
+		MSTR portTypeEnum = ToMSTR( portType );
+		cmd.printf( _M( "$.%s %s %s %s portToConnect:%s extDep:%s metaData:%s execPath:%s" ),
+					_M( "DFGAddPort" ),
+					desiredPortName.data(),
+					portTypeEnum.data(),
+					typeSpec.data(),
+					portToConnect.data(),
+					extDep.data(),
+					metaData.data(),
+					execPath.data() );
+		macroRecorder->ScriptString( cmd.data() );
+		macroRecorder->EmitScript();
 	}
-	cmd.printf(_M("$.%s %s %s %s portToConnect:%s extDep:%s metaData:%s execPath:%s"),
-		_M("DFGAddPort"),
-		desiredPortName.data(),
-		portTypeEnum.data(),
-		typeSpec.data(),
-		portToConnect.data(),
-		extDep.data(),
-		metaData.data(),
-		execPath.data());
-	macroRecorder->ScriptString(cmd.data());
-	macroRecorder->EmitScript();
 
 	DFGHoldActions hold(_M("DFG Add Port"));
 
@@ -242,18 +255,22 @@ QString MaxDFGCmdHandler::dfgDoAddPort(FabricCore::DFGBinding const &binding, QS
 
 QString MaxDFGCmdHandler::dfgDoEditPort(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString oldPortName, QString desiredNewPortName, FabricCore::DFGPortType portMode, QString typeSpec, QString extDep, QString uiMetadata)
 {
-	MSTR cmd;
-	cmd.printf(_M("$.%s %s desiredNewPortName:%s portType:%i typeSpec:%s extDep:%s metadata:%s execPath:%s"),
-		_M("DFGEditPort"),
-		oldPortName.data(),
-		desiredNewPortName.data(),
-		portMode,
-		typeSpec.data(),
-		extDep.data(),
-		uiMetadata.data(),
-		execPath.data());
-	macroRecorder->ScriptString(cmd.data());
-	macroRecorder->EmitScript();
+	if (macroRecorder->Enabled())
+	{
+		MSTR cmd;
+		MSTR portModeStr = ToMSTR( portMode );
+		cmd.printf( _M( "$.%s %s desiredNewPortName:%s portType:%s typeSpec:%s extDep:%s metadata:%s execPath:%s" ),
+					_M( "DFGEditPort" ),
+					oldPortName.data(),
+					desiredNewPortName.data(),
+					portModeStr.data(),
+					typeSpec.data(),
+					extDep.data(),
+					uiMetadata.data(),
+					execPath.data() );
+		macroRecorder->ScriptString( cmd.data() );
+		macroRecorder->EmitScript();
+	}
 
 	FabricCore::DFGPortType oldPortMode = const_cast<FabricCore::DFGExec&>(exec).getExecPortType( oldPortName.toStdString().c_str() );
 
@@ -280,7 +297,7 @@ void MaxDFGCmdHandler::dfgDoRemovePort(FabricCore::DFGBinding const &binding, QS
 		int pid = GetPortParamID(exec, portName.toStdString().c_str());
 		if (pid >= 0)
 		{
-			m_pTranslationLayer->SetMaxTypeForArg(MSTR::FromACP(portName.toStdString().c_str()), -1);
+			m_pTranslationLayer->SetMaxTypeForArg(ToMstr(portName), -1);
 		}
 	}
 
@@ -410,4 +427,129 @@ void MaxDFGCmdHandler::dfgDoSplitFromPreset(FabricCore::DFGBinding const &bindin
 	doEmit(_M("DFGSplitFromPreset"), nothing(), nothing(), nothing(), nothing(), execPath);
 	DFGHoldActions hold(_M("DFG Split From Preset"));
 	return __super::dfgDoSplitFromPreset(binding, execPath, exec);
+}
+
+QString MaxDFGCmdHandler::dfgDoCreatePreset( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString nodeName, QString presetDirPath, QString presetName )
+{
+	EMIT3( _M( "DFGDoCreatePreset" ), nodeName, presetDirPath, presetName, execPath );
+	DFGHoldActions hold( _M( "DFG Do Create Preset" ) );
+	return __super::dfgDoCreatePreset( binding, execPath, exec, nodeName, presetDirPath, presetName );
+}
+
+QString MaxDFGCmdHandler::dfgDoEditNode( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString oldNodeName, QString desiredNewNodeName, QString nodeMetadata, QString execMetadata )
+{
+	//EMIT4( _M( "DFGDoEditNode" ), oldNodeName, desiredNewNodeName, nodeMetadata, execMetadata, execPath );
+
+	if (macroRecorder->Enabled())
+	{
+		MSTR cmd;
+		cmd.printf( _M( "$.DFGDoEditNode \"%s\" desiredNewNodeName:\"%s\" nodeMetadata:\"%s\" execMetadata:\"%s\" execPath:\"%s\"" ),
+					oldNodeName.data(),
+					desiredNewNodeName.data(),
+					nodeMetadata.data(),
+					execMetadata.data(),
+					execPath.data() );
+		macroRecorder->ScriptString( cmd.data() );
+		macroRecorder->EmitScript();
+	}
+
+
+	DFGHoldActions hold( _M( "DFG Do Edit Node" ) );
+	return __super::dfgDoEditNode( binding, execPath, exec, oldNodeName, desiredNewNodeName, nodeMetadata, execMetadata );
+}
+
+void MaxDFGCmdHandler::dfgDoDismissLoadDiags( FabricCore::DFGBinding const &binding, QList<int> diagIndices )
+{
+	
+	if (macroRecorder->Enabled())
+	{
+		MSTR listAsString = ToMSTR( diagIndices );
+		MSTR cmd;
+		cmd.printf( _M( "$.DFGDoDismissLoadDiags %s" ), listAsString.data());
+		macroRecorder->ScriptString( cmd.data() );
+		macroRecorder->EmitScript();
+	}
+	DFGHoldActions hold( _M( "DFG Dismiss Load Dialogs" ) );
+	return __super::dfgDoDismissLoadDiags( binding, diagIndices );
+}
+
+
+QString MaxDFGCmdHandler::dfgDoAddInstPort( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString instName, QString desiredPortName, FabricCore::DFGPortType portType, QString typeSpec, QString pathToConnect, FabricCore::DFGPortType connectType, QString extDep, QString metaData )
+{
+	if (macroRecorder->Enabled())
+	{
+		MSTR cmd;
+		MSTR portTypeStr = ToMSTR( portType );
+		MSTR connectTypeStr = ToMSTR( connectType );
+
+		cmd.printf( _M( "$.DFGDoAddInstPort \"%s\" \"%s\" %s typeSpec:\"%s\" pathToConnect:\"%s\" connectType:%s extDep:\"%s\" metaData:\"%s\" execPath:\"%s\"" ),
+					instName.data(),
+					desiredPortName.data(),
+					portTypeStr.data(),
+					typeSpec.data(),
+					pathToConnect.data(),
+					connectTypeStr.data(),
+					extDep.data(),
+					metaData.data(),
+					execPath.data() );
+		macroRecorder->ScriptString( cmd.data() );
+		macroRecorder->EmitScript();
+	}
+
+	DFGHoldActions hold( _M( "DFG Do Add Inst Port" ) );
+	return __super::dfgDoAddInstPort( binding, execPath, exec, instName, desiredPortName, portType, typeSpec, pathToConnect, connectType, extDep, metaData );
+}
+
+QString MaxDFGCmdHandler::dfgDoAddInstBlockPort( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString instName, QString blockName, QString desiredPortName, QString typeSpec, QString pathToConnect, QString extDep, QString metaData )
+{
+	if (macroRecorder->Enabled())
+	{
+		MSTR cmd;
+
+
+		cmd.printf( _M( "$.DFGDoAddInstBlockPort \"%s\" \"%s\" \"%s\" typeSpec:\"%s\" pathToConnect:\"%s\" extDep:\"%s\" metaData:\"%s\" execPath:\"%s\"" ),
+					instName.data(),
+					blockName.data(),
+					desiredPortName.data(),
+					typeSpec.data(),
+					pathToConnect.data(),
+					extDep.data(),
+					metaData.data(),
+					execPath.data());
+		macroRecorder->ScriptString( cmd.data() );
+		macroRecorder->EmitScript();
+	}
+	DFGHoldActions hold( _M( "DFG Add Inst Block Port" ) );
+	return __super::dfgDoAddInstBlockPort( binding, execPath, exec, instName, blockName, desiredPortName, typeSpec, pathToConnect, extDep, metaData );
+}
+
+QString MaxDFGCmdHandler::dfgDoAddBlock( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString desiredName, QPointF pos )
+{
+	EMIT2( _M("DFGDoAddBlock"), desiredName, pos, execPath );
+	DFGHoldActions hold( _M( "DFG Add Block" ) );
+	return __super::dfgDoAddBlock( binding, execPath, exec, desiredName, pos );
+}
+
+QString MaxDFGCmdHandler::dfgDoAddBlockPort( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString blockName, QString desiredPortName, FabricCore::DFGPortType portType, QString typeSpec, QString pathToConnect, FabricCore::DFGPortType connectType, QString extDep, QString metaData )
+{
+	if (macroRecorder->Enabled())
+	{
+		MSTR cmd;
+		MSTR portTypeStr = ToMSTR( portType );
+		MSTR connectTypeStr = ToMSTR( connectType );
+		cmd.printf( _M( "$.DFGDoAddBlockPort \"%s\" \"%s\" %s typeSpec:\"%s\" pathToConnect:\"%s\" connectType:%s extDep:\"%s\" metaData:\"%s\" execPath:\"%s\"" ),
+					blockName.data(),
+					desiredPortName.data(),
+					portTypeStr.data(),
+					typeSpec.data(),
+					pathToConnect.data(),
+					connectTypeStr.data(),
+					extDep.data(),
+					metaData.data(),
+					execPath.data() );
+		macroRecorder->ScriptString( cmd.data() );
+		macroRecorder->EmitScript();
+	}
+	DFGHoldActions hold( _M( "DFG Add Block Port" ) );
+	return __super::dfgDoAddBlockPort( binding, execPath, exec, blockName, desiredPortName, portType, typeSpec, pathToConnect, connectType, extDep, metaData );
 }

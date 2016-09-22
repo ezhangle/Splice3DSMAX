@@ -1,5 +1,5 @@
 
-
+include "WireParameters.ms"
 
 -- macro script to toggle Fabric rendering
 macroScript FabricRendering 
@@ -44,25 +44,27 @@ autoUndoEnabled:false
 (
   shellLaunch "http://docs.fabric-engine.com/FabricEngine/latest/HTML/" ""
 )
-__FE_MENU_NAME = "Fabric"
 
-fn findFabricEngineMenuItem = (
-  local mainMenuBar = menuMan.getMainMenuBar()
+__FE_MENU_NAME = "Fabric"
+__FE_QUAD_MENU_TITLE = "Wire Fabric Ports"
+
+fn findFabricEngineMenuItem menu itemName = (
   res = false
-  for i = 1 to mainMenuBar.numItems() do (
-    item = mainMenuBar.getItem i
-    if (item.getTitle() == __FE_MENU_NAME) do ( res = item )
+  for i = 1 to menu.numItems() do (
+    item = menu.getItem i
+    if (item.getTitle() == itemName) do ( res = item )
   )
   res
 )
 
 -- Add Fabric commadns to the menu bar if they don't already exist
 fn RegisterFabricEngineMenu = (
+  -- Get the main menu bar
+  local mainMenuBar = menuMan.getMainMenuBar()
   -- This example adds a new sub-menu to MAX's main menu bar. -- It adds the menu just before the "Help" menu.
-  if findFabricEngineMenuItem() == false do
+  if findFabricEngineMenuItem mainMenuBar __FE_MENU_NAME == false do
   (
-    -- Get the main menu bar
-    local mainMenuBar = menuMan.getMainMenuBar()
+    
     -- Create a new menu
     local FabricMenu = menuMan.createMenu __FE_MENU_NAME
 
@@ -92,21 +94,44 @@ fn RegisterFabricEngineMenu = (
     -- redraw the menu bar with the new item
     menuMan.updateMenuBar()
   )
+  
+  -- Add "Connect Fabric Ports" macroscript to QuadMenu
+  local quadMenu = menuMan.getViewportRightClickMenu #nonePressed
+  local qmBottomRight = quadMenu.getMenu 1
+  local fabricQuadMenuItem = findFabricEngineMenuItem qmBottomRight __FE_QUAD_MENU_TITLE
+  if (fabricQuadMenuItem == false) do (
+	-- Create a separator and MacroScript item for calling "Wire Fabric Parameters"
+	sepItem = menuMan.createSeparatorItem()
+	-- create a menu items that calls the sample macroScript
+	wireQMItem = menuMan.createActionItem "WireFabricParameters" "FabricTools"
+	-- Add to end of menu  
+	qmBottomRight.addItem sepItem -1
+	qmBottomRight.addItem wireQMItem -1
+  )
 )
 
 fn DeRegisterFabricEngineMenu = (
-  local FabricMenuItem = findFabricEngineMenuItem()
+  local mainMenuBar = menuMan.getMainMenuBar()
+  local FabricMenuItem = findFabricEngineMenuItem mainMenuBar __FE_MENU_NAME
   if (FabricMenuItem != false) do (
     -- Get the main menu bar
-    local mainMenuBar = menuMan.getMainMenuBar()
     -- Remove menu item
     mainMenuBar.removeItem FabricMenuItem
     -- Create a new menu
     local FabricMenu = menuMan.findMenu __FE_MENU_NAME
     -- Remove this menu
     if (FabricMenu != undefined) do ( menuMan.unRegisterMenu FabricMenu )
-    menuMan.updateMenuBar()
   )
+  
+	-- Remove from quadmenu
+  local quadMenu = menuMan.getViewportRightClickMenu #nonePressed
+  local qmBottomRight = quadMenu.getMenu 1
+  local fabricQuadMenuItem = findFabricEngineMenuItem qmBottomRight __FE_QUAD_MENU_TITLE
+  if (fabricQuadMenuItem != false) do (
+	qmBottomRight.removeItem fabricQuadMenuItem 
+  ) 
+  menuMan.updateMenuBar()
+
   -- Force the release of any remaining Fabric happenings
   Fabric.DestroyClient force:true
 )

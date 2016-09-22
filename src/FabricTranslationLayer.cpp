@@ -266,7 +266,7 @@ ParamID AddMaxParameter( ParamBlockDesc2* pDesc, int type, const MCHAR* sName, P
 
 ParamID AddMaxParameter(ParamBlockDesc2* pDesc, int type, const char* cName )
 {
-	MSTR sName = MSTR::FromACP(cName);
+	MSTR sName = ToMstr(cName);
 	return AddMaxParameter(pDesc, type, sName.data());
 }
 
@@ -603,12 +603,6 @@ DynamicDialog::CDynamicDialogTemplate* GeneratePBlockUI(IParamBlock2* pblock)
 	return dialogTemplate;
 }
 
-// Add a parameter to the splice graph
-std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
-{
-	return AddFabricParameter(pOwner, type, CStr::FromMCHAR(pName).data(), mode, inExtension, metadata);
-}
-
 //////////////////////////////////////////////////////////////////////////
 // Helper functions for accessing options
 int GetPortParamID(const FabricCore::DFGExec& exec, const char* argName)
@@ -683,7 +677,7 @@ void SetPortPostConnectionUI(FabricTranslationFPInterface* pOwner, const char* a
 //	return aPort->getName();
 //}
 //
-const char* GetPortType( const FabricCore::DFGExec& exec, const char* argName )
+const char* GetPortSpec( const FabricCore::DFGExec& exec, const char* argName )
 {
 	return const_cast<FabricCore::DFGExec&>(exec).getExecPortResolvedType(argName);
 }
@@ -708,7 +702,7 @@ int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName)
 		return maxType;
 
 
-	const char* portType = GetPortType(exec, argName);
+	const char* portType = GetPortSpec(exec, argName);
 	if (maxType > 0)
 	{
 		// If our type is not legal for our current port type,
@@ -760,7 +754,7 @@ int is_array(const std::string& value)
 
 bool IsPortArray(const FabricCore::DFGExec& exec, const char* argName)
 {
-	return is_array(GetPortType(exec, argName));
+	return is_array(GetPortSpec(exec, argName));
 }
 
 bool AreTypesCompatible(int type1, int type2) {
@@ -952,6 +946,61 @@ int FabricTypeToMaxType(const char* cType)
 	return res;
 }
 
+const char* MaxTypeToFabricType( int paramType )
+{
+	switch ((int)paramType)
+	{
+		case TYPE_INT:
+			return "SInt32";
+		case TYPE_INDEX:
+			return "UInt32";
+			break;
+		case TYPE_FLOAT:
+		case TYPE_TIMEVALUE:
+		case TYPE_ANGLE:
+		case TYPE_WORLD:
+		case TYPE_PCNT_FRAC:
+			return "Scalar";
+			break;
+		case TYPE_FRGBA:
+		case TYPE_RGBA:
+			return "Color";
+			break;
+		case TYPE_POINT2:
+			return "Vec2";
+			break;
+		case TYPE_POINT3:
+			return "Vec3";
+			break;
+		case TYPE_POINT4:
+			return "Vec4";
+			break;
+		case TYPE_BOOL:
+			return "Boolean";
+			break;
+		case TYPE_MATRIX3:
+			return "Mat44";
+			break;
+		case TYPE_QUAT:
+			return "Quat";
+			break;
+		case TYPE_STRING:
+		case TYPE_FILENAME:
+			return "String";
+			break;
+		case TYPE_MESH:
+			return "PolygonMesh";
+			break;
+		case TYPE_INODE:
+		case TYPE_MTL:
+		case TYPE_TEXMAP:
+
+		default:
+			DbgAssert( false ); // What do we have here?
+			return "";
+	}
+
+}
 // This function is simply here to override the default PB2 type for PolygonMesh.
 // The correct type for PolyMesh is TYPE_MESH, but unfortunately the PB2
 // doesn't support that data, so we need it to create an INODE parameter instead.
@@ -963,78 +1012,6 @@ int FabricTypeToDefaultMaxType(const char* cType)
 	if (strcmp(cType, "PolygonMesh") == 0)
 		return TYPE_INODE;
 	return FabricTypeToMaxType(cType);
-}
-
-std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
-{
-	try
-	{
-		std::string res = pOwner->GetCommandHandler()->dfgDoAddPort(pOwner->GetBinding(), "", pOwner->GetBinding().getExec(), cName, mode, type, "", inExtension, metadata).toStdString();
-		return cName; // r3d shouldn't return res?
-	}
-	catch(FabricCore::Exception e) 
-	{
-		CStr message = "ERROR on AddPort to Fabric: ";
-		logMessage(message + e.getDesc_cstr());
-		return nullptr;
-	}
-}
-
-std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, int type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension, const char* metadata)
-{
-	std::string strType;
-	switch ((int)type)
-	{
-	case TYPE_INT:		
-	case TYPE_INDEX:
-		strType = "Integer";
-		break;
-	case TYPE_FLOAT:
-	case TYPE_TIMEVALUE:
-	case TYPE_ANGLE:
-	case TYPE_WORLD:
-	case TYPE_PCNT_FRAC:
-		strType = "Scalar";
-		break;
-	case TYPE_FRGBA:
-	case TYPE_RGBA:
-		strType = "Color";
-		break;
-	case TYPE_POINT2:
-		strType = "Vec2";
-		break;
-	case TYPE_POINT3:
-		strType = "Vec3";
-		break;
-	case TYPE_POINT4:
-		strType = "Vec4";
-		break;
-	case TYPE_BOOL:
-		strType = "Boolean";
-		break;
-	case TYPE_MATRIX3:
-		strType = "Mat44";
-		break;
-	case TYPE_QUAT:
-		strType = "Quat";
-		break;
-	case TYPE_STRING:
-	case TYPE_FILENAME:
-		strType = "String";
-		break;
-	case TYPE_MESH:
-		strType = "PolygonMesh";
-		break;
-	case TYPE_INODE:
-	case TYPE_MTL:
-	case TYPE_TEXMAP:
-
-	default:
-		DbgAssert(false); // What do we have here?
-		return std::string();
-	}
-
-	return AddFabricParameter(pOwner, strType.data(), cName, mode, inExtension, metadata);
 }
 
 #pragma endregion
@@ -1064,7 +1041,7 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			// A few static vars are shared between save and load
 			static int filterIndex = 0;
-			static MSTR initialDir = MSTR::FromACP(std::getenv("FABRIC_DIR"));
+			static MSTR initialDir = ToMstr(std::getenv("FABRIC_DIR"));
 
 			// If we are the KL editor button, pop that editor
 			if (wParam == IDC_BTN_EDIT_KL)

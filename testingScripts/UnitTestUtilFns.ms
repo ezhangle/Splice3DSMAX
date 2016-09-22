@@ -4,7 +4,7 @@ fn FAssert b msg = (
 	assert (b) message:msg options:#(#dialog)
 	if not b do (
 		if fabric_do_break then break()
-		throw ("Error running script: " + msg)
+		else throw ("Error running script: " + msg)
 	)
 	true
 )

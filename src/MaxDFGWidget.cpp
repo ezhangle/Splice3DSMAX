@@ -2,9 +2,12 @@
 
 #include "MaxDFGWidget.h"
 #include "plugin.h"
+#include <iInstanceMgr.h>
+
 
 MaxDFGWidget::MaxDFGWidget(QWidget * parent, FabricCore::DFGBinding& binding, FabricUI::DFG::DFGUICmdHandler* cmdHandler)
 	: m_binding(binding)
+	, m_pOwner(NULL)
 	, DFG::DFGCombinedWidget(parent)
 {
 	FabricCore::Client client = GetClient();
@@ -23,31 +26,79 @@ MaxDFGWidget::~MaxDFGWidget()
 {
 }
 
+//
+// Find all INodes that reference this class in any way
+class GatherINodes : public DependentEnumProc {
+public:
+	INodeTab m_gatheredNodes;
+
+	virtual int proc( ReferenceMaker *rm ) override
+	{
+		INode* pNode = dynamic_cast<INode*>(rm);
+		if (pNode != nullptr)
+		{
+			m_gatheredNodes.AppendNode( pNode );
+			return REF_ENUM_SKIP;
+		}
+		return REF_ENUM_CONTINUE;
+	}
+
+};
 void MaxDFGWidget::onSelectCanvasNodeInDCC()
 {
-	throw std::logic_error( "The method or operation is not implemented." );
+	HoldActions hold( _M("Select") );
+	if (m_pOwner != nullptr)
+	{
+		GatherINodes gatherer;
+		m_pOwner->DoEnumDependents( &gatherer );
+		GetCOREInterface()->SelectNodeTab( gatherer.m_gatheredNodes, TRUE, TRUE );
+	}
 }
 
 void MaxDFGWidget::onImportGraphInDCC()
 {
-	throw std::logic_error( "The method or operation is not implemented." );
+	HoldActions hold( _M("Load Graph") );
+
+	static MSTR dir;
+	MSTR filename;
+	FilterList filter;
+	filter.Append( _M( "Canvas(*.canvas)" ) );
+	filter.Append( _M( "*.canvas" ) );
+	filter.Append( _M( "All(*.*)" ) );
+	filter.Append( _M( "*.*" ) );
+	Interface8* imax = GetCOREInterface8();
+	if (imax->DoMaxOpenDialog( NULL, _M("Select Canvas file..."), filename, dir, filter )) {
+		// do something with filename
+		GetFabricInterface( m_pOwner )->LoadFromFile( filename, true );
+	}
 }
 
 void MaxDFGWidget::onExportGraphInDCC()
 {
-	throw std::logic_error( "The method or operation is not implemented." );
+	static MSTR dir;
+	MSTR filename;
+	FilterList filter;
+	filter.Append( _M( "Canvas(*.canvas)" ) );
+	filter.Append( _M( "*.canvas" ) );
+	filter.Append( _M( "All(*.*)" ) );
+	filter.Append( _M( "*.*" ) );
+	Interface8* imax = GetCOREInterface8();
+	if (imax->DoMaxSaveAsDialog( NULL, _M( "Select Canvas file..." ), filename, dir, filter )) {
+		// do something with filename
+		GetFabricInterface( m_pOwner )->SaveToFile( filename );
+	}
 }
 
 void MaxDFGWidget::onUndo()
 {
-	//if (theHold.Holding())
-	//	theHold.Accept(_M("Fabric Structure Changed"));
+	// Undo triggered in the Fabric Window menu
+	PostMessage( GetCOREInterface()->GetMAXHWnd(), WM_COMMAND, 50034, 0 );
 }
 
 void MaxDFGWidget::onRedo()
 {
-	//if (theHold.Holding())
-	//	theHold.Accept(_M("Fabric Structure Changed"));
+	// Redo triggered in the Fabric Window menu
+	PostMessage( GetCOREInterface()->GetMAXHWnd(), WM_COMMAND, 50035, 0 );
 }
 
 
@@ -199,7 +250,7 @@ void MaxDFGWidget::onPortEditDialogCreated(DFG::DFGBaseDialog * dialog)
 		// Do not enable 
 		if (GetPortParamID(exec, portName) >= 0)
 		{
-			const char* fabricType = GetPortType(exec, portName);
+			const char* fabricType = GetPortSpec(exec, portName);
 			BitArray br = FabricTypeToMaxTypes(fabricType);
 			if (br.AnyBitSet())
 			{
@@ -254,5 +305,23 @@ void MaxDFGWidget::onPortEditDialogInvoked(FabricUI::DFG::DFGBaseDialog * dialog
 				//FTL::JSONSInt32Enc<> typeS32Enc(paramTypeEnc, maxType);
 			}
 		}
+	}
+}
+
+void MaxDFGWidget::keyPressEvent( QKeyEvent * event )
+{
+	if (event->matches( QKeySequence::Undo ))
+	{
+		onUndo();
+		event->accept();
+	}
+	else if (event->matches( QKeySequence::Redo ))
+	{
+		onRedo();
+		event->accept();
+	}
+	else
+	{
+		return __super::keyPressEvent( event );
 	}
 }

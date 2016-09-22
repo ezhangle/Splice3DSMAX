@@ -40,7 +40,8 @@ fn TestFabricInterface =
 	sm.DFGConnect (epm + ".mesh") (func + ".inVal")  execPath:""
 
 	res = sm.DFGAddPort "aport" #DFGPortIN "UInt32" portToConnect:"" extDep:"" execPath:""
-	FAssert(sm.GetPortType res == "UInt32") "Error creating port type"
+	FAssert(sm.GetPortType res == #DFGPortIN) "Error creating port type"
+	FAssert(sm.GetPortSpec res == "UInt32") "Error creating port Spec"
 	FAssert(sm.GetMaxTypeForArg res == 1) "Created bad Max type"
 	FAssert(sm.GetPortCount() == 3) "Error in port count"
 	res = sm.DFGRenamePort res "aDiffPort"  execPath:""
@@ -117,7 +118,30 @@ fn TestFabricInterface =
 	sm.DFGSetExtDeps ("Geometry")    execPath:""
 
 	sm.DFGReorderPorts "" #(0, 3, 1, 2)    execPath:""
+	
+	-- Test adding/removing blocks
+	graph = sm.DFGAddGraph "graph" [570,80]  execPath:""
+	dfgBlock = sm.DFGDoAddBlock "block" [250.000000,114.000000]   execPath:graph
+	dfgBlockPort = sm.DFGDoAddBlockPort dfgBlock "aBlockPort" #DFGPortIN typeSpec:"Float32" execPath:graph
 
+	inBlockPrt = sm.DFGDoAddInstBlockPort graph dfgBlock "instBlkPrt" typeSpec:"UInt32" 
+	
+	instPort = sm.DFGDoAddInstPort graph "instPort" #DFGPortIn pathToConnect:"func.inVal" connectType:#DFGPortIn
+  
+    metadata = "{
+	  \"uiTooltip\" : \"\",
+	  \"uiDocUrl\" : \"\",
+	  \"uiNodeColor\" : \"{\n  'r' : 143,\n  'g' : 5,\n  'b' : 102\n  }\",
+	  \"uiTextColor\" : \"{\n  'r' : 20,\n  'g' : 20,\n  'b' : 20\n  }\",
+	  \"uiHeaderColor\" : \"\"
+	  }" 
+	graph = sm.DFGDoEditNode graph desiredNewNodeName:"graphics" nodeMetadata:metadata
+	
+	FAssert(sm.GetNodeCount() == 6) "Creating block graph"
+	FAssert(sm.GetPortCount execPath:graph == 2) "Error in block-graph port count"
+	
+	sm.DFGDoCreatePreset graph "User" "graphPreset"  execPath:""
+  
 	tmpFile = systemTools.getEnvVariable("TEMP") + "\\tmpFile.canvas"
 	sm.SaveToFile tmpFile
 	jsonString = sm.ExportToJSON()
@@ -130,15 +154,15 @@ fn TestFabricInterface =
 	--res == jsonString
 	-- From KDIff3  Files are equivalent, but not binary equal (so our test fails)
 
-	FAssert(sm.GetNodeCount() == 5) "InitValue"
+	FAssert(sm.GetNodeCount() == 6) "InitValue"
 	sm.DFGRemoveNodes #(epm, func)    execPath:""
-	FAssert(sm.GetNodeCount() == 3) "First Removed"
+	FAssert(sm.GetNodeCount() == 4) "First Removed"
 	sm.LoadFromFile tmpFile true
-	FAssert(sm.GetNodeCount() == 5) "File Restore"
+	FAssert(sm.GetNodeCount() == 6) "File Restore"
 	sm.DFGRemoveNodes #(epm, func)    execPath:""
-	FAssert(sm.GetNodeCount() == 3) "Second Removed"
+	FAssert(sm.GetNodeCount() == 4) "Second Removed"
 	sm.RestoreFromJSON jsonString true
-	FAssert(sm.GetNodeCount() == 5) "JSON Restore"
+	FAssert(sm.GetNodeCount() == 6) "JSON Restore"
 
 	sm.CloseDFGGraphEditor()
 )

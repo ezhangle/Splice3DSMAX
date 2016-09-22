@@ -264,6 +264,22 @@ virtual void dfgDoRemoveNodes(
     QList<int> diagIndices
     ) override;
 */    
+
+  virtual QString dfgDoEditNode( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString oldNodeName, QString desiredNewNodeName, QString nodeMetadata, QString execMetadata ) override;
+
+  virtual void dfgDoDismissLoadDiags( FabricCore::DFGBinding const &binding, QList<int> diagIndices ) override;
+
+  virtual QString dfgDoCreatePreset( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString nodeName, QString presetDirPath, QString presetName ) override;
+
+
+  virtual QString dfgDoAddInstPort( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString instName, QString desiredPortName, FabricCore::DFGPortType portType, QString typeSpec, QString pathToConnect, FabricCore::DFGPortType connectType, QString extDep, QString metaData ) override;
+
+  virtual QString dfgDoAddInstBlockPort( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString instName, QString blockName, QString desiredPortName, QString typeSpec, QString pathToConnect, QString extDep, QString metaData ) override;
+
+  virtual QString dfgDoAddBlock( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString desiredName, QPointF pos ) override;
+
+  virtual QString dfgDoAddBlockPort( FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString blockName, QString desiredPortName, FabricCore::DFGPortType portType, QString typeSpec, QString pathToConnect, FabricCore::DFGPortType connectType, QString extDep, QString metaData ) override;
+
 };
 
 

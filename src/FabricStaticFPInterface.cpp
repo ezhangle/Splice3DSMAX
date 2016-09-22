@@ -236,7 +236,7 @@ TSTR FabricStaticFPInterface::GetContextID()
 {
 	FabricCore::Client& client = GetClient(false);
 	if (client.isValid())
-		return MSTR::FromACP(client.getContextID());
+		return ToMstr(client.getContextID());
 	return _M("");
 }
 

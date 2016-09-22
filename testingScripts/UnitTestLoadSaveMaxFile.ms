@@ -26,8 +26,13 @@ fn TestLoadSaveMaxFile =
 
 	-- Validate load was successfuly
 	sliderTime = 50f
-	FAssert (($Point002.transform as string) == "(matrix3 [1,-2.38419e-007,-2.5332e-007] [2.45869e-007,0.798292,0.60227] [1.3411e-007,-0.60227,0.798292] [8.39596,-11.0702,13.6661])") "Bad rotation after setting dfg float input"
-	FAssert (($Point003.transform as string) == "(matrix3 [0.739942,0.516122,0.431398] [-0.620885,0.277274,0.733227] [0.258819,-0.810393,0.525619] [1.66667,10,0])") "Bad rotation values"
+	RedrawViews()
+	m1 = $Point002.transform
+	m2 = (matrix3 [1,-2.38419e-007,-2.5332e-007] [2.45869e-007,0.798292,0.60227] [1.3411e-007,-0.60227,0.798292] [8.39596,-11.0702,13.6661])
+	FAssert (matricesAreEquivalent m1 m2) "Bad rotation after setting dfg float input"
+	m1 = $Point003.transform 
+	m2= (matrix3 [0.739942,0.516122,0.431398] [-0.620885,0.277274,0.733227] [0.258819,-0.810393,0.525619] [1.66667,10,0])
+	FAssert (matricesAreEquivalent m1 m2) "Bad rotation values"
 	print(" -- Saved/Loaded Controllers successfully --")
 	--------------------------------------------------------------------------------
 	-- Next, test object
@@ -49,11 +54,15 @@ fn TestLoadSaveMaxFile =
 	resetMaxFile #noPrompt
 	TestMaxClassModifier()
 		
+	$Plane001.modifiers[1].enabled = false
+		
 	res = saveMaxFile tempFile useNewFile:false quiet:true
 	FAssert res "Failed saving file UnitTestMaxClassModifier"
 	res = loadMaxFile tempFile quiet:true
 	FAssert res "Failed loading file UnitTestMaxClassModifier"
 
+	FAssert (not $Plane001.modifiers[1].enabled) "Did not save/load enabled state"
+	$Plane001.modifiers[1].enabled = true
 	FAssert (CompBB $Plane001 207.122) "Bad modified object size"
 
 	print(" -- Saved/Loaded Modifiers successfully --")
@@ -63,11 +72,15 @@ fn TestLoadSaveMaxFile =
 	resetMaxFile #noPrompt
 	TestMaxClassWSModifier()
 
+	$Sphere001.modifiers[1].enabled = false
+	
 	res = saveMaxFile tempFile useNewFile:false quiet:true
 	FAssert res "Failed saving file UnitTestMaxClassObject"
 	res = loadMaxFile tempFile quiet:true
 	FAssert res "Failed loading file UnitTestMaxClassObject"
 
+	FAssert (not $Sphere001.modifiers[1].enabled) "Did not save/load enabled state"
+	$Sphere001.modifiers[1].enabled = true
 	FAssert (CompBB $Sphere001 131.938) "Bad WSModifier loaded size"
 	print(" -- Saved/Loaded WSModifiers successfully --")
 )

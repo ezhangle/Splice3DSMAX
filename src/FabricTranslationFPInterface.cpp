@@ -31,7 +31,9 @@ BOOL FabricTranslationFPInterface::ShowDFGGraphEditor()
 	m_pDFGWidgetWindow = DockableWindow::Create(_T("Fabric Engine - Canvas"), this);
 	HWND h = m_pDFGWidgetWindow->GetHWND();
 	QWinWidget* dlg = new QWinWidget(h);
-	/*MaxDFGWidget* pWidget = */new MaxDFGWidget(dlg, GetBinding(), &m_fabricCmdHandler);
+	MaxDFGWidget* pWidget = new MaxDFGWidget(dlg, GetBinding(), &m_fabricCmdHandler);
+
+	pWidget->SetCallbackItem( CastToRefTarg() );
 
 	m_pDFGWidgetWindow->SetWidget(dlg);
 	return TRUE;
@@ -52,7 +54,7 @@ QPointF Convert(const Point2& v) { return QPointF(v.x, v.y); }
 void Convert(const Tab<MSTR*>& from, QStringList& to) {
 	to.reserve(from.Count());
 	for (int i = 0; i < from.Count(); i++) {
-		to.push_back(TO_CSTR(*from[i]));
+		to.push_back(ToQStr(*from[i]));
 	}
 }
 
@@ -77,7 +79,7 @@ Tab<TSTR*> Convert(const QStringList& from)
 	Tab<TSTR*> to;
 	to.SetCount(from.size());
 	for (int i = 0; i < from.size(); i++) {
-		to[i] = new MSTR(MSTR::FromACP(from[i].toStdString().c_str()));
+		to[i] = new MSTR(ToMstr(from[i]));
 	}
 	return to;
 }
@@ -90,7 +92,7 @@ void FabricTranslationFPInterface::DFGRemoveNodes(const Tab<TSTR*>& nodeNames, c
 	MAXSPLICE_CATCH_BEGIN;
 	QStringList cNodeNames;
 		Convert(nodeNames, cNodeNames);
-		m_fabricCmdHandler.dfgDoRemoveNodes(m_binding, TO_CSTR(execPath), GetExec(execPath), cNodeNames);
+		m_fabricCmdHandler.dfgDoRemoveNodes(m_binding, ToQStr(execPath), GetExec(execPath), cNodeNames);
 	MAXSPLICE_CATCH_END;
 }
 
@@ -98,7 +100,7 @@ void FabricTranslationFPInterface::DFGConnect(const MSTR& srcPath, const MSTR& d
 {
 	MAXSPLICE_CATCH_BEGIN
 	InvalidateAll();
-	return m_fabricCmdHandler.dfgDoConnect(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(srcPath), TO_CSTR(destPath));
+	return m_fabricCmdHandler.dfgDoConnect(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(srcPath), ToQStr(destPath));
 	MAXSPLICE_CATCH_END
 }
 void FabricTranslationFPInterface::DFGDisconnect( const Tab<TSTR*>& srcPaths, const Tab<TSTR*>& destPaths, const MSTR& execPath)
@@ -109,43 +111,43 @@ void FabricTranslationFPInterface::DFGDisconnect( const Tab<TSTR*>& srcPaths, co
 	Convert( srcPaths, cSrcPaths );
 	QStringList cDestPaths;
 	Convert( destPaths, cDestPaths );
-	return m_fabricCmdHandler.dfgDoDisconnect(m_binding, TO_CSTR(execPath), GetExec(execPath), cSrcPaths, cDestPaths );
+	return m_fabricCmdHandler.dfgDoDisconnect(m_binding, ToQStr(execPath), GetExec(execPath), cSrcPaths, cDestPaths );
 	MAXSPLICE_CATCH_END
 }
 MSTR FabricTranslationFPInterface::DFGAddGraph(const MSTR& title, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddGraph(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(title), Convert(pos)).toStdString().c_str());
+	return ToMstr(m_fabricCmdHandler.dfgDoAddGraph(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(title), Convert(pos)));
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR FabricTranslationFPInterface::DFGAddFunc(const MSTR& title, const MSTR& initialCode, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddFunc(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(title), TO_CSTR(initialCode), Convert(pos)).toStdString().c_str());
+	return ToMstr(m_fabricCmdHandler.dfgDoAddFunc(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(title), ToQStr(initialCode), Convert(pos)));
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR FabricTranslationFPInterface::DFGInstPreset(const MSTR& presetPath, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoInstPreset(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(presetPath), Convert(pos)).toStdString().c_str());
+	return ToMstr(m_fabricCmdHandler.dfgDoInstPreset(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(presetPath), Convert(pos)));
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR FabricTranslationFPInterface::DFGAddVar(const MSTR& desiredNodeName, const MSTR& dataType, const MSTR& extDep, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddVar(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(desiredNodeName), TO_CSTR(dataType), TO_CSTR(extDep), Convert(pos)).toStdString().c_str());
+	return ToMstr(m_fabricCmdHandler.dfgDoAddVar(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(desiredNodeName), ToQStr(dataType), ToQStr(extDep), Convert(pos)));
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR FabricTranslationFPInterface::DFGAddGet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddGet(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(desiredNodeName), TO_CSTR(varPath), Convert(pos)).toStdString().c_str());
+	return ToMstr(m_fabricCmdHandler.dfgDoAddGet(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(desiredNodeName), ToQStr(varPath), Convert(pos)));
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR FabricTranslationFPInterface::DFGAddSet(const MSTR& desiredNodeName, const MSTR& varPath, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddSet(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(desiredNodeName), TO_CSTR(varPath), Convert(pos)).toStdString().c_str());
+	return ToMstr(m_fabricCmdHandler.dfgDoAddSet(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(desiredNodeName), ToQStr(varPath), Convert(pos)));
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR FabricTranslationFPInterface::DFGAddPort(const MSTR& desiredPortName, int portType, const MSTR& portSpec, const MSTR& portToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
@@ -153,7 +155,7 @@ MSTR FabricTranslationFPInterface::DFGAddPort(const MSTR& desiredPortName, int p
 	MAXSPLICE_CATCH_BEGIN
 	FabricCore::DFGPortType fType = static_cast<FabricCore::DFGPortType>(portType);
 	CStr cExecPath = execPath.ToCStr();
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoAddPort(m_binding, cExecPath.data(), GetExec(cExecPath.data()), TO_CSTR(desiredPortName), fType, TO_CSTR(portSpec), TO_CSTR(portToConnect), TO_CSTR(extDep), TO_CSTR(metaData)).toStdString().c_str());
+	return ToMstr(m_fabricCmdHandler.dfgDoAddPort(m_binding, cExecPath.data(), GetExec(cExecPath.data()), ToQStr(desiredPortName), fType, ToQStr(portSpec), ToQStr(portToConnect), ToQStr(extDep), ToQStr(metaData)));
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 MSTR FabricTranslationFPInterface::DFGEditPort(const MSTR& portName, int portType, const MSTR& desiredNewPortName, const MSTR& typeSpec, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath)
@@ -161,25 +163,25 @@ MSTR FabricTranslationFPInterface::DFGEditPort(const MSTR& portName, int portTyp
 	MAXSPLICE_CATCH_BEGIN
 
 	FabricCore::DFGExec exec = GetExec( execPath );
-	QString oldName = TO_CSTR( portName );
+	QString oldName = ToQStr( portName );
 	FabricCore::DFGPortType type = (FabricCore::DFGPortType)portType;
 
-	QString res = m_fabricCmdHandler.dfgDoEditPort(m_binding, TO_CSTR(execPath), exec, oldName, TO_CSTR(desiredNewPortName), type, TO_CSTR(typeSpec), TO_CSTR(extDep), TO_CSTR(metaData));
-	return  MSTR::FromACP(res.toStdString().c_str());
+	QString res = m_fabricCmdHandler.dfgDoEditPort(m_binding, ToQStr(execPath), exec, oldName, ToQStr(desiredNewPortName), type, ToQStr(typeSpec), ToQStr(extDep), ToQStr(metaData));
+	return  ToMstr(res);
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 void FabricTranslationFPInterface::DFGRemovePort(const MSTR& portName, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	InvalidateAll();
-	return m_fabricCmdHandler.dfgDoRemovePort(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(portName));
+	return m_fabricCmdHandler.dfgDoRemovePort(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(portName));
 	MAXSPLICE_CATCH_END
 }
 void FabricTranslationFPInterface::DFGResizeBackdrop(const MSTR& backDropNodeName, Point2 topLeft, Point2 size, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	QSizeF qSize(size.x, size.y);
-	return m_fabricCmdHandler.dfgDoResizeBackDrop(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(backDropNodeName), Convert(topLeft), qSize);
+	return m_fabricCmdHandler.dfgDoResizeBackDrop(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(backDropNodeName), Convert(topLeft), qSize);
 	MAXSPLICE_CATCH_END
 }
 void FabricTranslationFPInterface::DFGMoveNodes(Tab<TSTR*> nodeNames, Tab<Point2*> topLeftPoss, const MSTR& execPath)
@@ -189,7 +191,7 @@ void FabricTranslationFPInterface::DFGMoveNodes(Tab<TSTR*> nodeNames, Tab<Point2
 	Convert(nodeNames, cNodeNames);
 	QList<QPointF> qTopLeftPoss;
 	Convert(topLeftPoss, qTopLeftPoss);
-	return m_fabricCmdHandler.dfgDoMoveNodes(m_binding, TO_CSTR(execPath), GetExec(execPath), cNodeNames, qTopLeftPoss);
+	return m_fabricCmdHandler.dfgDoMoveNodes(m_binding, ToQStr(execPath), GetExec(execPath), cNodeNames, qTopLeftPoss);
 	MAXSPLICE_CATCH_END
 }
 MSTR FabricTranslationFPInterface::DFGImplodeNodes(Tab<TSTR*> nodeNames, const MSTR& desiredNewNodeName, const MSTR& execPath)
@@ -197,48 +199,48 @@ MSTR FabricTranslationFPInterface::DFGImplodeNodes(Tab<TSTR*> nodeNames, const M
 	MAXSPLICE_CATCH_BEGIN
 	QStringList cNodeNames;
 	Convert(nodeNames, cNodeNames);
-	return MSTR::FromACP(m_fabricCmdHandler.dfgDoImplodeNodes(m_binding, TO_CSTR(execPath), GetExec(execPath), cNodeNames, TO_CSTR(desiredNewNodeName)).toStdString().c_str());
+	return ToMstr(m_fabricCmdHandler.dfgDoImplodeNodes(m_binding, ToQStr(execPath), GetExec(execPath), cNodeNames, ToQStr(desiredNewNodeName)));
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 Tab<TSTR*> FabricTranslationFPInterface::DFGExplodeNodes(const MSTR& nodeName, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	QStringList res = m_fabricCmdHandler.dfgDoExplodeNode(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(nodeName));
+	QStringList res = m_fabricCmdHandler.dfgDoExplodeNode(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(nodeName));
 	return Convert(res);
 	MAXSPLICE_CATCH_RETURN(Tab<TSTR*>());
 }
 void FabricTranslationFPInterface::DFGAddBackdrop(const MSTR& title, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoAddBackDrop(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(title), Convert(pos));
+	return m_fabricCmdHandler.dfgDoAddBackDrop(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(title), Convert(pos));
 	MAXSPLICE_CATCH_END
 }
 void FabricTranslationFPInterface::DFGSetNodeComment(const MSTR& nodeName, const MSTR& comment, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoSetNodeComment(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(nodeName), TO_CSTR(comment));
+	return m_fabricCmdHandler.dfgDoSetNodeComment(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(nodeName), ToQStr(comment));
 	MAXSPLICE_CATCH_END
 }
 void FabricTranslationFPInterface::DFGSetCode(const MSTR& code, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoSetCode(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(code));
+	return m_fabricCmdHandler.dfgDoSetCode(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(code));
 	MAXSPLICE_CATCH_END
 }
 MSTR FabricTranslationFPInterface::DFGRenamePort(const MSTR& oldName, const MSTR& newDesiredName, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	int id = GetPortParamID(TO_CSTR(oldName));
-	QString res = m_fabricCmdHandler.dfgDoRenamePort(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(oldName), TO_CSTR(newDesiredName));
+	int id = GetPortParamID(ToCStr(oldName));
+	QString res = m_fabricCmdHandler.dfgDoRenamePort(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(oldName), ToQStr(newDesiredName));
 	if (id >= 0)
 		SetMaxParamName(GetPBlock()->GetDesc(), (ParamID)id, newDesiredName);
-	return MSTR::FromACP(res.toStdString().c_str());
+	return ToMstr(res);
 	MAXSPLICE_CATCH_RETURN(_M("Exception occured"))
 }
 Tab<TSTR*> FabricTranslationFPInterface::DFGPaste(const MSTR& json, Point2 pos, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	QStringList res = m_fabricCmdHandler.dfgDoPaste(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(json), Convert(pos));
+	QStringList res = m_fabricCmdHandler.dfgDoPaste(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(json), Convert(pos));
 	return Convert(res);
 	MAXSPLICE_CATCH_RETURN(Tab<TSTR*>())
 }
@@ -271,14 +273,14 @@ void FabricTranslationFPInterface::DFGSetPortDefaultValue(const MSTR& portName, 
 	if (defVal.isValid())
 	{
 		ConvertToRTVal(*fpvalue, defVal);
-		m_fabricCmdHandler.dfgDoSetPortDefaultValue(m_binding, TO_CSTR(execPath), exec, cPortName.data(), defVal);
+		m_fabricCmdHandler.dfgDoSetPortDefaultValue(m_binding, ToQStr(execPath), exec, cPortName.data(), defVal);
 	}
 	MAXSPLICE_CATCH_END
 }
 void FabricTranslationFPInterface::DFGSetRefVarPath(const MSTR& refName, const MSTR& varPath, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoSetRefVarPath(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(refName), TO_CSTR(varPath));
+	return m_fabricCmdHandler.dfgDoSetRefVarPath(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(refName), ToQStr(varPath));
 	MAXSPLICE_CATCH_END
 }
 void FabricTranslationFPInterface::DFGReorderPorts( const MSTR& itemPath, Tab<int> indices, const MSTR& execPath)
@@ -286,7 +288,7 @@ void FabricTranslationFPInterface::DFGReorderPorts( const MSTR& itemPath, Tab<in
 	MAXSPLICE_CATCH_BEGIN
 	QList<int> qIndices;
 	Convert( indices, qIndices );
-	return m_fabricCmdHandler.dfgDoReorderPorts(m_binding, TO_CSTR(execPath), GetExec(execPath), TO_CSTR(itemPath), qIndices );
+	return m_fabricCmdHandler.dfgDoReorderPorts(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(itemPath), qIndices );
 	MAXSPLICE_CATCH_END
 }
 void FabricTranslationFPInterface::DFGSetExtDeps(Tab<TSTR*> extDeps, const MSTR& execPath)
@@ -294,14 +296,78 @@ void FabricTranslationFPInterface::DFGSetExtDeps(Tab<TSTR*> extDeps, const MSTR&
 	MAXSPLICE_CATCH_BEGIN
 	QStringList cExtDeps;
 	Convert(extDeps, cExtDeps);
-	return m_fabricCmdHandler.dfgDoSetExtDeps(m_binding, TO_CSTR(execPath), GetExec(execPath), cExtDeps);
+	return m_fabricCmdHandler.dfgDoSetExtDeps(m_binding, ToQStr(execPath), GetExec(execPath), cExtDeps);
 	MAXSPLICE_CATCH_END
 }
 void FabricTranslationFPInterface::DFGSplitFromPreset(const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return m_fabricCmdHandler.dfgDoSplitFromPreset(m_binding, TO_CSTR(execPath), GetExec(execPath));
+	return m_fabricCmdHandler.dfgDoSplitFromPreset(m_binding, ToQStr(execPath), GetExec(execPath));
 	MAXSPLICE_CATCH_END
+}
+
+MSTR FabricTranslationFPInterface::DFGDoEditNode( const MSTR& oldNodeName, const MSTR& desiredNewNodeName, const MSTR& nodeMetadata, const MSTR& execMetadata, const MSTR& execPath )
+{
+	MAXSPLICE_CATCH_BEGIN
+	QString res =m_fabricCmdHandler.dfgDoEditNode( m_binding, ToQStr( execPath), GetExec( execPath ), ToQStr( oldNodeName), ToQStr( desiredNewNodeName), ToQStr( nodeMetadata), ToQStr( execMetadata ));
+	return ToMstr(res.toStdString().data());
+	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
+}
+
+void FabricTranslationFPInterface::DFGDoDismissLoadDiags( Tab<int>& indices )
+{
+	MAXSPLICE_CATCH_BEGIN
+	QList<int> params;
+	params.reserve( indices.Count() );
+	for (int i = 0; i < indices.Count(); i++)
+		params.append( indices[i] );
+	m_fabricCmdHandler.dfgDoDismissLoadDiags( m_binding, params );
+	MAXSPLICE_CATCH_END
+}
+
+MSTR FabricTranslationFPInterface::DFGDoCreatePreset( const MSTR& nodeName, const MSTR& presetDirPath, const MSTR& presetName, const MSTR& execPath )
+{
+	MAXSPLICE_CATCH_BEGIN
+	QString res = m_fabricCmdHandler.dfgDoCreatePreset( m_binding, ToQStr(execPath), GetExec( execPath ), ToQStr( nodeName), ToQStr( presetDirPath), ToQStr( presetName ));
+	return ToMstr(res);
+	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
+}
+
+MSTR FabricTranslationFPInterface::DFGDoAddInstPort( const MSTR& instName, const MSTR& desiredPortName, int portType, const MSTR& typeSpec, const MSTR& pathToConnect, int connectType, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath )
+{
+	MAXSPLICE_CATCH_BEGIN
+	FabricCore::DFGPortType pt = (FabricCore::DFGPortType)portType;
+	FabricCore::DFGPortType ct = (FabricCore::DFGPortType)connectType;
+	QString res = m_fabricCmdHandler.dfgDoAddInstPort( m_binding, ToQStr( execPath ), GetExec( execPath ), ToQStr( instName ), ToQStr( desiredPortName ), pt, ToQStr( typeSpec ), ToQStr( pathToConnect ), ct, ToQStr( extDep ), ToQStr( metaData ) );
+	return ToMstr( res );
+	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
+}
+
+MSTR FabricTranslationFPInterface::DFGDoAddInstBlockPort( const MSTR& instName, const MSTR& blockName, const MSTR& desiredPortName, const MSTR& typeSpec, const MSTR& pathToConnect, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath )
+{
+	MAXSPLICE_CATCH_BEGIN
+	QString res = m_fabricCmdHandler.dfgDoAddInstBlockPort( m_binding, ToQStr( execPath ), GetExec( execPath ), ToQStr( instName ), ToQStr( blockName ), ToQStr( desiredPortName ), ToQStr( typeSpec ), ToQStr( pathToConnect ), ToQStr( extDep ), ToQStr( metaData ) );
+	return ToMstr( res );
+	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
+}
+
+MSTR FabricTranslationFPInterface::DFGDoAddBlock( const MSTR& desiredName, Point2 pos, const MSTR& execPath )
+{
+	MAXSPLICE_CATCH_BEGIN
+		QPointF qp = Convert( pos );
+		QString res = m_fabricCmdHandler.dfgDoAddBlock( m_binding, ToQStr( execPath ), GetExec( execPath ), ToQStr( desiredName ), qp);
+		return ToMstr( res );
+	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
+}
+
+MSTR FabricTranslationFPInterface::DFGDoAddBlockPort( const MSTR& blockName, const MSTR& desiredPortName, int portType, const MSTR& typeSpec, const MSTR& pathToConnect, int connectType, const MSTR& extDep, const MSTR& metaData, const MSTR& execPath )
+{
+	MAXSPLICE_CATCH_BEGIN
+		FabricCore::DFGPortType pt = (FabricCore::DFGPortType)portType;
+		FabricCore::DFGPortType ct = (FabricCore::DFGPortType)connectType;
+		QString res = m_fabricCmdHandler.dfgDoAddBlockPort( m_binding, ToQStr( execPath ), GetExec( execPath ), ToQStr( blockName ), ToQStr( desiredPortName ), pt, ToQStr( typeSpec ), ToQStr( pathToConnect ), ct, ToQStr( extDep ), ToQStr( metaData ) );
+		return ToMstr( res );
+	MAXSPLICE_CATCH_RETURN( _M( "Exception occured" ) )
 }
 
 // Allow introspecting the ports on this graph
@@ -315,20 +381,27 @@ int FabricTranslationFPInterface::GetPortCount(const MSTR& execPath)
 MSTR FabricTranslationFPInterface::GetPortName(int i, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(GetExec(execPath).getExecPortName(i));
+	return ToMstr(GetExec(execPath).getExecPortName(i));
 	MAXSPLICE_CATCH_RETURN(_M(" ** Exception Occured"));
 }
 
-const char* FabricTranslationFPInterface::GetPortType(const char* portName, const char* execPath)
-{
-
-	return ::GetPortType(GetExec(execPath), portName);
-}
-
-MSTR FabricTranslationFPInterface::GetPortType(const MSTR& portName, const MSTR& execPath)
+FabricCore::DFGPortType FabricTranslationFPInterface::GetPortType( const MSTR& portName, const MSTR& execPath )
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(GetPortType(TO_CSTR(portName), TO_CSTR(execPath)));
+		return GetExec( execPath ).getExecPortType( ToCStr( portName ) );
+	MAXSPLICE_CATCH_RETURN( FabricCore::DFGPortType_In );
+}
+
+const char* FabricTranslationFPInterface::GetPortSpec(const char* portName, const char* execPath)
+{
+
+	return ::GetPortSpec(GetExec(execPath), portName);
+}
+
+MSTR FabricTranslationFPInterface::GetPortSpec(const MSTR& portName, const MSTR& execPath)
+{
+	MAXSPLICE_CATCH_BEGIN
+	return ToMstr(GetPortSpec(ToCStr(portName), ToCStr(execPath)));
 	MAXSPLICE_CATCH_RETURN(_M(" ** Exception Occured"));
 }
 
@@ -340,7 +413,7 @@ bool FabricTranslationFPInterface::HasSrcPort(const char* portName)
 bool FabricTranslationFPInterface::HasSrcPort(const MSTR& portName)
 {
 	MAXSPLICE_CATCH_BEGIN
-		return HasSrcPort(TO_CSTR(portName));
+	return HasSrcPort(ToCStr(portName));
 	MAXSPLICE_CATCH_RETURN(_M(" ** Exception Occured"));
 }
 
@@ -352,7 +425,7 @@ bool FabricTranslationFPInterface::HasDstPort(const char* portName)
 bool FabricTranslationFPInterface::HasDstPort(const MSTR& portName)
 {
 	MAXSPLICE_CATCH_BEGIN
-		return HasDstPort(TO_CSTR(portName));
+		return HasDstPort(ToCStr(portName));
 	MAXSPLICE_CATCH_RETURN(_M(" ** Exception Occured"));
 }
 
@@ -367,14 +440,14 @@ int FabricTranslationFPInterface::GetNodeCount(const MSTR& execPath)
 MSTR FabricTranslationFPInterface::GetNodeName(int i, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(GetExec(execPath).getNodeName(i));
+	return ToMstr(GetExec(execPath).getNodeName(i));
 	MAXSPLICE_CATCH_RETURN(_M(" ** Exception Occured"));
 }
 
 int FabricTranslationFPInterface::GetNodeType(const MSTR& NodeName, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	FabricCore::DFGNodeType nodeType = GetExec(execPath).getNodeType(TO_CSTR(NodeName));
+	FabricCore::DFGNodeType nodeType = GetExec(execPath).getNodeType(ToCStr(NodeName));
 	return nodeType;
 	MAXSPLICE_CATCH_RETURN(0);
 }
@@ -384,11 +457,8 @@ bool FabricTranslationFPInterface::GetArgValue(const char* argName, FPValue& val
 {
 	MAXSPLICE_CATCH_BEGIN
 
-	//FabricCore::DFGExec exec = GetExec(execPath);
-
-	//exec.getPort
 	FabricCore::RTVal rtVal = m_binding.getArgValue(argName);
-	const char* cType = GetPortType(argName);
+	const char* cType = GetPortSpec(argName);
 	int type = FabricTypeToMaxType(cType);
 
 	switch (type)
@@ -475,7 +545,7 @@ bool FabricTranslationFPInterface::GetArgValue(const char* argName, FPValue& val
 		DbgAssert(!"Cannot convert Fabric type");
 		static MSTR errorStr;
 		errorStr = _M("Cannot convert Fabric type: ");
-		errorStr += MSTR::FromACP(cType);
+		errorStr += ToMstr(cType);
 		value.Load(TYPE_STRING, errorStr);
 		return false;
 	}
@@ -493,7 +563,7 @@ const FPValue& FabricTranslationFPInterface::GetArgValue(const MSTR& portName, c
 	MAXSPLICE_CATCH_BEGIN
 	// Free whatever memory was assigned last time
 	val.Free();
-	GetArgValue(TO_CSTR(portName), val);
+	GetArgValue(ToCStr(portName), val);
 	return val;
 	MAXSPLICE_CATCH_RETURN(val);
 }
@@ -513,7 +583,7 @@ int FabricTranslationFPInterface::GetMaxTypeForArg(const char* argName)
 int FabricTranslationFPInterface::GetMaxTypeForArg(const MSTR& argName)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return GetMaxTypeForArg(TO_CSTR(argName));
+	return GetMaxTypeForArg(ToCStr(argName));
 	MAXSPLICE_CATCH_RETURN(-1);
 }
 
@@ -528,14 +598,14 @@ int FabricTranslationFPInterface::SetMaxTypeForArg(const char* argName, int type
 int FabricTranslationFPInterface::SetMaxTypeForArg(const MSTR& argName, int type)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return SetMaxTypeForArg(TO_CSTR(argName), type);
+	return SetMaxTypeForArg(ToCStr(argName), type);
 	MAXSPLICE_CATCH_RETURN(-1);
 }
 
 BitArray FabricTranslationFPInterface::GetLegalMaxTypesForArg(const MSTR& argName)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return FabricTypeToMaxTypes(GetPortType(TO_CSTR(argName)));
+	return FabricTypeToMaxTypes(GetPortSpec(ToCStr(argName)));
 	MAXSPLICE_CATCH_RETURN(BitArray());
 }
 
@@ -553,7 +623,7 @@ bool FabricTranslationFPInterface::SetPortMetaData(const char* argName, const ch
 bool FabricTranslationFPInterface::SetPortMetaData(const MSTR& argName, const MSTR& option, const MSTR& value, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	SetPortMetaData(TO_CSTR(argName), TO_CSTR(option), TO_CSTR(value), TO_CSTR(execPath));
+	SetPortMetaData( ToCStr(argName), ToCStr(option), ToCStr(value), ToCStr(execPath));
 	return true;
 	MAXSPLICE_CATCH_RETURN(false);
 }
@@ -566,7 +636,7 @@ const char* FabricTranslationFPInterface::GetPortMetaData(const char* port, cons
 MSTR FabricTranslationFPInterface::GetPortMetaData(const MSTR& port, const MSTR& option, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return MSTR::FromACP(GetPortMetaData(TO_CSTR(port), TO_CSTR(option), TO_CSTR(execPath)));
+	return ToMstr(GetPortMetaData(ToCStr(port), ToCStr(option), ToCStr(execPath)));
 	MAXSPLICE_CATCH_RETURN(_M(" ** Exception Occured"));
 }
 
@@ -652,7 +722,7 @@ bool FabricTranslationFPInterface::LoadFromFile(const MCHAR* filename, bool crea
 	buffer[fileSize] = '\0';
 
 	size_t readBytes = fread(buffer, 1, fileSize, file);
-	assert(readBytes == fileSize);
+	DbgAssert(readBytes == fileSize);
 
 	fclose(file);
 
@@ -686,13 +756,16 @@ bool FabricTranslationFPInterface::SaveToFile(const MCHAR* filename)
 bool FabricTranslationFPInterface::RestoreFromJSON(const MSTR& json, bool createMaxParams)
 {
 	MAXSPLICE_CATCH_BEGIN
-	return RestoreFromJSON(TO_CSTR(json), createMaxParams);
+	return RestoreFromJSON(ToCStr(json), createMaxParams);
 	MAXSPLICE_CATCH_RETURN( false );
 }
 
 bool FabricTranslationFPInterface::RestoreFromJSON(const char* json, bool createMaxParams)
 {
 	MAXSPLICE_CATCH_BEGIN
+
+	// First, remove all current parameters
+	CastToRefTarg()->DeleteReference(0);
 
 	// The KL Editor has pointers to the current graph
 
@@ -711,17 +784,18 @@ bool FabricTranslationFPInterface::RestoreFromJSON(const char* json, bool create
 			if (exec.getExecPortType(i) == FabricCore::DFGPortType_Out)
 			{
 				exec.getExecPortResolvedType(i);
-				BitArray compatibleTypes = FabricTypeToMaxTypes(GetPortType(portName));
+				BitArray compatibleTypes = FabricTypeToMaxTypes(GetPortSpec(portName));
 				// If this splice type is compatible with this classes output,
 				// set this port as our outport
 				if (compatibleTypes[GetValueType()]) {
-					SetOutPortName(MSTR::FromACP(portName));
+					SetOutPortName(ToMstr(portName));
 				}
 			}
 			else
 				SyncMetaDataFromPortToParam(portName);
 		}
 	}
+	CloseDFGGraphEditor();
 	InvalidateAll();
 	return true;
 
@@ -730,12 +804,12 @@ bool FabricTranslationFPInterface::RestoreFromJSON(const char* json, bool create
 
 MSTR FabricTranslationFPInterface::ExportToJSON()
 {
-	return MSTR::FromACP(m_binding.exportJSON().getCStr());
+	return ToMstr(m_binding.exportJSON().getCStr());
 }
 
 MSTR FabricTranslationFPInterface::GetExecCode(const MSTR& execPath) {
 	MAXSPLICE_CATCH_BEGIN
-		return MSTR::FromACP(GetExec(TO_CSTR(execPath)).getCode());
+		return ToMstr(GetExec(execPath).getCode());
 	MAXSPLICE_CATCH_RETURN(_M("Exception getting code"));
 }
 //////////////////////////////////////////////////////////////////////////
@@ -743,7 +817,7 @@ MSTR FabricTranslationFPInterface::GetExecCode(const MSTR& execPath) {
 MSTR FabricTranslationFPInterface::GetGraphName()
 {
 	const char* title = GetExec(nullptr).getTitle();
-	return MSTR::FromACP(title);
+	return ToMstr(title);
 }
 
 
@@ -796,7 +870,7 @@ FabricCore::DFGExec FabricTranslationFPInterface::GetExec(const char* execPath)
 }
 FabricCore::DFGExec FabricTranslationFPInterface::GetExec(const MSTR& execPath)
 {
-	return GetExec(TO_CSTR(execPath));
+	return GetExec(ToCStr(execPath));
 }
 
 //////////////////////////////////////////////////////////////////////////

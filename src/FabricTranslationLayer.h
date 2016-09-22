@@ -64,22 +64,11 @@ BitArray FabricTypeToMaxTypes(const char* spliceType);
 /** Returns the Max ParamType2 that matches the named Fabric type
 	if the type is not legal for PB2, returns -1 */
 int FabricTypeToMaxType(const char* cType);
+/** Returns a valid Fabric type for the passed max ParamType */
+const char* MaxTypeToFabricType( int paramType );
 
 /** Returns the default Max ParamType2 that matches the named Fabric type */
 int FabricTypeToDefaultMaxType(const char* cType);
-
-/** Add a new value port to the given DGGraph
-	This adds in the appropriate Fabric type to recieve
-	the Max parameter type, and connects the port.  The return
-	value should be cached as the port top set/get values
-	from the splice parameter
-	\rGraph - a reference to the Fabric sub-graph to add the parameter too
-	\type - The Max type that will be set
-	\pName - The name of the parameter
-	\mode - whether this is a read/write variable */
-std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, const char* type, const char* cName, FabricCore::DFGPortType mode, const char* inExtension = "", const char* metadata = "");
-std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, int type, const MCHAR* pName, FabricCore::DFGPortType mode, const char* inExtension = "", const char* metadata = "");
-std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, int type, const char* pName, FabricCore::DFGPortType mode, const char* inExtension = "", const char* metadata = "");
 
 /** Get various useful info's from fabric Ports 
 	These functions are defined here and don't depend
@@ -87,7 +76,7 @@ std::string AddFabricParameter(FabricTranslationFPInterface* pOwner, int type, c
 	from the UI layer */
 int GetPortParamID(const FabricCore::DFGExec& exec, const char* argName);
 int GetPort3dsMaxType(const FabricCore::DFGExec& exec, const char* argName);
-const char* GetPortType(const FabricCore::DFGExec& exec, const char* argName);
+const char* GetPortSpec(const FabricCore::DFGExec& exec, const char* argName);
 bool IsPortArray(const FabricCore::DFGExec& exec, const char* argName);
 bool AreTypesCompatible(int type1, int type2);
 
@@ -320,10 +309,8 @@ public:
 		return FabricTranslationFPInterface::GetDescByID(id);
 	}
 
-	ReferenceTarget* CastToRefTarg() { return this; }
-	//FabricCore::DFGBinding& GetBinding()	{ return m_binding; }
+	ReferenceTarget* CastToRefTarg() override { return this; }
 
-	//FabricUI::DFG::DFGUICmdHandler* GetCmdHandler() { return &m_maxCmdHandler; }
 
 #pragma endregion
 

@@ -1,6 +1,10 @@
 #include "StdAfx.h"
 #include "MaxConversionFns.h"
 #include "MeshNormalSpec.h"
+#pragma warning( disable : 4624)
+#include "..\src_kl\h\Mat44.h"
+
+using namespace Fabric::EDK;
 
 #pragma region Convert functions allow modifying a value just before it is sent to Fabric
 
@@ -272,7 +276,7 @@ void ConvertToSimpleRTVal( T param, FabricCore::RTVal& rtVal )
 			rtVal.setFloat32( (float)param );
 			break;
 		case FEC_RTVAL_SIMPLE_TYPE_FLOAT64:
-			rtVal.setFloat64( (double)param );
+			rtVal.setFloat64( (float)param ); // FE-7246 - Convert to double once rtVal argument is correct type
 			break;
 		default:
 			DbgAssert( FALSE && "Unknown type" );
@@ -431,16 +435,13 @@ void ConvertToRGBARTVal( const Point4& param, FabricCore::RTVal& val )
 	val.getMemberRef( 3 ).setUInt8( (uint8_t)FLto255( param.w ) );
 }
 
-void ConvertToVec4RTVal( const Point4& param, FabricCore::RTVal& val )
+void ConvertToVec4RTVal( const Point4& param, Fabric::EDK::KL::Vec4* val )
 {
 	// Callee assumes responsibility for RTVal validity
-	DbgAssert( strcmp( val.getMemberName( 0 ), "x" ) == 0 );
-	DbgAssert( strcmp( val.getMemberName( 3 ), "t" ) == 0 );
-
-	val.getMemberRef( 0 ).setFloat32( param.x );
-	val.getMemberRef( 1 ).setFloat32( param.y );
-	val.getMemberRef( 2 ).setFloat32( param.z );
-	val.getMemberRef( 3 ).setFloat32( param.w );
+	val->x = param.x;
+	val->y = param.y;
+	val->z = param.z;
+	val->t = param.w;
 }
 
 void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
@@ -456,7 +457,11 @@ void ConvertToRTVal(const Point4& param, FabricCore::RTVal& val)
 	else if (strcmp( spliceType, "RGBA" ) == 0)
 		ConvertToRGBARTVal( param, val );
 	else
-		ConvertToVec4RTVal( param, val );
+	{
+		FabricCore::RTVal rawPtrRTVal = val.callMethod( "Data", "data", 0, 0 );
+		void *ptr = rawPtrRTVal.getData();
+		ConvertToVec4RTVal( param, reinterpret_cast<KL::Vec4*>(ptr) );
+	}
 }
 
 void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val)
@@ -470,22 +475,30 @@ void ConvertToRTVal(const Quat& param, FabricCore::RTVal& val)
 	val.getMemberRef( 1 ).setFloat32(param.w);
 }
 
+
 void ConvertToRTVal(const Matrix3& param, FabricCore::RTVal& val)
 {
 	DbgAssert(val.isValid());
 	if (!val.isValid())
 		return;
 
-	const MRow* pInMtx = param.GetAddr();
-	FabricCore::RTVal row0 = val.getMemberRef( 0 );
-	FabricCore::RTVal row1 = val.getMemberRef( 1 );
-	FabricCore::RTVal row2 = val.getMemberRef( 2 );
-	FabricCore::RTVal row3 = val.getMemberRef( 3 );
 
-	ConvertToVec4RTVal(Point4(pInMtx[0][0], pInMtx[1][0], pInMtx[2][0], pInMtx[3][0]), row0);
-	ConvertToVec4RTVal(Point4(pInMtx[0][1], pInMtx[1][1], pInMtx[2][1], pInMtx[3][1]), row1);
-	ConvertToVec4RTVal(Point4(pInMtx[0][2], pInMtx[1][2], pInMtx[2][2], pInMtx[3][2]), row2);
-	ConvertToVec4RTVal(Point4(0, 0, 0, 1), row3);
+	FabricCore::RTVal rawPtrRTVal = val.callMethod( "Data", "data", 0, 0 );
+	void *ptr = rawPtrRTVal.getData();
+	
+
+	KL::Mat44* fmx = reinterpret_cast<Fabric::EDK::KL::Mat44*>(ptr);
+
+	const MRow* pInMtx = param.GetAddr();
+	//FabricCore::RTVal row0 = val.getMemberRef( 0 );
+	//FabricCore::RTVal row1 = val.getMemberRef( 1 );
+	//FabricCore::RTVal row2 = val.getMemberRef( 2 );
+	//FabricCore::RTVal row3 = val.getMemberRef( 3 );
+
+	ConvertToVec4RTVal(Point4(pInMtx[0][0], pInMtx[1][0], pInMtx[2][0], pInMtx[3][0]), &fmx->row0);
+	ConvertToVec4RTVal(Point4(pInMtx[0][1], pInMtx[1][1], pInMtx[2][1], pInMtx[3][1]), &fmx->row1 );
+	ConvertToVec4RTVal(Point4(pInMtx[0][2], pInMtx[1][2], pInMtx[2][2], pInMtx[3][2]), &fmx->row2 );
+	ConvertToVec4RTVal(Point4(0, 0, 0, 1), &fmx->row3);
 }
 
 
@@ -897,7 +910,7 @@ void FabricToMaxValue(const FabricCore::Variant& var, MSTR& param)
 		return;
 
 	const char* val = var.getString_cstr();
-	param = MSTR::FromACP(val);
+	param = ToMstr(val);
 }
 #pragma endregion // Variants
 
@@ -1033,17 +1046,22 @@ void FabricRGBAToMaxValue( const FabricCore::RTVal& rtVal, Point4& param )
 	param[3] = rtVal.getMember( 3 ).getUInt8() / 255.0f;
 }
 
-void FabricVec4ToMaxValue( const FabricCore::RTVal& rtVal, Point4& param )
+void FabricVec4ToMaxValue( const KL::Vec4* rtVal, Point4& param )
 {
-	param[0] = rtVal.getMember( 0 ).getFloat32();
-	param[1] = rtVal.getMember( 1 ).getFloat32();
-	param[2] = rtVal.getMember( 2 ).getFloat32();
-	param[3] = rtVal.getMember( 3 ).getFloat32();
+	param[0] = rtVal->x;
+	param[1] = rtVal->y;
+	param[2] = rtVal->z;
+	param[3] = rtVal->t;
 }
 
 void FabricToMaxValue(const FabricCore::RTVal& rtVal, Point4& param)
 {
 	const char* spliceType = rtVal.getTypeNameCStr();
+
+	FabricCore::RTVal& ncrtVal = const_cast<FabricCore::RTVal&>(rtVal);
+	FabricCore::RTVal rawPtrRTVal = ncrtVal.callMethod( "Data", "data", 0, 0 );
+	void *ptr = rawPtrRTVal.getData();
+
 	if (strcmp( spliceType, "RGBA" ) == 0) {
 		FabricRGBAToMaxValue( rtVal, param );
 	}
@@ -1051,7 +1069,7 @@ void FabricToMaxValue(const FabricCore::RTVal& rtVal, Point4& param)
 		FabricColorToMaxValue( rtVal, param );
 	}
 	else { // Assumed type == "Vec4"
-		FabricVec4ToMaxValue( rtVal, param );
+		FabricVec4ToMaxValue( reinterpret_cast<KL::Vec4*>(ptr), param );
 	}
 }
 
@@ -1077,24 +1095,30 @@ void FabricToMaxValue(const FabricCore::RTVal& rtVal, Quat& param)
 	param.Invert();
 }
 
-void FabricToMaxValue(const FabricCore::RTVal& dgPort, Matrix3& param)
+void FabricToMaxValue(const FabricCore::RTVal& rtVal, Matrix3& param)
 {
-	FabricCore::RTVal pRow0 = dgPort.getMember( 0 );
-	FabricCore::RTVal pRow1 = dgPort.getMember( 1 );
-	FabricCore::RTVal pRow2 = dgPort.getMember( 2 );
-	
-	if (!pRow0.isValid() ||
-		!pRow1.isValid() ||
-		!pRow2.isValid())
-	{
-		DbgAssert(!"Fabric Matrix Valid");
-		return;
-	}
+	FabricCore::RTVal& ncrtVal = const_cast<FabricCore::RTVal&>(rtVal);
+	FabricCore::RTVal rawPtrRTVal = ncrtVal.callMethod( "Data", "data", 0, 0 );
+	void *ptr = rawPtrRTVal.getData();
+
+	KL::Mat44* klMat = reinterpret_cast<KL::Mat44*>(ptr);
+
+	//FabricCore::RTVal pRow0 = dgPort.getMember( 0 );
+	//FabricCore::RTVal pRow1 = dgPort.getMember( 1 );
+	//FabricCore::RTVal pRow2 = dgPort.getMember( 2 );
+	//
+	//if (!pRow0.isValid() ||
+	//	!pRow1.isValid() ||
+	//	!pRow2.isValid())
+	//{
+	//	DbgAssert(!"Fabric Matrix Valid");
+	//	return;
+	//}
 
 	Point4 columns[3];
-	FabricVec4ToMaxValue(pRow0, columns[0]);
-	FabricVec4ToMaxValue(pRow1, columns[1]);
-	FabricVec4ToMaxValue(pRow2, columns[2]);
+	FabricVec4ToMaxValue( &klMat->row0, columns[0]);
+	FabricVec4ToMaxValue( &klMat->row1, columns[1]);
+	FabricVec4ToMaxValue( &klMat->row2, columns[2]);
 
 	param.SetColumn(0, columns[0]);
 	param.SetColumn(1, columns[1]);

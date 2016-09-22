@@ -61,11 +61,12 @@ void DockableWindow::ResizeContentToFrame()
 		QWidget* pChildWidget = dynamic_cast<QWidget*>(contentChildren[0]);
 		if (pChildWidget != nullptr)
 		{
-			QRect childSpace = w->childrenRect();
-			pChildWidget->resize(width - 16, height - 16);
+			// Magic subtraction values come from not-sure-where?
+			// Possibly trial-and-error
+			pChildWidget->resize(width - 16, height - 40);
 		}
 	}
-		
+	
 }
 
 int DockableWindow::GetWidth(int sizeType, int orient)
@@ -157,6 +158,7 @@ void DockableWindow::SetWidget(QWidget* widget)
 	ResizeFrameToContent();
 	// Just to verify - reframe our content as well
 	ResizeContentToFrame();
+
 	widget->show();
 }
 

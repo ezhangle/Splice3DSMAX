@@ -500,7 +500,11 @@ void FabricTranslationLayer<TBaseClass, TResultType>::RefAdded(	RefMakerHandle 	
 template<typename TBaseClass, typename TResultType>
 ReferenceTarget *FabricTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir &remap)
 {
+
   FabricTranslationLayer *pMyClone = reinterpret_cast<FabricTranslationLayer*>(GetClassDesc()->Create(TRUE));
+
+  // Clone the fabric graph
+  pMyClone->RestoreFromJSON( m_binding.exportJSON().getCStr(), false );
 
   // If we are cloning - lets clone the parameter block
   if (m_pblock != NULL)
@@ -513,9 +517,6 @@ ReferenceTarget *FabricTranslationLayer<TBaseClass, TResultType>::Clone(RemapDir
 	pMyClone->ReplaceReference( 0, ::CreateParamBlock( pDesc, m_pblock, pMyClone ) );
   }
   BaseClone( this, pMyClone, remap );
-
-  // Clone the fabric graph
-  pMyClone->RestoreFromJSON( m_binding.exportJSON().getCStr(), false );
 
   // Set out-value connection
   pMyClone->m_outArgName = m_outArgName;
@@ -624,7 +625,7 @@ IOResult FabricTranslationLayer<TBaseClass, TResultType>::Load( ILoad *iload )
 
   iload->RegisterPostLoadCallback(new RenameMaxParamsCallback(this));
   // Get our output port
-  SetOutPortName(MSTR::FromACP(outName.data()));
+  SetOutPortName(ToMstr(outName.data()));
 
   return IO_OK;
 }
@@ -642,7 +643,7 @@ void FabricTranslationLayer<TBaseClass, TResultType>::ReconnectPostLoad()
 		int pid = GetPortParamID( argName );
 		if (pid >= 0)
 		{
-			MSTR str = MSTR::FromACP( argName );
+			MSTR str = ToMstr( argName );
 			SetMaxParamName( m_pblock->GetDesc(), (ParamID)pid, str );
 			// Delete existing autogen UI
 			SAFE_DELETE( m_dialogTemplate );
@@ -683,7 +684,7 @@ bool FabricTranslationLayer<TBaseClass, TResultType>::ConnectArgs(const MSTR& my
       return false;
 
     // Are they of the same type?
-    if (strcmp(pSrcContInterface->GetPortType(cSrcPort), GetPortType(cDstPort)) != 0)
+    if (strcmp(pSrcContInterface->GetPortSpec(cSrcPort), GetPortSpec(cDstPort)) != 0)
       return false;
   
     // Ok - these ports are good to go.  Connect 'em up.
@@ -715,7 +716,7 @@ bool FabricTranslationLayer<TBaseClass, TResultType>::DisconnectArgs(const MSTR&
 template<typename TBaseClass, typename TResultType>
 MSTR FabricTranslationLayer<TBaseClass, TResultType>::GetOutPortName()
 {
-  return MSTR::FromACP(m_outArgName.c_str());
+  return ToMstr(m_outArgName.c_str());
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -725,7 +726,7 @@ bool FabricTranslationLayer<TBaseClass, TResultType>::SetOutPortName(const MSTR&
 
   // can this port be translated to our out-type?
   CStr cname = name.ToCStr();
-  const char* portType = GetPortType(cname.data());
+  const char* portType = GetPortSpec(cname.data());
   BitArray legalTypes = FabricTypeToMaxTypes(portType);
   if (!legalTypes[GetValueType()])
     return false;
@@ -748,7 +749,10 @@ void FabricTranslationLayer<TBaseClass, TResultType>::ResetPorts()
   MACROREC_GUARD;
 
   // Setup any necessary ports for the current graph
-  m_outArgName = AddFabricParameter(this, GetValueType(), "outputValue", FabricCore::DFGPortType_Out, "", "{ \"uiPersistValue\": \"false\" }");
+  const char* metadata = "{ \"uiPersistValue\": \"false\" }";
+  const char* portSpec = MaxTypeToFabricType( GetValueType() );
+  QString res = m_fabricCmdHandler.dfgDoAddPort( GetBinding(), "", GetExec( "" ), "outputValue", FabricCore::DFGPortType_Out, portSpec, "", "Math", metadata );
+  m_outArgName = res.toStdString();
 }
 
 template<typename TBaseClass, typename TResultType>
@@ -812,7 +816,7 @@ int FabricTranslationLayer<TBaseClass, TResultType>::SyncMetaDataFromPortToParam
 
 				SetMaxParamName( pDesc, (ParamID)paramId, NULL );
 				pDesc->DeleteParam( (ParamID)paramId );
-				AddMaxParameter( pDesc, maxType, MSTR::FromACP(argName), (ParamID)paramId );
+				AddMaxParameter( pDesc, maxType, ToMstr(argName), (ParamID)paramId );
 
 				// They are all float types, so we can safely change
 				// from one type to the next without changing the actual pblock
@@ -857,7 +861,7 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SyncMaxParamName(const cha
     return;
 
   // Assume argName is valid, and matches id
-  MSTR v = MSTR::FromACP(argName);
+  MSTR v = ToMstr(argName);
   SetMaxParamName(m_pblock->GetDesc(), ParamID(id), v.data());
   UpdateUISpec();
 }
@@ -958,7 +962,7 @@ void FabricTranslationLayer<TBaseClass, TResultType>::SyncMaxParamDefault(const 
   if (pid < 0)
     return;
 
-  char const *resolvedType = GetPortType(argName);
+  char const *resolvedType = GetPortSpec(argName);
   if (!resolvedType)
     return;
 

@@ -7,6 +7,14 @@ spacing = 20
 rootFolder = systemTools.getEnvVariable("FABRIC3DSMAXDIR")
 fileIn (rootFolder + "samples\\UnitTestUtilFns.ms")
 	
+fn getEnvVar var =
+(
+	var = var as string
+	dotNet.loadAssembly "System"   
+	local env = dotNetClass "system.Environment"
+	env.GetEnvironmentVariable var
+)
+
 fn RunScene messageStr = (	start = timeStamp()
 	-- Redraw 100 frames
 	for i = 1 to 100 do (
@@ -85,6 +93,11 @@ fn AnimateNode aNode = (
 
 fn TestControllerPerformance = (
 
+	-- If we are under a debug environment,
+	-- run the code, but do not do performance comparisons
+	skipTest = getEnvVar "ISDEBUG" == true
+
+	
 	Fabric.Rendering = false
 
 	-- First, run with no overhead (best-case)
@@ -98,7 +111,8 @@ fn TestControllerPerformance = (
 	BuildScene ModFabricCtrl
 	fabTime = RunScene "Fabric Controllers"
 	
-	FAssert (fabTime * 0.75 < baseTime) "Fabric Controllers are too slow!"
+
+	FAssert (skipTest or fabTime * 0.75 < baseTime) "Fabric Controllers are too slow!"
 	print "Unparented performance acceptable"
 	
 	resetMaxFile #noPrompt
@@ -111,7 +125,7 @@ fn TestControllerPerformance = (
 	AnimateNode baseNode
 	fabTime = RunScene "Parented Fabric Controllers"	
 
-	FAssert (fabTime * 0.25 < baseTime) "Fabric Controllers are too slow!"
+	FAssert (skipTest or fabTime * 0.25 < baseTime) "Fabric Controllers are too slow!"
 	print "Parented performance acceptable"
 	
 	resetMaxFile #noPrompt

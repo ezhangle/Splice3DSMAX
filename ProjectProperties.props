@@ -9,27 +9,15 @@
 		<BuildType Condition="'$(IsDebug)' == 'True'">Debug</BuildType>
 		<BuildType Condition="'$(IsRelease)' == 'True'">Release</BuildType>
 
-		<!-- variable contains max version -->
-		<MaxVersion>0</MaxVersion>
-		<MaxVersion Condition="'$(Configuration.Contains(2012))'">2012</MaxVersion>
-		<MaxVersion Condition="'$(Configuration.Contains(2013))'">2013</MaxVersion>
-		<MaxVersion Condition="'$(Configuration.Contains(2014))'">2014</MaxVersion>
-		<MaxVersion Condition="'$(Configuration.Contains(2015))'">2015</MaxVersion>
-		<MaxVersion Condition="'$(Configuration.Contains(2016))'">2016</MaxVersion>
+		<!-- Extract the number from the configuration from the Configuration -->
+		<MaxVersion>$([System.Convert]::ToString( $([System.Text.RegularExpressions.Regex]::Match($(Configuration), '\d+'))))</MaxVersion>
 
-		<!-- version specific path selectors -->
-		<MaxPath Condition="'$(MaxVersion)'=='2012' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2012)</MaxPath>
-		<MaxPath Condition="'$(MaxVersion)'=='2013' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2013)</MaxPath>
-		<MaxPath Condition="'$(MaxVersion)'=='2014' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2014)</MaxPath>
-		<MaxPath Condition="'$(MaxVersion)'=='2015' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2015)</MaxPath>
-		<MaxPath Condition="'$(MaxVersion)'=='2016' and '$(Platform)'=='x64'">$(ADSK_3DSMAX_x64_2016)</MaxPath>
-
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2012'">$(ADSK_3DSMAX_SDK_2012)</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2013'">$(ADSK_3DSMAX_SDK_2013)</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2014'">$(ADSK_3DSMAX_SDK_2014)</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2015'">$(ADSK_3DSMAX_SDK_2015)</MaxSDKPath>
-		<MaxSDKPath Condition="'$(MaxVersion)'=='2016'">$(ADSK_3DSMAX_SDK_2016)</MaxSDKPath>
-
+		<!-- Get the path to the executable -->
+		<MaxPath>$([System.Environment]::GetEnvironmentVariable('ADSK_3DSMAX_x64_$(MaxVersion)'))</MaxPath>
+		
+		<!-- Get the path SDK for this version -->
+		<MaxSDKPath>$([System.Environment]::GetEnvironmentVariable('ADSK_3DSMAX_SDK_$(MaxVersion)'))</MaxSDKPath>
+		
 		<!-- If no install of Max SDK is present, default to the fabric system build values  -->
 		<MaxSDKPath Condition="'$(MaxSDKPath)'==''">$(FABRIC_SCENE_GRAPH_DIR)\ThirdParty\PreBuilt\Windows\x86_64\Release\3dsmax\3ds Max $(MaxVersion) SDK\maxsdk\</MaxSDKPath>
 
@@ -44,7 +32,6 @@
 		<IsUnicode>true</IsUnicode>
 		<IsUnicode Condition="'$(MaxVersion)' &lt; '2013'">false</IsUnicode>
 
-		
 		<QtSuffix>4</QtSuffix>
 
 	</PropertyGroup>
@@ -106,7 +93,9 @@
 			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;$(FABRIC_DIR)\include\FabricServices;$(QTWINMIGRATE_DIR)\src;$(QT_DIR)\include;$(QT_DIR)\include/QtGui;$(MaxSDKPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
+			<ExceptionHandling>Async</ExceptionHandling>
 			<StringPooling>true</StringPooling>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
 			<PrecompiledHeader>Use</PrecompiledHeader>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
 			<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;QT_QTWINMIGRATE_IMPORT;FEC_SHARED;FECS_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -152,7 +141,8 @@
   <ItemDefinitionGroup>
 	<PostBuildEvent>
 	  <Command>CALL "$(ProjectDir)/GenerateMaxLauncher.bat" "$(PackageDir)" "$(MaxVersion)"
-copy "$(ProjectDir)SetupMenu.ms" "$(PackageDir)" /Y
+MKLINK /H "$(PackageDir)\SetupMenu.ms" "$(ProjectDir)SetupMenu.ms" 
+MKLINK /H "$(PackageDir)WireParameters.ms" "$(ProjectDir)WireParameters.ms"
 xcopy "$(ProjectDir)testingScripts" "$(PackageDir)samples" /E /I /Y
 MKDIR "$(PackageDir)plugin"
 MKLINK /H "$(PackageDir)plugin\QtSolutions_MFCMigrationFramework-head.dll" "$(QTWINMIGRATE_DIR)\lib\QtSolutions_MFCMigrationFramework-head.dll"
@@ -166,6 +156,7 @@ CALL "$(ProjectDir)/GeneratePluginIni.bat" "$(TargetDir)" "$(MaxVersion)"
 	<LocalDebuggerCommand>$(MaxPath)\3dsmax.exe</LocalDebuggerCommand>
 	<LocalDebuggerEnvironment>FABRIC3DSMAXDIR=$(PackageDir)
 PATH=$(PATH);$(FABRIC_DIR)\lib;$(PackageDir)plugin\
+ISDEBUG=$(IsDebug)
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>
 </Project>

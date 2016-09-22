@@ -174,7 +174,9 @@ void FabricModifier::ResetPorts()
 			\"uiPersistValue\" : \"false\" \n \
 		}";
 
-		m_inMeshPort = AddFabricParameter(this, GetValueType(), "baseMesh", FabricCore::DFGPortType_In, "Geometry", metadata);
+		const char* portSpec = MaxTypeToFabricType( GetValueType() );
+		QString res = m_fabricCmdHandler.dfgDoAddPort( GetBinding(), "", GetExec( "" ), "baseMesh", FabricCore::DFGPortType_In, portSpec, "", "Geometry", metadata );
+		m_inMeshPort = res.toStdString();
 
     ParentClass::ResetPorts();
 
@@ -199,13 +201,20 @@ bool FabricModifier::CloneFabricData( ParentClass* pMyClone )
 
 
 //////////////////////////////////////////////////////////////////////////
-#define BASE_MESH_PORT_NAME		0x100
+#define BASE_MESH_PORT_NAME		0x0100
+#define IS_ENABLED_NAME			0x1000
 
 IOResult FabricModifier::SaveImpData(ISave* isave)
 {
 	// Save additional values for derived values
 	isave->BeginChunk(BASE_MESH_PORT_NAME);
 	isave->WriteCString(m_inMeshPort.c_str());
+	isave->EndChunk();
+
+	ULONG dontcare;
+	bool isenabled = Modifier::IsEnabled();
+	isave->BeginChunk( IS_ENABLED_NAME );
+	isave->Write( &isenabled, sizeof(isenabled), &dontcare );
 	isave->EndChunk();
 
 	return IO_OK;
@@ -227,7 +236,18 @@ IOResult FabricModifier::LoadImpData(ILoad* iload)
 			}
 			break;
 		}
-
+		case IS_ENABLED_NAME:
+		{
+			bool isEnabled;
+			ULONG dontcare;
+			if (iload->Read( &isEnabled, sizeof(isEnabled), &dontcare ) == IO_OK) {
+				if (isEnabled)
+					EnableMod();
+				else
+					DisableMod();
+			}
+			break;
+		}
 		}
 		iload->CloseChunk();
 	}

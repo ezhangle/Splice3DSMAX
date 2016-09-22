@@ -49,7 +49,9 @@ void FabricControl<TResultType>::ResetPorts()
 		}";
 
 	m_parentArgName = "parentValue";
-	AddFabricParameter(this, GetParentValueType(), m_parentArgName.c_str(), FabricCore::DFGPortType_In, "Math", metadata );
+	std::string portSpec = MaxTypeToFabricType(GetParentValueType());
+	QString res = m_fabricCmdHandler.dfgDoAddPort( GetBinding(), "", GetExec( "" ), m_parentArgName.c_str(), FabricCore::DFGPortType_In, portSpec.c_str(), "", "Math", metadata );
+	m_parentArgName = res.toStdString();
 
 	__super::ResetPorts();
 }

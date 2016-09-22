@@ -23,7 +23,7 @@ REM Clear the contents of the file if it already exists.
 @echo REM 3dsmax is then launched using the generated plugin ini file.>> %LAUNCHER%
 @echo set FABRIC3DSMAXDIR=%%~dp0>> %LAUNCHER%
 @echo.>> %LAUNCHER%
-@echo if NOT EXIST %%FABRIC3DSMAXDIR%%Generated.Plugin.Fabric.ini (>> %LAUNCHER%
+@echo if NOT EXIST "%%FABRIC3DSMAXDIR%%Generated.Plugin.Fabric.ini" (>> %LAUNCHER%
 @echo 	REM To allow users to run this file, and load splice without installing>> %LAUNCHER%
 @echo 	REM anything, we generate a new ini file and pass it to Max to override>> %LAUNCHER%
 @echo 	REM its current plugin directories setting.  We recreate the default>> %LAUNCHER% 
@@ -33,14 +33,14 @@ REM Clear the contents of the file if it already exists.
 @echo 	echo Generating new plugin ini file.>> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo 	REM add in original plugins>> %LAUNCHER%
-@echo 	@echo [Directories] ^>^> %%FABRIC3DSMAXDIR%%Generated.Plugin.Fabric.ini>> %LAUNCHER%
-@echo 	@echo Additional MAX plug-ins=%%ADSK_3DSMAX_x64_%MAXVERSION%%%\PlugIns\ ^>^> %%FABRIC3DSMAXDIR%%Generated.Plugin.Fabric.ini>> %LAUNCHER%
-@echo 	@echo Fabric Plugins=%%~dp0plugin\ ^>^> %%FABRIC3DSMAXDIR%%Generated.Plugin.Fabric.ini>> %LAUNCHER%
-@echo 	@echo [Help] ^>^> %%FABRIC3DSMAXDIR%%Generated.Plugin.Fabric.ini>> %LAUNCHER%
-@echo 	@echo mental ray Help=http://www.autodesk.com/mentalray-help-2013-enu ^>^> %%FABRIC3DSMAXDIR%%Generated.Plugin.Fabric.ini>> %LAUNCHER%
+@echo 	@echo [Directories] ^>^> "%%FABRIC3DSMAXDIR%%Generated.Plugin.Fabric.ini">> %LAUNCHER%
+@echo 	@echo Additional MAX plug-ins=%%ADSK_3DSMAX_x64_%MAXVERSION%%%\PlugIns\ ^>^> "%%FABRIC3DSMAXDIR%%Generated.Plugin.Fabric.ini">> %LAUNCHER%
+@echo 	@echo Fabric Plugins=%%FABRIC3DSMAXDIR%%plugin\ ^>^> "%%FABRIC3DSMAXDIR%%Generated.Plugin.Fabric.ini">> %LAUNCHER%
+@echo 	@echo [Help] ^>^> "%%FABRIC3DSMAXDIR%%Generated.Plugin.Fabric.ini">> %LAUNCHER%
+@echo 	@echo mental ray Help=http://www.autodesk.com/mentalray-help-2013-enu ^>^> "%%FABRIC3DSMAXDIR%%Generated.Plugin.Fabric.ini">> %LAUNCHER%
 @echo )>> %LAUNCHER%
 @echo.>> %LAUNCHER%
-@echo CALL %%FABRIC3DSMAXDIR%%..\..\environment.bat>> %LAUNCHER%
+@echo CALL "%%FABRIC3DSMAXDIR%%..\..\environment.bat">> %LAUNCHER%
 @echo REM Enable the system to find the FabricCore and Scintilla dlls>> %LAUNCHER%
 @echo set PATH=%%PATH%%;%%FABRIC_DIR%%bin;%%FABRIC3DSMAXDIR%%\plugin>> %LAUNCHER%
 @echo.>> %LAUNCHER%

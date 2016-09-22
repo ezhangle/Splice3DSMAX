@@ -12,11 +12,12 @@ IF NOT DEFINED FABRIC_DIR (
 echo Allow the system to load FabricCore dll
 SET PATH=%FABRIC_DIR%/lib;%PATH%
 
-set DISTDIR=%FABRIC_DIR%\DCCIntegrations\Fabric3dsmax2014\
-set SCINTILLANETDIR=%DISTDIR%ScintillaNET\
+SET FABRIC_SCENE_GRAPH_DIR=%REPODIR%..\..\..\
+
+SET QT_DIR=%FABRIC_SCENE_GRAPH_DIR%\ThirdParty\PreBuilt\Windows\x86_64\VS2013\Release\qt\4.8.7
+SET QTWINMIGRATE_DIR=%FABRIC_SCENE_GRAPH_DIR%\ThirdParty\PreBuilt\Windows\x86_64\VS2013\Release\qt-solutions\qtwinmigrate
 
 echo Starting VS Launcher
 call "C:\Program Files (x86)\Common Files\microsoft shared\MSEnv\VSLauncher.exe" "%SLN%"
-
 
 echo on

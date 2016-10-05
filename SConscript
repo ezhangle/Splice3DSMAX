@@ -17,7 +17,7 @@ env = parentEnv.Clone()
 
 stageDir = env.Dir(scenegraph_dir).Dir('stage').Dir(buildOS).Dir(buildArch).Dir(buildType)
 
-maxVersions = ['2014', '2015', '2016', '2017']
+maxVersions = ['2015', '2016', '2017']
 
 if os.environ.has_key('FABRIC_SPLICE_MAX_VERSION'):
   maxVersions = [os.environ['FABRIC_SPLICE_MAX_VERSION']]

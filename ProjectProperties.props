@@ -90,7 +90,7 @@
 	<ItemDefinitionGroup>
 		<!-- default values for compiler -->
 		<ClCompile>
-			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;$(FABRIC_DIR)\include\FabricServices;$(QTWINMIGRATE_DIR)\src;$(QT_DIR)\include;$(QT_DIR)\include/QtGui;$(MaxSDKPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(FABRIC_DIR)\include;$(FABRIC_DIR)\include\FabricServices;$(QTWINMIGRATE_DIR)\src;$(QT_DIR)\include;$(QT_DIR)\include/QtGui;$(QT_DIR)\include/QtCore;$(MaxSDKPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<WarningLevel>Level4</WarningLevel>
 			<RuntimeTypeInfo>true</RuntimeTypeInfo>
 			<ExceptionHandling>Async</ExceptionHandling>
@@ -143,7 +143,7 @@
 	  <Command>CALL "$(ProjectDir)/GenerateMaxLauncher.bat" "$(PackageDir)" "$(MaxVersion)"
 MKLINK /H "$(PackageDir)\SetupMenu.ms" "$(ProjectDir)SetupMenu.ms" 
 MKLINK /H "$(PackageDir)WireParameters.ms" "$(ProjectDir)WireParameters.ms"
-xcopy "$(ProjectDir)testingScripts" "$(PackageDir)samples" /E /I /Y
+xcopy "$(ProjectDir)testingScripts\UnitTest*.ms" "$(PackageDir)samples" /I /Y
 MKDIR "$(PackageDir)plugin"
 MKLINK /H "$(PackageDir)plugin\QtSolutions_MFCMigrationFramework-head.dll" "$(QTWINMIGRATE_DIR)\lib\QtSolutions_MFCMigrationFramework-head.dll"
 MKLINK /H "$(PackageDir)plugin\$(TargetFileName)" "$(TargetPath)"

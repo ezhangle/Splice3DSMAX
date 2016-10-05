@@ -302,15 +302,7 @@ void FabricEvents::HookViewportRender()
 	//if (getCfgMgr().keyExists(_T("GFXType"))) {
 	//	getCfgMgr().getString(_T("GFXType"), buf, GW_MAX_FILE_LEN);
 
-	if (MaxSDK::Graphics::IsRetainedModeEnabled())
-	{
-		static DWORD dontShowMsg(0);
-		if (!dontShowMsg && !GetCOREInterface()->GetQuietMode())
-		{
-			MaxMsgBox(NULL, _T("For Fabric Engine inline drawing to work in the viewport, 'Legacy OpenGL' display driver is required."), _T("Incompatible Render Mode"), MB_OK, MAX_MB_DONTSHOWAGAIN, &dontShowMsg);
-		}
-	}
-	else 
+	if (!MaxSDK::Graphics::IsRetainedModeEnabled())
 	{
 		if (m_VptCallback == nullptr) 
 		{

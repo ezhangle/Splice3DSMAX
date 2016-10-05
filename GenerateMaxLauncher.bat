@@ -45,5 +45,5 @@ REM Clear the contents of the file if it already exists.
 @echo set PATH=%%PATH%%;%%FABRIC_DIR%%bin;%%FABRIC3DSMAXDIR%%\plugin>> %LAUNCHER%
 @echo.>> %LAUNCHER%
 @echo REM Launch Max>> %LAUNCHER%
-@echo START "3dsMax - Fabric" "%%ADSK_3DSMAX_x64_%MAXVERSION%%%\3dsmax.exe" -vo -p "%%FABRIC3DSMAXDIR%%/Generated.Plugin.Fabric.ini">> %LAUNCHER%
+@echo START "3dsMax - Fabric" "%%ADSK_3DSMAX_x64_%MAXVERSION%%%\3dsmax.exe" -p "%%FABRIC3DSMAXDIR%%/Generated.Plugin.Fabric.ini">> %LAUNCHER%
 

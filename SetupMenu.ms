@@ -123,13 +123,14 @@ fn DeRegisterFabricEngineMenu = (
     if (FabricMenu != undefined) do ( menuMan.unRegisterMenu FabricMenu )
   )
   
-	-- Remove from quadmenu
+	-- Remove from quadmenu (and any duplicates
   local quadMenu = menuMan.getViewportRightClickMenu #nonePressed
   local qmBottomRight = quadMenu.getMenu 1
   local fabricQuadMenuItem = findFabricEngineMenuItem qmBottomRight __FE_QUAD_MENU_TITLE
-  if (fabricQuadMenuItem != false) do (
+  while (fabricQuadMenuItem != false) do (
 	qmBottomRight.removeItem fabricQuadMenuItem 
-  ) 
+	fabricQuadMenuItem = findFabricEngineMenuItem qmBottomRight __FE_QUAD_MENU_TITLE
+  )
   menuMan.updateMenuBar()
 
   -- Force the release of any remaining Fabric happenings

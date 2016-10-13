@@ -121,7 +121,7 @@ public:
 		VFN_0(fn_closeDFGGraphEditor, CloseDFGGraphEditor);
 
 		VFN_2(fn_dfgRemoveNodes,						DFGRemoveNodes,			TYPE_TSTR_TAB_BV,	TYPE_TSTR);
-		VFN_3(fn_dfgConnect,							DFGConnect,				TYPE_TSTR,		TYPE_TSTR, TYPE_TSTR);
+		VFN_3(fn_dfgConnect,							DFGConnect,				    TYPE_TSTR_TAB_BV, TYPE_TSTR_TAB_BV, TYPE_TSTR);
 		VFN_3(fn_dfgDisconnect,							DFGDisconnect,			TYPE_TSTR_TAB_BV, TYPE_TSTR_TAB_BV, TYPE_TSTR );
 		FN_3(fn_dfgAddGraph,		TYPE_TSTR_BV,		DFGAddGraph,			TYPE_TSTR,		TYPE_POINT2, TYPE_TSTR);
 		FN_4(fn_dfgAddFunc,			TYPE_TSTR_BV,		DFGAddFunc,				TYPE_TSTR,		TYPE_TSTR, TYPE_POINT2, TYPE_TSTR);
@@ -201,7 +201,7 @@ public:
 
 	// The following are direct mappers to the commands defined by the DFGCmdHandler classed.
 	void DFGRemoveNodes(const Tab<TSTR*>& nodeNames, const MSTR& execPath);
-	void DFGConnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath);
+	void DFGConnect( const Tab<TSTR*>&  srcPaths, const Tab<TSTR*>&  destPaths, const MSTR& execPath);
 	void DFGDisconnect( const Tab<TSTR*>&  srcPaths, const Tab<TSTR*>&  destPaths, const MSTR& execPath );
 	MSTR DFGAddGraph(const MSTR& title, Point2 pos, const MSTR& execPath);
 	MSTR DFGAddFunc(const MSTR& title, const MSTR& initialCode, Point2 pos, const MSTR& execPath);
@@ -387,8 +387,8 @@ FPInterfaceDesc* GetDescriptor()
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				
 			FabricTranslationFPInterface::fn_dfgConnect, _T("DFGConnect"), 0, 0, 0, 3,
-				_M("srcPath"), 0, TYPE_TSTR,
-				_M("destPath"), 0, TYPE_TSTR,
+				_M("srcPaths"), 0, TYPE_TSTR_TAB_BV,
+				_M("destPaths"), 0, TYPE_TSTR_TAB_BV,
 				_M("execPath"), 0, TYPE_TSTR, f_keyArgDefault, EmptyStr(),
 				
 			FabricTranslationFPInterface::fn_dfgDisconnect, _T("DFGDisconnect"), 0, 0, 0, 3,

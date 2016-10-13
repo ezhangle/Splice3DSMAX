@@ -26,8 +26,8 @@ virtual void dfgDoRemoveNodes(
     FabricCore::DFGBinding const &binding,
     QString execPath,
     FabricCore::DFGExec const &exec,
-    QString srcPath, 
-    QString dstPath
+    QStringList srcPortPaths, 
+    QStringList dstPortPaths
     ) override;
 
   virtual void dfgDoDisconnect(

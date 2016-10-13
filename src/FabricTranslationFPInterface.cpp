@@ -96,11 +96,15 @@ void FabricTranslationFPInterface::DFGRemoveNodes(const Tab<TSTR*>& nodeNames, c
 	MAXSPLICE_CATCH_END;
 }
 
-void FabricTranslationFPInterface::DFGConnect(const MSTR& srcPath, const MSTR& destPath, const MSTR& execPath)
+void FabricTranslationFPInterface::DFGConnect(const Tab<TSTR*>& srcPaths, const Tab<TSTR*>& destPaths, const MSTR& execPath)
 {
 	MAXSPLICE_CATCH_BEGIN
 	InvalidateAll();
-	return m_fabricCmdHandler.dfgDoConnect(m_binding, ToQStr(execPath), GetExec(execPath), ToQStr(srcPath), ToQStr(destPath));
+  QStringList cSrcPaths;
+	Convert( srcPaths, cSrcPaths );
+	QStringList cDestPaths;
+	Convert( destPaths, cDestPaths );  
+	return m_fabricCmdHandler.dfgDoConnect(m_binding, ToQStr(execPath), GetExec(execPath), cSrcPaths, cDestPaths);
 	MAXSPLICE_CATCH_END
 }
 void FabricTranslationFPInterface::DFGDisconnect( const Tab<TSTR*>& srcPaths, const Tab<TSTR*>& destPaths, const MSTR& execPath)

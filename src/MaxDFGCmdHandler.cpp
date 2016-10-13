@@ -159,11 +159,11 @@ void MaxDFGCmdHandler::dfgDoRemoveNodes(FabricCore::DFGBinding const &binding, Q
 	m_pTranslationLayer->InvalidateAll();
 }
 
-void MaxDFGCmdHandler::dfgDoConnect(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QString srcPath, QString dstPath)
+void MaxDFGCmdHandler::dfgDoConnect(FabricCore::DFGBinding const &binding, QString execPath, FabricCore::DFGExec const &exec, QStringList srcPortPaths, QStringList dstPortPaths)
 {
-	EMIT2(_M("DFGConnect"), srcPath, dstPath, execPath);
+	EMIT2(_M("DFGConnect"), srcPortPaths, dstPortPaths, execPath);
 	DFGHoldActions hold(_M("DFG Connect"));
-	__super::dfgDoConnect(binding, execPath, exec, srcPath, dstPath);
+	__super::dfgDoConnect(binding, execPath, exec, srcPortPaths, dstPortPaths);
 	m_pTranslationLayer->InvalidateAll();
 }
 

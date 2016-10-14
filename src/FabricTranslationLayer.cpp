@@ -1144,7 +1144,7 @@ void MaxPtrToFabric(FabricCore::DFGBinding& binding, const char* argName, TimeVa
 	// There is no "INode" type in splice, so try to figure out a conversion
 	const char* cType = exec.getExecPortResolvedType(argName);
 	int maxTypeRequired = FabricTypeToMaxType(cType);
-	switch(maxTypeRequired)
+	switch(base_type(maxTypeRequired))
 	{
 	case TYPE_POINT3:
 		{

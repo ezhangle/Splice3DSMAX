@@ -719,6 +719,22 @@ void ConvertToRTVal(const FPValue& param, FabricCore::RTVal& val)
 			Quat q(aa);
 			return ConvertToRTVal(q, val);
 		}
+		case TYPE_STRING:
+		{
+			if (val.isData())
+			{
+				// For simple data RTVals, try to set the value directly
+				return ConvertToRTVal( param.s, val );
+			}
+			else
+			{
+				// If we have a complex type, we assume we are being passed JSON
+				CStr cStr = ToCStr(param.s);
+				val.setJSON( cStr );
+			}
+			break;
+
+		}
 		case TYPE_TSTR:
 		{
 			if (val.isData())
@@ -732,6 +748,7 @@ void ConvertToRTVal(const FPValue& param, FabricCore::RTVal& val)
 				CStr cStr = param.tstr->ToCStr();
 				val.setJSON(cStr);
 			}
+			break;
 		}
 			
 		case TYPE_MESH:

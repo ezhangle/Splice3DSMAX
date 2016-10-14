@@ -499,7 +499,7 @@ bool FabricTranslationFPInterface::GetArgValue(const char* argName, FPValue& val
 	{
 		Point2 p2(-1, -1);
 		FabricToMaxValue(rtVal, p2);
-		value.Load(TYPE_POINT2, p2);
+		value.Load(TYPE_POINT2, &p2);
 		break;
 	}
 	case TYPE_POINT3:
@@ -546,12 +546,16 @@ bool FabricTranslationFPInterface::GetArgValue(const char* argName, FPValue& val
 	}
 	default:
 	{
-		DbgAssert(!"Cannot convert Fabric type");
-		static MSTR errorStr;
-		errorStr = _M("Cannot convert Fabric type: ");
-		errorStr += ToMstr(cType);
-		value.Load(TYPE_STRING, errorStr);
-		return false;
+		TSTR tstr;
+		if ((rtVal.isObject() || rtVal.isInterface()) && rtVal.isNullObject())
+			tstr = _T( "null" );
+		else
+		{
+			// For unconverted values we send back the json representation
+			FabricCore::RTVal jsonValue = rtVal.getJSON();
+			FabricToMaxValue( jsonValue, tstr );
+		}
+		value.Load( TYPE_STRING, tstr );
 	}
 	}
 	return true;
